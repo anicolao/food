@@ -42,12 +42,28 @@ graph TD
 ### Insights
 -   **US-012**: As a user, I want to see my total calories and macros for the current day so that I know how much I have left.
 
-## Data Model (Google Sheets)
+## Event Store & Projections (Google Sheets)
 
-The backend will be a single Google Spreadsheet with multiple sheets.
+The backend will be a single Google Spreadsheet. **The `Events` sheet is the single source of truth.** All other sheets (`Log`, `Products`, `DailyStats`) are **projections** (read models) derived entirely by replaying the events.
 
-### Sheet 1: `Log`
-Record of every consumption event.
+### Source of Truth: `Events` Sheet
+This sheet contains the append-only log of every significant action that occurred in the system.
+
+| Column | Type | Description |
+| :--- | :--- | :--- |
+| `EventID` | UUID | Unique ID of the event |
+| `Timestamp` | ISO8601 | Server-side timestamp |
+| `ActionType` | String | e.g. `log/photoTaken`, `log/aiEstimateReceived`, `log/entryEdited` |
+| `Payload` | JSON | The complete Redux action payload |
+
+**Key Events:**
+-   `log/photoTaken`: `{ imageId, driveUrl, timestamp }`
+-   `log/aiEstimateReceived`: `{ imageId, rawJson, modelVersion }` (Considered a "fact" because AI is non-deterministic)
+-   `log/entryEdited`: `{ entryId, fileds: { ... } }`
+-   `log/entryConfirmed`: `{ entryId }`
+
+### Projection 1: `Log`
+A human-readable table derived from confirmed entries. Useful for manual inspection.
 
 | Column | Type | Description |
 | :--- | :--- | :--- |
@@ -66,8 +82,8 @@ Record of every consumption event.
 | `Fibre` | Number | g |
 | `JSON` | JSON | Full raw JSON from Gemini |
 
-### Sheet 2: `Products`
-Reusable database for repetitive items (barcodes, common meals).
+### Projection 2: `Products`
+Reusable database for repetitive items (barcodes, common meals). Derived from `product/created` or `product/updated` events.
 
 | Column | Type | Description |
 | :--- | :--- | :--- |
@@ -77,8 +93,8 @@ Reusable database for repetitive items (barcodes, common meals).
 | `NutritionJSON` | JSON | Validated nutrition facts |
 | `ImageURL` | URL | Representative image |
 
-### Sheet 3: `DailyStats`
-Pivot table or formula-based aggregation.
+### Projection 3: `DailyStats`
+Pivot table or formula-based aggregation. Derived from the `Log` projection.
 
 -   **Rows**: Date
 -   **Columns**: Sum(Calories), Sum(Protein), etc.
