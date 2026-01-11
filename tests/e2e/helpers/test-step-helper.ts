@@ -50,7 +50,7 @@ export class TestStepHelper {
         // 4. Record for Docs
         this.steps.push({
             title: options.description,
-            image: `screenshots/${filename}`,
+            image: `./screenshots/${filename}`,
             specs: options.verifications.map(v => v.spec)
         });
     }

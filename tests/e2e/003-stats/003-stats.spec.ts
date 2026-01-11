@@ -24,6 +24,7 @@ test('US-012: Stats persist after reload', async ({ page }, testInfo) => {
                             entry: {
                                 id: '1',
                                 date: new Date().toISOString().split('T')[0], // Today
+                                description: 'Mock Apple',
                                 calories: 500,
                                 protein: 20,
                                 fat: 10,
@@ -46,7 +47,8 @@ test('US-012: Stats persist after reload', async ({ page }, testInfo) => {
         description: 'Stats loaded from sheet',
         verifications: [
             { spec: 'Calories = 500', check: async () => await expect(page.locator('.value').first()).toHaveText('500') },
-            { spec: 'Protein = 20g', check: async () => await expect(page.getByText('20g').first()).toBeVisible() }
+            { spec: 'Protein = 20g', check: async () => await expect(page.getByText('20g').first()).toBeVisible() },
+            { spec: 'History shows entry', check: async () => await expect(page.getByText('Mock Apple')).toBeVisible() }
         ]
     });
 
