@@ -99,14 +99,27 @@ test('US-003: User logs food', async ({ page }, testInfo) => {
         ]
     });
 
-    // Save directly without editing
+    // Verify default value
+    await expect(page.getByLabel('Calories')).toHaveValue('95');
+
+    // Edit to 100
+    await page.getByLabel('Calories').fill('100');
+
+    await tester.step('edited', {
+        description: 'User corrects analysis',
+        verifications: [
+            { spec: 'Calories updated to 100', check: async () => await expect(page.getByLabel('Calories')).toHaveValue('100') }
+        ]
+    });
+
+    // Save
     await page.getByText('Save Entry').click();
 
     await tester.step('saved', {
         description: 'Returned to Dashboard',
         verifications: [
             { spec: 'On Dashboard', check: async () => await expect(page.getByText('Today\'s Summary')).toBeVisible() },
-            { spec: 'Calories updated', check: async () => await expect(page.locator('.value').first()).toHaveText('95') },
+            { spec: 'Calories updated', check: async () => await expect(page.locator('.value').first()).toHaveText('100') },
             { spec: 'History updated', check: async () => await expect(page.getByText('Mock Apple')).toBeVisible() }
         ]
     });
