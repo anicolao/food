@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { TestStepHelper } from '../helpers/test-step-helper';
 
-test.use({ viewport: { width: 393, height: 852 } });
+
 
 test('US-003: User logs food', async ({ page }, testInfo) => {
     const tester = new TestStepHelper(page, testInfo);
@@ -10,6 +10,7 @@ test('US-003: User logs food', async ({ page }, testInfo) => {
     page.on('pageerror', err => console.log(`BROWSER ERROR: ${err}`));
 
     // Mock Auth & Services
+    await page.clock.install({ time: new Date('2024-03-15T12:00:00') });
     await page.addInitScript(() => {
         (window as any).google = { accounts: { oauth2: { initTokenClient: (c: any) => ({ requestAccessToken: () => c.callback({ access_token: 'mock' }) }) } } };
     });
