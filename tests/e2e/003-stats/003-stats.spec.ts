@@ -1,0 +1,54 @@
+import { test, expect } from '@playwright/test';
+import { TestStepHelper } from '../helpers/test-step-helper';
+
+test('US-012: Stats persist after reload', async ({ page }, testInfo) => {
+    const tester = new TestStepHelper(page, testInfo);
+    tester.setMetadata('Stats', 'Verify stats load from history.');
+    page.on('console', msg => console.log(`BROWSER LOG: ${msg.text()}`));
+    page.on('pageerror', err => console.log(`BROWSER ERROR: ${err}`));
+
+    // Mock Auth
+    await page.addInitScript(() => {
+        (window as any).google = { accounts: { oauth2: { initTokenClient: (c: any) => ({ requestAccessToken: () => c.callback({ access_token: 'mock' }) }) } } };
+    });
+
+    // Mock Sheets fetching existing events
+    await page.route(/sheets\.googleapis\.com/, async route => {
+        if (route.request().url().includes('values/Events')) {
+            await route.fulfill({
+                json: {
+                    values: [
+                        ['HeaderID', 'Time', 'Type', 'Payload'], // Row 1 implied header or skipped? Logic didn't skip, but try/catch might handle.
+                        // Row 2: Confirmed Entry
+                        ['uuid-1', '2023-01-01', 'log/entryConfirmed', JSON.stringify({
+                            entry: {
+                                id: '1',
+                                date: new Date().toISOString().split('T')[0], // Today
+                                calories: 500,
+                                protein: 20,
+                                fat: 10,
+                                carbs: 50,
+                                mealType: 'Lunch'
+                            }
+                        })]
+                    ]
+                }
+            });
+        } else {
+            await route.fulfill({ json: {} });
+        }
+    });
+
+    await page.goto('/');
+    await page.getByText('Sign In with Google').click();
+
+    await tester.step('stats-loaded', {
+        description: 'Stats loaded from sheet',
+        verifications: [
+            { spec: 'Calories = 500', check: async () => await expect(page.locator('.value').first()).toHaveText('500') },
+            { spec: 'Protein = 20g', check: async () => await expect(page.getByText('20g').first()).toBeVisible() }
+        ]
+    });
+
+    tester.generateDocs();
+});
