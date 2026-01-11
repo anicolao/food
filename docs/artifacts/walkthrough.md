@@ -14,7 +14,7 @@ I have successfully initialized the `food` repository and established the projec
 ### Verification Results
 - **Automated E2E Tests**: Passed (3/3 files covering US-001 to US-012).
     - `001-auth`: Verified Google Sign-In and **Sign-Out** flow.
-    - `002-log-food`: Verified complete loop: Upload -> Gemini Analysis -> Edit -> Save -> Google Drive/Sheets.
+    - `002-log-food`: Verified complete flow with **mobile viewport (393x852)**: Upload (Apple Fixture) -> Gemini Analysis (Delay Verified) -> Edit (95 -> 100 cal) -> Save -> History.
     - `003-stats`: Verified event sourcing replay, idempotency, and **History List** display.
 - **Manual Verification**:
     - Confirmed UI responsiveness on local dev server.

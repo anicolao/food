@@ -1,6 +1,8 @@
 import { test, expect } from '@playwright/test';
 import { TestStepHelper } from '../helpers/test-step-helper';
 
+test.use({ viewport: { width: 393, height: 852 } });
+
 test('US-003: User logs food', async ({ page }, testInfo) => {
     const tester = new TestStepHelper(page, testInfo);
     tester.setMetadata('Logging', 'User logs a meal.');
