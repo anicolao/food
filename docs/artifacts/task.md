@@ -1,0 +1,17 @@
+# Task Checklist
+
+- [x] Research Best Practices <!-- id: 0 -->
+- [x] Initialize `food` Repository <!-- id: 6 -->
+- [x] Refine Project Setup <!-- id: 18 -->
+- [x] Design MVP <!-- id: 26 -->
+- [ ] Implement MVP <!-- id: 34 -->
+    - [x] Create Implementation Plan <!-- id: 35 -->
+    - [x] Initialize SvelteKit & Bun <!-- id: 36 -->
+    - [x] Setup Redux Event Store <!-- id: 37 -->
+    - [x] Implement Authentication (Google) <!-- id: 38 -->
+    - [x] Implement Logging UI (Camera/Upload) <!-- id: 39 -->
+    - [x] Implement Gemini Integration <!-- id: 40 -->
+    - [x] Implement Google Sheets/Drive Integration <!-- id: 41 -->
+    - [x] Create `MANUAL_TESTING.md` <!-- id: 42 -->
+    - [x] Implement E2E Tests (US-001 to US-012) <!-- id: 43 -->
+    - [x] Verify & Submit PR <!-- id: 44 -->
