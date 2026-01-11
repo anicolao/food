@@ -24,8 +24,11 @@ export default defineConfig({
                 '--use-gl=swiftshader',
                 '--disable-smooth-scrolling',
                 '--disable-partial-raster',
+                '--disable-partial-raster',
             ],
-        }
+        },
+        viewport: { width: 393, height: 852 },
+        deviceScaleFactor: 1, // Enforce 1x for manageable screenshot sizes
     },
     projects: [
         {
