@@ -76,10 +76,8 @@ test('US-003: User logs food', async ({ page }, testInfo) => {
 
     // Upload File
     const fileInput = page.locator('input[type="file"]');
-    // Minimal 1x1 JPEG Base64
-    const validJpeg = Buffer.from('/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/2wBDAQkJCQwLDBgNDRgyIRwhMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjL/wAARCAABAAEDASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD3+iiigD//2Q==', 'base64');
-
-    await fileInput.setInputFiles({ name: 'test.jpg', mimeType: 'image/jpeg', buffer: validJpeg });
+    // Use realistic fixture image
+    await fileInput.setInputFiles('tests/e2e/fixtures/apple.png');
 
     await tester.step('preview', {
         description: 'Image preview shown',
@@ -104,7 +102,8 @@ test('US-003: User logs food', async ({ page }, testInfo) => {
         description: 'Returned to Dashboard',
         verifications: [
             { spec: 'On Dashboard', check: async () => await expect(page.getByText('Today\'s Summary')).toBeVisible() },
-            { spec: 'Calories updated', check: async () => await expect(page.locator('.value').first()).toHaveText('100') }
+            { spec: 'Calories updated', check: async () => await expect(page.locator('.value').first()).toHaveText('100') },
+            { spec: 'History updated', check: async () => await expect(page.getByText('Mock Apple')).toBeVisible() }
         ]
     });
 

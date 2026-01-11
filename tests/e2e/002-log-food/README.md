@@ -34,6 +34,7 @@
 **Verifications:**
 - [x] On Dashboard
 - [x] Calories updated
+- [x] History updated
 
 ---
 
