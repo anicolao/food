@@ -14,4 +14,8 @@
     - [x] Implement Google Sheets/Drive Integration <!-- id: 41 -->
     - [x] Create `MANUAL_TESTING.md` <!-- id: 42 -->
     - [x] Implement E2E Tests (US-001 to US-012) <!-- id: 43 -->
+    - [x] Implement E2E Tests (US-001 to US-012) <!-- id: 43 -->
     - [x] Verify & Submit PR <!-- id: 44 -->
+    - [x] Implement Visual History (US-010) <!-- id: 45 -->
+    - [x] Implement Meal Type Display (US-008) <!-- id: 46 -->
+    - [x] Verify Full MVP Scope <!-- id: 47 -->
