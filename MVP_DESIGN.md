@@ -18,6 +18,30 @@ graph TD
     App -->|Store Image| Drive[Google Drive]
 ```
 
+## User Stories
+
+### Authentication
+-   **US-001**: As a user, I want to sign in with my Google account so that the app can access my Drive and Sheets.
+-   **US-002**: As a user, I want to grant minimal necessary permissions so that I trust the app with my data.
+
+### Logging
+-   **US-003**: As a user, I want to take a new photo of my food using the camera so that I can log what I am currently eating.
+-   **US-004**: As a user, I want to select an existing photo from my library so that I can log a meal I ate earlier.
+-   **US-005**: As a user, I want to see a preview of the selected image so that I can confirm I picked the right one.
+
+### Analysis & Editing
+-   **US-006**: As a user, I want the app to automatically estimate nutrition facts (Calories, Fat, Carbs, Protein) from my photo so that I save time.
+-   **US-007**: As a user, I want to edit the AI-generated values before saving so that I can correct any mistakes.
+-   **US-008**: As a user, I want to specify the "Meal Type" (Breakfast, Lunch, Dinner, Snack) so that I can categorize my intake.
+
+### Data Management
+-   **US-009**: As a user, I want my log entries to be saved to a Google Sheet so that I own my data.
+-   **US-010**: As a user, I want the photo to be backed up to a specific folder in Google Drive so that I have a visual history.
+-   **US-011**: As a user, I want to save a frequently eaten item as a "Product" (Favorite) so that the AI can recognize it better next time (future scope) or for easy reference.
+
+### Insights
+-   **US-012**: As a user, I want to see my total calories and macros for the current day so that I know how much I have left.
+
 ## Data Model (Google Sheets)
 
 The backend will be a single Google Spreadsheet with multiple sheets.
