@@ -45,3 +45,8 @@ export function signIn() {
 export function getAccessToken() {
     return accessToken;
 }
+
+export function signOut() {
+    accessToken = null;
+    // Optional: Revoke if needed, but for MVP client-side clear is enough.
+}

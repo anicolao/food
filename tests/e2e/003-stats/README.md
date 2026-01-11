@@ -2,11 +2,12 @@
 
 ## Stats loaded from sheet
 
-![Stats loaded from sheet](screenshots/000-stats-loaded.png)
+![Stats loaded from sheet](./screenshots/000-stats-loaded.png)
 
 **Verifications:**
 - [x] Calories = 500
 - [x] Protein = 20g
+- [x] History shows entry
 
 ---
 

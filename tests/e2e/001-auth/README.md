@@ -2,7 +2,7 @@
 
 ## User sees sign in button
 
-![User sees sign in button](screenshots/000-initial-load.png)
+![User sees sign in button](./screenshots/000-initial-load.png)
 
 **Verifications:**
 - [x] Sign In button visible
@@ -11,11 +11,21 @@
 
 ## User is signed in
 
-![User is signed in](screenshots/001-authenticated.png)
+![User is signed in](./screenshots/001-authenticated.png)
 
 **Verifications:**
 - [x] Food Log title visible
 - [x] Log Food button visible
+- [x] Sign Out button visible
+
+---
+
+## User signs out
+
+![User signs out](./screenshots/002-signed-out.png)
+
+**Verifications:**
+- [x] Sign In button visible
 
 ---
 

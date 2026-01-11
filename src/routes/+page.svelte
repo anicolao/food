@@ -1,11 +1,12 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { initializeAuth, signIn, getAccessToken } from '$lib/auth';
+  import { initializeAuth, signIn, signOut, getAccessToken } from '$lib/auth';
   import { fetchRows } from '$lib/sheets';
   import { store, dispatchEvent } from '$lib/store';
 
   let authenticated = false;
   let stats = { totalCalories: 0, totalProtein: 0, totalFat: 0, totalCarbs: 0 };
+  let todaysEntries: any[] = [];
   const today = new Date().toISOString().split('T')[0];
 
   async function syncData() {
@@ -45,6 +46,8 @@
       if (state.projections.stats[today]) {
         stats = state.projections.stats[today];
       }
+      // Filter entries for today
+      todaysEntries = state.projections.log.filter(e => e.date === today);
     });
 
     return unsubscribe;
@@ -53,11 +56,22 @@
   function handleSignIn() {
     signIn();
   }
+
+  function handleSignOut() {
+    signOut();
+    authenticated = false;
+    // Reset local state if needed
+  }
 </script>
 
 <div class="container">
   <p data-testid="debug-load">Debug: Loaded</p>
-  <h1>Food Log</h1>
+  <div class="header">
+      <h1>Food Log</h1>
+      {#if authenticated}
+           <button class="sign-out-btn" on:click={handleSignOut}>Sign Out</button>
+      {/if}
+  </div>
 
   {#if !authenticated}
     <button on:click={handleSignIn}>Sign In with Google</button>
@@ -87,16 +101,34 @@
 
     <div class="summary">
       <h2>Today's Summary</h2>
-      <!-- Could list entries here -->
+      {#if todaysEntries.length === 0}
+         <p>No entries yet.</p>
+      {:else}
+         <ul class="entry-list">
+             {#each todaysEntries as entry}
+                 <li class="entry-item">
+                     <span class="time">{entry.time}</span>
+                     <span class="desc">{entry.description}</span>
+                     <span class="cal">{entry.calories} kcal</span>
+                 </li>
+             {/each}
+         </ul>
+      {/if}
     </div>
   {/if}
 </div>
 
 <style>
   .container { padding: 1rem; max-width: 600px; margin: 0 auto; }
+  .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+  .sign-out-btn { padding: 0.5rem 1rem; background: #6c757d; color: white; border: none; border-radius: 4px; font-size: 0.8rem; }
   .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 2rem; }
   .stat-card { background: #f5f5f5; padding: 1rem; border-radius: 8px; text-align: center; }
   .value { font-size: 1.5rem; font-weight: bold; display: block; }
   .actions { text-align: center; margin-bottom: 2rem; }
   .log-btn { background: #007bff; color: white; padding: 1rem 2rem; border-radius: 25px; text-decoration: none; font-weight: bold; }
+  .entry-list { list-style: none; padding: 0; }
+  .entry-item { display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid #eee; }
+  .time { color: #666; font-size: 0.9rem; }
+  .cal { font-weight: bold; }
 </style>

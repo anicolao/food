@@ -33,7 +33,17 @@ test('US-001: User signs in', async ({ page }, testInfo) => {
         description: 'User is signed in',
         verifications: [
             { spec: 'Food Log title visible', check: async () => await expect(page.getByText('Today\'s Summary')).toBeVisible() },
-            { spec: 'Log Food button visible', check: async () => await expect(page.getByText('Log Food')).toBeVisible() }
+            { spec: 'Log Food button visible', check: async () => await expect(page.getByText('Log Food')).toBeVisible() },
+            { spec: 'Sign Out button visible', check: async () => await expect(page.getByText('Sign Out')).toBeVisible() }
+        ]
+    });
+
+    await page.getByText('Sign Out').click();
+
+    await tester.step('signed-out', {
+        description: 'User signs out',
+        verifications: [
+            { spec: 'Sign In button visible', check: async () => await expect(page.getByText('Sign In with Google')).toBeVisible() }
         ]
     });
 
