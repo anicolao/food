@@ -1,6 +1,4 @@
-import { GoogleGenerativeAI } from '@google/generative-ai';
-
-const API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
+import { getAccessToken } from './auth';
 
 export interface NutritionEstimate {
     is_label: boolean;
@@ -28,22 +26,44 @@ You are an expert dietician. Analyze the provided image.
 `;
 
 export async function analyzeImage(imageBase64: string, mimeType: string): Promise<NutritionEstimate> {
-    if (!API_KEY) throw new Error('Gemini API Key missing');
+    const token = getAccessToken();
+    if (!token) throw new Error('User not authenticated for Gemini analysis');
 
-    const genAI = new GoogleGenerativeAI(API_KEY);
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash', generationConfig: { responseMimeType: "application/json" } });
+    const url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent';
 
-    const result = await model.generateContent([
-        SYSTEM_PROMPT,
-        {
-            inlineData: {
-                data: imageBase64,
-                mimeType: mimeType
+    const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+            contents: [{
+                parts: [
+                    { text: SYSTEM_PROMPT },
+                    {
+                        inlineData: {
+                            mimeType: mimeType,
+                            data: imageBase64
+                        }
+                    }
+                ]
+            }],
+            generationConfig: {
+                responseMimeType: "application/json"
             }
-        }
-    ]);
+        })
+    });
 
-    const response = await result.response;
-    const text = response.text();
-    return JSON.parse(text) as NutritionEstimate;
+    if (!response.ok) {
+        const err = await response.text();
+        throw new Error(`Gemini API Error: ${response.status} - ${err}`);
+    }
+
+    const result = await response.json();
+    // Safety check for response structure
+    const candidate = result.candidates?.[0]?.content?.parts?.[0]?.text;
+    if (!candidate) throw new Error('No content in Gemini response');
+
+    return JSON.parse(candidate) as NutritionEstimate;
 }

@@ -74,6 +74,16 @@ This plan details the implementation of the Minimum Viable Product (MVP) for the
 -   Verify meal type dropdown is visible and defaults correctly (mock time).
 -   Verify Drive link in history.
 
+### 9. Auth & Gemini Refactor
+#### [MODIFY] [src/lib/auth.ts](file:///Users/anicolao/projects/antigravity/food/src/lib/auth.ts)
+-   **Fix**: Update `GOOGLE_CLIENT_ID` to match `.env` variable `VITE_GOOGLE_DRIVE_CLIENT_ID`.
+-   **Scopes**: Add `https://www.googleapis.com/auth/generative-language.retriever` (or appropriate scope) for Gemini.
+
+#### [MODIFY] [src/lib/gemini.ts](file:///Users/anicolao/projects/antigravity/food/src/lib/gemini.ts)
+-   **Refactor**: Remove `GoogleGenerativeAI` SDK dependency.
+-   **Implementation**: Use `fetch` calling `https://generativelanguage.googleapis.com/...` directly with `Authorization: Bearer <token>`.
+-   **State**: Accept `accessToken` from `auth.ts` (passed in or retrieved).
+
 ## Verification Plan
 
 ### Automated Tests

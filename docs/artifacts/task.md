@@ -20,3 +20,6 @@
     - [x] Implement Time-Based Meal Type Default (US-008) <!-- id: 49 -->
     - [x] Add Drive Folder Link (US-010) <!-- id: 50 -->
     - [x] Verify Refined UX <!-- id: 51 -->
+    - [x] Fix Auth Client ID (Env Mismatch) <!-- id: 52 -->
+    - [x] Refactor Gemini to use User OAuth (Billing) <!-- id: 53 -->
+    - [x] Verify Gemini Auth Flow <!-- id: 54 -->
