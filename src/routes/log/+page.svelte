@@ -67,7 +67,10 @@
     if (!imageFile) return;
     try {
         // 1. Upload Image
-        const driveFile = await uploadImage(imageFile, `FoodLog-${Date.now()}.jpg`);
+        const state = store.getState();
+        // @ts-ignore - dealing with typed store wrapper issues in svelte file for now
+        const folderId = state.config?.folderId;
+        const driveFile = await uploadImage(imageFile, `FoodLog-${Date.now()}.jpg`, folderId);
         
         // 2. Dispatch Redux Event
         const entry = {
@@ -86,14 +89,20 @@
         
         store.dispatch(dispatchEvent('log/entryConfirmed', { entry }));
 
-        // 3. Sync to Sheets (ActionType, Timestamp, PayloadJSON)
-        // Ideally handled by middleware, but doing inline for MVP simplicity
-        await appendRow('TODO_SPREADSHEET_ID', 'Events', [
-            entry.id,
-            new Date().toISOString(),
-            'log/entryConfirmed',
-            JSON.stringify({ entry })
-        ]);
+        // 3. Sync to Sheets
+        // @ts-ignore
+        const spreadsheetId = state.config?.spreadsheetId;
+
+        if (spreadsheetId) {
+             await appendRow(spreadsheetId, 'Events', [
+                entry.id,
+                new Date().toISOString(),
+                'log/entryConfirmed',
+                JSON.stringify({ entry })
+            ]);
+        } else {
+            console.warn('No spreadsheet ID found, skipping sync');
+        }
 
         goto('/');
     } catch (e) {

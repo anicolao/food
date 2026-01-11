@@ -23,3 +23,5 @@
     - [x] Fix Auth Client ID (Env Mismatch) <!-- id: 52 -->
     - [x] Refactor Gemini to use User OAuth (Billing) <!-- id: 53 -->
     - [x] Verify Gemini Auth Flow <!-- id: 54 -->
+    - [x] Implement Per-User Data Discovery (Drive/Sheets) <!-- id: 55 -->
+    - [x] Verify Per-User Flow (E2E + Manual) <!-- id: 56 -->

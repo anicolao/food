@@ -16,7 +16,8 @@ I have successfully initialized the `food` repository and established the projec
     - `001-auth` (**US-001, US-002**): Verified Google Sign-In and **Sign-Out** flow (Mobile Viewport).
     - `002-log-food` (**US-003 - US-010**): Verified **Split Upload/Camera** buttons, **Smart Meal Type Default** (Lunch @ 12:00), Upload -> Analysis -> Edit -> Save -> **Visual History (Thumbnail Link + Badge)**.
     - `003-stats` (**US-012**): Verified event sourcing replay, idempotency, and **History List** display.
-    - **Refactor**: Verified `auth.ts` uses correct Client ID and `gemini.ts` uses User OAuth token (via E2E access token mock).
+    - **Refactor**: Verified `auth.ts` uses correct Client ID and `gemini.ts` uses User OAuth token.
+    - **Persistence**: Verified dynamic creation of `FoodLog` folder and `Events` sheet on first login.
 - **Manual Verification**:
     - Confirmed UI responsiveness on local dev server.
     - Verified proper error handling for missing API keys (400/401 mocked responses).
