@@ -103,16 +103,35 @@ const projectionsSlice = createSlice({
   }
 });
 
+// 3. Configuration (Session State)
+interface ConfigState {
+  spreadsheetId: string | null;
+  folderId: string | null;
+}
+
+const configSlice = createSlice({
+  name: 'config',
+  initialState: { spreadsheetId: null, folderId: null } as ConfigState,
+  reducers: {
+    setConfig: (state, action: PayloadAction<ConfigState>) => {
+      state.spreadsheetId = action.payload.spreadsheetId;
+      state.folderId = action.payload.folderId;
+    }
+  }
+});
+
 // --- Store ---
 export const store = configureStore({
   reducer: {
     events: eventLogSlice.reducer,
-    projections: projectionsSlice.reducer
+    projections: projectionsSlice.reducer,
+    config: configSlice.reducer
   }
 });
 
 export const { appendEvent } = eventLogSlice.actions;
 export const { processEvent } = projectionsSlice.actions;
+export const { setConfig } = configSlice.actions;
 
 // --- Thunks / Helpers ---
 export const dispatchEvent = (type: string, payload: any) => (dispatch: any) => {

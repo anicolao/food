@@ -84,6 +84,21 @@ This plan details the implementation of the Minimum Viable Product (MVP) for the
 -   **Implementation**: Use `fetch` calling `https://generativelanguage.googleapis.com/...` directly with `Authorization: Bearer <token>`.
 -   **State**: Accept `accessToken` from `auth.ts` (passed in or retrieved).
 
+### 10. Per-User Data Persistence (Refactor)
+#### [MODIFY] [src/lib/sheets.ts](file:///Users/anicolao/projects/antigravity/food/src/lib/sheets.ts)
+-   **Remove**: `SPREADSHEET_ID` constant.
+-   **Add**: `ensureDataStructures()`:
+    1.  Search Drive for folder `FoodLog` (mimeType = folder). Create if missing.
+    2.  Search inside folder for file `Events` (mimeType = spreadsheet). Create if missing.
+    3.  Return `{ folderId, spreadsheetId }`.
+
+#### [MODIFY] [src/routes/+page.svelte](file:///Users/anicolao/projects/antigravity/food/src/routes/+page.svelte)
+-   **Logic**: Call `ensureDataStructures()` upon successful auth.
+-   **State**: Store `spreadsheetId` and `folderId` in Redux `config` slice (or local store).
+
+#### [MODIFY] [src/routes/log/+page.svelte](file:///Users/anicolao/projects/antigravity/food/src/routes/log/+page.svelte)
+-   **Logic**: Retrieve `spreadsheetId` associated with current user session for appending rows.
+
 ## Verification Plan
 
 ### Automated Tests

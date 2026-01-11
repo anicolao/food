@@ -1,8 +1,8 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { initializeAuth, signIn, signOut, getAccessToken } from '$lib/auth';
-  import { fetchRows } from '$lib/sheets';
-  import { store, dispatchEvent } from '$lib/store';
+  import { fetchRows, ensureDataStructures } from '$lib/sheets';
+  import { store, dispatchEvent, setConfig } from '$lib/store';
 
   let authenticated = false;
   let stats = { totalCalories: 0, totalProtein: 0, totalFat: 0, totalCarbs: 0 };
@@ -11,7 +11,10 @@
 
   async function syncData() {
         try {
-            const rows = await fetchRows('TODO_SPREADSHEET_ID', 'Events');
+            const { spreadsheetId, folderId } = await ensureDataStructures();
+            store.dispatch(setConfig({ spreadsheetId, folderId }));
+
+            const rows = await fetchRows(spreadsheetId, 'Events');
             rows.forEach(row => {
                if (row[2] && row[3]) {
                    const type = row[2];
@@ -23,6 +26,7 @@
             });
         } catch (e) {
             console.error('Sync failed', e);
+            // Optionally initialize sheet headers if empty/error implies missing sheet content
         }
   }
 
@@ -30,6 +34,7 @@
     const existingToken = getAccessToken();
     if (existingToken) {
         authenticated = true;
+        // Don't sync immediately, wait for explicit token validity or just try
         syncData();
     }
 

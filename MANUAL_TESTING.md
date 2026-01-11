@@ -5,17 +5,21 @@ This guide describes how to manually verify the MVP functionality of the Food ap
 ## Prerequisites
 
 1.  **Google Cloud Project**: You need a project with Sheets, Drive, and Photos APIs enabled.
-2.  **Credentials**: Create an OAuth 2.0 Client ID and configure `VITE_GOOGLE_CLIENT_ID`.
-3.  **Gemini API Key**: Configure `VITE_GEMINI_API_KEY`.
-4.  **Test User**: A Google account added to the test users list (if app is in testing mode).
+## Prerequisites
+
+1.  **Google Cloud Project**: You need a project with Sheets, Drive, and Photos APIs enabled.
+2.  **Credentials**: Create an OAuth 2.0 Client ID and configure `VITE_GOOGLE_DRIVE_CLIENT_ID` in `.env`.
+3.  **Test User**: A Google account added to the test users list (if app is in testing mode).
 
 ## Scenarios to Verify
 
-### 1. Authentication (US-001, US-002)
+### 1. Authentication & Discovery (US-001, US-002, US-013)
 -   [ ] Clear local storage/cookies.
 -   [ ] Click "Sign In with Google".
 -   [ ] Verify the permission consent screen asks for Drive and Sheets access.
--   [ ] Confirm you are redirected back to the dashboard.
+-   [ ] **Validation**: Check Google Drive.
+    -   Verify a folder named `FoodLog` was created (or found).
+    -   Verify a spreadsheet named `Events` exists inside it.
 
 ### 2. Logging Flow (US-003 to US-008)
 -   [ ] Click "Log Food".
