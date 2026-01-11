@@ -56,6 +56,15 @@ This plan details the implementation of the Minimum Viable Product (MVP) for the
 #### [NEW] [MANUAL_TESTING.md](file:///Users/anicolao/projects/antigravity/food/MANUAL_TESTING.md)
 -   Guide for setting up Google Credentials and running through user stories.
 
+### 7. Enhanced MVP Visuals
+#### [MODIFY] [src/routes/+page.svelte](file:///Users/anicolao/projects/antigravity/food/src/routes/+page.svelte)
+-   **Visual History (US-010)**: Display image thumbnails in the history list.
+-   **Meal Type (US-008)**: Display meal type badges (Breakfast/Lunch/Dinner/Snack).
+
+#### [MODIFY] [tests/e2e/002-log-food/002-log-food.spec.ts](file:///Users/anicolao/projects/antigravity/food/tests/e2e/002-log-food/002-log-food.spec.ts)
+-   Verify image thumbnail presence in history.
+-   Verify meal type text in history.
+
 ## Verification Plan
 
 ### Automated Tests

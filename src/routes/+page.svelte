@@ -107,9 +107,17 @@
          <ul class="entry-list">
              {#each todaysEntries as entry}
                  <li class="entry-item">
-                     <span class="time">{entry.time}</span>
-                     <span class="desc">{entry.description}</span>
-                     <span class="cal">{entry.calories} kcal</span>
+                     <div class="entry-info">
+                         <span class="time">{entry.time}</span>
+                         <span class="meal-badge">{entry.mealType}</span>
+                         <span class="desc">{entry.description}</span>
+                     </div>
+                     <div class="entry-meta">
+                        <span class="cal">{entry.calories} kcal</span>
+                        {#if entry.imageDriveUrl}
+                            <img src={entry.imageDriveUrl} alt="Food" class="thumb" />
+                        {/if}
+                     </div>
                  </li>
              {/each}
          </ul>
@@ -128,7 +136,11 @@
   .actions { text-align: center; margin-bottom: 2rem; }
   .log-btn { background: #007bff; color: white; padding: 1rem 2rem; border-radius: 25px; text-decoration: none; font-weight: bold; }
   .entry-list { list-style: none; padding: 0; }
-  .entry-item { display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid #eee; }
-  .time { color: #666; font-size: 0.9rem; }
+  .entry-item { display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0; border-bottom: 1px solid #eee; }
+  .entry-info { display: flex; flex-direction: column; gap: 0.2rem; }
+  .entry-meta { display: flex; align-items: center; gap: 0.5rem; }
+  .time { color: #666; font-size: 0.8rem; }
+  .meal-badge { display: inline-block; background: #e9ecef; color: #495057; padding: 0.1rem 0.4rem; border-radius: 4px; font-size: 0.7rem; width: fit-content; }
   .cal { font-weight: bold; }
+  .thumb { width: 40px; height: 40px; border-radius: 4px; object-fit: cover; border: 1px solid #ddd; }
 </style>

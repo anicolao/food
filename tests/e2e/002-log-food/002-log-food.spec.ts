@@ -123,7 +123,9 @@ test('US-003: User logs food', async ({ page }, testInfo) => {
         verifications: [
             { spec: 'On Dashboard', check: async () => await expect(page.getByText('Today\'s Summary')).toBeVisible() },
             { spec: 'Calories updated', check: async () => await expect(page.locator('.value').first()).toHaveText('100') },
-            { spec: 'History updated', check: async () => await expect(page.getByText('Mock Apple')).toBeVisible() }
+            { spec: 'History name shown', check: async () => await expect(page.getByText('Mock Apple')).toBeVisible() },
+            { spec: 'Meal type shown', check: async () => await expect(page.getByText('Snack')).toBeVisible() },
+            { spec: 'Thumbnail shown', check: async () => await expect(page.locator('.thumb')).toBeVisible() }
         ]
     });
 

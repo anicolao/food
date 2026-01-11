@@ -44,7 +44,9 @@
 **Verifications:**
 - [x] On Dashboard
 - [x] Calories updated
-- [x] History updated
+- [x] History name shown
+- [x] Meal type shown
+- [x] Thumbnail shown
 
 ---
 
