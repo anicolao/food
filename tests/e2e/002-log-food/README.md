@@ -28,9 +28,18 @@
 
 ---
 
+## User corrects analysis
+
+![User corrects analysis](./screenshots/003-edited.png)
+
+**Verifications:**
+- [x] Calories updated to 100
+
+---
+
 ## Returned to Dashboard
 
-![Returned to Dashboard](./screenshots/003-saved.png)
+![Returned to Dashboard](./screenshots/004-saved.png)
 
 **Verifications:**
 - [x] On Dashboard
