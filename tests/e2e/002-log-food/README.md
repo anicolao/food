@@ -15,6 +15,7 @@
 
 **Verifications:**
 - [x] Preview visible
+- [x] Status is Analyzing
 
 ---
 

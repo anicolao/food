@@ -42,6 +42,8 @@ test('US-003: User logs food', async ({ page }, testInfo) => {
                 await route.fulfill({ json: {} });
             }
         } else if (url.includes('generativelanguage')) {
+            // Simulate network/processing delay
+            await new Promise(r => setTimeout(r, 2000));
             await route.fulfill({
                 json: {
                     candidates: [{
@@ -81,7 +83,10 @@ test('US-003: User logs food', async ({ page }, testInfo) => {
 
     await tester.step('preview', {
         description: 'Image preview shown',
-        verifications: [{ spec: 'Preview visible', check: async () => await expect(page.locator('.preview')).toBeVisible() }]
+        verifications: [
+            { spec: 'Preview visible', check: async () => await expect(page.locator('.preview')).toBeVisible() },
+            { spec: 'Status is Analyzing', check: async () => await expect(page.getByText('Analyzing with Gemini...')).toBeVisible() }
+        ]
     });
 
     // Wait for Gemini Mock (triggered by file load)
