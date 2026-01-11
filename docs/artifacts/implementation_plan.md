@@ -61,9 +61,18 @@ This plan details the implementation of the Minimum Viable Product (MVP) for the
 -   **Visual History (US-010)**: Display image thumbnails in the history list.
 -   **Meal Type (US-008)**: Display meal type badges (Breakfast/Lunch/Dinner/Snack).
 
+### 8. UX Refinements (User Feedback)
+#### [MODIFY] [src/routes/log/+page.svelte](file:///Users/anicolao/projects/antigravity/food/src/routes/log/+page.svelte)
+-   **Split Capture/Upload**: Add distinct buttons for "Take Photo" (capture=environment) and "Upload" (file picker).
+-   **Smart Defaults**: Set `mealType` based on current time (e.g. 12:00 -> Lunch).
+
+#### [MODIFY] [src/routes/+page.svelte](file:///Users/anicolao/projects/antigravity/food/src/routes/+page.svelte)
+-   **Drive Link**: Wrap thumbnail in link to Drive file for easy access (US-010).
+
 #### [MODIFY] [tests/e2e/002-log-food/002-log-food.spec.ts](file:///Users/anicolao/projects/antigravity/food/tests/e2e/002-log-food/002-log-food.spec.ts)
--   Verify image thumbnail presence in history.
--   Verify meal type text in history.
+-   Verify both upload buttons exist.
+-   Verify meal type dropdown is visible and defaults correctly (mock time).
+-   Verify Drive link in history.
 
 ## Verification Plan
 

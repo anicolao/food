@@ -82,11 +82,17 @@ test('US-003 to US-010: User logs food flow', async ({ page }, testInfo) => {
 
     await tester.step('log-page', {
         description: 'User on log page',
-        verifications: [{ spec: 'Upload button visible', check: async () => await expect(page.getByText('Take Photo')).toBeVisible() }]
+        verifications: [
+            { spec: 'Camera button visible', check: async () => await expect(page.getByText('Take Photo')).toBeVisible() },
+            { spec: 'Upload button visible', check: async () => await expect(page.getByText('Upload File')).toBeVisible() }
+        ]
     });
 
-    // Upload File
-    const fileInput = page.locator('input[type="file"]');
+    // Upload File (using the upload button input)
+    // In our implementation, the 'Upload File' button triggers the second input (fileInput)
+    // We can target the input directly or trigger the click. For Playwright, setInputFiles on the visible input is hard because it's hidden.
+    // We target the input that does NOT have capture="environment"
+    const fileInput = page.locator('input[type="file"]:not([capture])');
     // Use realistic fixture image
     await fileInput.setInputFiles('tests/e2e/fixtures/apple.png');
 
@@ -110,6 +116,8 @@ test('US-003 to US-010: User logs food flow', async ({ page }, testInfo) => {
 
     // Verify default value
     await expect(page.getByLabel('Calories')).toHaveValue('95');
+    // Verify Smart Meal Type Default (Time is 12:00 -> Lunch)
+    await expect(page.getByLabel('Meal Type')).toHaveValue('Lunch');
 
     // Edit to 100
     await page.getByLabel('Calories').fill('100');
@@ -117,7 +125,8 @@ test('US-003 to US-010: User logs food flow', async ({ page }, testInfo) => {
     await tester.step('edited', {
         description: 'User corrects analysis',
         verifications: [
-            { spec: 'Calories updated to 100', check: async () => await expect(page.getByLabel('Calories')).toHaveValue('100') }
+            { spec: 'Calories updated to 100', check: async () => await expect(page.getByLabel('Calories')).toHaveValue('100') },
+            { spec: 'Meal type defaulted to Lunch', check: async () => await expect(page.getByLabel('Meal Type')).toHaveValue('Lunch') }
         ]
     });
 
@@ -130,8 +139,9 @@ test('US-003 to US-010: User logs food flow', async ({ page }, testInfo) => {
             { spec: 'On Dashboard', check: async () => await expect(page.getByText('Today\'s Summary')).toBeVisible() },
             { spec: 'Calories updated', check: async () => await expect(page.locator('.value').first()).toHaveText('100') },
             { spec: 'History name shown', check: async () => await expect(page.getByText('Mock Apple')).toBeVisible() },
-            { spec: 'Meal type shown', check: async () => await expect(page.getByText('Snack')).toBeVisible() },
+            { spec: 'Meal type shown', check: async () => await expect(page.getByText('Lunch')).toBeVisible() },
             { spec: 'Thumbnail shown', check: async () => await expect(page.locator('.thumb')).toBeVisible() },
+            { spec: 'Thumbnail linked to Drive', check: async () => await expect(page.locator('a:has(.thumb)')).toHaveAttribute('href', 'https://drive.mock/img.jpg') },
             // Wait for image to load to ensure valid src
             {
                 spec: 'Thumbnail loaded',

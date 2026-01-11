@@ -1,10 +1,12 @@
 <script lang="ts">
+  import { onMount } from 'svelte';
   import { analyzeImage, type NutritionEstimate } from '$lib/gemini';
   import { uploadImage, appendRow } from '$lib/sheets';
   import { dispatchEvent, store } from '$lib/store';
   import { goto } from '$app/navigation';
 
   let fileInput: HTMLInputElement;
+  let cameraInput: HTMLInputElement;
   let imagePreview: string | null = null;
   let analyzing = false;
   let form: NutritionEstimate = {
@@ -17,6 +19,14 @@
   };
   let mealType: 'Breakfast' | 'Lunch' | 'Dinner' | 'Snack' = 'Snack';
   let imageFile: File | null = null;
+
+  onMount(() => {
+    const hour = new Date().getHours();
+    if (hour < 11) mealType = 'Breakfast';
+    else if (hour < 16) mealType = 'Lunch';
+    else if (hour < 22) mealType = 'Dinner';
+    else mealType = 'Snack';
+  });
 
   async function handleFileSelect(e: Event) {
     const target = e.target as HTMLInputElement;
@@ -98,7 +108,18 @@
 
   <div class="upload-section">
     {#if !imagePreview}
-      <button on:click={() => fileInput.click()}>Take Photo / Upload</button>
+      <div class="button-group">
+          <button on:click={() => cameraInput.click()}>Take Photo</button>
+          <button on:click={() => fileInput.click()} class="secondary">Upload File</button>
+      </div>
+      <input 
+        type="file" 
+        accept="image/*" 
+        capture="environment"
+        bind:this={cameraInput} 
+        on:change={handleFileSelect} 
+        hidden 
+      />
       <input 
         type="file" 
         accept="image/*" 
@@ -161,6 +182,8 @@
   label { display: block; margin-bottom: 0.5rem; }
   input, select { width: 100%; padding: 0.5rem; margin-bottom: 1rem; }
   .macros { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-  button { width: 100%; padding: 1rem; background: #007bff; color: white; border: none; border-radius: 8px; }
+  .button-group { display: flex; gap: 1rem; }
+  button { width: 100%; padding: 1rem; background: #007bff; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
+  .secondary { background: #6c757d; }
   .save-btn { background: #28a745; margin-top: 1rem; }
 </style>

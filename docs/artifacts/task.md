@@ -16,6 +16,7 @@
     - [x] Implement E2E Tests (US-001 to US-012) <!-- id: 43 -->
     - [x] Implement E2E Tests (US-001 to US-012) <!-- id: 43 -->
     - [x] Verify & Submit PR <!-- id: 44 -->
-    - [x] Implement Visual History (US-010) <!-- id: 45 -->
-    - [x] Implement Meal Type Display (US-008) <!-- id: 46 -->
-    - [x] Verify Full MVP Scope <!-- id: 47 -->
+    - [x] Refine Log UI (Split Camera/Upload) (US-003, US-004) <!-- id: 48 -->
+    - [x] Implement Time-Based Meal Type Default (US-008) <!-- id: 49 -->
+    - [x] Add Drive Folder Link (US-010) <!-- id: 50 -->
+    - [x] Verify Refined UX <!-- id: 51 -->
