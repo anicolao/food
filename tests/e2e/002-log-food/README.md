@@ -5,6 +5,7 @@
 ![User on log page](./screenshots/000-log-page.png)
 
 **Verifications:**
+- [x] Camera button visible
 - [x] Upload button visible
 
 ---
@@ -34,6 +35,7 @@
 
 **Verifications:**
 - [x] Calories updated to 100
+- [x] Meal type defaulted to Lunch
 
 ---
 
@@ -47,6 +49,7 @@
 - [x] History name shown
 - [x] Meal type shown
 - [x] Thumbnail shown
+- [x] Thumbnail linked to Drive
 - [x] Thumbnail loaded
 
 ---

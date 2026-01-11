@@ -115,7 +115,9 @@
                      <div class="entry-meta">
                         <span class="cal">{entry.calories} kcal</span>
                         {#if entry.imageDriveUrl}
-                            <img src={entry.imageDriveUrl} alt="Food" class="thumb" />
+                            <a href={entry.imageDriveUrl} target="_blank">
+                                <img src={entry.imageDriveUrl} alt="Food" class="thumb" />
+                            </a>
                         {/if}
                      </div>
                  </li>
