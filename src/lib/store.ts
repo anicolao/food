@@ -67,23 +67,35 @@ const projectionsSlice = createSlice({
   reducers: {
     processEvent: (state, action: PayloadAction<FoodEvent>) => {
       const event = action.payload;
-      
+      // Idempotency Check: correct place depends on if we rely on log or projections.
+      // Ideally we check if event is in log. But projections slice acts on stream.
+      // If we assume sequential replay, we should check set of processed IDs?
+      // Or check if event is already in `log` slice?
+      // But `projections` slice has its own `log`.
+      // Removed global idempotency check as it's now specific to the event type.
+
       switch (event.type) {
         case 'log/entryConfirmed': {
-            // Payload expected: { entry: LogEntry }
-            const entry = event.payload.entry as LogEntry;
-            state.log.push(entry);
-            
-            // Update Stats
-            if (!state.stats[entry.date]) {
-                state.stats[entry.date] = { date: entry.date, totalCalories: 0, totalProtein: 0, totalFat: 0, totalCarbs: 0 };
-            }
-            const stat = state.stats[entry.date];
-            stat.totalCalories += entry.calories;
-            stat.totalProtein += entry.protein;
-            stat.totalFat += entry.fat;
-            stat.totalCarbs += entry.carbs;
-            break;
+          // Payload expected: { entry: LogEntry }
+          const entry = event.payload.entry as LogEntry;
+
+          // Idempotency Check: using business ID (entry.id)
+          if (state.log.some(e => e.id === entry.id)) {
+            return;
+          }
+
+          state.log.push(entry);
+
+          // Update Stats
+          if (!state.stats[entry.date]) {
+            state.stats[entry.date] = { date: entry.date, totalCalories: 0, totalProtein: 0, totalFat: 0, totalCarbs: 0 };
+          }
+          const stat = state.stats[entry.date];
+          stat.totalCalories += entry.calories;
+          stat.totalProtein += entry.protein;
+          stat.totalFat += entry.fat;
+          stat.totalCarbs += entry.carbs;
+          break;
         }
         // Add other cases as needed
       }
@@ -104,21 +116,21 @@ export const { processEvent } = projectionsSlice.actions;
 
 // --- Thunks / Helpers ---
 export const dispatchEvent = (type: string, payload: any) => (dispatch: any) => {
-    const event: FoodEvent = {
-        eventId: crypto.randomUUID(),
-        type,
-        timestamp: new Date().toISOString(),
-        payload
-    };
-    
-    // 1. Append to Source of Truth
-    dispatch(appendEvent(event));
-    
-    // 2. Update Projections
-    dispatch(processEvent(event));
-    
-    // 3. Side Effects (Sync to Sheets) would go here or in a listener
-    // syncToSheets(event);
+  const event: FoodEvent = {
+    eventId: crypto.randomUUID(),
+    type,
+    timestamp: new Date().toISOString(),
+    payload
+  };
+
+  // 1. Append to Source of Truth
+  dispatch(appendEvent(event));
+
+  // 2. Update Projections
+  dispatch(processEvent(event));
+
+  // 3. Side Effects (Sync to Sheets) would go here or in a listener
+  // syncToSheets(event);
 };
 
 export type RootState = ReturnType<typeof store.getState>;
