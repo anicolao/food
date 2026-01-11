@@ -1,0 +1,127 @@
+# MVP Design
+
+This document outlines the Minimum Viable Product (MVP) for the Food application.
+
+## Goals
+1.  **Interactive Logging**: Capture or select food photos.
+2.  **AI Nutrition Estimation**: Use Gemini Flash to estimate nutrition facts (Canadian Standard) from images.
+3.  **Cloud Storage**: Use Google Drive (Photos) and Google Sheets (Data) as the backend.
+
+## Architecture
+
+```mermaid
+graph TD
+    User[User] -->|Upload/Select Photo| App[Food App]
+    App -->|Image| Gemini[Gemini Flash API]
+    Gemini -->|Nutrition JSON| App
+    App -->|Write Data| Sheets[Google Sheets]
+    App -->|Store Image| Drive[Google Drive]
+```
+
+## Data Model (Google Sheets)
+
+The backend will be a single Google Spreadsheet with multiple sheets.
+
+### Sheet 1: `Log`
+Record of every consumption event.
+
+| Column | Type | Description |
+| :--- | :--- | :--- |
+| `Date` | Date | YYYY-MM-DD |
+| `Time` | Time | HH:MM |
+| `ImageURL` | URL | Link to image in Google Drive |
+| `MealType` | Enum | Breakfast, Lunch, Dinner, Snack |
+| `RawText` | String | User description or AI summary |
+| `FoodRefID` | String | (Optional) Link to `Products` entry |
+| `Calories` | Number | kcal |
+| `Fat` | Number | g |
+| `Carbs` | Number | g |
+| `Protein` | Number | g |
+| `Sodium` | Number | mg |
+| `Sugar` | Number | g |
+| `Fibre` | Number | g |
+| `JSON` | JSON | Full raw JSON from Gemini |
+
+### Sheet 2: `Products`
+Reusable database for repetitive items (barcodes, common meals).
+
+| Column | Type | Description |
+| :--- | :--- | :--- |
+| `ID` | String | UUID or Barcode |
+| `Name` | String | |
+| `Barcode` | String | (Optional) |
+| `NutritionJSON` | JSON | Validated nutrition facts |
+| `ImageURL` | URL | Representative image |
+
+### Sheet 3: `DailyStats`
+Pivot table or formula-based aggregation.
+
+-   **Rows**: Date
+-   **Columns**: Sum(Calories), Sum(Protein), etc.
+
+## Gemini Integration
+
+### Model
+-   **Model**: `gemini-1.5-flash`
+-   **Input**: Image (Binary/Base64) + Prompt
+
+### Prompt Strategy
+We will prompt Gemini to act as an expert nutritionist using the Canadian Nutrition Facts standard.
+
+**System Prompt:**
+> You are an expert dietician. Analyze the provided image.
+> 1. If it is a **Nutrition Facts label**, extract the data exactly as shown.
+> 2. If it is a **food item/meal**, estimate the nutrition facts based on visible portion sizes and standard values.
+> 3. Return the data **exclusively** in the following JSON format matching the Canadian Nutrition Facts table standard:
+
+```json
+{
+  "is_label": boolean,
+  "item_name": "string",
+  "serving_size": "string",
+  "calories": number,
+  "fat": {
+    "total": number, // g
+    "saturated": number, // g
+    "trans": number // g
+  },
+  "carbohydrates": {
+    "total": number, // g
+    "fibre": number, // g
+    "sugars": number // g
+  },
+  "protein": number, // g
+  "cholesterol": number, // mg
+  "sodium": number, // mg
+  "potassium": number, // mg
+  "calcium": number, // mg
+  "iron": number // mg
+}
+```
+
+### Reference Standard
+![Canadian Nutrition Facts](assets/images/nutrition-facts-canada.png)
+
+## Workflow
+
+### 1. Capture/Select
+-   User takes a photo or selects from Google Photos picker.
+-   App validates image is usable.
+
+### 2. Analysis
+-   App sends image to Gemini Flash.
+-   Gemini returns JSON estimate.
+-   User reviews and edits the estimated values (UI must allow overrides).
+
+### 3. Log
+-   User confirms entry.
+-   App uploads image to specific Google Drive folder (e.g., `FoodApp/Images/YYYY/MM`).
+-   App appends row to `Log` sheet in Google Sheets.
+-   App checks if item should be added to `Products` (e.g. "Save to Favorites").
+
+## Authentication
+-   **Provider**: Google OAuth 2.0
+-   **Scopes**:
+    -   `https://www.googleapis.com/auth/drive.file` (Create/Edit app-specific files)
+    -   `https://www.googleapis.com/auth/spreadsheets` (Read/Write sheets)
+    -   `https://www.googleapis.com/auth/photoslibrary.readonly` (Select photos)
