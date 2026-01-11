@@ -157,7 +157,7 @@
 
 <style>
   .container { padding: 1rem; max-width: 600px; margin: 0 auto; }
-  .preview { width: 100%; border-radius: 8px; margin-bottom: 1rem; }
+  .preview { width: 100%; max-height: 50vh; object-fit: contain; border-radius: 8px; margin-bottom: 1rem; }
   label { display: block; margin-bottom: 0.5rem; }
   input, select { width: 100%; padding: 0.5rem; margin-bottom: 1rem; }
   .macros { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
