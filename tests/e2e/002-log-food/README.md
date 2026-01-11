@@ -1,4 +1,4 @@
-# Test: US-003: User logs food
+# Test: US-003 to US-010: User logs food flow
 
 ## User on log page
 
@@ -47,6 +47,7 @@
 - [x] History name shown
 - [x] Meal type shown
 - [x] Thumbnail shown
+- [x] Thumbnail loaded
 
 ---
 

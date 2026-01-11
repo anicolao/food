@@ -1,9 +1,9 @@
 import { test, expect } from '@playwright/test';
 import { TestStepHelper } from '../helpers/test-step-helper';
+import * as fs from 'fs';
+import * as path from 'path';
 
-
-
-test('US-003: User logs food', async ({ page }, testInfo) => {
+test('US-003 to US-010: User logs food flow', async ({ page }, testInfo) => {
     const tester = new TestStepHelper(page, testInfo);
     tester.setMetadata('Logging', 'User logs a meal.');
     page.on('console', msg => console.log(`BROWSER LOG: ${msg.text()}`));
@@ -24,12 +24,18 @@ test('US-003: User logs food', async ({ page }, testInfo) => {
     // Stateful Mock for Sheets
     const events: any[] = [];
 
+    // Mock Drive Images
+    await page.route(/drive\.mock/, async route => {
+        const buffer = fs.readFileSync('tests/e2e/fixtures/apple.png');
+        await route.fulfill({ body: buffer, contentType: 'image/png' });
+    });
+
     await page.route('**googleapis.com**', async route => {
         const url = route.request().url();
         console.log('MOCKING:', url);
 
         if (url.includes('upload/drive')) {
-            await route.fulfill({ json: { id: 'file-123', webViewLink: 'http://mock-drive/img.jpg' } });
+            await route.fulfill({ json: { id: 'file-123', webViewLink: 'https://drive.mock/img.jpg' } });
         } else if (url.includes('sheets.googleapis.com')) {
             if (url.includes('append')) {
                 // Capture append
@@ -125,7 +131,19 @@ test('US-003: User logs food', async ({ page }, testInfo) => {
             { spec: 'Calories updated', check: async () => await expect(page.locator('.value').first()).toHaveText('100') },
             { spec: 'History name shown', check: async () => await expect(page.getByText('Mock Apple')).toBeVisible() },
             { spec: 'Meal type shown', check: async () => await expect(page.getByText('Snack')).toBeVisible() },
-            { spec: 'Thumbnail shown', check: async () => await expect(page.locator('.thumb')).toBeVisible() }
+            { spec: 'Thumbnail shown', check: async () => await expect(page.locator('.thumb')).toBeVisible() },
+            // Wait for image to load to ensure valid src
+            {
+                spec: 'Thumbnail loaded',
+                check: async () => {
+                    const img = page.locator('.thumb');
+                    await expect(img).toBeVisible();
+                    await expect(img).toHaveAttribute('src', 'https://drive.mock/img.jpg');
+                    // Ensure it is not broken
+                    const naturalWidth = await img.evaluate((e: HTMLImageElement) => e.naturalWidth);
+                    expect(naturalWidth).toBeGreaterThan(0);
+                }
+            }
         ]
     });
 
