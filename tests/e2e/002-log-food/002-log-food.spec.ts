@@ -76,8 +76,10 @@ test('US-003: User logs food', async ({ page }, testInfo) => {
 
     // Upload File
     const fileInput = page.locator('input[type="file"]');
-    // Create a dummy image buffer
-    await fileInput.setInputFiles({ name: 'test.jpg', mimeType: 'image/jpeg', buffer: Buffer.from('mock data') });
+    // Minimal 1x1 JPEG Base64
+    const validJpeg = Buffer.from('/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/2wBDAQkJCQwLDBgNDRgyIRwhMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjL/wAARCAABAAEDASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD3+iiigD//2Q==', 'base64');
+
+    await fileInput.setInputFiles({ name: 'test.jpg', mimeType: 'image/jpeg', buffer: validJpeg });
 
     await tester.step('preview', {
         description: 'Image preview shown',
