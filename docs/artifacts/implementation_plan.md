@@ -103,8 +103,11 @@ This plan details the implementation of the Minimum Viable Product (MVP) for the
 #### [MODIFY] [src/routes/log/+page.svelte](file:///Users/anicolao/projects/antigravity/food/src/routes/log/+page.svelte)
 -   **Camera UI**: Implement `<video>` and `navigator.mediaDevices.getUserMedia` overlay for "Take Photo".
     -   Add "Capture", "Switch Camera" (if multiple), and "Cancel" buttons.
--   **Upload File**: Maintain standard generic file input (allows Photo Library access on mobile).
-    -   *Decision*: Google Picker API skipped to avoid extra API Key requirements for MVP. Standard input suffices.
+-   **Google Photos**: Replace "Upload File" with "Pick from Photos".
+    -   Load Google Picker API `https://apis.google.com/js/api.js`.
+    -   Authenticate with `photoslibrary.readonly`.
+    -   Use `google.picker.PickerBuilder` with `ViewId.PHOTOS`.
+    -   Handle selection: Retrieve image data (likely via fetch using OAuth token or proxy if CORS blocks direct access).
 
 ## Verification Plan
 

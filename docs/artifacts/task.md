@@ -26,5 +26,5 @@
     - [x] Implement Per-User Data Discovery (Drive/Sheets) <!-- id: 55 -->
     - [x] Verify Per-User Flow (E2E + Manual) <!-- id: 56 -->
     - [x] Implement In-App Camera UI (getUserMedia) <!-- id: 57 -->
-    - [x] Refine "Upload File" (Standard Input) <!-- id: 58 -->
+    - [x] Implement Google Photos Picker Integration <!-- id: 58 -->
     - [x] Verify Photo Handling Improvements <!-- id: 59 -->
