@@ -1,5 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte';
+  import { base } from '$app/paths';
   import { initializeAuth, signIn, signOut, getAccessToken } from '$lib/auth';
   import { fetchRows, ensureDataStructures } from '$lib/sheets';
   import { store, dispatchEvent, setConfig } from '$lib/store';
@@ -147,7 +148,7 @@
     </div>
     
     <div class="actions">
-      <a href="/log" class="log-btn">Log Food</a>
+      <a href="{base}/log" class="log-btn">Log Food</a>
     </div>
 
     <div class="summary">
