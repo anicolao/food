@@ -5,6 +5,7 @@
   import { dispatchEvent, store } from '$lib/store';
   import { signIn } from '$lib/auth';
   import { goto } from '$app/navigation';
+  import { base } from '$app/paths';
   // @ts-ignore
   import exifr from 'exifr'; 
   import { createPickerSession, pollPickerSession, listSessionMediaItems } from '$lib/google-photos';
@@ -261,7 +262,7 @@
             console.warn('No spreadsheet ID found, skipping sync');
         }
 
-        goto('/');
+        goto(`${base}/`);
     } catch (e) {
         console.error(e);
         alert('Failed to save');
