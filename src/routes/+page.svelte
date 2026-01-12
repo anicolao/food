@@ -3,6 +3,7 @@
   import { initializeAuth, signIn, signOut, getAccessToken } from '$lib/auth';
   import { fetchRows, ensureDataStructures } from '$lib/sheets';
   import { store, dispatchEvent, setConfig } from '$lib/store';
+  import { base } from '$app/paths';
 
   let authenticated = false;
   let stats = { totalCalories: 0, totalProtein: 0, totalFat: 0, totalCarbs: 0 };
@@ -147,7 +148,7 @@
     </div>
     
     <div class="actions">
-      <a href="log" class="log-btn">Log Food</a>
+      <a href="{base}/log" class="log-btn">Log Food</a>
     </div>
 
     <div class="summary">
