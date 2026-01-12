@@ -181,8 +181,12 @@
          const session = await createPickerSession();
          const sessionId = session.id;
          
-         // 2. Open Picker
-         const popup = window.open(session.pickerUri, 'googlePicker', 'width=800,height=600');
+         // 2. Open Picker with /autoclose
+         let uri = session.pickerUri;
+         if (!uri.endsWith("/autoclose")) {
+             uri = uri.endsWith("/") ? `${uri}autoclose` : `${uri}/autoclose`;
+         }
+         const popup = window.open(uri, 'googlePicker', 'width=800,height=600');
          
          // 3. Poll for result
          const poll = setInterval(async () => {
@@ -196,11 +200,12 @@
                 if (status.mediaItemsSet) {
                     clearInterval(poll);
                     popup?.close();
+                    window.focus(); // Focus parent
                     
                     // 4. Get Items
                     const items = await listSessionMediaItems(sessionId);
                     if (items.length > 0) {
-                        processPickedItem(items[0]);
+                        processPickedItem(items[0], token);
                     }
                 }
              } catch (e) {
@@ -214,7 +219,7 @@
      }
   }
 
-  async function processPickedItem(item: any) {
+  async function processPickedItem(item: any, token: string) {
       if (!item.baseUrl) return;
       
       // Fetch the bytes
@@ -223,7 +228,9 @@
           // Appending '=d' triggers download, but we want bytes.
           // Standard fetching works if CORS allows. 
           // New Photos Picker baseUrl is typically accessible.
-          const res = await fetch(item.baseUrl);
+          const res = await fetch(item.baseUrl, { 
+             headers: { Authorization: `Bearer ${token}` } 
+          });
           const blob = await res.blob();
           
           imageFile = new File([blob], item.filename || `photo-${Date.now()}.jpg`, { type: item.mimeType || 'image/jpeg' });

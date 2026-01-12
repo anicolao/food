@@ -24,6 +24,7 @@ I have successfully initialized the `food` repository and established the projec
     - Confirmed UI responsiveness on local dev server.
     - Verified proper error handling for missing API keys (400/401 mocked responses).
     - Verified Google Picker flow (REST API) relies correctly on User OAuth token.
+    - Verified Picker auto-closing logic (`/autoclose`) and authorized byte fetching.
 
 ### Next Steps
 - obtaining a real Google Client ID and Gemini API Key.
