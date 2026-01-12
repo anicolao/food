@@ -8,7 +8,8 @@
   import { appendRow } from '$lib/sheets';
   import { formatLogDate } from '$lib/formatDate';
 
-  const id = $page.params.id;
+  // Changed: Get ID from query params
+  const id = $page.url.searchParams.get('id');
   
   let entry: any = null;
   let form: any = {
@@ -25,6 +26,12 @@
   let entryDateTimeStr = '';
 
   onMount(() => {
+      if (!id) {
+          console.error("No ID provided in query params");
+          goto(`${base}/`);
+          return;
+      }
+
       const state = store.getState();
       entry = state.projections.log.find(e => e.id === id);
       
@@ -53,7 +60,7 @@
   });
 
   async function handleSave() {
-     if (!entry) return;
+     if (!entry || !id) return;
 
      const changes = {
          mealType: form.mealType,
@@ -87,6 +94,7 @@
 
   async function handleDelete() {
       if (!confirm('Are you sure you want to delete this entry?')) return;
+      if (!id) return;
       
       store.dispatch(dispatchEvent('log/entryDeleted', { entryId: id }));
 

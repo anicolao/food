@@ -168,7 +168,7 @@
          <ul class="entry-list">
              {#each allEntries as entry}
                  <li class="entry-item">
-                     <a href="{base}/log/{entry.id}" class="entry-link">
+                     <a href="{base}/entry?id={entry.id}" class="entry-link">
                          <div class="entry-info">
                              <span class="time">{formatLogDate(entry.date + 'T' + entry.time)}</span>
                              <span class="meal-badge">{entry.mealType}</span>
