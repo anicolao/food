@@ -97,7 +97,62 @@ const projectionsSlice = createSlice({
           stat.totalCarbs += Number(entry.carbs || 0);
           break;
         }
-        // Add other cases as needed
+
+        case 'log/entryUpdated': {
+          const { entryId, changes } = event.payload;
+          const index = state.log.findIndex(e => e.id === entryId);
+          if (index !== -1) {
+            const oldEntry = state.log[index];
+
+            // 1. Decrement old stats
+            if (state.stats[oldEntry.date]) {
+              const stat = state.stats[oldEntry.date];
+              stat.totalCalories -= Number(oldEntry.calories || 0);
+              stat.totalProtein -= Number(oldEntry.protein || 0);
+              stat.totalFat -= Number(oldEntry.fat || 0);
+              stat.totalCarbs -= Number(oldEntry.carbs || 0);
+            }
+
+            // 2. Update Entry
+            const newEntry = { ...oldEntry, ...changes };
+            state.log[index] = newEntry;
+
+            // 3. Increment new stats (date might have changed! but ignoring that complexity for MVP+, assuming date matches)
+            // Safety: If date changed, we'd need to handle that. Assuming date stays same for simplified logic unless prompt said editable date.
+            // Prompt said "dates/times... editable". Let's assume date CAN change.
+            // So we should look up stat for newEntry.date.
+
+            if (!state.stats[newEntry.date]) {
+              state.stats[newEntry.date] = { date: newEntry.date, totalCalories: 0, totalProtein: 0, totalFat: 0, totalCarbs: 0 };
+            }
+            const stat = state.stats[newEntry.date];
+            stat.totalCalories += Number(newEntry.calories || 0);
+            stat.totalProtein += Number(newEntry.protein || 0);
+            stat.totalFat += Number(newEntry.fat || 0);
+            stat.totalCarbs += Number(newEntry.carbs || 0);
+          }
+          break;
+        }
+        case 'log/entryDeleted': {
+          const { entryId } = event.payload;
+          const index = state.log.findIndex(e => e.id === entryId);
+          if (index !== -1) {
+            const entry = state.log[index];
+
+            // Decrement stats
+            if (state.stats[entry.date]) {
+              const stat = state.stats[entry.date];
+              stat.totalCalories -= Number(entry.calories || 0);
+              stat.totalProtein -= Number(entry.protein || 0);
+              stat.totalFat -= Number(entry.fat || 0);
+              stat.totalCarbs -= Number(entry.carbs || 0);
+            }
+
+            // Remove from log
+            state.log.splice(index, 1);
+          }
+          break;
+        }
       }
     }
   }

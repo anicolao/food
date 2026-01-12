@@ -4,10 +4,11 @@
   import { fetchRows, ensureDataStructures } from '$lib/sheets';
   import { store, dispatchEvent, setConfig } from '$lib/store';
   import { base } from '$app/paths';
+  import { formatLogDate } from '$lib/formatDate';
 
   let authenticated = false;
   let stats = { totalCalories: 0, totalProtein: 0, totalFat: 0, totalCarbs: 0 };
-  let todaysEntries: any[] = [];
+  let allEntries: any[] = [];
   const today = new Date().toISOString().split('T')[0];
 
   async function syncData() {
@@ -51,9 +52,16 @@
       const state = store.getState();
       if (state.projections.stats[today]) {
         stats = state.projections.stats[today];
+      } else {
+        stats = { totalCalories: 0, totalProtein: 0, totalFat: 0, totalCarbs: 0 };
       }
-      // Filter entries for today
-      todaysEntries = state.projections.log.filter(e => e.date === today);
+      
+      // Filter entries for full history, sorted DESC
+      allEntries = [...state.projections.log].sort((a, b) => {
+          const dateA = new Date(a.date + 'T' + a.time);
+          const dateB = new Date(b.date + 'T' + b.time);
+          return dateB.getTime() - dateA.getTime();
+      });
     });
 
     return unsubscribe;
@@ -72,7 +80,8 @@
   let showGallery = false;
   let galleryImages: string[] = [];
 
-  function openGallery(images: string[]) {
+  function openGallery(images: string[], e: Event) {
+      e.stopPropagation(); // Prevent navigation when clicking thumb
       galleryImages = images;
       showGallery = true;
   }
@@ -152,37 +161,39 @@
     </div>
 
     <div class="summary">
-      <h2>Today's Summary</h2>
-      {#if todaysEntries.length === 0}
+      <h2>Recent Logs</h2>
+      {#if allEntries.length === 0}
          <p>No entries yet.</p>
       {:else}
          <ul class="entry-list">
-             {#each todaysEntries as entry}
+             {#each allEntries as entry}
                  <li class="entry-item">
-                     <div class="entry-info">
-                         <span class="time">{entry.time}</span>
-                         <span class="meal-badge">{entry.mealType}</span>
-                         <span class="desc">{entry.description}</span>
-                     </div>
-                     <div class="entry-meta">
-                        <span class="cal">{entry.calories} kcal</span>
-                        {#if entry.imageDriveUrl}
-                            {@const imageUrls = entry.imageDriveUrl.split(',').map((u: string) => u.trim())}
-                            <button class="thumb-btn" on:click={() => openGallery(imageUrls)}>
-                                {#await resolveDriveImage(imageUrls[0])}
-                                    <div class="thumb-loading"></div>
-                                {:then src} 
-                                    <img src={src} alt="Food" class="thumb" />
-                                {:catch}
-                                    <div class="thumb-error">!</div>
-                                {/await}
-                                
-                                {#if imageUrls.length > 1}
-                                    <span class="count-badge">+{imageUrls.length - 1}</span>
-                                {/if}
-                            </button>
-                        {/if}
-                     </div>
+                     <a href="{base}/log/{entry.id}" class="entry-link">
+                         <div class="entry-info">
+                             <span class="time">{formatLogDate(entry.date + 'T' + entry.time)}</span>
+                             <span class="meal-badge">{entry.mealType}</span>
+                             <span class="desc">{entry.description}</span>
+                         </div>
+                         <div class="entry-meta">
+                            <span class="cal">{entry.calories} kcal</span>
+                            {#if entry.imageDriveUrl}
+                                {@const imageUrls = entry.imageDriveUrl.split(',').map((u: string) => u.trim())}
+                                <button class="thumb-btn" on:click={(e) => openGallery(imageUrls, e)}>
+                                    {#await resolveDriveImage(imageUrls[0])}
+                                        <div class="thumb-loading"></div>
+                                    {:then src} 
+                                        <img src={src} alt="Food" class="thumb" />
+                                    {:catch}
+                                        <div class="thumb-error">!</div>
+                                    {/await}
+                                    
+                                    {#if imageUrls.length > 1}
+                                        <span class="count-badge">+{imageUrls.length - 1}</span>
+                                    {/if}
+                                </button>
+                            {/if}
+                         </div>
+                     </a>
                  </li>
              {/each}
          </ul>
@@ -218,7 +229,9 @@
   .actions { text-align: center; margin-bottom: 2rem; }
   .log-btn { background: #007bff; color: white; padding: 1rem 2rem; border-radius: 25px; text-decoration: none; font-weight: bold; }
   .entry-list { list-style: none; padding: 0; }
-  .entry-item { display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0; border-bottom: 1px solid #eee; }
+  .entry-item { border-bottom: 1px solid #eee; }
+  .entry-link { display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0; text-decoration: none; color: inherit; width: 100%; }
+  .entry-link:hover { background: #f9f9f9; }
   .entry-info { display: flex; flex-direction: column; gap: 0.2rem; }
   .entry-meta { display: flex; align-items: center; gap: 0.5rem; }
   .time { color: #666; font-size: 0.8rem; }
