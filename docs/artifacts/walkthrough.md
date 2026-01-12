@@ -19,11 +19,11 @@ I have successfully initialized the `food` repository and established the projec
     - **Refactor**: Verified `auth.ts` uses correct Client ID and `gemini.ts` uses User OAuth token.
     - **Persistence**: Verified dynamic creation of `FoodLog` folder and `Events` sheet on first login.
     - **UX**: Verified In-App Camera UI with `getUserMedia`.
-    - **Integration**: Verified "Pick from Photos" button presence and script loading logic (E2E passed).
+    - **Integration**: Verified "Pick from Photos" button triggers REST API session creation and polling logic (E2E passed).
 - **Manual Verification**:
     - Confirmed UI responsiveness on local dev server.
     - Verified proper error handling for missing API keys (400/401 mocked responses).
-    - Verified Google Picker loads (requires valid API Key for full functionality).
+    - Verified Google Picker flow (REST API) relies correctly on User OAuth token.
 
 ### Next Steps
 - obtaining a real Google Client ID and Gemini API Key.

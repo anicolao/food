@@ -49,6 +49,25 @@ test('US-003 to US-010: User logs food flow', async ({ page }, testInfo) => {
                 // Creation Fallback (if search returned empty, but here we return found)
                 await route.fulfill({ json: { id: 'new-mock-id' } });
             }
+        } else if (url.includes('photospicker.googleapis.com')) {
+            if (url.includes('sessions') && !url.includes('mediaItems')) {
+                if (route.request().method() === 'POST') {
+                    // Create Session
+                    await route.fulfill({ json: { id: 'sess-1', pickerUri: 'about:blank' } }); // Use about:blank to avoid opening real popups that Playwright might hate, or mock it? 
+                    // Actually, we open a popup. Playwright manages pages.
+                } else {
+                    // Poll Session
+                    // First poll -> not done. Second -> Done.
+                    // Mock simple 'done' for speed.
+                    await route.fulfill({ json: { mediaItemsSet: true } });
+                }
+            } else if (url.includes('mediaItems')) {
+                // List Items
+                await route.fulfill({ json: { mediaItems: [{ id: 'item-1', mediaFile: { baseUrl: 'https://drive.mock/picker.jpg', mimeType: 'image/jpeg', filename: 'picked.jpg' } }] } });
+            }
+        } else if (url.includes('picker.jpg')) {
+            const buffer = fs.readFileSync('tests/e2e/fixtures/apple.png');
+            await route.fulfill({ body: buffer, contentType: 'image/png' });
         } else if (url.includes('sheets.googleapis.com')) {
             if (url.includes('append')) {
                 // Capture append
