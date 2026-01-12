@@ -23,10 +23,12 @@ The OAuth 2.0 Client ID for Google authentication and all Google services.
    - Generative Language API (Gemini)
 4. Go to "Credentials" → "Create Credentials" → "OAuth 2.0 Client ID"
 5. Choose "Web application"
-6. Add authorized JavaScript origins:
-   - `https://anicolao.github.io`
-7. Add authorized redirect URIs:
-   - `https://anicolao.github.io/food/`
+6. Add authorized JavaScript origins (replace with your actual GitHub Pages URL):
+   - For this repository: `https://anicolao.github.io`
+   - For your fork: `https://YOUR_USERNAME.github.io`
+7. Add authorized redirect URIs (replace with your actual GitHub Pages URL):
+   - For this repository: `https://anicolao.github.io/food/`
+   - For your fork: `https://YOUR_USERNAME.github.io/YOUR_REPO_NAME/`
 8. Copy the Client ID (looks like: `123456789-abcdef.apps.googleusercontent.com`)
 
 ## Setting Up Secret in GitHub

@@ -44,6 +44,16 @@ jobs:
           NODE_ENV: production
           PUBLIC_BASE_PATH: ${{ steps.base_path.outputs.path }}
           VITE_GOOGLE_OAUTH_ID: ${{ secrets.GOOGLE_OAUTH_ID }}
+      
+      - name: Verify OAuth configuration
+        run: |
+          if [ -z "${{ secrets.GOOGLE_OAUTH_ID }}" ]; then
+            echo "⚠️  Warning: GOOGLE_OAUTH_ID secret is not set. Authentication will not work in the deployed app."
+            echo "Please set the GOOGLE_OAUTH_ID secret in repository settings."
+            echo "See OAUTH_SETUP.md for instructions."
+          else
+            echo "✅ OAuth configuration is present"
+          fi
 
       - name: Deploy to gh-pages branch
         uses: peaceiris/actions-gh-pages@v4
