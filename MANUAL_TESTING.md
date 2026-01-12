@@ -8,7 +8,7 @@ This guide describes how to manually verify the MVP functionality of the Food ap
 ## Prerequisites
 
 1.  **Google Cloud Project**: You need a project with Sheets, Drive, and Photos APIs enabled.
-2.  **Credentials**: Create an OAuth 2.0 Client ID and configure `VITE_GOOGLE_DRIVE_CLIENT_ID` in `.env`.
+2.  **Credentials**: Create an OAuth 2.0 Client ID and configure `VITE_GOOGLE_OAUTH_ID` in `.env`.
 3.  **Test User**: A Google account added to the test users list (if app is in testing mode).
 
 ## Scenarios to Verify

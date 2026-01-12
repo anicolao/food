@@ -76,7 +76,7 @@ This plan details the implementation of the Minimum Viable Product (MVP) for the
 
 ### 9. Auth & Gemini Refactor
 #### [MODIFY] [src/lib/auth.ts](file:///Users/anicolao/projects/antigravity/food/src/lib/auth.ts)
--   **Fix**: Update `GOOGLE_CLIENT_ID` to match `.env` variable `VITE_GOOGLE_DRIVE_CLIENT_ID`.
+-   **Fix**: Update `GOOGLE_CLIENT_ID` to match `.env` variable `VITE_GOOGLE_OAUTH_ID`.
 -   **Scopes**: Add `https://www.googleapis.com/auth/generative-language.retriever` (or appropriate scope) for Gemini.
 
 #### [MODIFY] [src/lib/gemini.ts](file:///Users/anicolao/projects/antigravity/food/src/lib/gemini.ts)
