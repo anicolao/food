@@ -136,6 +136,25 @@
       }
       return url;
   }
+  let galleryContainer: HTMLElement;
+
+  function handleGalleryClick(e: MouseEvent) {
+      if (!galleryContainer) return;
+
+      const rect = galleryContainer.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const center = rect.width / 2;
+      
+      // Calculate scroll amount: ~85% of width + gap (approx) or just generic "page"
+      // Since it's scroll-snap, approximate scroll usually snaps to correct point.
+      const scrollAmount = rect.width * 0.85; 
+
+      if (x > center) {
+          galleryContainer.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+      } else {
+          galleryContainer.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+      }
+  }
 </script>
 
 <div class="container">
@@ -146,7 +165,9 @@
   </div>
 
   {#if imageUrls.length > 0}
-      <div class="gallery">
+      <!-- svelte-ignore a11y-click-events-have-key-events(we just want enhancement, scrolling works naturally too) -->
+      <!-- svelte-ignore a11y-no-static-element-interactions -->
+      <div class="gallery" bind:this={galleryContainer} on:click={handleGalleryClick}>
           {#each imageUrls as url}
                {#await resolveDriveImage(url)}
                    <div class="loading-placeholder">Loading...</div>
