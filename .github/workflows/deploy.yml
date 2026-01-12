@@ -43,12 +43,22 @@ jobs:
         env:
           NODE_ENV: production
           PUBLIC_BASE_PATH: ${{ steps.base_path.outputs.path }}
-          # Provide dummy values for build to succeed
+          # Provide dummy values for build to succeed (will be replaced at runtime)
           VITE_GOOGLE_API_KEY: "dummy"
           VITE_GOOGLE_CLIENT_ID: "dummy"
           VITE_GOOGLE_DRIVE_CLIENT_ID: "dummy"
           VITE_GOOGLE_DRIVE_FOLDER_ID: "dummy"
           VITE_GOOGLE_PHOTOS_CLIENT_ID: "dummy"
+
+      - name: Inject runtime configuration
+        run: |
+          chmod +x ./scripts/inject-config.sh
+          ./scripts/inject-config.sh build
+        env:
+          GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_DRIVE_CLIENT_ID }}
+          GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
+          GOOGLE_DRIVE_FOLDER_ID: ${{ secrets.GOOGLE_DRIVE_FOLDER_ID }}
+          GOOGLE_PHOTOS_CLIENT_ID: ${{ secrets.GOOGLE_PHOTOS_CLIENT_ID }}
 
       - name: Deploy to gh-pages branch
         uses: peaceiris/actions-gh-pages@v4
