@@ -29,7 +29,7 @@ export async function analyzeImage(imageBase64: string, mimeType: string): Promi
     const token = getAccessToken();
     if (!token) throw new Error('User not authenticated for Gemini analysis');
 
-    const url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent';
+    const url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
 
     const response = await fetch(url, {
         method: 'POST',
