@@ -81,6 +81,13 @@ The app is automatically deployed to GitHub Pages:
 
 PR preview URLs are posted as comments on the pull request for easy access.
 
+### OAuth Configuration
+
+OAuth credentials are required for the deployed application to work. See [OAUTH_SETUP.md](OAUTH_SETUP.md) for detailed instructions on:
+- Setting up Google Cloud Console credentials
+- Configuring GitHub Secrets
+- Managing OAuth Client IDs and API keys
+
 ## Architecture
 
 This app follows an Event Sourcing pattern using Redux. The Google Sheets backend contains:
