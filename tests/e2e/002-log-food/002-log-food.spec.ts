@@ -21,6 +21,9 @@ test('US-003 to US-010: User logs food flow', async ({ page }, testInfo) => {
         await route.continue();
     });
 
+    // Block real Google Identity script to prevent overwriting mocks
+    await page.route('https://accounts.google.com/gsi/client', route => route.abort());
+
     // Stateful Mock for Sheets
     const events: any[] = [];
 
