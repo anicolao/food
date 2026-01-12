@@ -1,6 +1,5 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { base } from '$app/paths';
   import { analyzeImage, type NutritionEstimate } from '$lib/gemini';
   import { uploadImage, appendRow } from '$lib/sheets';
   import { dispatchEvent, store } from '$lib/store';
@@ -262,7 +261,7 @@
             console.warn('No spreadsheet ID found, skipping sync');
         }
 
-        goto(`${base}/`);
+        goto('/');
     } catch (e) {
         console.error(e);
         alert('Failed to save');
