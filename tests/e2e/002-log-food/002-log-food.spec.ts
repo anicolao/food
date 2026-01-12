@@ -34,8 +34,21 @@ test('US-003 to US-010: User logs food flow', async ({ page }, testInfo) => {
         const url = route.request().url();
         console.log('MOCKING:', url);
 
-        if (url.includes('upload/drive')) {
-            await route.fulfill({ json: { id: 'file-123', webViewLink: 'https://drive.mock/img.jpg' } });
+        // Drive Discovery Mocks (ensureDataStructures)
+        if (url.includes('drive/v3/files')) {
+            if (url.includes('foodlog') || url.includes('FoodLog')) {
+                // Search for Folder
+                await route.fulfill({ json: { files: [{ id: 'mock-folder-id', name: 'FoodLog' }] } });
+            } else if (url.includes('Events')) {
+                // Search for File
+                await route.fulfill({ json: { files: [{ id: 'mock-spreadsheet-id', name: 'Events' }] } });
+            } else if (url.includes('uploadType=multipart')) {
+                // Upload
+                await route.fulfill({ json: { id: 'file-123', webViewLink: 'https://drive.mock/img.jpg' } });
+            } else {
+                // Creation Fallback (if search returned empty, but here we return found)
+                await route.fulfill({ json: { id: 'new-mock-id' } });
+            }
         } else if (url.includes('sheets.googleapis.com')) {
             if (url.includes('append')) {
                 // Capture append

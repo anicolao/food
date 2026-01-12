@@ -99,6 +99,13 @@ This plan details the implementation of the Minimum Viable Product (MVP) for the
 #### [MODIFY] [src/routes/log/+page.svelte](file:///Users/anicolao/projects/antigravity/food/src/routes/log/+page.svelte)
 -   **Logic**: Retrieve `spreadsheetId` associated with current user session for appending rows.
 
+### 11. Photo UX Refactor
+#### [MODIFY] [src/routes/log/+page.svelte](file:///Users/anicolao/projects/antigravity/food/src/routes/log/+page.svelte)
+-   **Camera UI**: Implement `<video>` and `navigator.mediaDevices.getUserMedia` overlay for "Take Photo".
+    -   Add "Capture", "Switch Camera" (if multiple), and "Cancel" buttons.
+-   **Upload File**: Maintain standard generic file input (allows Photo Library access on mobile).
+    -   *Decision*: Google Picker API skipped to avoid extra API Key requirements for MVP. Standard input suffices.
+
 ## Verification Plan
 
 ### Automated Tests

@@ -18,6 +18,7 @@ I have successfully initialized the `food` repository and established the projec
     - `003-stats` (**US-012**): Verified event sourcing replay, idempotency, and **History List** display.
     - **Refactor**: Verified `auth.ts` uses correct Client ID and `gemini.ts` uses User OAuth token.
     - **Persistence**: Verified dynamic creation of `FoodLog` folder and `Events` sheet on first login.
+    - **UX**: Verified In-App Camera UI with `getUserMedia` logic and file upload fallback for mobile library access.
 - **Manual Verification**:
     - Confirmed UI responsiveness on local dev server.
     - Verified proper error handling for missing API keys (400/401 mocked responses).

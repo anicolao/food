@@ -5,9 +5,14 @@ test('US-001: User signs in', async ({ page }, testInfo) => {
     const tester = new TestStepHelper(page, testInfo);
     tester.setMetadata('Authentication', 'Verify user can sign in.');
 
-    // Mock Google Auth
+    // Mock Google Auth & Drive Discovery
     await page.addInitScript(() => {
         (window as any).google = { accounts: { oauth2: { initTokenClient: (c: any) => ({ requestAccessToken: () => c.callback({ access_token: 'mock-token' }) }) } } };
+    });
+
+    await page.route('**googleapis.com**', async route => {
+        // Minimal mock for auth flow which triggers sync
+        await route.fulfill({ json: { files: [{ id: 'mock-id' }] } });
     });
 
     page.on('console', msg => console.log(`BROWSER LOG: ${msg.text()}`));
