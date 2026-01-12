@@ -12,6 +12,9 @@ test('US-012: Stats persist after reload', async ({ page }, testInfo) => {
         (window as any).google = { accounts: { oauth2: { initTokenClient: (c: any) => ({ requestAccessToken: () => c.callback({ access_token: 'mock' }) }) } } };
     });
 
+    // Block real Google Identity script to prevent overwriting mocks
+    await page.route('https://accounts.google.com/gsi/client', route => route.abort());
+
     // Mock Sheets fetching existing events AND Drive Discovery
     await page.route('**googleapis.com**', async route => {
         const url = route.request().url();

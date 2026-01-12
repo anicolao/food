@@ -15,6 +15,9 @@ test('US-001: User signs in', async ({ page }, testInfo) => {
         await route.fulfill({ json: { files: [{ id: 'mock-id' }] } });
     });
 
+    // Block real Google Identity script to prevent overwriting mocks
+    await page.route('https://accounts.google.com/gsi/client', route => route.abort());
+
     page.on('console', msg => console.log(`BROWSER LOG: ${msg.text()}`));
     page.on('pageerror', err => console.log(`BROWSER ERROR: ${err}`));
 
