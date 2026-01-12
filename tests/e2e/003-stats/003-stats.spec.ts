@@ -12,9 +12,20 @@ test('US-012: Stats persist after reload', async ({ page }, testInfo) => {
         (window as any).google = { accounts: { oauth2: { initTokenClient: (c: any) => ({ requestAccessToken: () => c.callback({ access_token: 'mock' }) }) } } };
     });
 
-    // Mock Sheets fetching existing events
-    await page.route(/sheets\.googleapis\.com/, async route => {
-        if (route.request().url().includes('values/Events')) {
+    // Mock Sheets fetching existing events AND Drive Discovery
+    await page.route('**googleapis.com**', async route => {
+        const url = route.request().url();
+        console.log('MOCKING:', url);
+
+        if (url.includes('drive/v3/files')) {
+            if (url.includes('foodlog') || url.includes('FoodLog')) {
+                await route.fulfill({ json: { files: [{ id: 'mock-folder-id', name: 'FoodLog' }] } });
+            } else if (url.includes('Events')) {
+                await route.fulfill({ json: { files: [{ id: 'mock-spreadsheet-id', name: 'Events' }] } });
+            } else {
+                await route.fulfill({ json: { id: 'new-mock-id' } });
+            }
+        } else if (url.includes('values/Events')) {
             await route.fulfill({
                 json: {
                     values: [

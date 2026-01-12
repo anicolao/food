@@ -28,6 +28,56 @@
     else mealType = 'Snack';
   });
 
+  let showCamera = false;
+  let videoElement: HTMLVideoElement;
+  let stream: MediaStream | null = null;
+
+  async function startCamera() {
+    showCamera = true;
+    try {
+        stream = await navigator.mediaDevices.getUserMedia({ 
+            video: { facingMode: 'environment' } 
+        });
+        // Svelte bind:this updates after render, wait a tick or use reactive statement
+        // checking videoElement in simple timeout or lifecycle would be better but:
+        setTimeout(() => {
+            if (videoElement) videoElement.srcObject = stream;
+        }, 100);
+    } catch (e) {
+        console.error('Camera failed', e);
+        alert('Could not access camera');
+        showCamera = false;
+    }
+  }
+
+  function stopCamera() {
+    if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+        stream = null;
+    }
+    showCamera = false;
+  }
+
+  function capturePhoto() {
+    if (!videoElement) return;
+    const canvas = document.createElement('canvas');
+    canvas.width = videoElement.videoWidth;
+    canvas.height = videoElement.videoHeight;
+    const ctx = canvas.getContext('2d');
+    ctx?.drawImage(videoElement, 0, 0);
+    
+    imagePreview = canvas.toDataURL('image/jpeg');
+    
+    canvas.toBlob(blob => {
+        if (blob) {
+            imageFile = new File([blob], `capture-${Date.now()}.jpg`, { type: 'image/jpeg' });
+            runAnalysis();
+        }
+    }, 'image/jpeg');
+
+    stopCamera();
+  }
+
   async function handleFileSelect(e: Event) {
     const target = e.target as HTMLInputElement;
     if (target.files && target.files[0]) {
@@ -110,34 +160,111 @@
         alert('Failed to save');
     }
   }
+  // --- Google Picker ---
+
+  function loadPicker() {
+    // Assuming gapi is avail via layout or we load it. For MVP, we'll try straightforward approach
+    // In strict production we'd use a loader.
+    // Ensure 'picker' is loaded
+    if (window.gapi) {
+        window.gapi.load('picker', () => { console.log('Picker loaded'); });
+    }
+  }
+
+  async function handleGooglePhotosPick() {
+     const token = await new Promise<string>((resolve) => {
+         // Force token refresh/ensure scopes if needed, or just use existing
+         const t = store.getState().config?.accessToken; // If we stored it? We didn't store it in Redux config yet.
+         // Let's rely on auth.ts getter
+         import('$lib/auth').then(m => resolve(m.getAccessToken() || ''));
+     });
+
+     if (!token) {
+         alert('Please Sign In first');
+         return;
+     }
+
+     if (!window.google || !window.google.picker) {
+         // Try loading
+          if (window.gapi) {
+            window.gapi.load('picker', createPicker);
+          }
+          return;
+     }
+     createPicker();
+
+     function createPicker() {
+         const picker = new window.google.picker.PickerBuilder()
+            .addView(window.google.picker.ViewId.PHOTOS)
+            .setOAuthToken(token)
+            .setDeveloperKey(import.meta.env.VITE_GOOGLE_PICKER_API_KEY || 'MISSING_API_KEY_ADD_TO_ENV') // Picker needs API Key too usually
+            // Actually, newer Picker might not need DevKey if OAuth is solid, but docs say yes.
+            // For MVP reuse Gemini Key if it's broad, or just OAuth.
+            // Let's try without DevKey first or use a placeholder to warn user.
+            .setCallback(pickerCallback)
+            .build();
+         picker.setVisible(true);
+     }
+  }
+
+  async function pickerCallback(data: any) {
+    if (data[window.google.picker.Response.ACTION] == window.google.picker.Action.PICKED) {
+      const doc = data[window.google.picker.Response.DOCUMENTS][0];
+      const url = doc[window.google.picker.Document.URL]; // This is usually a permalink
+
+      // Photos API: We need the bytes.
+      // The picker returns a drive ID or a photo ID.
+      // If it's from Photos, we might get a baseUrl.
+      // Ideally we fetch the bytes via fetch() if we have the URL and permitted.
+      // Often simpler: Use the thumbnail/src URL if high res enough, or fetch via Drive API if it's a Drive file.
+      // For "Pick from Photos", we get a direct link.
+
+      console.log('Picked', doc);
+      // For MVP: Let's assume we can fetch the image content via proxy or direct if CORS allows.
+      // Actually Google Photos Picker often gives a URL that requires auth to fetch bytes.
+      // Let's try downloading it.
+
+      // Fallback: If complicated, just alert. But we want to work.
+      // Hack for MVP: Use the 'iconUrl' or similar for preview? No, need full res.
+
+      alert('Photo picked (Mock implementation pending bytes fetch)');
+    }
+  }
+
+  onMount(() => {
+    // ... logic
+  });
 </script>
 
 <div class="container">
   <h1>Log Food</h1>
 
   <div class="upload-section">
-    {#if !imagePreview}
+    {#if showCamera}
+        <div class="camera-overlay">
+            <video bind:this={videoElement} autoplay playsinline muted></video>
+            <div class="camera-controls">
+                <button on:click={capturePhoto} class="capture-btn">Capture</button>
+                <button on:click={stopCamera} class="cancel-btn">Cancel</button>
+            </div>
+        </div>
+    {:else if !imagePreview}
       <div class="button-group">
-          <button on:click={() => cameraInput.click()}>Take Photo</button>
+          <button on:click={startCamera}>Take Photo</button>
           <button on:click={() => fileInput.click()} class="secondary">Upload File</button>
       </div>
-      <input 
-        type="file" 
-        accept="image/*" 
-        capture="environment"
-        bind:this={cameraInput} 
-        on:change={handleFileSelect} 
-        hidden 
-      />
-      <input 
-        type="file" 
-        accept="image/*" 
-        bind:this={fileInput} 
-        on:change={handleFileSelect} 
-        hidden 
+      <input
+        type="file"
+        accept="image/*"
+        bind:this={fileInput}
+        on:change={handleFileSelect}
+        hidden
       />
     {:else}
       <img src={imagePreview} alt="Preview" class="preview" />
+      <div class="preview-controls">
+        <button on:click={() => { imagePreview = null; form = { ...form, item_name: '' }; }} class="secondary">Retake</button>
+      </div>
       {#if analyzing}
         <p>Analyzing with Gemini...</p>
       {/if}
@@ -195,4 +322,28 @@
   button { width: 100%; padding: 1rem; background: #007bff; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
   .secondary { background: #6c757d; }
   .save-btn { background: #28a745; margin-top: 1rem; }
+  
+  .camera-overlay { 
+    position: relative; 
+    width: 100%; 
+    height: 60vh; 
+    background: #000; 
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  video { width: 100%; height: 100%; object-fit: cover; }
+  .camera-controls { 
+    position: absolute; 
+    bottom: 20px; 
+    display: flex; 
+    gap: 20px; 
+    width: 100%; 
+    justify-content: center; 
+  }
+  .capture-btn { width: 60px; height: 60px; border-radius: 50%; background: white; border: 4px solid #ccc; text-indent: -9999px; overflow: hidden; padding: 0; }
+  .cancel-btn { background: rgba(255, 255, 255, 0.3); color: white; border: none; padding: 0.5rem 1rem; border-radius: 20px; height: fit-content; align-self: center; width: auto; }
+  .preview-controls { margin-bottom: 1rem; text-align: center; }
 </style>
