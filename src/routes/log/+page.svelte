@@ -189,23 +189,36 @@
          const popup = window.open(uri, 'googlePicker', 'width=800,height=600');
          
          // 3. Poll for result
+         console.log('Starting poll loop for session:', sessionId);
+         let attempts = 0;
+         const MAX_ATTEMPTS = 60; // 2 minutes at 2s interval
+
          const poll = setInterval(async () => {
+             attempts++;
+             if (attempts > MAX_ATTEMPTS) {
+                 clearInterval(poll);
+                 console.warn('Polling timed out.');
+                 alert('Selection timed out. Please try again.');
+                 return;
+             }
+
              try {
-                if (popup?.closed) {
-                    clearInterval(poll);
-                    return; 
-                }
-                
                 const status = await pollPickerSession(sessionId);
+                console.log('Poll Status:', status); 
+                
                 if (status.mediaItemsSet) {
+                    console.log('Media items set! Closing popup.');
                     clearInterval(poll);
-                    popup?.close();
-                    window.focus(); // Focus parent
+                    if (popup && !popup.closed) popup.close();
                     
                     // 4. Get Items
                     const items = await listSessionMediaItems(sessionId);
+                    console.log('Listed items:', items);
                     if (items.length > 0) {
                         processPickedItem(items[0], token);
+                    } else {
+                        console.warn('No items returned despite mediaItemsSet=true');
+                        alert('No photos selected');
                     }
                 }
              } catch (e) {
@@ -215,35 +228,60 @@
 
      } catch (e) {
          console.error('Picker Flow Failed', e);
-         alert('Failed to open Photos Picker');
+         alert('Failed to open Photos Picker: ' + e);
      }
   }
 
   async function processPickedItem(item: any, token: string) {
-      if (!item.baseUrl) return;
+      if (!item.baseUrl) {
+          console.error('No baseUrl found for item', item);
+          return;
+      }
       
+      console.log('Processing picked item:', item.id, item.filename);
+
+      // Construct high-quality download URL based on source patterns (Reference: admin2)
+      let fetchUrl = item.baseUrl;
+      if (fetchUrl.includes("drive.google.com/thumbnail")) {
+           // Upgrade Drive Thumbnail to File Media API
+           const match = fetchUrl.match(/id=([^&]+)/);
+           if (match) fetchUrl = `https://www.googleapis.com/drive/v3/files/${match[1]}?alt=media`;
+      } else if (fetchUrl.includes("googleapis.com/drive")) {
+           // Already high res API URL - Do nothing
+      } else if (fetchUrl.includes("googleusercontent.com")) {
+           // Upgrade Photos URL (default is often small)
+           // Use =d for download or =w2048-h2048 for high res display/fetch
+           fetchUrl = `${fetchUrl}=w2048-h2048`; 
+      }
+
+      console.log('Fetching from:', fetchUrl);
+
       // Fetch the bytes
       try {
-          // Note on baseUrl: It usually requires a width/height param or defaults.
-          // Appending '=d' triggers download, but we want bytes.
-          // Standard fetching works if CORS allows. 
-          // New Photos Picker baseUrl is typically accessible.
-          const res = await fetch(item.baseUrl, { 
+          const res = await fetch(fetchUrl, { 
              headers: { Authorization: `Bearer ${token}` } 
           });
-          const blob = await res.blob();
           
-          imageFile = new File([blob], item.filename || `photo-${Date.now()}.jpg`, { type: item.mimeType || 'image/jpeg' });
+          if (!res.ok) {
+              const text = await res.text();
+              throw new Error(`Fetch failed: ${res.status} ${res.statusText} - ${text}`);
+          }
+
+          const blob = await res.blob();
+          console.log('Blob received:', blob.size, blob.type);
+          
+          imageFile = new File([blob], item.filename || `photo-${Date.now()}.jpg`, { type: item.mimeType || blob.type || 'image/jpeg' });
           
           const reader = new FileReader();
           reader.onload = (e) => {
+             console.log('FileReader loaded, setting preview');
              imagePreview = e.target?.result as string;
              runAnalysis();
           };
           reader.readAsDataURL(imageFile);
       } catch (e) {
           console.error('Failed to download media', e);
-          alert('Failed to download photo from Google');
+          alert(`Failed to download photo. Details in console.`);
       }
   }
 

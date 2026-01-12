@@ -80,10 +80,46 @@ export async function ensureDataStructures() {
     const spreadsheetId = await findOrCreateFile('Events', folderId, 'application/vnd.google-apps.spreadsheet');
     console.log('Spreadsheet ID:', spreadsheetId);
 
-    // Initialize Headers if new (optional, strictly speaking append works without it but nice to have)
-    // skipping for MVP simplicity
+    // Ensure "Events" tab exists (default is Sheet1)
+    await ensureSheetExists(spreadsheetId, 'Events');
 
     return { folderId, spreadsheetId };
+}
+
+async function ensureSheetExists(spreadsheetId: string, title: string) {
+    const token = getAccessToken();
+    if (!token) return; // Should be checked earlier
+
+    try {
+        // 1. Get metadata
+        const metaRes = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}`, {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        if (!metaRes.ok) return; // Fail silently or log?
+        const meta = await metaRes.json();
+
+        // 2. Check if exists
+        if (meta.sheets?.some((s: any) => s.properties.title === title)) {
+            return;
+        }
+
+        // 3. Create if missing
+        console.log(`Creating sheet '${title}'...`);
+        const updateRes = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}:batchUpdate`, {
+            method: 'POST',
+            headers: {
+                Authorization: `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                requests: [{ addSheet: { properties: { title } } }]
+            })
+        });
+        if (!updateRes.ok) console.error('Failed to create sheet', await updateRes.text());
+
+    } catch (e) {
+        console.error('Error ensuring sheet exists', e);
+    }
 }
 
 export async function appendRow(spreadsheetId: string, sheetName: string, values: any[]) {
