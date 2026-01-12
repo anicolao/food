@@ -59,7 +59,23 @@ test('US-018 to US-022: Details, Edit and Delete', async ({ page }, testInfo) =>
         verifications: [
             { spec: 'Name field populated', check: async () => await expect(page.getByLabel('Item Name')).toHaveValue('Original Food') },
             { spec: 'Calories field populated', check: async () => await expect(page.getByLabel('Calories')).toHaveValue('100') },
-            { spec: 'Multiple images shown', check: async () => await expect(page.locator('.hero-image')).toHaveCount(2) }
+            { spec: 'Multiple images shown', check: async () => await expect(page.locator('.hero-image')).toHaveCount(2) },
+            {
+                spec: 'Carousel scrolls on click',
+                check: async () => {
+                    const gallery = page.locator('.gallery');
+                    const initialScroll = await gallery.evaluate(el => el.scrollLeft);
+                    const box = await gallery.boundingBox();
+                    if (box) {
+                        // Click on the right side (80% width)
+                        await page.mouse.click(box.x + box.width * 0.9, box.y + box.height / 2);
+                        // Wait for scroll
+                        await page.waitForTimeout(500);
+                        const newScroll = await gallery.evaluate(el => el.scrollLeft);
+                        expect(newScroll).toBeGreaterThan(initialScroll);
+                    }
+                }
+            }
         ]
     });
 
