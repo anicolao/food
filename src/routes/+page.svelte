@@ -67,6 +67,52 @@
     authenticated = false;
     // Reset local state if needed
   }
+
+  let showGallery = false;
+  let galleryImages: string[] = [];
+
+  function openGallery(images: string[]) {
+      galleryImages = images;
+      showGallery = true;
+  }
+
+  const imageCache = new Map<string, string>();
+  
+  async function resolveDriveImage(url: string): Promise<string> {
+      if (!url) return '';
+      if (imageCache.has(url)) return imageCache.get(url)!;
+
+      // Check if it's a Drive URL we need to fetch authenticated
+      // Pattern 1: constructed thumbnail link
+      let fileId = '';
+      const match1 = url.match(/id=([^&]+)/);
+      if (match1) fileId = match1[1];
+      
+      // Pattern 2: direct file link (if we ever use that)
+      // const match2 = url.match(/\/file\/d\/([^/]+)/);
+      
+      if (fileId) {
+          const token = getAccessToken();
+          if (token) {
+              try {
+                  const res = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`, {
+                      headers: { Authorization: `Bearer ${token}` }
+                  });
+                  if (res.ok) {
+                      const blob = await res.blob();
+                      const blobUrl = URL.createObjectURL(blob);
+                      imageCache.set(url, blobUrl);
+                      return blobUrl;
+                  }
+              } catch (e) {
+                  console.error('Failed to fetch authenticated image', e);
+              }
+          }
+      }
+      
+      // Fallback: return original (might work if public or cached) or failure
+      return url;
+  }
 </script>
 
 <div class="container">
@@ -120,9 +166,20 @@
                      <div class="entry-meta">
                         <span class="cal">{entry.calories} kcal</span>
                         {#if entry.imageDriveUrl}
-                            <a href={entry.imageDriveUrl} target="_blank">
-                                <img src={entry.imageDriveUrl} alt="Food" class="thumb" />
-                            </a>
+                            {@const imageUrls = entry.imageDriveUrl.split(',').map((u: string) => u.trim())}
+                            <button class="thumb-btn" on:click={() => openGallery(imageUrls)}>
+                                {#await resolveDriveImage(imageUrls[0])}
+                                    <div class="thumb-loading"></div>
+                                {:then src} 
+                                    <img src={src} alt="Food" class="thumb" />
+                                {:catch}
+                                    <div class="thumb-error">!</div>
+                                {/await}
+                                
+                                {#if imageUrls.length > 1}
+                                    <span class="count-badge">+{imageUrls.length - 1}</span>
+                                {/if}
+                            </button>
                         {/if}
                      </div>
                  </li>
@@ -130,6 +187,23 @@
          </ul>
       {/if}
     </div>
+  {/if}
+
+  {#if showGallery}
+      <div class="modal-backdrop" on:click={() => showGallery = false}>
+          <div class="modal-content" on:click|stopPropagation>
+              <button class="close-btn" on:click={() => showGallery = false}>&times;</button>
+              <div class="gallery-scroll">
+                  {#each galleryImages as imgUrl}
+                      {#await resolveDriveImage(imgUrl)}
+                           <div class="gallery-loading">Loading...</div>
+                      {:then src}
+                           <img src={src} alt="Gallery" class="gallery-img" />
+                      {/await}
+                  {/each}
+              </div>
+          </div>
+      </div>
   {/if}
 </div>
 
@@ -149,5 +223,14 @@
   .time { color: #666; font-size: 0.8rem; }
   .meal-badge { display: inline-block; background: #e9ecef; color: #495057; padding: 0.1rem 0.4rem; border-radius: 4px; font-size: 0.7rem; width: fit-content; }
   .cal { font-weight: bold; }
+  
+  .thumb-btn { position: relative; border: none; background: none; padding: 0; cursor: pointer; }
   .thumb { width: 40px; height: 40px; border-radius: 4px; object-fit: cover; border: 1px solid #ddd; }
+  .count-badge { position: absolute; bottom: -5px; right: -5px; background: #007bff; color: white; font-size: 0.6rem; padding: 2px 4px; border-radius: 4px; font-weight: bold; }
+
+  .modal-backdrop { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; display: flex; justify-content: center; align-items: center; }
+  .modal-content { position: relative; width: 90%; max-width: 500px; background: black; padding: 1rem; border-radius: 8px; overflow: hidden; }
+  .close-btn { position: absolute; top: 5px; right: 10px; background: none; border: none; color: white; font-size: 2rem; cursor: pointer; z-index: 1001; }
+  .gallery-scroll { display: flex; overflow-x: auto; gap: 1rem; scroll-snap-type: x mandatory; padding-bottom: 10px; }
+  .gallery-img { width: 100%; flex-shrink: 0; scroll-snap-align: center; border-radius: 4px; max-height: 70vh; object-fit: contain; }
 </style>

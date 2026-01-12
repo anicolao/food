@@ -3,6 +3,7 @@ import { getAccessToken } from './auth';
 export interface NutritionEstimate {
     is_label: boolean;
     item_name: string;
+    rationale?: string;
     calories: number;
     fat: { total: number };
     carbohydrates: { total: number };
@@ -11,13 +12,15 @@ export interface NutritionEstimate {
 }
 
 const SYSTEM_PROMPT = `
-You are an expert dietician. Analyze the provided image.
-1. If it is a **Nutrition Facts label**, extract the data exactly as shown.
-2. If it is a **food item/meal**, estimate the nutrition facts based on visible portion sizes and standard values using Canadian standards.
-3. Return the data **exclusively** in the following JSON format:
+You are an expert dietician. Analyze the provided image(s).
+1. If multiple images are provided, treat them as different angles or components of a **single meal/entry**. Aggregate the nutrition facts into one total estimate.
+2. If it is a **Nutrition Facts label**, extract the data exactly as shown.
+3. If it is a **food item/meal**, estimate the nutrition facts based on visible portion sizes and standard values using Canadian standards.
+4. Return the data **exclusively** in the following JSON format (a SINGLE object, not a list):
 {
   "is_label": boolean,
   "item_name": "string",
+  "rationale": "string",
   "calories": number,
   "fat": { "total": number },
   "carbohydrates": { "total": number },
@@ -25,11 +28,34 @@ You are an expert dietician. Analyze the provided image.
 }
 `;
 
-export async function analyzeImage(imageBase64: string, mimeType: string): Promise<NutritionEstimate> {
+export interface ImageInput {
+    base64: string;
+    mimeType: string;
+}
+
+export async function analyzeImage(images: ImageInput[], previousRationale?: string, userCorrection?: string): Promise<NutritionEstimate> {
     const token = getAccessToken();
     if (!token) throw new Error('User not authenticated for Gemini analysis');
 
     const url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
+
+    let prompt = SYSTEM_PROMPT;
+    if (previousRationale && userCorrection) {
+        prompt += `
+        
+        CONTEXT FOR RE-ANALYSIS:
+        The previous analysis provided this rationale: "${previousRationale}".
+        The user has provided this correction: "${userCorrection}".
+        Please re-evaluate the image and nutrition facts based on this correction.
+        `;
+    }
+
+    const imageParts = images.map(img => ({
+        inlineData: {
+            mimeType: img.mimeType,
+            data: img.base64
+        }
+    }));
 
     const response = await fetch(url, {
         method: 'POST',
@@ -40,13 +66,8 @@ export async function analyzeImage(imageBase64: string, mimeType: string): Promi
         body: JSON.stringify({
             contents: [{
                 parts: [
-                    { text: SYSTEM_PROMPT },
-                    {
-                        inlineData: {
-                            mimeType: mimeType,
-                            data: imageBase64
-                        }
-                    }
+                    { text: prompt },
+                    ...imageParts
                 ]
             }],
             generationConfig: {

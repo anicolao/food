@@ -181,7 +181,7 @@ export async function uploadImage(file: Blob, filename: string, folderId?: strin
     form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
     form.append('file', file);
 
-    const url = 'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart';
+    const url = 'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,name,webViewLink,thumbnailLink';
 
     const response = await fetch(url, {
         method: 'POST',
