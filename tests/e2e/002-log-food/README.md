@@ -35,7 +35,7 @@
 
 **Verifications:**
 - [x] Calories updated to 100
-- [x] Meal type defaulted to Lunch
+- [x] Meal type is Lunch
 
 ---
 
@@ -49,8 +49,7 @@
 - [x] History name shown
 - [x] Meal type shown
 - [x] Thumbnail shown
-- [x] Thumbnail linked to Drive
-- [x] Thumbnail loaded
+- [x] Gallery opens on click
 
 ---
 
