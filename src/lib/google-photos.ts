@@ -15,6 +15,7 @@ export interface MediaItem {
     baseUrl: string;
     mimeType: string;
     filename: string;
+    creationTime?: string;
 }
 
 export async function createPickerSession(): Promise<PickerSession> {
@@ -91,5 +92,6 @@ export async function listSessionMediaItems(sessionId: string): Promise<MediaIte
         baseUrl: item.mediaFile?.baseUrl || "",
         mimeType: item.mediaFile?.mimeType || "",
         filename: item.mediaFile?.filename || "",
+        creationTime: item.mediaFile?.mediaMetadata?.creationTime,
     }));
 }

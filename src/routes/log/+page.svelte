@@ -3,35 +3,51 @@
   import { analyzeImage, type NutritionEstimate } from '$lib/gemini';
   import { uploadImage, appendRow } from '$lib/sheets';
   import { dispatchEvent, store } from '$lib/store';
-  import { signIn } from '$lib/auth'; // Added signIn
+  import { signIn } from '$lib/auth';
   import { goto } from '$app/navigation';
+  // @ts-ignore
+  import exifr from 'exifr'; 
+  import { createPickerSession, pollPickerSession, listSessionMediaItems } from '$lib/google-photos';
 
   let fileInput: HTMLInputElement;
-  let cameraInput: HTMLInputElement;
-  let imagePreview: string | null = null;
+  let videoElement: HTMLVideoElement;
+  let stream: MediaStream | null = null;
+  let showCamera = false;
+
+  // Single file input for legacy/file picker, but we process into arrays
+  let imageFiles: File[] = [];
+  let imagePreviews: string[] = [];
+  
   let analyzing = false;
   let form: NutritionEstimate = {
     is_label: false,
     item_name: '',
+    rationale: '',
     calories: 0,
     fat: { total: 0 },
     carbohydrates: { total: 0 },
     protein: 0
   };
+  
   let mealType: 'Breakfast' | 'Lunch' | 'Dinner' | 'Snack' = 'Snack';
-  let imageFile: File | null = null;
+  let entryDate = new Date().toISOString().split('T')[0];
+  let entryTime = new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+
+  // Correction State
+  let showCorrectionInput = false;
+  let userCorrection = '';
+
+  function updateMealType(dateObj: Date) {
+     const hour = dateObj.getHours();
+     if (hour < 11) mealType = 'Breakfast';
+     else if (hour < 16) mealType = 'Lunch';
+     else if (hour < 22) mealType = 'Dinner';
+     else mealType = 'Snack';
+  }
 
   onMount(() => {
-    const hour = new Date().getHours();
-    if (hour < 11) mealType = 'Breakfast';
-    else if (hour < 16) mealType = 'Lunch';
-    else if (hour < 22) mealType = 'Dinner';
-    else mealType = 'Snack';
+    updateMealType(new Date());
   });
-
-  let showCamera = false;
-  let videoElement: HTMLVideoElement;
-  let stream: MediaStream | null = null;
 
   async function startCamera() {
     showCamera = true;
@@ -39,8 +55,6 @@
         stream = await navigator.mediaDevices.getUserMedia({ 
             video: { facingMode: 'environment' } 
         });
-        // Svelte bind:this updates after render, wait a tick or use reactive statement
-        // checking videoElement in simple timeout or lifecycle would be better but:
         setTimeout(() => {
             if (videoElement) videoElement.srcObject = stream;
         }, 100);
@@ -67,12 +81,11 @@
     const ctx = canvas.getContext('2d');
     ctx?.drawImage(videoElement, 0, 0);
     
-    imagePreview = canvas.toDataURL('image/jpeg');
-    
+    // Add to lists
     canvas.toBlob(blob => {
         if (blob) {
-            imageFile = new File([blob], `capture-${Date.now()}.jpg`, { type: 'image/jpeg' });
-            runAnalysis();
+            const file = new File([blob], `capture-${Date.now()}.jpg`, { type: 'image/jpeg' });
+            addImage(file);
         }
     }, 'image/jpeg');
 
@@ -81,73 +94,166 @@
 
   async function handleFileSelect(e: Event) {
     const target = e.target as HTMLInputElement;
-    if (target.files && target.files[0]) {
-      imageFile = target.files[0];
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        imagePreview = e.target?.result as string;
-        runAnalysis();
-      };
-      reader.readAsDataURL(imageFile);
+    if (target.files) {
+      for (let i = 0; i < target.files.length; i++) {
+          await addImage(target.files[i]);
+      }
     }
   }
 
-  async function runAnalysis() {
-    if (!imagePreview) return;
+  async function addImage(file: File) {
+      // 1. Parse EXIF for Date/Time (Use first valid found)
+      try {
+           // @ts-ignore
+           const exifData = await exifr.parse(file);
+           if (exifData && (exifData.DateTimeOriginal || exifData.CreateDate)) {
+               const date = exifData.DateTimeOriginal || exifData.CreateDate;
+               // Only update if it's the first image or we want to prioritize latest? 
+               // Let's rely on the first image causing an update, or just update every time.
+               entryDate = date.toISOString().split('T')[0];
+               entryTime = date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+               updateMealType(date);
+           } else if (imageFiles.length === 0) {
+               // Fallback only if this is the first image
+               const date = new Date(file.lastModified || Date.now());
+               entryDate = date.toISOString().split('T')[0];
+               entryTime = date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+               updateMealType(date);
+           }
+      } catch (e) {
+           console.warn('EXIF parse failed', e);
+      }
+
+      imageFiles = [...imageFiles, file];
+
+      const reader = new FileReader();
+    reader.onload = (e) => {
+        if (e.target?.result) {
+            imagePreviews = [...imagePreviews, e.target.result as string];
+            
+            // Debounce analysis to allow multiple images to be added
+            if (analysisTimer) clearTimeout(analysisTimer);
+            analysisTimer = setTimeout(() => {
+                runAnalysis();
+            }, 1000);
+        }
+    };
+    reader.readAsDataURL(file);
+  }
+
+  let analysisTimer: NodeJS.Timeout;
+
+  async function runAnalysis(correction?: string) {
+    if (imagePreviews.length === 0) {
+        console.warn('runAnalysis: No images to analyze');
+        return;
+    }
+    
+    console.log('runAnalysis: Starting...', { 
+        imageCount: imagePreviews.length, 
+        correction,
+        firstImageLength: imagePreviews[0]?.length 
+    });
+
     analyzing = true;
     try {
-      const base64 = imagePreview.split(',')[1];
-      const mime = imagePreview.split(';')[0].split(':')[1];
-      const result = await analyzeImage(base64, mime);
-      // Clone to ensure mutability
-      form = { ...result };
-      // Dispatch "AI Received" event
+      // Prepare all images
+      const images = imagePreviews.map((preview, i) => {
+          try {
+              return {
+                  base64: preview.split(',')[1],
+                  mimeType: preview.split(';')[0].split(':')[1]
+              };
+          } catch (e) {
+              console.error(`runAnalysis: Failed to parse image ${i}`, e);
+              throw e;
+          }
+      });
+      
+      console.log('runAnalysis: Images prepared, calling Gemini...');
+      
+      const previousRationale = form.rationale;
+      const result = await analyzeImage(images, correction ? previousRationale : undefined, correction);
+      
+      console.log('runAnalysis: Gemini response received', result);
+
+      form = { 
+          ...result, 
+          rationale: result.rationale || '',
+          fat: result.fat || { total: 0 },
+          carbohydrates: result.carbohydrates || { total: 0 },
+          calories: result.calories || 0,
+          protein: result.protein || 0,
+          item_name: result.item_name || ''
+      };
+      
+      if (correction) {
+          showCorrectionInput = false;
+          userCorrection = '';
+      }
+
       store.dispatch(dispatchEvent('log/aiEstimateReceived', { 
-        imageName: imageFile?.name, 
+        imagesCount: imageFiles.length, 
         rawJson: result 
       }));
     } catch (e) {
-      console.error(e);
-      alert('Analysis failed');
+      console.error('runAnalysis: FATAL ERROR', e);
+      alert('Analysis failed: ' + e);
     } finally {
       analyzing = false;
     }
   }
 
+  function handleReanalyze() {
+      if (!userCorrection) return;
+      runAnalysis(userCorrection);
+  }
+
   async function handleSubmit() {
-    if (!imageFile) return;
+    if (imageFiles.length === 0) return;
     try {
-        // 1. Upload Image
         const state = store.getState();
-        // @ts-ignore - dealing with typed store wrapper issues in svelte file for now
-        const folderId = state.config?.folderId;
-        const driveFile = await uploadImage(imageFile, `FoodLog-${Date.now()}.jpg`, folderId);
+        // @ts-ignore
+        const folderId = state.config?.folderId || undefined;
         
-        // 2. Dispatch Redux Event
+        // Upload ALL images
+        const uploadPromises = imageFiles.map(file => 
+            uploadImage(file, `FoodLog-${Date.now()}-${file.name}`, folderId)
+        );
+        const driveFiles = await Promise.all(uploadPromises);
+        // Prefer thumbnailLink, fallback to constructed thumbnail URL (reliable), then webViewLink
+        const driveUrls = driveFiles.map(f => {
+            if (f.thumbnailLink) return f.thumbnailLink;
+            if (f.id) return `https://drive.google.com/thumbnail?id=${f.id}&sz=w2048`;
+            return f.webViewLink;
+        }).join(', ');
+
+        const isoDateTime = new Date(`${entryDate}T${entryTime}`).toISOString();
+
         const entry = {
             id: crypto.randomUUID(),
-            date: new Date().toISOString().split('T')[0],
-            time: new Date().toLocaleTimeString(),
+            date: entryDate,
+            time: entryTime, 
             mealType,
             description: form.item_name,
+            rationale: form.rationale, 
             calories: form.calories,
             fat: form.fat.total,
             carbs: form.carbohydrates.total,
             protein: form.protein,
-            imageDriveUrl: driveFile.webViewLink,
+            imageDriveUrl: driveUrls, // Comma separated URLs
             rawJson: form
         };
         
         store.dispatch(dispatchEvent('log/entryConfirmed', { entry }));
 
-        // 3. Sync to Sheets
         // @ts-ignore
         const spreadsheetId = state.config?.spreadsheetId;
 
         if (spreadsheetId) {
              await appendRow(spreadsheetId, 'Events', [
                 entry.id,
-                new Date().toISOString(),
+                isoDateTime,
                 'log/entryConfirmed',
                 JSON.stringify({ entry })
             ]);
@@ -161,9 +267,8 @@
         alert('Failed to save');
     }
   }
-  // --- Google Photos Picker (REST) ---
 
-  import { createPickerSession, pollPickerSession, listSessionMediaItems } from '$lib/google-photos';
+  // --- Google Photos Logic ---
 
   async function handleGooglePhotosPick() {
      const token = await new Promise<string>((resolve) => {
@@ -177,21 +282,18 @@
      }
 
      try {
-         // 1. Create Session
          const session = await createPickerSession();
          const sessionId = session.id;
          
-         // 2. Open Picker with /autoclose
          let uri = session.pickerUri;
          if (!uri.endsWith("/autoclose")) {
              uri = uri.endsWith("/") ? `${uri}autoclose` : `${uri}/autoclose`;
          }
          const popup = window.open(uri, 'googlePicker', 'width=800,height=600');
          
-         // 3. Poll for result
          console.log('Starting poll loop for session:', sessionId);
          let attempts = 0;
-         const MAX_ATTEMPTS = 60; // 2 minutes at 2s interval
+         const MAX_ATTEMPTS = 60; 
 
          const poll = setInterval(async () => {
              attempts++;
@@ -204,27 +306,24 @@
 
              try {
                 const status = await pollPickerSession(sessionId);
-                console.log('Poll Status:', status); 
-                
                 if (status.mediaItemsSet) {
-                    console.log('Media items set! Closing popup.');
                     clearInterval(poll);
                     if (popup && !popup.closed) popup.close();
                     
-                    // 4. Get Items
                     const items = await listSessionMediaItems(sessionId);
-                    console.log('Listed items:', items);
                     if (items.length > 0) {
-                        processPickedItem(items[0], token);
+                        // User requested to send ALL together
+                        for (const item of items) {
+                            await processPickedItem(item, token);
+                        }
                     } else {
-                        console.warn('No items returned despite mediaItemsSet=true');
                         alert('No photos selected');
                     }
                 }
              } catch (e) {
                  console.error('Polling error', e);
              }
-         }, 2000); // Poll every 2s
+         }, 2000); 
 
      } catch (e) {
          console.error('Picker Flow Failed', e);
@@ -233,61 +332,55 @@
   }
 
   async function processPickedItem(item: any, token: string) {
-      if (!item.baseUrl) {
-          console.error('No baseUrl found for item', item);
-          return;
-      }
+      if (!item.baseUrl) return;
       
-      console.log('Processing picked item:', item.id, item.filename);
+      // Timestamp logic (Priority to API metadata if valid)
+      if (item.creationTime && imageFiles.length === 0) {
+           // Only set time on first photo to avoid jumping around
+          const date = new Date(item.creationTime);
+          entryDate = date.toISOString().split('T')[0];
+          entryTime = date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+          updateMealType(date);
+      }
 
-      // Construct high-quality download URL based on source patterns (Reference: admin2)
       let fetchUrl = item.baseUrl;
       if (fetchUrl.includes("drive.google.com/thumbnail")) {
-           // Upgrade Drive Thumbnail to File Media API
            const match = fetchUrl.match(/id=([^&]+)/);
            if (match) fetchUrl = `https://www.googleapis.com/drive/v3/files/${match[1]}?alt=media`;
-      } else if (fetchUrl.includes("googleapis.com/drive")) {
-           // Already high res API URL - Do nothing
       } else if (fetchUrl.includes("googleusercontent.com")) {
-           // Upgrade Photos URL (default is often small)
-           // Use =d for download or =w2048-h2048 for high res display/fetch
            fetchUrl = `${fetchUrl}=w2048-h2048`; 
       }
 
-      console.log('Fetching from:', fetchUrl);
-
-      // Fetch the bytes
       try {
-          const res = await fetch(fetchUrl, { 
-             headers: { Authorization: `Bearer ${token}` } 
-          });
-          
-          if (!res.ok) {
-              const text = await res.text();
-              throw new Error(`Fetch failed: ${res.status} ${res.statusText} - ${text}`);
-          }
-
+          const res = await fetch(fetchUrl, { headers: { Authorization: `Bearer ${token}` } });
+          if (!res.ok) throw new Error('Fetch failed');
           const blob = await res.blob();
-          console.log('Blob received:', blob.size, blob.type);
           
-          imageFile = new File([blob], item.filename || `photo-${Date.now()}.jpg`, { type: item.mimeType || blob.type || 'image/jpeg' });
+          const file = new File([blob], item.filename || `photo-${Date.now()}.jpg`, { type: item.mimeType || blob.type || 'image/jpeg' });
           
-          const reader = new FileReader();
-          reader.onload = (e) => {
-             console.log('FileReader loaded, setting preview');
-             imagePreview = e.target?.result as string;
-             runAnalysis();
-          };
-          reader.readAsDataURL(imageFile);
+          // Re-trigger addImage which does EXIF + array push + analysis
+          await addImage(file);
+
       } catch (e) {
           console.error('Failed to download media', e);
-          alert(`Failed to download photo. Details in console.`);
       }
   }
 
-  onMount(() => {
-    // ... logic
-  });
+  function resetForm() {
+      imageFiles = [];
+      imagePreviews = [];
+      form = {
+        is_label: false,
+        item_name: '',
+        rationale: '',
+        calories: 0,
+        fat: { total: 0 },
+        carbohydrates: { total: 0 },
+        protein: 0
+      };
+      showCorrectionInput = false;
+      userCorrection = '';
+  }
 </script>
 
 <div class="container">
@@ -302,34 +395,42 @@
                 <button on:click={stopCamera} class="cancel-btn">Cancel</button>
             </div>
         </div>
-    {:else if !imagePreview}
+    {:else}
+      <!-- Always show buttons to add MORE photos if we want, or just hide if previews exist? 
+           User might want to add more. Let's keep buttons visible but smaller if images exist. -->
+      
       <div class="button-group">
           <button on:click={startCamera}>Take Photo</button>
-          <button on:click={handleGooglePhotosPick} class="secondary">Pick from Photos</button>
+          <button on:click={handleGooglePhotosPick} class="secondary">Pick Photos</button>
+          {#if imagePreviews.length > 0}
+             <button on:click={resetForm} class="secondary warning">Reset</button>
+          {/if}
       </div>
-      <!-- Hidden input for potential fallback or internal use -->
-      <input 
-        type="file" 
-        accept="image/*" 
-        bind:this={fileInput} 
-        on:change={handleFileSelect} 
-        hidden 
-      />
-    {:else}
-      <img src={imagePreview} alt="Preview" class="preview" />
-      <div class="preview-controls">
-        <button on:click={() => { imagePreview = null; form = { ...form, item_name: '' }; }} class="secondary">Retake</button>
-      </div>
-      {#if analyzing}
-        <p>Analyzing with Gemini...</p>
+
+      <input type="file" accept="image/*" multiple bind:this={fileInput} on:change={handleFileSelect} hidden />
+      
+      {#if imagePreviews.length > 0}
+          <div class="previews-grid">
+              {#each imagePreviews as preview}
+                  <img src={preview} alt="Preview" class="preview-thumb" />
+              {/each}
+          </div>
+          {#if analyzing}
+            <p>Analyzing {imagePreviews.length} images with Gemini...</p>
+          {/if}
       {/if}
+
     {/if}
   </div>
 
-  {#if imagePreview && !analyzing}
+  {#if imagePreviews.length > 0 && !analyzing}
     <div class="form-section">
-      <label>
-        Meal Type
+      <div class="datetime-row">
+          <label>Date <input type="date" bind:value={entryDate} /></label>
+          <label>Time <input type="time" bind:value={entryTime} ></label>
+      </div>
+
+      <label>Meal Type
         <select bind:value={mealType}>
           <option>Breakfast</option>
           <option>Lunch</option>
@@ -338,28 +439,28 @@
         </select>
       </label>
 
-      <label>
-        Item Name
-        <input type="text" bind:value={form.item_name} />
-      </label>
+      <label>Item Name <input type="text" bind:value={form.item_name} /></label>
+
+      <label>Rationale <textarea bind:value={form.rationale} rows="3" placeholder="AI explanation..." readonly></textarea></label>
+
+      <!-- Correction UI -->
+      {#if !showCorrectionInput}
+        <button on:click={() => showCorrectionInput = true} class="secondary small-btn">Reply / Correct AI</button>
+      {:else}
+        <div class="correction-box">
+            <textarea bind:value={userCorrection} placeholder="Correct the AI..." rows="2"></textarea>
+            <div class="correction-actions">
+                <button on:click={handleReanalyze} class="primary small-btn" disabled={!userCorrection}>Re-analyze</button>
+                <button on:click={() => showCorrectionInput = false} class="text-btn">Cancel</button>
+            </div>
+        </div>
+      {/if}
 
       <div class="macros">
-        <label>
-          Calories
-          <input type="number" bind:value={form.calories} />
-        </label>
-        <label>
-          Protein (g)
-          <input type="number" bind:value={form.protein} />
-        </label>
-        <label>
-          Carbs (g)
-          <input type="number" bind:value={form.carbohydrates.total} />
-        </label>
-        <label>
-          Fat (g)
-          <input type="number" bind:value={form.fat.total} />
-        </label>
+        <label>Calories <input type="number" bind:value={form.calories} /></label>
+        <label>Protein (g) <input type="number" bind:value={form.protein} /></label>
+        <label>Carbs (g) <input type="number" bind:value={form.carbohydrates.total} /></label>
+        <label>Fat (g) <input type="number" bind:value={form.fat.total} /></label>
       </div>
 
       <button on:click={handleSubmit} class="save-btn">Save Entry</button>
@@ -369,36 +470,28 @@
 
 <style>
   .container { padding: 1rem; max-width: 600px; margin: 0 auto; }
-  .preview { width: 100%; max-height: 25vh; object-fit: contain; border-radius: 8px; margin-bottom: 1rem; }
-  label { display: block; margin-bottom: 0.5rem; }
-  input, select { width: 100%; padding: 0.5rem; margin-bottom: 1rem; }
-  .macros { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-  .button-group { display: flex; gap: 1rem; }
-  button { width: 100%; padding: 1rem; background: #007bff; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
-  .secondary { background: #6c757d; }
-  .save-btn { background: #28a745; margin-top: 1rem; }
+  .previews-grid { display: flex; gap: 0.5rem; overflow-x: auto; padding: 0.5rem 0; }
+  .preview-thumb { height: 100px; width: 100px; object-fit: cover; border-radius: 8px; flex-shrink: 0; border: 2px solid #ddd; }
   
-  .camera-overlay { 
-    position: relative; 
-    width: 100%; 
-    height: 60vh; 
-    background: #000; 
-    display: flex; 
-    flex-direction: column; 
-    align-items: center; 
-    border-radius: 8px;
-    overflow: hidden;
-  }
+  label { display: block; margin-bottom: 0.5rem; }
+  input, select, textarea { width: 100%; padding: 0.5rem; margin-bottom: 1rem; }
+  textarea { resize: vertical; }
+  .datetime-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .macros { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .button-group { display: flex; gap: 1rem; margin-bottom: 1rem; flex-wrap: wrap; }
+  button { flex: 1; min-width: 120px; padding: 1rem; background: #007bff; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
+  .secondary { background: #6c757d; }
+  .warning { background: #dc3545; }
+  .small-btn { padding: 0.5rem; font-size: 0.9rem; margin-bottom: 1rem; }
+  .text-btn { background: none; color: #666; width: auto; padding: 0.5rem; }
+  .save-btn { background: #28a745; margin-top: 1rem; width: 100%; }
+  
+  .correction-box { background: #f8f9fa; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; border: 1px solid #ddd; }
+  .correction-actions { display: flex; gap: 0.5rem; align-items: center; }
+  
+  .camera-overlay { position: relative; width: 100%; height: 60vh; background: #000; display: flex; flex-direction: column; align-items: center; border-radius: 8px; overflow: hidden; }
   video { width: 100%; height: 100%; object-fit: cover; }
-  .camera-controls { 
-    position: absolute; 
-    bottom: 20px; 
-    display: flex; 
-    gap: 20px; 
-    width: 100%; 
-    justify-content: center; 
-  }
+  .camera-controls { position: absolute; bottom: 20px; display: flex; gap: 20px; width: 100%; justify-content: center; }
   .capture-btn { width: 60px; height: 60px; border-radius: 50%; background: white; border: 4px solid #ccc; text-indent: -9999px; overflow: hidden; padding: 0; }
   .cancel-btn { background: rgba(255, 255, 255, 0.3); color: white; border: none; padding: 0.5rem 1rem; border-radius: 20px; height: fit-content; align-self: center; width: auto; }
-  .preview-controls { margin-bottom: 1rem; text-align: center; }
 </style>
