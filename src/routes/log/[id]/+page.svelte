@@ -191,7 +191,7 @@
   .delete-btn { background: none; color: #dc3545; border: 1px solid #dc3545; padding: 0.2rem 0.5rem; border-radius: 4px; cursor: pointer; }
   
   .gallery { display: flex; overflow-x: auto; gap: 1rem; margin-bottom: 1.5rem; scroll-snap-type: x mandatory; }
-  .hero-image { width: 100%; height: 300px; object-fit: cover; border-radius: 8px; flex-shrink: 0; scroll-snap-align: center; }
+  .hero-image { width: 85%; height: 300px; object-fit: cover; border-radius: 8px; flex-shrink: 0; scroll-snap-align: center; }
   .loading-placeholder, .error-placeholder { width: 100%; height: 200px; display: flex; align-items: center; justify-content: center; background: #eee; border-radius: 8px; }
   
   label { display: block; margin-bottom: 0.5rem; font-weight: 500; }

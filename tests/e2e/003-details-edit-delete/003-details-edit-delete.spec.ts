@@ -36,7 +36,10 @@ test('US-018 to US-022: Details, Edit and Delete', async ({ page }, testInfo) =>
 
     // 1. Create Entry
     await page.getByText('Log Food').click();
-    await page.locator('input[type="file"]:not([capture])').setInputFiles('tests/e2e/fixtures/apple.png');
+    await page.locator('input[type="file"]:not([capture])').setInputFiles([
+        'tests/e2e/fixtures/apple.png',
+        'tests/e2e/fixtures/apple.png'
+    ]);
 
     await expect(page.getByLabel('Item Name')).toHaveValue('Original Food');
     await page.getByLabel('Date').fill('2024-03-15');
@@ -55,7 +58,8 @@ test('US-018 to US-022: Details, Edit and Delete', async ({ page }, testInfo) =>
         description: 'Details page loaded',
         verifications: [
             { spec: 'Name field populated', check: async () => await expect(page.getByLabel('Item Name')).toHaveValue('Original Food') },
-            { spec: 'Calories field populated', check: async () => await expect(page.getByLabel('Calories')).toHaveValue('100') }
+            { spec: 'Calories field populated', check: async () => await expect(page.getByLabel('Calories')).toHaveValue('100') },
+            { spec: 'Multiple images shown', check: async () => await expect(page.locator('.hero-image')).toHaveCount(2) }
         ]
     });
 
