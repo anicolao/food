@@ -3,6 +3,7 @@ export const SCOPES = [
     'https://www.googleapis.com/auth/drive.file',
     'https://www.googleapis.com/auth/spreadsheets',
     'https://www.googleapis.com/auth/photoslibrary.readonly',
+    'https://www.googleapis.com/auth/photospicker.mediaitems.readonly',
     'https://www.googleapis.com/auth/generative-language.retriever'
 ].join(' ');
 

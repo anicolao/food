@@ -161,132 +161,83 @@
         alert('Failed to save');
     }
   }
-  // --- Google Picker ---
+  // --- Google Photos Picker (REST) ---
 
-  let gapiLoaded = false;
-
-  async function loadGapi() {
-    if (gapiLoaded) return;
-    return new Promise<void>((resolve) => {
-        const script = document.createElement('script');
-        script.src = 'https://apis.google.com/js/api.js';
-        script.onload = () => {
-            window.gapi.load('picker', () => {
-                gapiLoaded = true;
-                resolve();
-            });
-        };
-        document.body.appendChild(script);
-    });
-  }
+  import { createPickerSession, pollPickerSession, listSessionMediaItems } from '$lib/google-photos';
 
   async function handleGooglePhotosPick() {
-     // 1. Ensure Auth Token
      const token = await new Promise<string>((resolve) => {
          import('$lib/auth').then(m => resolve(m.getAccessToken() || ''));
      });
 
      if (!token) {
-         signIn(); // Trigger sign in if missing? Better to alert.
+         signIn();
          alert('Please Sign In first');
          return;
      }
 
-     // 2. Ensure GAPI Loaded
-     if (!gapiLoaded) {
-        await loadGapi();
+     try {
+         // 1. Create Session
+         const session = await createPickerSession();
+         const sessionId = session.id;
+         
+         // 2. Open Picker
+         const popup = window.open(session.pickerUri, 'googlePicker', 'width=800,height=600');
+         
+         // 3. Poll for result
+         const poll = setInterval(async () => {
+             try {
+                if (popup?.closed) {
+                    clearInterval(poll);
+                    return; 
+                }
+                
+                const status = await pollPickerSession(sessionId);
+                if (status.mediaItemsSet) {
+                    clearInterval(poll);
+                    popup?.close();
+                    
+                    // 4. Get Items
+                    const items = await listSessionMediaItems(sessionId);
+                    if (items.length > 0) {
+                        processPickedItem(items[0]);
+                    }
+                }
+             } catch (e) {
+                 console.error('Polling error', e);
+             }
+         }, 2000); // Poll every 2s
+
+     } catch (e) {
+         console.error('Picker Flow Failed', e);
+         alert('Failed to open Photos Picker');
      }
-
-     createPicker(token);
   }
 
-  function createPicker(oauthToken: string) {
-     const picker = new window.google.picker.PickerBuilder()
-        .addView(window.google.picker.ViewId.PHOTOS)
-        .setOAuthToken(oauthToken)
-        .setDeveloperKey(import.meta.env.VITE_GOOGLE_PICKER_API_KEY || import.meta.env.VITE_GEMINI_API_KEY) 
-        .setCallback(pickerCallback)
-        .build();
-     picker.setVisible(true);
-  }
-
-  async function pickerCallback(data: any) {
-    if (data[window.google.picker.Response.ACTION] == window.google.picker.Action.PICKED) {
-      const doc = data[window.google.picker.Response.DOCUMENTS][0];
+  async function processPickedItem(item: any) {
+      if (!item.baseUrl) return;
       
-      // Photos often returns a 'url' (permalink) and 'thumbnails'.
-      // For actual bytes, we might rely on the fact we have the token.
-      // However, Photos API MediaItems might be cleaner. 
-      // The Picker "Photos" view returns items that might be accessible via simple fetch with auth.
-      // Let's try the 'url' or potentially construct a fetch.
-      // Actually, doc[google.picker.Document.URL] is the view link.
-      // We need download URL.
-      console.log('Picked Doc:', doc);
-      
-      // Fallback strategy:
-      // Try fetching the high-res thumbnail.
-      // doc.thumbnails -> array.
-      // Or try fetching the URL if it allows.
-      
-      // Important: For Photos, obtaining the bytes can be tricky without the full Photos API 'mediaItems.get'.
-      // But let's assume valid scope allows fetching the 'src' or similar if present.
-      // Often doc.url is just the UI link.
-      
-      // Attempt to use the 'iconUrl' or 'thumbnails' to find a source?
-      // Actually, typically we get an ID.
-      // Let's try just alerting for now, as fetching bytes from a Picker Result for "Photos" specifically requires correct parsing. 
-      // Better yet: Easiest way in pure frontend flow -> Fetch the blob from a provided sensitive URL if present?
-      // Photos Picker often doesn't give a direct download link without using the Drive API or Photos API.
-      // Let's try to simulate success by using a proxy or just the thumbnail for MVP if we can't get raw.
-      
-      // MVP Implementation:
-      // If we can't easily get the blob (CORS/Auth), we might fail.
-      // But let's try to fetch() the image if a valid src is exposed or construct one.
-      // HACK: Use the thumbnail URL, resize it?
-      // Better: If we have an ID, use Photos API (but that requires discovery).
-      
-      // Let's assume for MVP validation we just show we picked it.
-      // But wait, "Upload to Drive" depends on `imageFile` (File object).
-      // We MUST create a File object.
-      
-      // Try fetching the object via the 'thumbnails' URL (largest available)
-      if (doc.thumbnails && doc.thumbnails.length > 0) {
-         const thumb = doc.thumbnails[doc.thumbnails.length - 1]; // largest?
-         // Thumbnails are usually small.
-         
-         // Real approach: "Photos" view items are not always direct mediaItems.
-         // If we use ViewId.DOCS_IMAGES_AND_VIDEOS (Drive), it's easier.
-         // But user asked for Photos.
-         
-         // Let's try to fetch the thumbnail url but manipulate it to be large? (Hack usually works with ggogleusercontent: =s0 ? or similar)
-         // Default is often small.
-         // Let's try fetching the `doc.url`? No that's HTML.
-         // Let's look for `description` or `embedUrl`?
-         
-         // OK, Plan B: Prompt user this is a "Link" or try to fetch.
-         // I'll try to fetch the `thumbnails[0].url` replacing size params if possible, or just use it.
-         // Standard is `...=s132`. Replace with `=d` (download) or `=w2048-h2048`?
-         let src = doc.thumbnails[0].url;
-         // Try to upgrade resolution
-         src = src.replace(/=s\d+/, '=w4096-h4096'); 
-         
-         try {
-             const res = await fetch(src);
-             const blob = await res.blob();
-             imageFile = new File([blob], `photo-picked-${Date.now()}.jpg`, { type: 'image/jpeg' });
-             
-             const reader = new FileReader();
-             reader.onload = (e) => {
-                imagePreview = e.target?.result as string;
-                runAnalysis();
-             };
-             reader.readAsDataURL(imageFile);
-         } catch(e) {
-             console.error('Failed to fetch picked photo', e);
-             alert('Could not download photo. CORS or Auth issue.');
-         }
+      // Fetch the bytes
+      try {
+          // Note on baseUrl: It usually requires a width/height param or defaults.
+          // Appending '=d' triggers download, but we want bytes.
+          // Standard fetching works if CORS allows. 
+          // New Photos Picker baseUrl is typically accessible.
+          const res = await fetch(item.baseUrl);
+          const blob = await res.blob();
+          
+          imageFile = new File([blob], item.filename || `photo-${Date.now()}.jpg`, { type: item.mimeType || 'image/jpeg' });
+          
+          const reader = new FileReader();
+          reader.onload = (e) => {
+             imagePreview = e.target?.result as string;
+             runAnalysis();
+          };
+          reader.readAsDataURL(imageFile);
+      } catch (e) {
+          console.error('Failed to download media', e);
+          alert('Failed to download photo from Google');
       }
-    }
   }
 
   onMount(() => {
