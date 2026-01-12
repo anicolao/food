@@ -1,38 +1,103 @@
-# sv
+# Food App
 
-Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
+[![E2E Tests](https://github.com/anicolao/food/actions/workflows/e2e.yml/badge.svg)](https://github.com/anicolao/food/actions/workflows/e2e.yml)
 
-## Creating a project
+A food logging application that uses AI to estimate nutrition facts from photos. Built with SvelteKit and powered by Google's Gemini AI.
 
-If you're seeing this, you've probably already done this step. Congrats!
+## Features
 
+- 📸 **Photo-based Logging**: Capture or select food photos to log meals
+- 🤖 **AI Nutrition Estimation**: Automatic nutrition facts estimation using Gemini Flash
+- 📊 **Google Sheets Backend**: Your data stored in your own Google Sheets (event sourcing pattern)
+- 🔒 **Privacy First**: All data stays in your Google account
+- 📱 **Mobile Friendly**: Progressive web app with native iOS wrapper
+
+## Technology Stack
+
+- **Frontend**: SvelteKit (Svelte 5)
+- **State Management**: Redux (Event Sourcing Pattern)
+- **AI**: Google Gemini Flash API
+- **Storage**: Google Drive & Google Sheets
+- **Testing**: Playwright (E2E tests)
+- **Package Manager**: npm/bun
+- **Environment**: Nix
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js 20+
+- Google API credentials (for Gemini AI, Drive, and Sheets access)
+
+### Installation
+
+1. Clone the repository:
 ```sh
-# create a new project in the current directory
-npx sv create
-
-# create a new project in my-app
-npx sv create my-app
+git clone https://github.com/anicolao/food.git
+cd food
 ```
 
-## Developing
+2. Install dependencies:
+```sh
+npm install
+```
 
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
+3. Set up environment variables:
+```sh
+cp .env.example .env
+# Edit .env with your Google API credentials
+```
 
+4. Start the development server:
 ```sh
 npm run dev
 
-# or start the server and open the app in a new browser tab
+# or start and open in browser
 npm run dev -- --open
 ```
 
-## Building
+The app will be available at http://localhost:5174
 
-To create a production version of your app:
+## Building for Production
+
+To create a production build:
 
 ```sh
 npm run build
 ```
 
-You can preview the production build with `npm run preview`.
+Preview the production build:
 
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
+```sh
+npm run preview
+```
+
+## Architecture
+
+This app follows an Event Sourcing pattern using Redux. The Google Sheets backend contains:
+- **Events sheet**: Append-only log of all actions (source of truth)
+- **Log sheet**: Projection of confirmed meal entries
+- **Products sheet**: Reusable database for common items
+- **DailyStats sheet**: Aggregated daily nutrition totals
+
+See [MVP_DESIGN.md](MVP_DESIGN.md) for detailed architecture documentation.
+
+## Development
+
+See [DEVELOPMENT.md](DEVELOPMENT.md) for development standards and guidelines.
+
+## Testing
+
+Run E2E tests:
+```sh
+npx playwright test
+```
+
+View test report:
+```sh
+npx playwright show-report
+```
+
+## License
+
+See [LICENSE](LICENSE) file for details.
