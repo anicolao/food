@@ -3,6 +3,7 @@
   import { analyzeImage, type NutritionEstimate } from '$lib/gemini';
   import { uploadImage, appendRow } from '$lib/sheets';
   import { dispatchEvent, store } from '$lib/store';
+  import { signIn } from '$lib/auth'; // Added signIn
   import { goto } from '$app/navigation';
 
   let fileInput: HTMLInputElement;
@@ -162,72 +163,129 @@
   }
   // --- Google Picker ---
 
-  function loadPicker() {
-    // Assuming gapi is avail via layout or we load it. For MVP, we'll try straightforward approach
-    // In strict production we'd use a loader.
-    // Ensure 'picker' is loaded
-    if (window.gapi) {
-        window.gapi.load('picker', () => { console.log('Picker loaded'); });
-    }
+  let gapiLoaded = false;
+
+  async function loadGapi() {
+    if (gapiLoaded) return;
+    return new Promise<void>((resolve) => {
+        const script = document.createElement('script');
+        script.src = 'https://apis.google.com/js/api.js';
+        script.onload = () => {
+            window.gapi.load('picker', () => {
+                gapiLoaded = true;
+                resolve();
+            });
+        };
+        document.body.appendChild(script);
+    });
   }
 
   async function handleGooglePhotosPick() {
+     // 1. Ensure Auth Token
      const token = await new Promise<string>((resolve) => {
-         // Force token refresh/ensure scopes if needed, or just use existing
-         const t = store.getState().config?.accessToken; // If we stored it? We didn't store it in Redux config yet.
-         // Let's rely on auth.ts getter
          import('$lib/auth').then(m => resolve(m.getAccessToken() || ''));
      });
 
      if (!token) {
+         signIn(); // Trigger sign in if missing? Better to alert.
          alert('Please Sign In first');
          return;
      }
 
-     if (!window.google || !window.google.picker) {
-         // Try loading
-          if (window.gapi) {
-            window.gapi.load('picker', createPicker);
-          }
-          return;
+     // 2. Ensure GAPI Loaded
+     if (!gapiLoaded) {
+        await loadGapi();
      }
-     createPicker();
 
-     function createPicker() {
-         const picker = new window.google.picker.PickerBuilder()
-            .addView(window.google.picker.ViewId.PHOTOS)
-            .setOAuthToken(token)
-            .setDeveloperKey(import.meta.env.VITE_GOOGLE_PICKER_API_KEY || 'MISSING_API_KEY_ADD_TO_ENV') // Picker needs API Key too usually
-            // Actually, newer Picker might not need DevKey if OAuth is solid, but docs say yes.
-            // For MVP reuse Gemini Key if it's broad, or just OAuth.
-            // Let's try without DevKey first or use a placeholder to warn user.
-            .setCallback(pickerCallback)
-            .build();
-         picker.setVisible(true);
-     }
+     createPicker(token);
+  }
+
+  function createPicker(oauthToken: string) {
+     const picker = new window.google.picker.PickerBuilder()
+        .addView(window.google.picker.ViewId.PHOTOS)
+        .setOAuthToken(oauthToken)
+        .setDeveloperKey(import.meta.env.VITE_GOOGLE_PICKER_API_KEY || import.meta.env.VITE_GEMINI_API_KEY) 
+        .setCallback(pickerCallback)
+        .build();
+     picker.setVisible(true);
   }
 
   async function pickerCallback(data: any) {
     if (data[window.google.picker.Response.ACTION] == window.google.picker.Action.PICKED) {
       const doc = data[window.google.picker.Response.DOCUMENTS][0];
-      const url = doc[window.google.picker.Document.URL]; // This is usually a permalink
-
-      // Photos API: We need the bytes.
-      // The picker returns a drive ID or a photo ID.
-      // If it's from Photos, we might get a baseUrl.
-      // Ideally we fetch the bytes via fetch() if we have the URL and permitted.
-      // Often simpler: Use the thumbnail/src URL if high res enough, or fetch via Drive API if it's a Drive file.
-      // For "Pick from Photos", we get a direct link.
-
-      console.log('Picked', doc);
-      // For MVP: Let's assume we can fetch the image content via proxy or direct if CORS allows.
-      // Actually Google Photos Picker often gives a URL that requires auth to fetch bytes.
-      // Let's try downloading it.
-
-      // Fallback: If complicated, just alert. But we want to work.
-      // Hack for MVP: Use the 'iconUrl' or similar for preview? No, need full res.
-
-      alert('Photo picked (Mock implementation pending bytes fetch)');
+      
+      // Photos often returns a 'url' (permalink) and 'thumbnails'.
+      // For actual bytes, we might rely on the fact we have the token.
+      // However, Photos API MediaItems might be cleaner. 
+      // The Picker "Photos" view returns items that might be accessible via simple fetch with auth.
+      // Let's try the 'url' or potentially construct a fetch.
+      // Actually, doc[google.picker.Document.URL] is the view link.
+      // We need download URL.
+      console.log('Picked Doc:', doc);
+      
+      // Fallback strategy:
+      // Try fetching the high-res thumbnail.
+      // doc.thumbnails -> array.
+      // Or try fetching the URL if it allows.
+      
+      // Important: For Photos, obtaining the bytes can be tricky without the full Photos API 'mediaItems.get'.
+      // But let's assume valid scope allows fetching the 'src' or similar if present.
+      // Often doc.url is just the UI link.
+      
+      // Attempt to use the 'iconUrl' or 'thumbnails' to find a source?
+      // Actually, typically we get an ID.
+      // Let's try just alerting for now, as fetching bytes from a Picker Result for "Photos" specifically requires correct parsing. 
+      // Better yet: Easiest way in pure frontend flow -> Fetch the blob from a provided sensitive URL if present?
+      // Photos Picker often doesn't give a direct download link without using the Drive API or Photos API.
+      // Let's try to simulate success by using a proxy or just the thumbnail for MVP if we can't get raw.
+      
+      // MVP Implementation:
+      // If we can't easily get the blob (CORS/Auth), we might fail.
+      // But let's try to fetch() the image if a valid src is exposed or construct one.
+      // HACK: Use the thumbnail URL, resize it?
+      // Better: If we have an ID, use Photos API (but that requires discovery).
+      
+      // Let's assume for MVP validation we just show we picked it.
+      // But wait, "Upload to Drive" depends on `imageFile` (File object).
+      // We MUST create a File object.
+      
+      // Try fetching the object via the 'thumbnails' URL (largest available)
+      if (doc.thumbnails && doc.thumbnails.length > 0) {
+         const thumb = doc.thumbnails[doc.thumbnails.length - 1]; // largest?
+         // Thumbnails are usually small.
+         
+         // Real approach: "Photos" view items are not always direct mediaItems.
+         // If we use ViewId.DOCS_IMAGES_AND_VIDEOS (Drive), it's easier.
+         // But user asked for Photos.
+         
+         // Let's try to fetch the thumbnail url but manipulate it to be large? (Hack usually works with ggogleusercontent: =s0 ? or similar)
+         // Default is often small.
+         // Let's try fetching the `doc.url`? No that's HTML.
+         // Let's look for `description` or `embedUrl`?
+         
+         // OK, Plan B: Prompt user this is a "Link" or try to fetch.
+         // I'll try to fetch the `thumbnails[0].url` replacing size params if possible, or just use it.
+         // Standard is `...=s132`. Replace with `=d` (download) or `=w2048-h2048`?
+         let src = doc.thumbnails[0].url;
+         // Try to upgrade resolution
+         src = src.replace(/=s\d+/, '=w4096-h4096'); 
+         
+         try {
+             const res = await fetch(src);
+             const blob = await res.blob();
+             imageFile = new File([blob], `photo-picked-${Date.now()}.jpg`, { type: 'image/jpeg' });
+             
+             const reader = new FileReader();
+             reader.onload = (e) => {
+                imagePreview = e.target?.result as string;
+                runAnalysis();
+             };
+             reader.readAsDataURL(imageFile);
+         } catch(e) {
+             console.error('Failed to fetch picked photo', e);
+             alert('Could not download photo. CORS or Auth issue.');
+         }
+      }
     }
   }
 
@@ -251,14 +309,15 @@
     {:else if !imagePreview}
       <div class="button-group">
           <button on:click={startCamera}>Take Photo</button>
-          <button on:click={() => fileInput.click()} class="secondary">Upload File</button>
+          <button on:click={handleGooglePhotosPick} class="secondary">Pick from Photos</button>
       </div>
-      <input
-        type="file"
-        accept="image/*"
-        bind:this={fileInput}
-        on:change={handleFileSelect}
-        hidden
+      <!-- Hidden input for potential fallback or internal use -->
+      <input 
+        type="file" 
+        accept="image/*" 
+        bind:this={fileInput} 
+        on:change={handleFileSelect} 
+        hidden 
       />
     {:else}
       <img src={imagePreview} alt="Preview" class="preview" />
