@@ -61,9 +61,13 @@ test('US-003 to US-010: User logs food flow', async ({ page }, testInfo) => {
                     await route.fulfill({ json: { mediaItemsSet: true } });
                 }
             } else if (url.includes('mediaItems')) {
-                // List Items
-                await route.fulfill({ json: { mediaItems: [{ id: 'item-1', mediaFile: { baseUrl: 'https://drive.mock/picker.jpg', mimeType: 'image/jpeg', filename: 'picked.jpg' } }] } });
+                // List Items with googleusercontent style URL
+                await route.fulfill({ json: { mediaItems: [{ id: 'item-1', mediaFile: { baseUrl: 'https://lh3.googleusercontent.com/picker-img', mimeType: 'image/jpeg', filename: 'picked.jpg' } }] } });
             }
+        } else if (url.includes('lh3.googleusercontent.com')) {
+            // Mock image download (ignoring query params like =w2048)
+            const buffer = fs.readFileSync('tests/e2e/fixtures/apple.png');
+            await route.fulfill({ body: buffer, contentType: 'image/png' });
         } else if (url.includes('picker.jpg')) {
             const buffer = fs.readFileSync('tests/e2e/fixtures/apple.png');
             await route.fulfill({ body: buffer, contentType: 'image/png' });

@@ -21,6 +21,7 @@ export async function createPickerSession(): Promise<PickerSession> {
     const token = getAccessToken();
     if (!token) throw new Error("Not authenticated");
 
+    console.log('[GooglePhotos] Creating session...');
     const response = await fetch(
         `https://photospicker.googleapis.com/v1/sessions`,
         {
@@ -35,10 +36,13 @@ export async function createPickerSession(): Promise<PickerSession> {
 
     if (!response.ok) {
         const errorText = await response.text();
+        console.error('[GooglePhotos] Session creation failed:', response.status, errorText);
         throw new Error(`Failed to create picker session: ${response.statusText} - ${errorText}`);
     }
 
-    return await response.json();
+    const data = await response.json();
+    console.log('[GooglePhotos] Session created:', data);
+    return data;
 }
 
 export async function pollPickerSession(sessionId: string): Promise<PickerSession> {
@@ -54,9 +58,12 @@ export async function pollPickerSession(sessionId: string): Promise<PickerSessio
     );
 
     if (!response.ok) {
+        console.error('[GooglePhotos] Poll failed:', response.status);
         throw new Error(`Failed to poll session: ${response.statusText}`);
     }
-    return await response.json();
+    const data = await response.json();
+    // console.log('[GooglePhotos] Poll status:', data); // Verbose
+    return data;
 }
 
 export async function listSessionMediaItems(sessionId: string): Promise<MediaItem[]> {
