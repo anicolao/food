@@ -4,14 +4,14 @@ This document explains how to configure OAuth credentials for the deployed appli
 
 ## Overview
 
-The application requires Google OAuth credentials to authenticate users and access Google services (Drive, Sheets, Photos, Gemini AI). These credentials are provided at deployment time through GitHub Secrets, not at build time, to ensure they can be updated without rebuilding the application.
+The application requires a Google OAuth Client ID to authenticate users and access Google services (Drive, Sheets, Photos, Gemini AI). This credential is provided at build time through a GitHub Secret environment variable.
 
-## Required GitHub Secrets
+## Required GitHub Secret
 
-You need to configure the following secrets in your GitHub repository:
+You need to configure the following secret in your GitHub repository:
 
-### 1. GOOGLE_DRIVE_CLIENT_ID (Required)
-The OAuth 2.0 Client ID for Google Drive and authentication.
+### GOOGLE_OAUTH_ID (Required)
+The OAuth 2.0 Client ID for Google authentication and all Google services.
 
 **How to obtain:**
 1. Go to [Google Cloud Console](https://console.cloud.google.com/)
@@ -27,84 +27,66 @@ The OAuth 2.0 Client ID for Google Drive and authentication.
    - `https://anicolao.github.io`
 7. Add authorized redirect URIs:
    - `https://anicolao.github.io/food/`
-8. Copy the Client ID
+8. Copy the Client ID (looks like: `123456789-abcdef.apps.googleusercontent.com`)
 
-### 2. GOOGLE_API_KEY (Required)
-API key for Google Gemini AI API.
-
-**How to obtain:**
-1. In the same Google Cloud project
-2. Go to "Credentials" → "Create Credentials" → "API Key"
-3. Restrict the key to only the "Generative Language API"
-4. Copy the API Key
-
-### 3. GOOGLE_DRIVE_FOLDER_ID (Optional)
-A default folder ID where the app stores data.
-
-### 4. GOOGLE_PHOTOS_CLIENT_ID (Optional)
-Separate OAuth client ID for Google Photos if needed.
-
-## Setting Up Secrets in GitHub
+## Setting Up Secret in GitHub
 
 1. Go to your GitHub repository
 2. Navigate to **Settings** → **Secrets and variables** → **Actions**
 3. Click **New repository secret**
-4. Add each secret with the exact name and value
+4. Add the secret:
 
-Example:
 ```
-Name: GOOGLE_DRIVE_CLIENT_ID
+Name: GOOGLE_OAUTH_ID
 Value: 123456789-abcdefghijklmnop.apps.googleusercontent.com
 ```
 
 ## How It Works
 
-1. **Build Time**: The application is built with placeholder values
-2. **Deployment Time**: The `inject-config.sh` script runs after the build
-3. **Runtime**: The `static/config.js` file is replaced with actual secret values
-4. **Client Side**: The application loads `config.js` and uses the values for OAuth
+1. **Build Time**: GitHub Actions provides the secret as environment variable `VITE_GOOGLE_OAUTH_ID`
+2. **Vite Build**: Vite embeds the value into the built JavaScript bundle
+3. **Runtime**: The application uses the embedded value for OAuth authentication
+
+The `VITE_` prefix tells Vite to embed the environment variable at build time.
 
 ## Security Considerations
 
-- Secrets are stored securely in GitHub Secrets (encrypted at rest)
-- Secrets are only accessible during GitHub Actions workflow execution
-- The OAuth Client ID is a public identifier (not a secret), but storing it in GitHub Secrets allows centralized management
-- The API key should be restricted to specific APIs and referrer URLs in Google Cloud Console
+- The secret is stored securely in GitHub Secrets (encrypted at rest)
+- The secret is only accessible during GitHub Actions workflow execution
+- The OAuth Client ID is embedded in the built application (it's a public identifier, not a secret)
+- The OAuth Client ID should be restricted to specific origins and redirect URIs in Google Cloud Console to prevent misuse
 
 ## Local Development
 
 For local development, create a `.env` file in the project root:
 
 ```env
-VITE_GOOGLE_DRIVE_CLIENT_ID=your-client-id
-VITE_GOOGLE_API_KEY=your-api-key
-VITE_GOOGLE_DRIVE_FOLDER_ID=your-folder-id
-VITE_GOOGLE_PHOTOS_CLIENT_ID=your-photos-client-id
+VITE_GOOGLE_OAUTH_ID=your-client-id.apps.googleusercontent.com
 ```
 
-The application will use these environment variables during local development and fall back to the runtime config in production.
+The application will use this environment variable during local development.
 
 ## Verifying the Configuration
 
 After deployment:
 
-1. Visit the deployed application
-2. Open browser DevTools → Console
-3. Type `window.APP_CONFIG` and press Enter
-4. Verify that the configuration values are present (not null)
-5. Try signing in with your Google account
+1. Visit the deployed application at https://anicolao.github.io/food/
+2. Click the sign-in button
+3. You should see the Google OAuth consent screen
+4. After signing in, the app should work normally
 
-If the configuration is missing or incorrect:
-- Check that the GitHub Secrets are set correctly
-- Review the GitHub Actions workflow logs for errors
-- Verify the `inject-config.sh` script ran successfully
+If authentication fails:
+- Check that the GitHub Secret `GOOGLE_OAUTH_ID` is set correctly
+- Review the GitHub Actions workflow logs for build errors
+- Verify the OAuth Client ID is configured correctly in Google Cloud Console
+- Check browser console for any OAuth-related errors
 
 ## Updating Credentials
 
-To update OAuth credentials:
+To update the OAuth Client ID:
 
-1. Update the secret values in GitHub repository settings
+1. Update the secret value in GitHub repository settings
 2. Trigger a new deployment (push to main or manually trigger workflow)
-3. The new credentials will be injected into the deployed application
+3. The new credential will be embedded in the rebuilt application
 
-No code changes or rebuilding is necessary to update credentials.
+The application must be rebuilt for credential changes to take effect.

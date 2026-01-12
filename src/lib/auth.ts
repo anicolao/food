@@ -1,8 +1,4 @@
-// Access runtime config from window object (injected at deployment)
-// Falls back to Vite env var for local development
-export const GOOGLE_CLIENT_ID = 
-    (typeof window !== 'undefined' && (window as any).APP_CONFIG?.GOOGLE_CLIENT_ID) || 
-    import.meta.env.VITE_GOOGLE_DRIVE_CLIENT_ID;
+export const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_OAUTH_ID;
 export const SCOPES = [
     'https://www.googleapis.com/auth/drive.file',
     'https://www.googleapis.com/auth/spreadsheets',
