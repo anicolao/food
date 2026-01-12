@@ -72,6 +72,15 @@ Preview the production build:
 npm run preview
 ```
 
+## Deployment
+
+The app is automatically deployed to GitHub Pages:
+
+- **Production**: Push to `main` branch deploys to https://anicolao.github.io/food/
+- **PR Previews**: Each pull request automatically deploys to https://anicolao.github.io/food/pr{number}/
+
+PR preview URLs are posted as comments on the pull request for easy access.
+
 ## Architecture
 
 This app follows an Event Sourcing pattern using Redux. The Google Sheets backend contains:
