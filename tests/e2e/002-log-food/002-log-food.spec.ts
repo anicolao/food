@@ -53,8 +53,7 @@ test('US-003 to US-010: User logs food flow', async ({ page }, testInfo) => {
             if (url.includes('sessions') && !url.includes('mediaItems')) {
                 if (route.request().method() === 'POST') {
                     // Create Session
-                    await route.fulfill({ json: { id: 'sess-1', pickerUri: 'about:blank' } }); // Use about:blank to avoid opening real popups that Playwright might hate, or mock it? 
-                    // Actually, we open a popup. Playwright manages pages.
+                    await route.fulfill({ json: { id: 'sess-1', pickerUri: 'http://mock-picker.com' } });
                 } else {
                     // Poll Session
                     // First poll -> not done. Second -> Done.
