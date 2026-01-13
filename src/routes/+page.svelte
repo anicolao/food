@@ -168,32 +168,35 @@
          <ul class="entry-list">
              {#each allEntries as entry}
                  <li class="entry-item">
-                     <a href="{base}/entry?id={entry.id}" class="entry-link">
-                         <div class="entry-info">
-                             <span class="time">{formatLogDate(entry.date + 'T' + entry.time)}</span>
-                             <span class="meal-badge">{entry.mealType}</span>
-                             <span class="desc">{entry.description}</span>
-                         </div>
-                         <div class="entry-meta">
-                            <span class="cal">{entry.calories} kcal</span>
-                            {#if entry.imageDriveUrl}
-                                {@const imageUrls = entry.imageDriveUrl.split(',').map((u: string) => u.trim())}
-                                <button class="thumb-btn" on:click={(e) => openGallery(imageUrls, e)}>
-                                    {#await resolveDriveImage(imageUrls[0])}
-                                        <div class="thumb-loading"></div>
-                                    {:then src} 
-                                        <img src={src} alt="Food" class="thumb" />
-                                    {:catch}
-                                        <div class="thumb-error">!</div>
-                                    {/await}
-                                    
-                                    {#if imageUrls.length > 1}
-                                        <span class="count-badge">+{imageUrls.length - 1}</span>
-                                    {/if}
-                                </button>
-                            {/if}
-                         </div>
-                     </a>
+                     <div class="entry-row">
+                         <a href="{base}/entry?id={entry.id}" class="entry-main-link">
+                             <div class="entry-info">
+                                 <span class="time">{formatLogDate(entry.date + 'T' + entry.time)}</span>
+                                 <span class="meal-badge">{entry.mealType}</span>
+                                 <span class="desc">{entry.description}</span>
+                             </div>
+                             <div class="entry-cal">
+                                <span class="cal">{entry.calories} kcal</span>
+                             </div>
+                         </a>
+                         
+                         {#if entry.imageDriveUrl}
+                            {@const imageUrls = entry.imageDriveUrl.split(',').map((u: string) => u.trim())}
+                            <button class="thumb-btn" on:click={(e) => openGallery(imageUrls, e)}>
+                                {#await resolveDriveImage(imageUrls[0])}
+                                    <div class="thumb-loading"></div>
+                                {:then src} 
+                                    <img src={src} alt="Food" class="thumb" />
+                                {:catch}
+                                    <div class="thumb-error">!</div>
+                                {/await}
+                                
+                                {#if imageUrls.length > 1}
+                                    <span class="count-badge">+{imageUrls.length - 1}</span>
+                                {/if}
+                            </button>
+                         {/if}
+                     </div>
                  </li>
              {/each}
          </ul>
@@ -230,15 +233,18 @@
   .log-btn { background: #007bff; color: white; padding: 1rem 2rem; border-radius: 25px; text-decoration: none; font-weight: bold; }
   .entry-list { list-style: none; padding: 0; }
   .entry-item { border-bottom: 1px solid #eee; }
-  .entry-link { display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0; text-decoration: none; color: inherit; width: 100%; }
-  .entry-link:hover { background: #f9f9f9; }
+  .entry-row { display: flex; align-items: center; padding: 0.5rem 0; width: 100%; }
+  
+  .entry-main-link { display: flex; justify-content: space-between; align-items: center; text-decoration: none; color: inherit; flex-grow: 1; margin-right: 0.5rem; }
+  .entry-main-link:hover { background: #f9f9f9; }
+  
   .entry-info { display: flex; flex-direction: column; gap: 0.2rem; }
-  .entry-meta { display: flex; align-items: center; gap: 0.5rem; }
+  .entry-cal { white-space: nowrap; margin-left: 0.5rem; }
   .time { color: #666; font-size: 0.8rem; }
   .meal-badge { display: inline-block; background: #e9ecef; color: #495057; padding: 0.1rem 0.4rem; border-radius: 4px; font-size: 0.7rem; width: fit-content; }
   .cal { font-weight: bold; }
   
-  .thumb-btn { position: relative; border: none; background: none; padding: 0; cursor: pointer; }
+  .thumb-btn { position: relative; border: none; background: none; padding: 0; cursor: pointer; flex-shrink: 0; }
   .thumb { width: 40px; height: 40px; border-radius: 4px; object-fit: cover; border: 1px solid #ddd; }
   .count-badge { position: absolute; bottom: -5px; right: -5px; background: #007bff; color: white; font-size: 0.6rem; padding: 2px 4px; border-radius: 4px; font-weight: bold; }
 
