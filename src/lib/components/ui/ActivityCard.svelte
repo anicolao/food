@@ -59,16 +59,15 @@
                 </div>
 
                 <div class="item-info">
-                    <div class="info-main">
-                        <div class="item-name">{item.description}</div>
-                        <div class="item-macros">
-                            <MacroSummary protein={item.protein} carbs={item.carbs} fat={item.fat} size="xs" />
-                        </div>
-                    </div>
-                    <div class="item-stats">
+                    <div class="item-name">{item.description}</div>
+                    
+                    <div class="item-right-col">
                         {#if item.calories}
                             <span class="item-cal">{item.calories} kcal</span>
                         {/if}
+                        <div class="item-macros">
+                            <MacroSummary protein={item.protein} carbs={item.carbs} fat={item.fat} size="xs" />
+                        </div>
                     </div>
                 </div>
             </a>
@@ -212,10 +211,16 @@
       align-items: center;
   }
   
-  .info-main {
+  .item-right-col {
       display: flex;
       flex-direction: column;
+      align-items: flex-end;
       gap: 2px;
+      text-align: right;
+  }
+
+  .item-macros {
+      margin-top: 2px;
   }
 
   .item-name {
