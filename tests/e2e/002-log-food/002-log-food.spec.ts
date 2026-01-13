@@ -170,7 +170,7 @@ test('US-003 to US-010: User logs food flow', async ({ page }, testInfo) => {
     // Verify default value (Time might dictate Breakfast/Lunch based on file mod time)
     // We force set to Lunch to ensure downstream assertions pass deterministically
     // We ALSO force set the Date to match our mocked "Today" (2024-03-15) because the image EXIF might change it.
-    await page.getByLabel('Date').fill('2024-03-15');
+    await page.getByLabel('Date').fill('2024-03-15', { force: true });
     await page.getByLabel('Meal').selectOption('Lunch');
     await expect(page.getByLabel('Meal')).toHaveValue('Lunch');
 

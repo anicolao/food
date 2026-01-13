@@ -54,8 +54,8 @@ test('US-018 to US-022: Details, Edit and Delete', async ({ page }, testInfo) =>
     ]);
 
     await expect(page.getByLabel('Log Description')).toHaveValue('Original Food');
-    await page.getByLabel('Date').fill('2024-03-15');
-    await page.getByLabel('Time').fill('12:00'); // Explicit time to match expect
+    await page.getByLabel('Date').fill('2024-03-15', { force: true });
+    await page.getByLabel('Time').fill('12:00', { force: true }); // Explicit time to match expect
     await page.getByText('Save Entry').click();
 
     // 2. Verify on Home

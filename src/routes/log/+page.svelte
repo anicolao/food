@@ -34,6 +34,16 @@
   let entryDate = $state(new Date().toISOString().split('T')[0]);
   let entryTime = $state(new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }));
 
+  // Derived display values for custom inputs
+  let displayDate = $derived(entryDate); // ISO string is already what we want: YYYY-MM-DD
+  let displayTime = $derived((() => {
+      if (!entryTime) return '--:--';
+      const [h, m] = entryTime.split(':').map(Number);
+      const suffix = h >= 12 ? 'PM' : 'AM';
+      const h12 = h % 12 || 12;
+      return `${String(h12).padStart(2, '0')}:${String(m).padStart(2, '0')} ${suffix}`;
+  })());
+
   let showCorrectionInput = $state(false);
   let userCorrection = $state('');
   
@@ -414,12 +424,20 @@
                       <div class="split-row">
                           <div class="field">
                               <label>Date
-                                <input type="date" bind:value={entryDate} class="bg-input" />
+                                 <div class="custom-input-wrapper bg-input">
+                                     <span class="value-text">{displayDate}</span>
+                                     <span class="input-icon">📅</span>
+                                     <input type="date" bind:value={entryDate} class="native-input-overlay" />
+                                 </div>
                               </label>
                           </div>
                           <div class="field">
                               <label>Time
-                                <input type="time" bind:value={entryTime} class="bg-input" />
+                                 <div class="custom-input-wrapper bg-input">
+                                     <span class="value-text">{displayTime}</span>
+                                     <span class="input-icon">🕒</span>
+                                     <input type="time" bind:value={entryTime} class="native-input-overlay" />
+                                 </div>
                               </label>
                           </div>
                       </div>
@@ -637,9 +655,43 @@
         border-radius: var(--radius-m);
         font-size: 1rem;
     }
+
+    /* Custom Input Wrapper */
+    .custom-input-wrapper {
+        position: relative;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        overflow: hidden; /* Ensure overlay doesn't spill */
+    }
+
+    .value-text {
+        font-variant-numeric: tabular-nums;
+        z-index: 1;
+    }
+
+    .input-icon {
+        opacity: 0.7;
+        z-index: 1;
+        font-size: 1.1rem;
+    }
+
+    .native-input-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        opacity: 0;
+        cursor: pointer;
+        background: transparent;
+        border: none;
+        appearance: none;
+        -webkit-appearance: none;
+        z-index: 2; /* On top of text */
+    }
     
-    .bg-input:focus {
-        outline: none;
+    .bg-input:focus-within {
         border-color: var(--color-primary);
         background: rgba(255,255,255,0.1);
     }
