@@ -1,14 +1,21 @@
 <script lang="ts">
   import type { ActivityGroup } from '$lib/activity-grouping';
   import { base } from '$app/paths';
+  import { resolveDriveImage } from '$lib/images';
   
   // Props
   export let group: ActivityGroup;
 
-  let expanded = false;
+  let expanded = true;
 
   function toggle() {
     expanded = !expanded;
+  }
+
+  function getMainImage(urlStr?: string) {
+      if (!urlStr) return null;
+      const urls = urlStr.split(',').map(u => u.trim());
+      return urls.length > 0 ? urls[0] : null;
   }
 </script>
 
@@ -36,12 +43,29 @@
   {#if expanded}
     <div class="details-list">
         {#each group.items as item}
+            {@const mainImage = getMainImage(item.imageDriveUrl)}
             <a href="{base}/entry?id={item.id}" class="item-row">
-                <div class="item-name">{item.description}</div>
-                <div class="item-stats">
-                    {#if item.calories}
-                        <span class="item-cal">{item.calories}</span>
+                <div class="item-visual">
+                    {#if mainImage}
+                        {#await resolveDriveImage(mainImage)}
+                            <div class="skel-img"></div>
+                        {:then src}
+                            <img src={src} alt={item.description} class="thumb" />
+                        {:catch}
+                            <div class="fallback-img">?</div>
+                        {/await}
+                    {:else}
+                        <div class="fallback-img">{item.mealType[0]}</div>
                     {/if}
+                </div>
+
+                <div class="item-info">
+                    <div class="item-name">{item.description}</div>
+                    <div class="item-stats">
+                        {#if item.calories}
+                            <span class="item-cal">{item.calories} kcal</span>
+                        {/if}
+                    </div>
                 </div>
             </a>
         {/each}
@@ -129,7 +153,8 @@
 
   .item-row {
       display: flex;
-      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
       padding: 12px 20px;
       text-decoration: none;
       color: var(--text-secondary);
@@ -147,8 +172,62 @@
       color: white;
   }
 
+  /* Image Area */
+  .item-visual {
+      position: relative;
+      width: 48px;
+      height: 48px;
+      border-radius: 8px;
+      overflow: hidden;
+      flex-shrink: 0;
+      background: #2a2a2a;
+  }
+
+  .thumb {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+  }
+
+  .skel-img {
+      width: 100%;
+      height: 100%;
+      background: rgba(255,255,255,0.05);
+      animation: pulse 1.5s infinite;
+  }
+
+  .fallback-img {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      color: var(--text-muted);
+      background: rgba(255,255,255,0.03);
+  }
+
+  .item-info {
+      flex: 1;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+  }
+
+  .item-name {
+      font-weight: 500;
+      color: var(--text-primary, #fff);
+  }
+
   .item-cal {
       color: var(--text-secondary);
       font-size: 0.9rem;
+      font-weight: 600;
+  }
+
+  @keyframes pulse {
+      0% { opacity: 0.6; }
+      50% { opacity: 1; }
+      100% { opacity: 0.6; }
   }
 </style>

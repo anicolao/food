@@ -60,9 +60,8 @@ test('US-018 to US-022: Details, Edit and Delete', async ({ page }, testInfo) =>
 
     // 2. Verify on Home
     // 2. Verify on Home
-    // ActivityCard shows "Lunch" (based on 12:00 PM), expand it to see "Original Food"
+    // ActivityCard shows "Lunch" (based on 12:00 PM), verified expanded by default
     await expect(page.locator('.activity-card').first()).toBeVisible();
-    await page.locator('.activity-card .header-btn').first().click();
 
     await expect(page.locator('.item-name').filter({ hasText: 'Original Food' }).first()).toBeVisible();
 
@@ -109,8 +108,7 @@ test('US-018 to US-022: Details, Edit and Delete', async ({ page }, testInfo) =>
     await tester.step('edited-state', {
         description: 'Returned to Home after edit',
         verifications: [
-            // Expand again as reload collapses state
-            { spec: 'Expand card', check: async () => await page.locator('.activity-card .header-btn').first().click() },
+            // Expanded by default
             { spec: 'Name updated in list', check: async () => await expect(page.locator('.item-name').filter({ hasText: 'Edited Food' }).first()).toBeVisible() },
             { spec: 'Calories updated in list', check: async () => await expect(page.locator('.item-cal').filter({ hasText: '200' }).first()).toBeVisible() },
             { spec: 'Total Calories updated', check: async () => await expect(page.locator('.hero-ring .value-text').first()).toContainText('200') }

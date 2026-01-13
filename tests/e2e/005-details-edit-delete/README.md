@@ -17,7 +17,6 @@
 ![Returned to Home after edit](./screenshots/001-edited-state.png)
 
 **Verifications:**
-- [x] Expand card
 - [x] Name updated in list
 - [x] Calories updated in list
 - [x] Total Calories updated
