@@ -71,7 +71,8 @@ test('US-012: Stats persist after reload', async ({ page }, testInfo) => {
         verifications: [
 
             { spec: 'Calories = 500', check: async () => await expect(page.locator('.value-text').first()).toHaveText('500') },
-            { spec: 'Protein = 20', check: async () => await expect(page.locator('.bubble-value').first()).toHaveText('20') },
+            // Bubble value format is now "Value/Max" e.g. "20/180" inside the bubble.
+            { spec: 'Protein = 20', check: async () => await expect(page.locator('.bubble-value').first()).toHaveText('20/180') },
             { spec: 'History shows entry', check: async () => await expect(page.getByText('Mock Apple')).toBeVisible() }
         ]
     });

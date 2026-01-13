@@ -6,7 +6,7 @@
         strokeWidth?: number;
         color?: string; // Hex or CSS variable
         gradientId?: string; // ID of a gradient defined elsewhere or inline
-        label?: string;
+        label?: string; // e.g. "kcal"
         suffix?: string;
     }
 
@@ -14,10 +14,10 @@
         value,
         max,
         size = 120,
-        strokeWidth = 8,
+        strokeWidth = 20,
         color = '#ff6b6b',
         gradientId,
-        label = '',
+        label = 'kcal',
         suffix = ''
     }: Props = $props();
 
@@ -29,6 +29,24 @@
 
 <div class="stats-ring-container" style="width: {size}px; height: {size}px;">
     <svg width={size} height={size} viewBox="0 0 {size} {size}" class="stats-ring-svg">
+        <defs>
+            <filter id="glow-shadow" x="-50%" y="-50%" width="200%" height="200%">
+               <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+               <feMerge>
+                   <feMergeNode in="coloredBlur"/>
+                   <feMergeNode in="SourceGraphic"/>
+               </feMerge>
+            </filter>
+            
+             <!-- Default gradient if specific one requested -->
+            {#if gradientId === 'calories-ring'}
+                <linearGradient id="calories-ring" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#FF9966"/>
+                    <stop offset="100%" stop-color="#FF5E62"/>
+                </linearGradient>
+            {/if}
+        </defs>
+
         <!-- Background Circle -->
         <circle
             cx={size / 2}
@@ -39,7 +57,7 @@
             stroke-width={strokeWidth}
         />
         
-        <!-- Progress Circle -->
+        <!-- Progress Circle with Glow -->
         <circle
             cx={size / 2}
             cy={size / 2}
@@ -52,27 +70,18 @@
             stroke-linecap="round"
             class="progress-circle"
             transform="rotate(-90 {size/2} {size/2})"
+            filter="url(#glow-shadow)"
         />
-
-        <!-- Inline defs if needed, though usually global or passed in is better -->
-        {#if gradientId === 'calories-ring'}
-             <defs>
-                <linearGradient id="calories-ring" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stop-color="#FF9966"/>
-                    <stop offset="100%" stop-color="#FF5E62"/>
-                </linearGradient>
-            </defs>
-        {/if}
     </svg>
 
     <div class="content">
+        <div class="main-value-row">
+            <span class="value-text">{Math.round(value)}{suffix}</span>
+            <span class="max-text">/ {max}</span>
+        </div>
         {#if label}
             <span class="label">{label}</span>
         {/if}
-        <span class="value-text">
-            {Math.round(value)}{suffix}
-        </span>
-        <span class="max-text">/ {max}</span>
     </div>
 </div>
 
@@ -88,6 +97,7 @@
         position: absolute;
         top: 0;
         left: 0;
+        overflow: visible; /* Allow glow to spill out */
     }
 
     .progress-circle {
@@ -104,24 +114,30 @@
         text-align: center;
     }
 
-    .label {
-        font-size: 0.8rem;
-        color: var(--text-secondary);
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-        margin-bottom: 2px;
-    }
-
-    .value-text {
-        font-size: 1.8rem;
-        font-weight: 800;
-        color: var(--text-primary);
+    .main-value-row {
+        display: flex;
+        align-items: baseline;
+        gap: 4px;
         line-height: 1;
     }
 
+    .value-text {
+        font-size: 2.5rem; /* Larger as per screenshot */
+        font-weight: 700;
+        color: var(--text-primary);
+        letter-spacing: -0.02em;
+    }
+
     .max-text {
-        font-size: 0.8rem;
+        font-size: 1.2rem;
         color: var(--text-muted);
-        margin-top: 2px;
+        font-weight: 500;
+    }
+
+    .label {
+        font-size: 1rem;
+        color: var(--text-secondary);
+        margin-top: 4px;
+        font-weight: 500;
     }
 </style>
