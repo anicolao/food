@@ -395,7 +395,7 @@
                     <span>Photo Library</span>
                 </button>
                 <!-- Hidden file input for file picker fallback if library fails or just standard upload -->
-                <button class="big-btn glass-panel" onclick={() => fileInput.click()}>
+                <button class="big-btn glass-panel" onclick={() => fileInput?.click()}>
                     <div class="icon">📁</div>
                     <span>File</span>
                 </button>
@@ -411,7 +411,7 @@
                  {#each imagePreviews as preview}
                      <img src={preview} alt="Thumb" class="sheet-thumb" />
                  {/each}
-                 <button class="add-more-btn" onclick={() => fileInput.click()}>+</button>
+                <button class="add-more-btn" onclick={() => fileInput?.click()}>+</button>
              </div>
              
              {#if analyzing}
