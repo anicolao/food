@@ -53,13 +53,13 @@ test('US-013 to US-017: Smart Date Formatting', async ({ page }, testInfo) => {
 
     // Helper to log an item with specific date
     async function logItem(date: string, time: string, name: string) {
-        await page.getByText('Log Food').click();
+        await page.getByText('Log New').click();
         const fileInput = page.locator('input[type="file"]:not([capture])');
         await fileInput.setInputFiles('tests/e2e/fixtures/apple.png');
 
-        await expect(page.getByLabel('Item Name')).toHaveValue('Test Food');
+        await expect(page.getByLabel('Log Description')).toHaveValue('Test Food');
 
-        await page.getByLabel('Item Name').fill(name);
+        await page.getByLabel('Log Description').fill(name);
         await page.getByLabel('Date').fill(date);
         await page.getByLabel('Time').fill(time);
         await page.getByText('Save Entry').click();
@@ -85,11 +85,11 @@ test('US-013 to US-017: Smart Date Formatting', async ({ page }, testInfo) => {
     await tester.step('smart-dates', {
         description: 'Check date formatting',
         verifications: [
-            { spec: 'Today shows time only', check: async () => await expect(page.locator('.entry-item').filter({ hasText: 'Today Food' }).locator('.time')).toHaveText('12:00') },
-            { spec: 'Yesterday shows Yesterday @ Time', check: async () => await expect(page.locator('.entry-item').filter({ hasText: 'Yesterday Food' }).locator('.time')).toHaveText('Yesterday @ 12:00') },
-            { spec: 'Recent shows Day @ Time', check: async () => await expect(page.locator('.entry-item').filter({ hasText: 'Monday Food' }).locator('.time')).toHaveText('Monday @ 12:00') },
-            { spec: 'This Year shows Date', check: async () => await expect(page.locator('.entry-item').filter({ hasText: 'Year Food' }).locator('.time')).toHaveText('Mon, Jan 1') },
-            { spec: 'Old shows Date with Year', check: async () => await expect(page.locator('.entry-item').filter({ hasText: 'Old Food' }).locator('.time')).toHaveText('Dec 31, 2023') }
+            { spec: 'Today shows time only', check: async () => await expect(page.locator('.food-card').filter({ hasText: 'Today Food' }).locator('.time')).toHaveText('12:00') },
+            { spec: 'Yesterday shows Yesterday @ Time', check: async () => await expect(page.locator('.food-card').filter({ hasText: 'Yesterday Food' }).locator('.time')).toHaveText('Yesterday @ 12:00') },
+            { spec: 'Recent shows Day @ Time', check: async () => await expect(page.locator('.food-card').filter({ hasText: 'Monday Food' }).locator('.time')).toHaveText('Monday @ 12:00') },
+            { spec: 'This Year shows Date', check: async () => await expect(page.locator('.food-card').filter({ hasText: 'Year Food' }).locator('.time')).toHaveText('Mon, Jan 1') },
+            { spec: 'Old shows Date with Year', check: async () => await expect(page.locator('.food-card').filter({ hasText: 'Old Food' }).locator('.time')).toHaveText('Dec 31, 2023') }
         ]
     });
 

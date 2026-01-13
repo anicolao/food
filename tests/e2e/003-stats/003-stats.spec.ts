@@ -69,8 +69,9 @@ test('US-012: Stats persist after reload', async ({ page }, testInfo) => {
     await tester.step('stats-loaded', {
         description: 'Stats loaded from sheet',
         verifications: [
-            { spec: 'Calories = 500', check: async () => await expect(page.locator('.value').first()).toHaveText('500') },
-            { spec: 'Protein = 20g', check: async () => await expect(page.getByText('20g').first()).toBeVisible() },
+
+            { spec: 'Calories = 500', check: async () => await expect(page.locator('.value-text').first()).toHaveText('500') },
+            { spec: 'Protein = 20', check: async () => await expect(page.locator('.bubble-value').first()).toHaveText('20') },
             { spec: 'History shows entry', check: async () => await expect(page.getByText('Mock Apple')).toBeVisible() }
         ]
     });
