@@ -164,6 +164,7 @@
         height: 24px;
         object-fit: contain;
         margin-bottom: 2px;
+        mix-blend-mode: screen; /* Removes black background */
     }
     
     .stats {
