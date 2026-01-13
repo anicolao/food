@@ -153,42 +153,49 @@
 
   <div class="glass-panel form-section">
       <div class="field">
-          <label>Item Name</label>
-          <input type="text" class="bg-input big-text" bind:value={form.description} />
+          <label>Item Name
+            <input type="text" class="bg-input big-text" bind:value={form.description} />
+          </label>
       </div>
       
       <div class="field">
-          <label>Meal Type</label>
-          <select class="bg-input" bind:value={form.mealType}>
-            <option>Breakfast</option>
-            <option>Lunch</option>
-            <option>Dinner</option>
-            <option>Snack</option>
-          </select>
+          <label>Meal Type
+            <select class="bg-input" bind:value={form.mealType}>
+                <option>Breakfast</option>
+                <option>Lunch</option>
+                <option>Dinner</option>
+                <option>Snack</option>
+            </select>
+          </label>
       </div>
 
       <div class="macros-grid">
         <div class="field">
-            <label>Calories</label>
-            <input type="number" class="bg-input highlight-cal" bind:value={form.calories} />
+            <label>Calories
+                <input type="number" class="bg-input highlight-cal" bind:value={form.calories} />
+            </label>
         </div>
         <div class="field">
-            <label>Protein (g)</label>
-            <input type="number" class="bg-input" bind:value={form.protein} />
+            <label>Protein (g)
+                <input type="number" class="bg-input" bind:value={form.protein} />
+            </label>
         </div>
         <div class="field">
-            <label>Carbs (g)</label>
-            <input type="number" class="bg-input" bind:value={form.carbs} />
+            <label>Carbs (g)
+                <input type="number" class="bg-input" bind:value={form.carbs} />
+            </label>
         </div>
         <div class="field">
-            <label>Fat (g)</label>
-            <input type="number" class="bg-input" bind:value={form.fat} />
+            <label>Fat (g)
+                <input type="number" class="bg-input" bind:value={form.fat} />
+            </label>
         </div>
       </div>
 
       <div class="field">
-          <label>Rationale / Notes</label>
-          <textarea class="bg-input" bind:value={form.rationale} rows="4"></textarea>
+          <label>Rationale / Notes
+            <textarea class="bg-input" bind:value={form.rationale} rows="4"></textarea>
+          </label>
       </div>
 
       <button class="save-btn" onclick={handleSave}>Save Changes</button>
