@@ -33,22 +33,39 @@ Logs will be clustered into "Cards" based on type and time.
 
 ## 3. User Interface
 
-### 3.1 The Feed (Cards)
-The main view remains an infinitely scrollable list, but populated by **Activity Cards** instead of raw logs.
+### 3.1 Overview
+The view is a vertical feed anchored by a fixed navigation bar and a summary card.
+
+### 3.2 Navigation & Header
+-   **Top Bar:** A clean navigation bar allowing travel between days.
+    -   `[ < ]` (Previous Day)
+    -   `Current Date` (e.g., "Today, Jan 15") - Tapping opens calendar/view switcher.
+    -   `[ > ]` (Next Day)
+
+### 3.3 Stats Summary Card
+-   **Location:** Fixed at the top of the scrollable feed (or sticky).
+-   **Content:**
+    -   **Primary:** Large "Calories Left" or "Calories Consumed" Ring (Neon Orange).
+    -   **Secondary:** Three smaller rings/bubbles for Protein (Purple), Carbs (Blue), and Fat (Yellow).
+-   **Style:** Glassmorphic container, vibrant neon data points against a dark charcoal background.
+
+### 3.4 The Feed (Activity Cards)
+Below the stats, the list displays **Activity Cards** instead of raw logs.
 
 **Card Layout:**
 1.  **Header:**
     -   **Left:** Activity Name (e.g., "Breakfast", "Snack").
     -   **Right:** Total Calories (e.g., "650 kcal") in vibrant neon orange.
-    -   **Sub-data:** Time / Time Range.
-2.  **Body (Collapsed/Preview):**
-    -   Visual list of items in the group (e.g., "Oatmeal", "Coffee").
-    -   Individual calorie counts for context (muted text).
+    -   **Sub-data:** Start Time.
+2.  **Content List:**
+    -   Clean list of items in the group (e.g., "Oatmeal", "Coffee").
+    -   Individual calorie counts are shown subtly.
+    -   **No "Body" labels or clutter.**
 3.  **Interaction:**
     -   **Tap:** Expands the card or navigates to a "Detail View" to edit/delete individual items.
 
-### 3.2 Visual Mockup
-*Nano Banana Style: a dark, glassmorphic UI with vibrant neon accents.*
+### 3.5 Visual Mockup
+*Revised Nano Banana Style: Dark mode, glassmorphism, stats summary at top.*
 
 ![Grouped Log View](../../design/mockups/grouped_log_view.png)
 
@@ -68,10 +85,6 @@ To handle reviewing multiple days, we introduce specific summary views:
 -   **Month View (Calendar):**
     -   Heatmap style (Green = Hit Goal, Red = Over, Grey = Under).
     -   High-level pattern recognition.
-
-### 4.3 Navigation Pattern
--   Top Bar: `[ < ] [ Today / Date ] [ > ]`
--   Tapping the Date opens a calendar picker / view switcher (Day/Week/Month).
 
 ## 5. Implementation Strategy
 1.  **Refactor Selectors:** Update Redux selectors to implement the grouping logic (4AM split, 30m window).
