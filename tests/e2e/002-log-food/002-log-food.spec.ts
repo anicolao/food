@@ -172,7 +172,7 @@ test('US-003 to US-010: User logs food flow', async ({ page }, testInfo) => {
     await tester.step('saved', {
         description: 'Returned to Dashboard',
         verifications: [
-            { spec: 'On Dashboard', check: async () => await expect(page.getByText('Today\'s Summary')).toBeVisible() },
+            { spec: 'On Dashboard', check: async () => await expect(page.getByText('Recent Logs')).toBeVisible() },
             { spec: 'Calories updated', check: async () => await expect(page.locator('.value').first()).toHaveText('100') },
             { spec: 'History name shown', check: async () => await expect(page.getByText('Mock Apple')).toBeVisible() },
             { spec: 'Meal type shown', check: async () => await expect(page.getByText('Lunch')).toBeVisible() },
