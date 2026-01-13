@@ -4,12 +4,24 @@
   import { fetchRows, ensureDataStructures } from '$lib/sheets';
   import { store, dispatchEvent, setConfig } from '$lib/store';
   import { base } from '$app/paths';
-  import { formatLogDate } from '$lib/formatDate';
+  import { resolveDriveImage } from '$lib/images';
+  
+  import StatsRing from '$lib/components/ui/StatsRing.svelte';
+  import MacroBubble from '$lib/components/ui/MacroBubble.svelte';
+  import FoodCard from '$lib/components/ui/FoodCard.svelte';
 
-  let authenticated = false;
-  let stats = { totalCalories: 0, totalProtein: 0, totalFat: 0, totalCarbs: 0 };
-  let allEntries: any[] = [];
+  let authenticated = $state(false);
+  let stats = $state({ totalCalories: 0, totalProtein: 0, totalFat: 0, totalCarbs: 0 });
+  let allEntries: any[] = $state([]);
   const today = new Date().toISOString().split('T')[0];
+
+  // Daily Goals (Mock for now, should be in settings/store)
+  const GOALS = {
+      calories: 2500,
+      protein: 180,
+      carbs: 250,
+      fat: 80
+  };
 
   async function syncData() {
         try {
@@ -28,7 +40,6 @@
             });
         } catch (e) {
             console.error('Sync failed', e);
-            // Optionally initialize sheet headers if empty/error implies missing sheet content
         }
   }
 
@@ -36,7 +47,6 @@
     const existingToken = getAccessToken();
     if (existingToken) {
         authenticated = true;
-        // Don't sync immediately, wait for explicit token validity or just try
         syncData();
     }
 
@@ -47,7 +57,6 @@
       }
     });
 
-    // Subscribe to store updates
     const unsubscribe = store.subscribe(() => {
       const state = store.getState();
       if (state.projections.stats[today]) {
@@ -56,7 +65,6 @@
         stats = { totalCalories: 0, totalProtein: 0, totalFat: 0, totalCarbs: 0 };
       }
       
-      // Filter entries for full history, sorted DESC
       allEntries = [...state.projections.log].sort((a, b) => {
           const dateA = new Date(a.date + 'T' + a.time);
           const dateB = new Date(b.date + 'T' + b.time);
@@ -71,186 +79,182 @@
     signIn();
   }
 
-  function handleSignOut() {
-    signOut();
-    authenticated = false;
-    // Reset local state if needed
-  }
+  // Gallery Logic
+  let showGallery = $state(false);
+  let galleryImages: string[] = $state([]);
 
-  let showGallery = false;
-  let galleryImages: string[] = [];
-
-  function openGallery(images: string[], e: Event) {
-      e.stopPropagation(); // Prevent navigation when clicking thumb
-      galleryImages = images;
-      showGallery = true;
-  }
-
-  const imageCache = new Map<string, string>();
-  
-  async function resolveDriveImage(url: string): Promise<string> {
-      if (!url) return '';
-      if (imageCache.has(url)) return imageCache.get(url)!;
-
-      // Check if it's a Drive URL we need to fetch authenticated
-      // Pattern 1: constructed thumbnail link
-      let fileId = '';
-      const match1 = url.match(/id=([^&]+)/);
-      if (match1) fileId = match1[1];
-      
-      // Pattern 2: direct file link (if we ever use that)
-      // const match2 = url.match(/\/file\/d\/([^/]+)/);
-      
-      if (fileId) {
-          const token = getAccessToken();
-          if (token) {
-              try {
-                  const res = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`, {
-                      headers: { Authorization: `Bearer ${token}` }
-                  });
-                  if (res.ok) {
-                      const blob = await res.blob();
-                      const blobUrl = URL.createObjectURL(blob);
-                      imageCache.set(url, blobUrl);
-                      return blobUrl;
-                  }
-              } catch (e) {
-                  console.error('Failed to fetch authenticated image', e);
-              }
-          }
-      }
-      
-      // Fallback: return original (might work if public or cached) or failure
-      return url;
-  }
+  // We can expose this function to children if needed, but FoodCard handles its own click -> navigation currently.
+  // Except FoodCard wraps the whole thing in an anchor.
+  // If we want a gallery, we might need to intercept clicks on the FoodCard thumbnail?
+  // The implementations of FoodCard didn't expose an event for thumb click.
+  // Actually FoodCard just has an anchor to /entry. Let's stick to that for now for simplicity.
+  // The detail page handles gallery.
+  // BUT the old dashboard had a gallery. 
+  // Let's rely on the Detail page for gallery viewing to keep the Dashboard clean.
 </script>
 
-<div class="container">
-  <p data-testid="debug-load">Debug: Loaded</p>
-  <div class="header">
-      <h1>Food Log</h1>
-      {#if authenticated}
-           <button class="sign-out-btn" on:click={handleSignOut}>Sign Out</button>
-      {/if}
-  </div>
-
+<div class="page-container" data-testid="debug-load">
+  
   {#if !authenticated}
-    <button on:click={handleSignIn}>Sign In with Google</button>
+    <div class="auth-hero">
+        <h1>Welcome Back</h1>
+        <p>Sign in to track your nutrition.</p>
+        <button class="primary-btn" onclick={handleSignIn}>Sign In with Google</button>
+    </div>
   {:else}
-    <div class="stats-grid">
-      <div class="stat-card">
-        <h3>Calories</h3>
-        <span class="value">{stats.totalCalories}</span>
-      </div>
-      <div class="stat-card">
-        <h3>Protein</h3>
-        <span class="value">{stats.totalProtein}g</span>
-      </div>
-      <div class="stat-card">
-        <h3>Carbs</h3>
-        <span class="value">{stats.totalCarbs}g</span>
-      </div>
-      <div class="stat-card">
-        <h3>Fat</h3>
-        <span class="value">{stats.totalFat}g</span>
-      </div>
-    </div>
-    
-    <div class="actions">
-      <a href="{base}/log" class="log-btn">Log Food</a>
-    </div>
+    <div class="dashboard-grid">
+        <!-- Left Col / Top Section: Stats -->
+        <section class="stats-section glass-panel">
+             <div class="hero-ring">
+                 <StatsRing 
+                    value={stats.totalCalories} 
+                    max={GOALS.calories} 
+                    size={220} 
+                    gradientId="calories-ring"
+                    label="Tokens"
+                    suffix=""
+                 />
+             </div>
+             
+             <div class="macros-row">
+                 <MacroBubble label="Protein" value={stats.totalProtein} max={GOALS.protein} color="url(#protein-grad)" />
+                 <MacroBubble label="Carbs" value={stats.totalCarbs} max={GOALS.carbs} color="url(#carbs-grad)" />
+                 <MacroBubble label="Fat" value={stats.totalFat} max={GOALS.fat} color="url(#fat-grad)" />
+             </div>
+             
+             <!-- SVG Gradients for Macros -->
+             <svg width="0" height="0" class="visually-hidden">
+                <defs>
+                    <linearGradient id="protein-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="#c471ed"/>
+                        <stop offset="100%" stop-color="#f64f59"/>
+                    </linearGradient>
+                    <linearGradient id="carbs-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="#24c6dc"/>
+                        <stop offset="100%" stop-color="#514a9d"/>
+                    </linearGradient>
+                    <linearGradient id="fat-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="#FFD194"/>
+                        <stop offset="100%" stop-color="#D1913C"/>
+                    </linearGradient>
+                </defs>
+             </svg>
+        </section>
 
-    <div class="summary">
-      <h2>Recent Logs</h2>
-      {#if allEntries.length === 0}
-         <p>No entries yet.</p>
-      {:else}
-         <ul class="entry-list">
-             {#each allEntries as entry}
-                 <li class="entry-item">
-                     <div class="entry-row">
-                         <a href="{base}/entry?id={entry.id}" class="entry-main-link">
-                             <div class="entry-info">
-                                 <span class="time">{formatLogDate(entry.date + 'T' + entry.time)}</span>
-                                 <span class="meal-badge">{entry.mealType}</span>
-                                 <span class="desc">{entry.description}</span>
-                             </div>
-                             <div class="entry-cal">
-                                <span class="cal">{entry.calories} kcal</span>
-                             </div>
-                         </a>
-                         
-                         {#if entry.imageDriveUrl}
-                            {@const imageUrls = entry.imageDriveUrl.split(',').map((u: string) => u.trim())}
-                            <button class="thumb-btn" on:click={(e) => openGallery(imageUrls, e)}>
-                                {#await resolveDriveImage(imageUrls[0])}
-                                    <div class="thumb-loading"></div>
-                                {:then src} 
-                                    <img src={src} alt="Food" class="thumb" />
-                                {:catch}
-                                    <div class="thumb-error">!</div>
-                                {/await}
-                                
-                                {#if imageUrls.length > 1}
-                                    <span class="count-badge">+{imageUrls.length - 1}</span>
-                                {/if}
-                            </button>
-                         {/if}
-                     </div>
-                 </li>
-             {/each}
-         </ul>
-      {/if}
+        <!-- Right Col / Bottom Section: Feed -->
+        <section class="feed-section">
+            <div class="feed-header">
+                <h2>Today's Logs</h2>
+                <a href="{base}/log" class="text-link">Log New</a>
+            </div>
+            
+            <div class="feed-list">
+                {#if allEntries.length === 0}
+                    <div class="empty-state">
+                        <p>No food logged today.</p>
+                    </div>
+                {:else}
+                    {#each allEntries as entry (entry.id)}
+                        <FoodCard {...entry} />
+                    {/each}
+                {/if}
+            </div>
+        </section>
     </div>
   {/if}
 
-  {#if showGallery}
-      <div class="modal-backdrop" on:click={() => showGallery = false}>
-          <div class="modal-content" on:click|stopPropagation>
-              <button class="close-btn" on:click={() => showGallery = false}>&times;</button>
-              <div class="gallery-scroll">
-                  {#each galleryImages as imgUrl}
-                      {#await resolveDriveImage(imgUrl)}
-                           <div class="gallery-loading">Loading...</div>
-                      {:then src}
-                           <img src={src} alt="Gallery" class="gallery-img" />
-                      {/await}
-                  {/each}
-              </div>
-          </div>
-      </div>
-  {/if}
 </div>
 
 <style>
-  .container { padding: 1rem; max-width: 600px; margin: 0 auto; }
-  .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
-  .sign-out-btn { padding: 0.5rem 1rem; background: #6c757d; color: white; border: none; border-radius: 4px; font-size: 0.8rem; }
-  .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 2rem; }
-  .stat-card { background: #f5f5f5; padding: 1rem; border-radius: 8px; text-align: center; }
-  .value { font-size: 1.5rem; font-weight: bold; display: block; }
-  .actions { text-align: center; margin-bottom: 2rem; }
-  .log-btn { background: #007bff; color: white; padding: 1rem 2rem; border-radius: 25px; text-decoration: none; font-weight: bold; }
-  .entry-list { list-style: none; padding: 0; }
-  .entry-item { border-bottom: 1px solid #eee; }
-  .entry-row { display: flex; align-items: center; padding: 0.5rem 0; width: 100%; }
-  
-  .entry-main-link { display: flex; justify-content: space-between; align-items: center; text-decoration: none; color: inherit; flex-grow: 1; margin-right: 0.5rem; }
-  .entry-main-link:hover { background: #f9f9f9; }
-  
-  .entry-info { display: flex; flex-direction: column; gap: 0.2rem; }
-  .entry-cal { white-space: nowrap; margin-left: 0.5rem; }
-  .time { color: #666; font-size: 0.8rem; }
-  .meal-badge { display: inline-block; background: #e9ecef; color: #495057; padding: 0.1rem 0.4rem; border-radius: 4px; font-size: 0.7rem; width: fit-content; }
-  .cal { font-weight: bold; }
-  
-  .thumb-btn { position: relative; border: none; background: none; padding: 0; cursor: pointer; flex-shrink: 0; }
-  .thumb { width: 40px; height: 40px; border-radius: 4px; object-fit: cover; border: 1px solid #ddd; }
-  .count-badge { position: absolute; bottom: -5px; right: -5px; background: #007bff; color: white; font-size: 0.6rem; padding: 2px 4px; border-radius: 4px; font-weight: bold; }
+    .page-container {
+        padding: var(--pad-page);
+        max-width: 1200px;
+        margin: 0 auto;
+        padding-bottom: 120px; /* Mobile nav clearance */
+    }
 
-  .modal-backdrop { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; display: flex; justify-content: center; align-items: center; }
-  .modal-content { position: relative; width: 90%; max-width: 500px; background: black; padding: 1rem; border-radius: 8px; overflow: hidden; }
-  .close-btn { position: absolute; top: 5px; right: 10px; background: none; border: none; color: white; font-size: 2rem; cursor: pointer; z-index: 1001; }
-  .gallery-scroll { display: flex; overflow-x: auto; gap: 1rem; scroll-snap-type: x mandatory; padding-bottom: 10px; }
-  .gallery-img { width: 100%; flex-shrink: 0; scroll-snap-align: center; border-radius: 4px; max-height: 70vh; object-fit: contain; }
+    .auth-hero {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 60vh;
+        text-align: center;
+    }
+    
+    .primary-btn {
+        background: var(--color-primary);
+        color: white;
+        padding: 12px 24px;
+        border-radius: var(--radius-m);
+        border: none;
+        font-weight: 600;
+        font-size: 1rem;
+        margin-top: 20px;
+    }
+
+    .dashboard-grid {
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+    }
+
+    .stats-section {
+        padding: 24px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 100%;
+    }
+
+    .hero-ring {
+        margin-bottom: 30px;
+    }
+
+    .macros-row {
+        display: flex;
+        justify-content: space-around;
+        width: 100%;
+        max-width: 400px;
+    }
+
+    .feed-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 16px;
+    }
+
+    .text-link {
+        color: var(--color-primary);
+        font-size: 0.9rem;
+        font-weight: 500;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 40px;
+        color: var(--text-muted);
+        background: rgba(255,255,255,0.03);
+        border-radius: var(--radius-m);
+    }
+
+    /* Desktop Layout */
+    @media (min-width: 1024px) {
+        .page-container {
+            padding-bottom: 40px;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 40px;
+            align-items: start;
+        }
+        
+        .stats-section {
+            position: sticky;
+            top: 40px;
+        }
+    }
 </style>

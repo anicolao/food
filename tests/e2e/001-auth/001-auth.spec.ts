@@ -49,12 +49,14 @@ test('US-001: User signs in', async ({ page }, testInfo) => {
     await tester.step('authenticated', {
         description: 'User is signed in',
         verifications: [
-            { spec: 'Food Log title visible', check: async () => await expect(page.getByText('Recent Logs')).toBeVisible() },
-            { spec: 'Log Food button visible', check: async () => await expect(page.getByText('Log Food')).toBeVisible() },
-            { spec: 'Sign Out button visible', check: async () => await expect(page.getByText('Sign Out')).toBeVisible() }
+            { spec: 'Food Log title visible', check: async () => await expect(page.getByText('Today\'s Logs')).toBeVisible() },
+            { spec: 'Log Food link visible', check: async () => await expect(page.getByText('Log New')).toBeVisible() },
+            { spec: 'Settings link visible', check: async () => await expect(page.locator('a').filter({ hasText: 'Settings' }).first()).toBeVisible() }
         ]
     });
 
+    // Go to settings to sign out
+    await page.locator('a').filter({ hasText: 'Settings' }).first().click();
     await page.getByText('Sign Out').click();
 
     await tester.step('signed-out', {

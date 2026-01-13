@@ -9,18 +9,19 @@
   // @ts-ignore
   import exifr from 'exifr'; 
   import { createPickerSession, pollPickerSession, listSessionMediaItems } from '$lib/google-photos';
+  
+  import LogSheet from '$lib/components/ui/LogSheet.svelte';
 
   let fileInput: HTMLInputElement;
   let videoElement: HTMLVideoElement;
   let stream: MediaStream | null = null;
-  let showCamera = false;
+  let showCamera = $state(false);
 
-  // Single file input for legacy/file picker, but we process into arrays
-  let imageFiles: File[] = [];
-  let imagePreviews: string[] = [];
+  let imageFiles: File[] = $state([]);
+  let imagePreviews: string[] = $state([]);
   
-  let analyzing = false;
-  let form: NutritionEstimate = {
+  let analyzing = $state(false);
+  let form = $state<NutritionEstimate>({
     is_label: false,
     item_name: '',
     rationale: '',
@@ -28,15 +29,17 @@
     fat: { total: 0 },
     carbohydrates: { total: 0 },
     protein: 0
-  };
+  });
   
-  let mealType: 'Breakfast' | 'Lunch' | 'Dinner' | 'Snack' = 'Snack';
-  let entryDate = new Date().toISOString().split('T')[0];
-  let entryTime = new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+  let mealType: 'Breakfast' | 'Lunch' | 'Dinner' | 'Snack' = $state('Snack');
+  let entryDate = $state(new Date().toISOString().split('T')[0]);
+  let entryTime = $state(new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }));
 
-  // Correction State
-  let showCorrectionInput = false;
-  let userCorrection = '';
+  let showCorrectionInput = $state(false);
+  let userCorrection = $state('');
+  
+  // Sheet State
+  let sheetOpen = $derived(imagePreviews.length > 0);
 
   function updateMealType(dateObj: Date) {
      const hour = dateObj.getHours();
@@ -82,7 +85,6 @@
     const ctx = canvas.getContext('2d');
     ctx?.drawImage(videoElement, 0, 0);
     
-    // Add to lists
     canvas.toBlob(blob => {
         if (blob) {
             const file = new File([blob], `capture-${Date.now()}.jpg`, { type: 'image/jpeg' });
@@ -102,20 +104,18 @@
     }
   }
 
+  let analysisTimer: NodeJS.Timeout;
+
   async function addImage(file: File) {
-      // 1. Parse EXIF for Date/Time (Use first valid found)
       try {
            // @ts-ignore
            const exifData = await exifr.parse(file);
            if (exifData && (exifData.DateTimeOriginal || exifData.CreateDate)) {
                const date = exifData.DateTimeOriginal || exifData.CreateDate;
-               // Only update if it's the first image or we want to prioritize latest? 
-               // Let's rely on the first image causing an update, or just update every time.
                entryDate = date.toISOString().split('T')[0];
                entryTime = date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
                updateMealType(date);
            } else if (imageFiles.length === 0) {
-               // Fallback only if this is the first image
                const date = new Date(file.lastModified || Date.now());
                entryDate = date.toISOString().split('T')[0];
                entryTime = date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
@@ -128,37 +128,24 @@
       imageFiles = [...imageFiles, file];
 
       const reader = new FileReader();
-    reader.onload = (e) => {
-        if (e.target?.result) {
-            imagePreviews = [...imagePreviews, e.target.result as string];
-            
-            // Debounce analysis to allow multiple images to be added
-            if (analysisTimer) clearTimeout(analysisTimer);
-            analysisTimer = setTimeout(() => {
-                runAnalysis();
-            }, 1000);
-        }
-    };
-    reader.readAsDataURL(file);
+      reader.onload = (e) => {
+          if (e.target?.result) {
+              imagePreviews = [...imagePreviews, e.target.result as string];
+              
+              if (analysisTimer) clearTimeout(analysisTimer);
+              analysisTimer = setTimeout(() => {
+                  runAnalysis();
+              }, 1000);
+          }
+      };
+      reader.readAsDataURL(file);
   }
 
-  let analysisTimer: NodeJS.Timeout;
-
   async function runAnalysis(correction?: string) {
-    if (imagePreviews.length === 0) {
-        console.warn('runAnalysis: No images to analyze');
-        return;
-    }
+    if (imagePreviews.length === 0) return;
     
-    console.log('runAnalysis: Starting...', { 
-        imageCount: imagePreviews.length, 
-        correction,
-        firstImageLength: imagePreviews[0]?.length 
-    });
-
     analyzing = true;
     try {
-      // Prepare all images
       const images = imagePreviews.map((preview, i) => {
           try {
               return {
@@ -166,18 +153,14 @@
                   mimeType: preview.split(';')[0].split(':')[1]
               };
           } catch (e) {
-              console.error(`runAnalysis: Failed to parse image ${i}`, e);
+              console.error(`Failed to parse image ${i}`, e);
               throw e;
           }
       });
       
-      console.log('runAnalysis: Images prepared, calling Gemini...');
-      
       const previousRationale = form.rationale;
       const result = await analyzeImage(images, correction ? previousRationale : undefined, correction);
       
-      console.log('runAnalysis: Gemini response received', result);
-
       form = { 
           ...result, 
           rationale: result.rationale || '',
@@ -198,7 +181,7 @@
         rawJson: result 
       }));
     } catch (e) {
-      console.error('runAnalysis: FATAL ERROR', e);
+      console.error('Analysis failed', e);
       alert('Analysis failed: ' + e);
     } finally {
       analyzing = false;
@@ -217,12 +200,10 @@
         // @ts-ignore
         const folderId = state.config?.folderId || undefined;
         
-        // Upload ALL images
         const uploadPromises = imageFiles.map(file => 
             uploadImage(file, `FoodLog-${Date.now()}-${file.name}`, folderId)
         );
         const driveFiles = await Promise.all(uploadPromises);
-        // Prefer thumbnailLink, fallback to constructed thumbnail URL (reliable), then webViewLink
         const driveUrls = driveFiles.map(f => {
             if (f.thumbnailLink) return f.thumbnailLink;
             if (f.id) return `https://drive.google.com/thumbnail?id=${f.id}&sz=w2048`;
@@ -258,8 +239,6 @@
                 'log/entryConfirmed',
                 JSON.stringify({ entry })
             ]);
-        } else {
-            console.warn('No spreadsheet ID found, skipping sync');
         }
 
         goto(`${base}/`);
@@ -270,7 +249,7 @@
   }
 
   // --- Google Photos Logic ---
-
+  // (Simplified for brevity, reusing existing logic structure but wrapping in new UI trigger)
   async function handleGooglePhotosPick() {
      const token = await new Promise<string>((resolve) => {
          import('$lib/auth').then(m => resolve(m.getAccessToken() || ''));
@@ -285,65 +264,46 @@
      try {
          const session = await createPickerSession();
          const sessionId = session.id;
-         
          let uri = session.pickerUri;
-         if (!uri.endsWith("/autoclose")) {
-             uri = uri.endsWith("/") ? `${uri}autoclose` : `${uri}/autoclose`;
-         }
+         if (!uri.endsWith("/autoclose")) uri = uri.endsWith("/") ? `${uri}autoclose` : `${uri}/autoclose`;
          const popup = window.open(uri, 'googlePicker', 'width=800,height=600');
          
-         console.log('Starting poll loop for session:', sessionId);
          let attempts = 0;
          const MAX_ATTEMPTS = 60; 
-
          const poll = setInterval(async () => {
              attempts++;
              if (attempts > MAX_ATTEMPTS) {
                  clearInterval(poll);
-                 console.warn('Polling timed out.');
-                 alert('Selection timed out. Please try again.');
+                 alert('Selection timed out.');
                  return;
              }
-
              try {
                 const status = await pollPickerSession(sessionId);
                 if (status.mediaItemsSet) {
                     clearInterval(poll);
                     if (popup && !popup.closed) popup.close();
-                    
                     const items = await listSessionMediaItems(sessionId);
                     if (items.length > 0) {
-                        // User requested to send ALL together
-                        for (const item of items) {
-                            await processPickedItem(item, token);
-                        }
+                        for (const item of items) await processPickedItem(item, token);
                     } else {
                         alert('No photos selected');
                     }
                 }
-             } catch (e) {
-                 console.error('Polling error', e);
-             }
+             } catch (e) {}
          }, 2000); 
-
      } catch (e) {
-         console.error('Picker Flow Failed', e);
          alert('Failed to open Photos Picker: ' + e);
      }
   }
 
   async function processPickedItem(item: any, token: string) {
       if (!item.baseUrl) return;
-      
-      // Timestamp logic (Priority to API metadata if valid)
       if (item.creationTime && imageFiles.length === 0) {
-           // Only set time on first photo to avoid jumping around
           const date = new Date(item.creationTime);
           entryDate = date.toISOString().split('T')[0];
           entryTime = date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
           updateMealType(date);
       }
-
       let fetchUrl = item.baseUrl;
       if (fetchUrl.includes("drive.google.com/thumbnail")) {
            const match = fetchUrl.match(/id=([^&]+)/);
@@ -351,148 +311,406 @@
       } else if (fetchUrl.includes("googleusercontent.com")) {
            fetchUrl = `${fetchUrl}=w2048-h2048`; 
       }
-
       try {
           const res = await fetch(fetchUrl, { headers: { Authorization: `Bearer ${token}` } });
-          if (!res.ok) throw new Error('Fetch failed');
-          const blob = await res.blob();
-          
-          const file = new File([blob], item.filename || `photo-${Date.now()}.jpg`, { type: item.mimeType || blob.type || 'image/jpeg' });
-          
-          // Re-trigger addImage which does EXIF + array push + analysis
-          await addImage(file);
-
+          if (res.ok) {
+              const blob = await res.blob();
+              const file = new File([blob], item.filename || `photo-${Date.now()}.jpg`, { type: item.mimeType || blob.type || 'image/jpeg' });
+              await addImage(file);
+          }
       } catch (e) {
           console.error('Failed to download media', e);
+      }
+  }
+
+  function handleCloseSheet() {
+      // Don't actually close it if we deleted images? 
+      // Actually closer behavior is usually "reset" or "minimize".
+      // For now, dragging down just clears everything? Or maybe confirm?
+      if (confirm('Discard entry?')) {
+          resetForm();
       }
   }
 
   function resetForm() {
       imageFiles = [];
       imagePreviews = [];
-      form = {
-        is_label: false,
-        item_name: '',
-        rationale: '',
-        calories: 0,
-        fat: { total: 0 },
-        carbohydrates: { total: 0 },
-        protein: 0
-      };
+      form = { is_label: false, item_name: '', rationale: '', calories: 0, fat: { total: 0 }, carbohydrates: { total: 0 }, protein: 0 };
       showCorrectionInput = false;
       userCorrection = '';
   }
 </script>
 
-<div class="container">
-  <h1>Log Food</h1>
-
-  <div class="upload-section">
+<div class="log-page">
     {#if showCamera}
-        <div class="camera-overlay">
-            <video bind:this={videoElement} autoplay playsinline muted></video>
-            <div class="camera-controls">
-                <button on:click={capturePhoto} class="capture-btn">Capture</button>
-                <button on:click={stopCamera} class="cancel-btn">Cancel</button>
-            </div>
+        <div class="camera-ui">
+             <video bind:this={videoElement} autoplay playsinline muted></video>
+             <div class="cam-controls">
+                 <button class="cam-btn capture" onclick={capturePhoto}></button>
+                 <button class="cam-btn cancel" onclick={stopCamera}>Cancel</button>
+             </div>
         </div>
     {:else}
-      <!-- Always show buttons to add MORE photos if we want, or just hide if previews exist? 
-           User might want to add more. Let's keep buttons visible but smaller if images exist. -->
-      
-      <div class="button-group">
-          <button on:click={startCamera}>Take Photo</button>
-          <button on:click={handleGooglePhotosPick} class="secondary">Pick Photos</button>
-          {#if imagePreviews.length > 0}
-             <button on:click={resetForm} class="secondary warning">Reset</button>
-          {/if}
-      </div>
-
-      <input type="file" accept="image/*" multiple bind:this={fileInput} on:change={handleFileSelect} hidden />
-      
-      {#if imagePreviews.length > 0}
-          <div class="previews-grid">
-              {#each imagePreviews as preview}
-                  <img src={preview} alt="Preview" class="preview-thumb" />
-              {/each}
-          </div>
-          {#if analyzing}
-            <p>Analyzing {imagePreviews.length} images with Gemini...</p>
-          {/if}
-      {/if}
-
-    {/if}
-  </div>
-
-  {#if imagePreviews.length > 0 && !analyzing}
-    <div class="form-section">
-      <div class="datetime-row">
-          <label>Date <input type="date" bind:value={entryDate} /></label>
-          <label>Time <input type="time" bind:value={entryTime} ></label>
-      </div>
-
-      <label>Meal Type
-        <select bind:value={mealType}>
-          <option>Breakfast</option>
-          <option>Lunch</option>
-          <option>Dinner</option>
-          <option>Snack</option>
-        </select>
-      </label>
-
-      <label>Item Name <input type="text" bind:value={form.item_name} /></label>
-
-      <label>Rationale <textarea bind:value={form.rationale} rows="3" placeholder="AI explanation..." readonly></textarea></label>
-
-      <!-- Correction UI -->
-      {#if !showCorrectionInput}
-        <button on:click={() => showCorrectionInput = true} class="secondary small-btn">Reply / Correct AI</button>
-      {:else}
-        <div class="correction-box">
-            <textarea bind:value={userCorrection} placeholder="Correct the AI..." rows="2"></textarea>
-            <div class="correction-actions">
-                <button on:click={handleReanalyze} class="primary small-btn" disabled={!userCorrection}>Re-analyze</button>
-                <button on:click={() => showCorrectionInput = false} class="text-btn">Cancel</button>
+        <!-- Pre-capture State / Background -->
+        <div class="start-ui">
+            <h1>Log Food</h1>
+            <div class="action-buttons">
+                <button class="big-btn glass-panel" onclick={startCamera}>
+                    <div class="icon">📷</div>
+                    <span>Camera</span>
+                </button>
+                <button class="big-btn glass-panel" onclick={handleGooglePhotosPick}>
+                    <div class="icon">🖼️</div>
+                    <span>Photo Library</span>
+                </button>
+                <!-- Hidden file input for file picker fallback if library fails or just standard upload -->
+                <button class="big-btn glass-panel" onclick={() => fileInput.click()}>
+                    <div class="icon">📁</div>
+                    <span>File</span>
+                </button>
             </div>
+            
+            <input type="file" accept="image/*" multiple bind:this={fileInput} onchange={handleFileSelect} hidden />
         </div>
-      {/if}
+    {/if}
 
-      <div class="macros">
-        <label>Calories <input type="number" bind:value={form.calories} /></label>
-        <label>Protein (g) <input type="number" bind:value={form.protein} /></label>
-        <label>Carbs (g) <input type="number" bind:value={form.carbohydrates.total} /></label>
-        <label>Fat (g) <input type="number" bind:value={form.fat.total} /></label>
-      </div>
+    <LogSheet open={sheetOpen} onClose={handleCloseSheet}>
+         <div class="sheet-content">
+             <div class="preview-strip">
+                 {#each imagePreviews as preview}
+                     <img src={preview} alt="Thumb" class="sheet-thumb" />
+                 {/each}
+                 <button class="add-more-btn" onclick={() => fileInput.click()}>+</button>
+             </div>
+             
+             {#if analyzing}
+                 <div class="analyzing-state">
+                     <div class="magic-sparkle">✨</div>
+                     <p>Analyzing {imagePreviews.length} images with Gemini...</p>
+                 </div>
+             {:else}
+                 <div class="form-grid">
+                      <div class="split-row">
+                          <div class="field">
+                              <label>Date
+                                <input type="date" bind:value={entryDate} class="bg-input" />
+                              </label>
+                          </div>
+                          <div class="field">
+                              <label>Time
+                                <input type="time" bind:value={entryTime} class="bg-input" />
+                              </label>
+                          </div>
+                      </div>
+                      
+                      <div class="field">
+                          <label>Meal
+                            <select bind:value={mealType} class="bg-input">
+                                <option>Breakfast</option>
+                                <option>Lunch</option>
+                                <option>Dinner</option>
+                                <option>Snack</option>
+                            </select>
+                          </label>
+                      </div>
 
-      <button on:click={handleSubmit} class="save-btn">Save Entry</button>
-    </div>
-  {/if}
+                      <div class="field">
+                          <label>Log Description
+                            <input type="text" bind:value={form.item_name} class="bg-input big-text" placeholder="What is this?" />
+                          </label>
+                      </div>
+                      
+                      <div class="macros-row">
+                          <div class="macro-field">
+                              <label>Cals
+                                <input type="number" bind:value={form.calories} class="bg-input highlight-cal" />
+                              </label>
+                          </div>
+                          <div class="macro-field">
+                              <label>Prot
+                                <input type="number" bind:value={form.protein} class="bg-input" />
+                              </label>
+                          </div>
+                          <div class="macro-field">
+                              <label>Carb
+                                <input type="number" bind:value={form.carbohydrates.total} class="bg-input" />
+                              </label>
+                          </div>
+                          <div class="macro-field">
+                              <label>Fat
+                                <input type="number" bind:value={form.fat.total} class="bg-input" />
+                              </label>
+                          </div>
+                      </div>
+
+                      <div class="rationale-box">
+                          <p class="rationale-text">{form.rationale}</p>
+                          <button class="correct-btn" onclick={() => showCorrectionInput = !showCorrectionInput}>
+                             {showCorrectionInput ? 'Cancel Correction' : 'Correct AI'}
+                          </button>
+                      </div>
+                      
+                      {#if showCorrectionInput}
+                         <div class="correction-area">
+                              <textarea bind:value={userCorrection} placeholder="e.g. It was 2 eggs, not 3" rows="2" class="bg-input"></textarea>
+                              <button class="primary-btn small" onclick={handleReanalyze} disabled={!userCorrection}>Retry</button>
+                         </div>
+                      {/if}
+
+                      <button class="save-btn-primary" onclick={handleSubmit}>Save Entry</button>
+                 </div>
+             {/if}
+         </div>
+    </LogSheet>
 </div>
 
 <style>
-  .container { padding: 1rem; max-width: 600px; margin: 0 auto; }
-  .previews-grid { display: flex; gap: 0.5rem; overflow-x: auto; padding: 0.5rem 0; }
-  .preview-thumb { height: 100px; width: 100px; object-fit: cover; border-radius: 8px; flex-shrink: 0; border: 2px solid #ddd; }
-  
-  label { display: block; margin-bottom: 0.5rem; }
-  input, select, textarea { width: 100%; padding: 0.5rem; margin-bottom: 1rem; }
-  textarea { resize: vertical; }
-  .datetime-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-  .macros { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-  .button-group { display: flex; gap: 1rem; margin-bottom: 1rem; flex-wrap: wrap; }
-  button { flex: 1; min-width: 120px; padding: 1rem; background: #007bff; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
-  .secondary { background: #6c757d; }
-  .warning { background: #dc3545; }
-  .small-btn { padding: 0.5rem; font-size: 0.9rem; margin-bottom: 1rem; }
-  .text-btn { background: none; color: #666; width: auto; padding: 0.5rem; }
-  .save-btn { background: #28a745; margin-top: 1rem; width: 100%; }
-  
-  .correction-box { background: #f8f9fa; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; border: 1px solid #ddd; }
-  .correction-actions { display: flex; gap: 0.5rem; align-items: center; }
-  
-  .camera-overlay { position: relative; width: 100%; height: 60vh; background: #000; display: flex; flex-direction: column; align-items: center; border-radius: 8px; overflow: hidden; }
-  video { width: 100%; height: 100%; object-fit: cover; }
-  .camera-controls { position: absolute; bottom: 20px; display: flex; gap: 20px; width: 100%; justify-content: center; }
-  .capture-btn { width: 60px; height: 60px; border-radius: 50%; background: white; border: 4px solid #ccc; text-indent: -9999px; overflow: hidden; padding: 0; }
-  .cancel-btn { background: rgba(255, 255, 255, 0.3); color: white; border: none; padding: 0.5rem 1rem; border-radius: 20px; height: fit-content; align-self: center; width: auto; }
+    .log-page {
+        min-height: 100vh;
+        padding-bottom: 120px;
+    }
+
+    .start-ui {
+        padding: 40px 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 40px;
+    }
+
+    .action-buttons {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+        width: 100%;
+        max-width: 500px;
+    }
+
+    .big-btn {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 120px;
+        color: var(--text-primary);
+        background: var(--bg-card-glass);
+        border: 1px solid rgba(255,255,255,0.1);
+        border-radius: var(--radius-m);
+        gap: 10px;
+        transition: transform 0.2s;
+    }
+
+    .big-btn:active {
+        transform: scale(0.95);
+    }
+
+    .icon {
+        font-size: 2.5rem;
+    }
+
+    /* Camera UI */
+    .camera-ui {
+        position: fixed;
+        top: 0; 
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: black;
+        z-index: 50;
+    }
+    
+    video {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    
+    .cam-controls {
+        position: absolute;
+        bottom: 50px;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        gap: 40px;
+        align-items: center;
+    }
+    
+    .cam-btn.capture {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        border: 5px solid rgba(255,255,255,0.5);
+        background: white;
+    }
+    
+    .cam-btn.cancel {
+        background: rgba(0,0,0,0.5);
+        color: white;
+        border: 1px solid white;
+        padding: 10px 20px;
+        border-radius: 20px;
+    }
+
+    /* Sheet Content */
+    .sheet-content {
+        padding-bottom: 40px;
+    }
+    
+    .preview-strip {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 20px;
+        overflow-x: auto;
+    }
+    
+    .sheet-thumb {
+        width: 80px;
+        height: 80px;
+        border-radius: var(--radius-s);
+        object-fit: cover;
+        border: 2px solid rgba(255,255,255,0.1);
+    }
+    
+    .add-more-btn {
+        width: 80px;
+        height: 80px;
+        border-radius: var(--radius-s);
+        background: rgba(255,255,255,0.1);
+        color: white;
+        border: none;
+        font-size: 2rem;
+    }
+
+    .form-grid {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    }
+    
+    .split-row {
+        display: flex;
+        gap: 16px;
+    }
+    
+    .field {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        flex: 1;
+    }
+    
+    label {
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+    
+    .bg-input {
+        background: rgba(255,255,255,0.05);
+        border: 1px solid rgba(255,255,255,0.1);
+        color: white;
+        padding: 12px;
+        border-radius: var(--radius-m);
+        font-size: 1rem;
+    }
+    
+    .bg-input:focus {
+        outline: none;
+        border-color: var(--color-primary);
+        background: rgba(255,255,255,0.1);
+    }
+    
+    .big-text {
+        font-size: 1.2rem;
+        font-weight: 600;
+    }
+    
+    .macros-row {
+        display: flex;
+        gap: 10px;
+    }
+    
+    .macro-field {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+    
+    .macro-field input {
+        text-align: center;
+        padding: 10px 4px;
+    }
+    
+    .highlight-cal {
+        color: var(--text-accent);
+        font-weight: bold;
+    }
+    
+    .rationale-box {
+        background: rgba(255,255,255,0.03);
+        padding: 12px;
+        border-radius: var(--radius-m);
+        margin-top: 10px;
+    }
+    
+    .rationale-text {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+        margin-bottom: 8px;
+        line-height: 1.4;
+    }
+    
+    .correct-btn {
+        font-size: 0.75rem;
+        color: var(--color-primary);
+        background: none;
+        border: none;
+        padding: 0;
+        text-decoration: underline;
+    }
+    
+    .correction-area {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .primary-btn.small {
+        padding: 8px;
+        align-self: flex-end;
+        border: none;
+        border-radius: 8px;
+        background: var(--color-primary);
+        color: white;
+    }
+    
+    .save-btn-primary {
+        margin-top: 20px;
+        background: var(--gradient-calories);
+        color: white;
+        border: none;
+        padding: 16px;
+        border-radius: 30px;
+        font-size: 1.1rem;
+        font-weight: 700;
+    }
+    
+    .analyzing-state {
+        text-align: center;
+        padding: 40px;
+        color: var(--text-secondary);
+    }
+    
+    .magic-sparkle {
+        font-size: 3rem;
+        margin-bottom: 20px;
+        animation: spin 3s infinite linear;
+    }
+    
+    @keyframes spin { 100% { transform: rotate(360deg); } }
 </style>

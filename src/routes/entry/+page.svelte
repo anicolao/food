@@ -4,11 +4,10 @@
   import { goto } from '$app/navigation';
   import { base } from '$app/paths';
   import { onMount, tick } from 'svelte';
-  import { getAccessToken } from '$lib/auth';
   import { appendRow } from '$lib/sheets';
   import { formatLogDate } from '$lib/formatDate';
+  import { resolveDriveImage } from '$lib/images';
 
-  // Changed: Get ID from query params
   const id = $page.url.searchParams.get('id');
   
   let entry: any = null;
@@ -24,16 +23,15 @@
   
   let imageUrls: string[] = [];
   let entryDateTimeStr = '';
+  // @ts-ignore
+  let galleryContainer: HTMLElement;
 
   onMount(async () => {
       if (!id) {
-          console.error("No ID provided in query params");
           goto(`${base}/`);
           return;
       }
-
-      await tick(); // Ensure store/nav settles
-
+      await tick();
       const state = store.getState();
       entry = state.projections.log.find(e => e.id === id);
       
@@ -42,7 +40,6 @@
           return;
       }
 
-      // Populate form
       form = {
           mealType: entry.mealType,
           description: entry.description,
@@ -66,7 +63,7 @@
      const changes = {
          mealType: form.mealType,
          description: form.description,
-         rationale: form.rationale, // Allow editing rationale manually if desired
+         rationale: form.rationale,
          calories: Number(form.calories),
          protein: Number(form.protein),
          carbs: Number(form.carbs),
@@ -75,7 +72,6 @@
 
      store.dispatch(dispatchEvent('log/entryUpdated', { entryId: id, changes }));
      
-     // Sync to Sheets (Append update event)
      try {
         const state = store.getState();
         // @ts-ignore
@@ -99,7 +95,6 @@
       
       store.dispatch(dispatchEvent('log/entryDeleted', { entryId: id }));
 
-      // Sync to Sheets
       try {
         const state = store.getState();
         // @ts-ignore
@@ -117,45 +112,12 @@
       goto(`${base}/`);
   }
   
-  // Image Resolution (Copied from home page - ideally refactor to util)
-  const imageCache = new Map<string, string>();
-  async function resolveDriveImage(url: string): Promise<string> {
-      if (!url) return '';
-      if (imageCache.has(url)) return imageCache.get(url)!;
-
-      let fileId = '';
-      const match1 = url.match(/id=([^&]+)/);
-      if (match1) fileId = match1[1];
-      
-      if (fileId) {
-          const token = getAccessToken();
-          if (token) {
-              try {
-                  const res = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`, {
-                      headers: { Authorization: `Bearer ${token}` }
-                  });
-                  if (res.ok) {
-                      const blob = await res.blob();
-                      const blobUrl = URL.createObjectURL(blob);
-                      imageCache.set(url, blobUrl);
-                      return blobUrl;
-                  }
-              } catch (e) { console.error('Failed to fetch image', e); }
-          }
-      }
-      return url;
-  }
-  let galleryContainer: HTMLElement;
-
   function handleGalleryClick(e: MouseEvent) {
       if (!galleryContainer) return;
 
       const rect = galleryContainer.getBoundingClientRect();
       const x = e.clientX - rect.left;
       const center = rect.width / 2;
-      
-      // Calculate scroll amount: ~85% of width + gap (approx) or just generic "page"
-      // Since it's scroll-snap, approximate scroll usually snaps to correct point.
       const scrollAmount = rect.width * 0.85; 
 
       if (x > center) {
@@ -166,67 +128,198 @@
   }
 </script>
 
-<div class="container">
+<div class="page-container">
   <div class="nav-header">
-      <a href="{base}/" class="back-link">&larr; Back</a>
-      <span>{entryDateTimeStr}</span>
-      <button class="delete-btn" on:click={handleDelete}>Delete</button>
+      <a href="{base}/" class="text-link">&larr; Back</a>
+      <h2 class="page-title">{entryDateTimeStr}</h2>
+      <button class="delete-link" onclick={handleDelete}>Delete</button>
   </div>
 
   {#if imageUrls.length > 0}
-      <!-- svelte-ignore a11y-click-events-have-key-events(we just want enhancement, scrolling works naturally too) -->
-      <!-- svelte-ignore a11y-no-static-element-interactions -->
-      <div class="gallery" bind:this={galleryContainer} on:click={handleGalleryClick}>
+      <!-- svelte-ignore a11y_click_events_have_key_events -->
+      <!-- svelte-ignore a11y_no_static_element_interactions -->
+      <div class="gallery" bind:this={galleryContainer} onclick={handleGalleryClick}>
           {#each imageUrls as url}
                {#await resolveDriveImage(url)}
-                   <div class="loading-placeholder">Loading...</div>
+                   <div class="loading-placeholder glass-panel">Loading...</div>
                {:then src}
                    <img src={src} class="hero-image" alt="Food" />
                {:catch}
-                   <div class="error-placeholder">Image Error</div>
+                   <div class="error-placeholder glass-panel">Image Error</div>
                {/await}
           {/each}
       </div>
   {/if}
 
-  <div class="form-section">
-      <label>Item Name <input type="text" bind:value={form.description} /></label>
+  <div class="glass-panel form-section">
+      <div class="field">
+          <label>Item Name</label>
+          <input type="text" class="bg-input big-text" bind:value={form.description} />
+      </div>
       
-      <label>Meal Type
-        <select bind:value={form.mealType}>
-          <option>Breakfast</option>
-          <option>Lunch</option>
-          <option>Dinner</option>
-          <option>Snack</option>
-        </select>
-      </label>
-
-      <div class="macros">
-        <label>Calories <input type="number" bind:value={form.calories} /></label>
-        <label>Protein (g) <input type="number" bind:value={form.protein} /></label>
-        <label>Carbs (g) <input type="number" bind:value={form.carbs} /></label>
-        <label>Fat (g) <input type="number" bind:value={form.fat} /></label>
+      <div class="field">
+          <label>Meal Type</label>
+          <select class="bg-input" bind:value={form.mealType}>
+            <option>Breakfast</option>
+            <option>Lunch</option>
+            <option>Dinner</option>
+            <option>Snack</option>
+          </select>
       </div>
 
-      <label>Rationale / Notes <textarea bind:value={form.rationale} rows="4"></textarea></label>
+      <div class="macros-grid">
+        <div class="field">
+            <label>Calories</label>
+            <input type="number" class="bg-input highlight-cal" bind:value={form.calories} />
+        </div>
+        <div class="field">
+            <label>Protein (g)</label>
+            <input type="number" class="bg-input" bind:value={form.protein} />
+        </div>
+        <div class="field">
+            <label>Carbs (g)</label>
+            <input type="number" class="bg-input" bind:value={form.carbs} />
+        </div>
+        <div class="field">
+            <label>Fat (g)</label>
+            <input type="number" class="bg-input" bind:value={form.fat} />
+        </div>
+      </div>
 
-      <button class="save-btn" on:click={handleSave}>Save Changes</button>
+      <div class="field">
+          <label>Rationale / Notes</label>
+          <textarea class="bg-input" bind:value={form.rationale} rows="4"></textarea>
+      </div>
+
+      <button class="save-btn" onclick={handleSave}>Save Changes</button>
   </div>
 </div>
 
 <style>
-  .container { padding: 1rem; max-width: 600px; margin: 0 auto; }
-  .nav-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
-  .back-link { text-decoration: none; color: #007bff; font-weight: bold; }
-  .delete-btn { background: none; color: #dc3545; border: 1px solid #dc3545; padding: 0.2rem 0.5rem; border-radius: 4px; cursor: pointer; }
+  .page-container {
+      padding: 20px;
+      padding-bottom: 120px;
+      max-width: 600px;
+      margin: 0 auto;
+  }
   
-  .gallery { display: flex; overflow-x: auto; gap: 1rem; margin-bottom: 1.5rem; scroll-snap-type: x mandatory; }
-  .hero-image { width: 85%; height: 300px; object-fit: cover; border-radius: 8px; flex-shrink: 0; scroll-snap-align: center; }
-  .loading-placeholder, .error-placeholder { width: 100%; height: 200px; display: flex; align-items: center; justify-content: center; background: #eee; border-radius: 8px; }
+  .nav-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+  }
   
-  label { display: block; margin-bottom: 0.5rem; font-weight: 500; }
-  input, select, textarea { width: 100%; padding: 0.8rem; margin-bottom: 1.2rem; border: 1px solid #ddd; border-radius: 4px; font-size: 1rem; }
-  .macros { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .text-link {
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 0.9rem;
+  }
   
-  .save-btn { width: 100%; background: #28a745; color: white; padding: 1rem; border: none; border-radius: 8px; font-size: 1.1rem; font-weight: bold; cursor: pointer; }
+  .page-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+  }
+  
+  .delete-link {
+      background: none;
+      border: none;
+      color: #ff4d4d;
+      font-size: 0.9rem;
+      cursor: pointer;
+  }
+  
+  .gallery {
+      display: flex;
+      overflow-x: auto;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+      scroll-snap-type: x mandatory;
+      padding-bottom: 10px;
+  }
+  
+  .hero-image {
+      width: 85%;
+      height: 300px;
+      object-fit: cover;
+      border-radius: var(--radius-m);
+      flex-shrink: 0;
+      scroll-snap-align: center;
+      border: 1px solid rgba(255,255,255,0.1);
+  }
+  
+  .loading-placeholder, .error-placeholder {
+      width: 85%;
+      height: 300px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: var(--radius-m);
+      flex-shrink: 0;
+  }
+  
+  .form-section {
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+  }
+  
+  .field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+  }
+  
+  label {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+  }
+  
+  .bg-input {
+      background: rgba(0,0,0,0.2);
+      border: 1px solid rgba(255,255,255,0.1);
+      color: white;
+      padding: 12px;
+      border-radius: var(--radius-m);
+      font-size: 1rem;
+      width: 100%;
+      box-sizing: border-box;
+  }
+  
+  .bg-input:focus {
+      outline: none;
+      border-color: var(--color-primary);
+      background: rgba(0,0,0,0.3);
+  }
+  
+  .big-text {
+      font-size: 1.2rem;
+      font-weight: 600;
+  }
+  
+  .macros-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+  }
+  
+  .highlight-cal {
+      color: var(--text-accent);
+      font-weight: bold;
+  }
+  
+  .save-btn {
+      margin-top: 10px;
+      background: var(--gradient-primary);
+      color: white;
+      border: none;
+      padding: 16px;
+      border-radius: 30px;
+      font-size: 1.1rem;
+      font-weight: 700;
+      cursor: pointer;
+  }
 </style>

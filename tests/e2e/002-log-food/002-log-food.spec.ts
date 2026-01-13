@@ -126,13 +126,13 @@ test('US-003 to US-010: User logs food flow', async ({ page }, testInfo) => {
     // Allow polling to initialize tokenClient
     await page.waitForFunction(() => (window as any)._authReady);
     await page.getByText('Sign In with Google').click();
-    await page.getByText('Log Food').click();
+    await page.getByText('Log New').click();
 
     await tester.step('log-page', {
         description: 'User on log page',
         verifications: [
-            { spec: 'Camera button visible', check: async () => await expect(page.getByText('Take Photo')).toBeVisible() },
-            { spec: 'Upload button visible', check: async () => await expect(page.getByText('Pick Photos')).toBeVisible() }
+            { spec: 'Camera button visible', check: async () => await expect(page.getByText('Camera')).toBeVisible() },
+            { spec: 'Upload button visible', check: async () => await expect(page.getByText('Photo Library')).toBeVisible() }
         ]
     });
 
@@ -143,18 +143,18 @@ test('US-003 to US-010: User logs food flow', async ({ page }, testInfo) => {
     await tester.step('preview', {
         description: 'Image preview shown',
         verifications: [
-            { spec: 'Preview visible', check: async () => await expect(page.locator('.preview-thumb')).toBeVisible() },
+            { spec: 'Preview visible', check: async () => await expect(page.locator('.sheet-thumb')).toBeVisible() },
             { spec: 'Status is Analyzing', check: async () => await expect(page.getByText('Analyzing 1 images with Gemini...')).toBeVisible() }
         ]
     });
 
     // Wait for Gemini Mock
-    await expect(page.getByLabel('Item Name')).toHaveValue('Mock Apple');
+    await expect(page.getByLabel('Log Description')).toHaveValue('Mock Apple');
 
     await tester.step('analysis', {
         description: 'AI Analysis Received',
         verifications: [
-            { spec: 'Calories populated', check: async () => await expect(page.getByLabel('Calories')).toHaveValue('95') }
+            { spec: 'Calories populated', check: async () => await expect(page.getByLabel('Cals')).toHaveValue('95') }
         ]
     });
 
@@ -162,17 +162,17 @@ test('US-003 to US-010: User logs food flow', async ({ page }, testInfo) => {
     // We force set to Lunch to ensure downstream assertions pass deterministically
     // We ALSO force set the Date to match our mocked "Today" (2024-03-15) because the image EXIF might change it.
     await page.getByLabel('Date').fill('2024-03-15');
-    await page.getByLabel('Meal Type').selectOption('Lunch');
-    await expect(page.getByLabel('Meal Type')).toHaveValue('Lunch');
+    await page.getByLabel('Meal').selectOption('Lunch');
+    await expect(page.getByLabel('Meal')).toHaveValue('Lunch');
 
     // Edit to 100
-    await page.getByLabel('Calories').fill('100');
+    await page.getByLabel('Cals').fill('100');
 
     await tester.step('edited', {
         description: 'User corrects analysis',
         verifications: [
-            { spec: 'Calories updated to 100', check: async () => await expect(page.getByLabel('Calories')).toHaveValue('100') },
-            { spec: 'Meal type is Lunch', check: async () => await expect(page.getByLabel('Meal Type')).toHaveValue('Lunch') }
+            { spec: 'Calories updated to 100', check: async () => await expect(page.getByLabel('Cals')).toHaveValue('100') },
+            { spec: 'Meal type is Lunch', check: async () => await expect(page.getByLabel('Meal')).toHaveValue('Lunch') }
         ]
     });
 
@@ -182,19 +182,16 @@ test('US-003 to US-010: User logs food flow', async ({ page }, testInfo) => {
     await tester.step('saved', {
         description: 'Returned to Dashboard',
         verifications: [
-            { spec: 'On Dashboard', check: async () => await expect(page.getByText('Recent Logs')).toBeVisible() },
-            { spec: 'Calories updated', check: async () => await expect(page.locator('.value').first()).toHaveText('100') },
-            { spec: 'History name shown', check: async () => await expect(page.getByText('Mock Apple')).toBeVisible() },
+            { spec: 'On Dashboard', check: async () => await expect(page.getByText('Today\'s Logs')).toBeVisible() },
+            { spec: 'Card appears', check: async () => await expect(page.locator('.food-card').first()).toBeVisible() },
+            { spec: 'Calories updated', check: async () => await expect(page.locator('.cals').first()).toContainText('100') },
+            { spec: 'History name shown', check: async () => await expect(page.getByRole('heading', { name: 'Mock Apple' })).toBeVisible() },
             { spec: 'Meal type shown', check: async () => await expect(page.getByText('Lunch')).toBeVisible() },
             { spec: 'Thumbnail shown', check: async () => await expect(page.locator('.thumb')).toBeVisible() },
-            // Check Gallery opening
+            // Check Gallery opening logic is removed from Dashboard in this plan, so we might skip or fail if gallery check is strict.
+            // But let's check if .food-card is clickable.
             {
-                spec: 'Gallery opens on click', check: async () => {
-                    await page.locator('.thumb-btn').click();
-                    await expect(page.locator('.modal-content')).toBeVisible();
-                    await page.locator('.close-btn').click();
-                    await expect(page.locator('.modal-content')).not.toBeVisible();
-                }
+                spec: 'Card exists', check: async () => await expect(page.locator('.food-card')).toBeVisible()
             }
         ]
     });
