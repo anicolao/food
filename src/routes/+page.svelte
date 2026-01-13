@@ -5,15 +5,22 @@
   import { store, dispatchEvent, setConfig } from '$lib/store';
   import { base } from '$app/paths';
   import { resolveDriveImage } from '$lib/images';
+  import { getBusinessDate, groupLogs, type ActivityGroup } from '$lib/activity-grouping';
   
   import StatsRing from '$lib/components/ui/StatsRing.svelte';
   import MacroBubble from '$lib/components/ui/MacroBubble.svelte';
-  import FoodCard from '$lib/components/ui/FoodCard.svelte';
+  import ActivityCard from '$lib/components/ui/ActivityCard.svelte';
 
   let authenticated = $state(false);
+  
+  // Stats derived from today's filtered logs
   let stats = $state({ totalCalories: 0, totalProtein: 0, totalFat: 0, totalCarbs: 0 });
-  let allEntries: any[] = $state([]);
-  const today = new Date().toISOString().split('T')[0];
+  
+  // Grouped entries for the feed
+  let groupedEntries: ActivityGroup[] = $state([]);
+  
+  // Current Business Date (4AM cutoff)
+  const today = getBusinessDate(new Date());
 
   // Daily Goals (Mock for now, should be in settings/store)
   const GOALS = {
@@ -59,17 +66,28 @@
 
     const unsubscribe = store.subscribe(() => {
       const state = store.getState();
-      if (state.projections.stats[today]) {
-        stats = state.projections.stats[today];
-      } else {
-        stats = { totalCalories: 0, totalProtein: 0, totalFat: 0, totalCarbs: 0 };
-      }
-      
-      allEntries = [...state.projections.log].sort((a, b) => {
-          const dateA = new Date(a.date + 'T' + a.time);
-          const dateB = new Date(b.date + 'T' + b.time);
-          return dateB.getTime() - dateA.getTime();
+      const allLogs = state.projections.log;
+
+      // 1. Filter logs for "Today" (Business Day)
+      const todaysLogs = allLogs.filter(entry => {
+          // Construct full date object to check business date
+          // Handling potential missing time with default if needed, but store guarantees time
+          const dateObj = new Date(`${entry.date}T${entry.time}`);
+          return getBusinessDate(dateObj) === today;
       });
+
+      // 2. Group them
+      groupedEntries = groupLogs(todaysLogs);
+
+      // 3. Calculate Stats from these specific logs (ignoring store pre-calc which uses calendar date)
+      const newStats = { totalCalories: 0, totalProtein: 0, totalFat: 0, totalCarbs: 0 };
+      todaysLogs.forEach(entry => {
+          newStats.totalCalories += Number(entry.calories || 0);
+          newStats.totalProtein += Number(entry.protein || 0);
+          newStats.totalFat += Number(entry.fat || 0);
+          newStats.totalCarbs += Number(entry.carbs || 0);
+      });
+      stats = newStats;
     });
 
     return unsubscribe;
@@ -78,19 +96,6 @@
   function handleSignIn() {
     signIn();
   }
-
-  // Gallery Logic
-  let showGallery = $state(false);
-  let galleryImages: string[] = $state([]);
-
-  // We can expose this function to children if needed, but FoodCard handles its own click -> navigation currently.
-  // Except FoodCard wraps the whole thing in an anchor.
-  // If we want a gallery, we might need to intercept clicks on the FoodCard thumbnail?
-  // The implementations of FoodCard didn't expose an event for thumb click.
-  // Actually FoodCard just has an anchor to /entry. Let's stick to that for now for simplicity.
-  // The detail page handles gallery.
-  // BUT the old dashboard had a gallery. 
-  // Let's rely on the Detail page for gallery viewing to keep the Dashboard clean.
 </script>
 
 <div class="page-container" data-testid="debug-load">
@@ -170,13 +175,13 @@
             </div>
             
             <div class="feed-list">
-                {#if allEntries.length === 0}
+                {#if groupedEntries.length === 0}
                     <div class="empty-state">
-                        <p>No food logged today.</p>
+                        <p>No food logged today (since 4 AM).</p>
                     </div>
                 {:else}
-                    {#each allEntries as entry (entry.id)}
-                        <FoodCard {...entry} />
+                    {#each groupedEntries as group (group.id)}
+                        <ActivityCard {group} />
                     {/each}
                 {/if}
             </div>

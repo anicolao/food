@@ -59,9 +59,13 @@ test('US-018 to US-022: Details, Edit and Delete', async ({ page }, testInfo) =>
     await page.getByText('Save Entry').click();
 
     // 2. Verify on Home
-    await expect(page.getByText('Original Food').first()).toBeVisible();
-    // Use .cals class for specificity
-    await expect(page.locator('.food-card .cals').first()).toContainText('100');
+    // 2. Verify on Home
+    // ActivityCard shows "Lunch" (based on 12:00 PM), expand it to see "Original Food"
+    await expect(page.locator('.activity-card').first()).toBeVisible();
+    await page.locator('.activity-card .header-btn').first().click();
+
+    await expect(page.locator('.item-name').filter({ hasText: 'Original Food' }).first()).toBeVisible();
+
     // Stats check: 100
     await expect(page.locator('.hero-ring').getByText('100', { exact: true })).toBeVisible();
 
@@ -105,8 +109,10 @@ test('US-018 to US-022: Details, Edit and Delete', async ({ page }, testInfo) =>
     await tester.step('edited-state', {
         description: 'Returned to Home after edit',
         verifications: [
-            { spec: 'Name updated in list', check: async () => await expect(page.getByText('Edited Food')).toBeVisible() },
-            { spec: 'Calories updated in list', check: async () => await expect(page.locator('.food-card .cals').filter({ hasText: '200' }).first()).toBeVisible() },
+            // Expand again as reload collapses state
+            { spec: 'Expand card', check: async () => await page.locator('.activity-card .header-btn').first().click() },
+            { spec: 'Name updated in list', check: async () => await expect(page.locator('.item-name').filter({ hasText: 'Edited Food' }).first()).toBeVisible() },
+            { spec: 'Calories updated in list', check: async () => await expect(page.locator('.item-cal').filter({ hasText: '200' }).first()).toBeVisible() },
             { spec: 'Total Calories updated', check: async () => await expect(page.locator('.hero-ring .value-text').first()).toContainText('200') }
         ]
     });

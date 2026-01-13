@@ -9,7 +9,7 @@ export interface FoodEvent {
 }
 
 // --- Initial State (Projections) ---
-interface LogEntry {
+export interface LogEntry {
   id: string;
   date: string;
   time: string;

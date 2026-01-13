@@ -45,6 +45,7 @@ test('US-012: Stats persist after reload', async ({ page }, testInfo) => {
                             entry: {
                                 id: '1',
                                 date: new Date().toISOString().split('T')[0], // Today
+                                time: '12:00',
                                 description: 'Mock Apple',
                                 calories: 500,
                                 protein: 20,
@@ -71,8 +72,12 @@ test('US-012: Stats persist after reload', async ({ page }, testInfo) => {
         verifications: [
 
             { spec: 'Calories = 500', check: async () => await expect(page.locator('.value-text').first()).toHaveText('500') },
+            { spec: 'Calories = 500', check: async () => await expect(page.locator('.value-text').first()).toHaveText('500') },
             // Bubble value format is now "Value/Max" e.g. "20/180" inside the bubble.
             { spec: 'Protein = 20', check: async () => await expect(page.locator('.bubble-value').first()).toHaveText('20/180') },
+
+            // Expand card to see item
+            { spec: 'Expand card', check: async () => await page.locator('.activity-card .header-btn').first().click() },
             { spec: 'History shows entry', check: async () => await expect(page.getByText('Mock Apple')).toBeVisible() }
         ]
     });
