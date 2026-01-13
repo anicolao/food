@@ -1,15 +1,35 @@
 # Test: US-013 to US-017: Smart Date Formatting
 
-## Check date formatting
+## Verify Today View
 
-![Check date formatting](./screenshots/000-smart-dates.png)
+![Verify Today View](./screenshots/000-check-today.png)
 
 **Verifications:**
-- [x] Today shows time only
-- [x] Yesterday shows Yesterday @ Time
-- [x] Recent shows Day @ Time
-- [x] This Year shows Date
-- [x] Old shows Date with Year
+- [x] Header says Today
+- [x] Today Food visible
+- [x] Yesterday Food NOT visible
+- [x] Monday Food NOT visible
+
+---
+
+## Verify Yesterday View
+
+![Verify Yesterday View](./screenshots/001-check-yesterday.png)
+
+**Verifications:**
+- [x] Header says Yesterday
+- [x] Yesterday Food visible
+- [x] Today Food NOT visible
+
+---
+
+## Verify Monday View
+
+![Verify Monday View](./screenshots/002-check-monday.png)
+
+**Verifications:**
+- [x] Header says Mon, Mar 11
+- [x] Monday Food visible
 
 ---
 
