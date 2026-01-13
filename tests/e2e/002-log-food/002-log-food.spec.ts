@@ -10,9 +10,17 @@ test('US-003 to US-010: User logs food flow', async ({ page }, testInfo) => {
     page.on('pageerror', err => console.log(`BROWSER ERROR: ${err}`));
 
     // Mock Auth & Services
+    // Mock Auth & Services
     await page.clock.install({ time: new Date('2024-03-15T12:00:00') });
     await page.addInitScript(() => {
-        (window as any).google = { accounts: { oauth2: { initTokenClient: (c: any) => ({ requestAccessToken: () => c.callback({ access_token: 'mock' }) }) } } };
+        (window as any).google = {
+            accounts: {
+                oauth2: {
+                    initTokenClient: (c: any) => ({ requestAccessToken: () => c.callback({ access_token: 'mock' }) }),
+                    revoke: (token: string, cb: any) => cb()
+                }
+            }
+        };
     });
 
     // Debug requests
@@ -115,6 +123,8 @@ test('US-003 to US-010: User logs food flow', async ({ page }, testInfo) => {
     });
 
     await page.goto('/');
+    // Allow polling to initialize tokenClient
+    await page.waitForTimeout(500);
     await page.getByText('Sign In with Google').click();
     await page.getByText('Log Food').click();
 

@@ -10,7 +10,12 @@ test('US-018 to US-022: Details, Edit and Delete', async ({ page }, testInfo) =>
     await page.clock.install({ time: new Date('2024-03-15T12:00:00') });
     await page.addInitScript(() => {
         (window as any).google = {
-            accounts: { oauth2: { initTokenClient: (c: any) => ({ requestAccessToken: () => c.callback({ access_token: 'mock' }) }) } }
+            accounts: {
+                oauth2: {
+                    initTokenClient: (c: any) => ({ requestAccessToken: () => c.callback({ access_token: 'mock' }) }),
+                    revoke: (token: string, cb: any) => cb()
+                }
+            }
         };
     });
     await page.route('https://accounts.google.com/gsi/client', route => route.abort());
@@ -32,6 +37,8 @@ test('US-018 to US-022: Details, Edit and Delete', async ({ page }, testInfo) =>
     });
 
     await page.goto('/');
+    // Allow polling to initialize tokenClient
+    await page.waitForTimeout(500);
     await page.getByText('Sign In with Google').click();
 
     // 1. Create Entry

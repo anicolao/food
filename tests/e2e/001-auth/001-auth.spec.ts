@@ -7,7 +7,14 @@ test('US-001: User signs in', async ({ page }, testInfo) => {
 
     // Mock Google Auth & Drive Discovery
     await page.addInitScript(() => {
-        (window as any).google = { accounts: { oauth2: { initTokenClient: (c: any) => ({ requestAccessToken: () => c.callback({ access_token: 'mock-token' }) }) } } };
+        (window as any).google = {
+            accounts: {
+                oauth2: {
+                    initTokenClient: (c: any) => ({ requestAccessToken: () => c.callback({ access_token: 'mock-token' }) }),
+                    revoke: (token: string, cb: any) => cb()
+                }
+            }
+        };
     });
 
     await page.route('**googleapis.com**', async route => {
@@ -35,6 +42,8 @@ test('US-001: User signs in', async ({ page }, testInfo) => {
         ]
     });
 
+    // Allow polling to initialize tokenClient
+    await page.waitForTimeout(500);
     await page.getByText('Sign In with Google').click();
 
     await tester.step('authenticated', {
