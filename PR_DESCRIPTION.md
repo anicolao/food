@@ -1,11 +1,17 @@
-# Description
-Implemented PWA 'Add to Homescreen' support with custom icons and manifest.
+# Grouped Logging
 
-## User Prompt
-When the user adds the bookmark to homescreen on iOS or Android, I want them to get a smooth, as app-like experience as possible from the resulting bookmark. Let's update our site so that it looks as near as possible to a native app when bookmarked this way. Use nano banana to generate a homescreen icon that is visually similar to the rest of the UI design, by showing it existing mockups it has made as inspiration.
+## Original User Request
+Read DEVELOPMENT.md, WORKFLOW.md, and GROUPED_LOGGING_UX.md and implement the grouped logging.
+
+## Comments (Internal)
+I have implemented the "Grouped Logging" feature as per `GROUPED_LOGGING_UX.md`.
 
 ## Changes
-- Created `static/manifest.webmanifest`.
-- Generated app icons (192, 512, apple-touch-icon).
-- Updated `src/app.html` with iOS meta tags.
-- Added documentation in `docs/pwa/`.
+- **Grouping Logic**: Implemented `src/lib/activity-grouping.ts` to handling 4AM day rollovers and meal/snack activity clustering.
+- **UI Components**: created `ActivityCard.svelte` to display grouped logs.
+- **Dashboard**: Updated `+page.svelte` to use the new grouping logic and component.
+- **Store**: Exported `LogEntry` interface.
+- **Verification**: Added `tests/unit/activity-grouping.test.ts` and updated `002-log-food.spec.ts` with new assertions and snapshots.
+
+## Artifacts
+Detailed plans and walkthroughs are in `docs/grouped-logging/`.

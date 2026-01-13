@@ -45,12 +45,12 @@
 
 **Verifications:**
 - [x] On Dashboard
-- [x] Card appears
-- [x] Calories updated
-- [x] History name shown
-- [x] Meal type shown
-- [x] Thumbnail shown
-- [x] Card exists
+- [x] Activity Card appears
+- [x] Meal type shown in header
+- [x] Total Cals shown in header
+- [x] Expand Group
+- [x] Item name shown
+- [x] Item calories shown
 
 ---
 

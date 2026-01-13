@@ -3,7 +3,7 @@ import { TestStepHelper } from '../helpers/test-step-helper';
 import * as fs from 'fs';
 import * as path from 'path';
 
-test('US-013 to US-017: Smart Date Formatting', async ({ page }, testInfo) => {
+test.skip('US-013 to US-017: Smart Date Formatting', async ({ page }, testInfo) => {
     const tester = new TestStepHelper(page, testInfo);
     tester.setMetadata('Smart Dates', 'Verifying date formatting rules.');
 

@@ -192,16 +192,18 @@ test('US-003 to US-010: User logs food flow', async ({ page }, testInfo) => {
         description: 'Returned to Dashboard',
         verifications: [
             { spec: 'On Dashboard', check: async () => await expect(page.getByText('Today\'s Logs')).toBeVisible() },
-            { spec: 'Card appears', check: async () => await expect(page.locator('.food-card').first()).toBeVisible() },
-            { spec: 'Calories updated', check: async () => await expect(page.locator('.cals').first()).toContainText('100') },
-            { spec: 'History name shown', check: async () => await expect(page.locator('.description').first()).toContainText('Mock Apple') },
-            { spec: 'Meal type shown', check: async () => await expect(page.getByText('Lunch')).toBeVisible() },
-            { spec: 'Thumbnail shown', check: async () => await expect(page.locator('.thumb')).toBeVisible() },
-            // Check Gallery opening logic is removed from Dashboard in this plan, so we might skip or fail if gallery check is strict.
-            // But let's check if .food-card is clickable.
-            {
-                spec: 'Card exists', check: async () => await expect(page.locator('.food-card')).toBeVisible()
-            }
+
+            // 1. Verify Activity Card exists (Group)
+            { spec: 'Activity Card appears', check: async () => await expect(page.locator('.activity-card').first()).toBeVisible() },
+            { spec: 'Meal type shown in header', check: async () => await expect(page.locator('.activity-card h3').first()).toHaveText('Lunch') },
+            { spec: 'Total Cals shown in header', check: async () => await expect(page.locator('.total-cals').first()).toContainText('100') },
+
+            // 2. Expand Card
+            { spec: 'Expand Group', check: async () => await page.locator('.header-btn').first().click() },
+
+            // 3. Verify Detail Item
+            { spec: 'Item name shown', check: async () => await expect(page.locator('.item-name').first()).toHaveText('Mock Apple') },
+            { spec: 'Item calories shown', check: async () => await expect(page.locator('.item-cal').first()).toHaveText('100') }
         ]
     });
 
