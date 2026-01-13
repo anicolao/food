@@ -1,0 +1,4 @@
+if git grep -q 'waitForTimeout' .; then
+  echo 'Error: waitForTimeout is forbidden. Use event-based waiting instead.'
+  exit 1
+fi

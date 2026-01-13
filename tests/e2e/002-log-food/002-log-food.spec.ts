@@ -124,7 +124,7 @@ test('US-003 to US-010: User logs food flow', async ({ page }, testInfo) => {
 
     await page.goto('/');
     // Allow polling to initialize tokenClient
-    await page.waitForTimeout(500);
+    await page.waitForFunction(() => (window as any)._authReady);
     await page.getByText('Sign In with Google').click();
     await page.getByText('Log Food').click();
 
