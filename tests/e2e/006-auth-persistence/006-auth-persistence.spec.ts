@@ -6,7 +6,8 @@ test('US-023: Auth Persistence', async ({ page }, testInfo) => {
     tester.setMetadata('Auth Persistence', 'Verifying session survives reload.');
 
     // Mock Clock for Expiry Check (Start at T0)
-    const T0 = new Date('2024-03-15T12:00:00');
+    // 12:00 PM EDT = 16:00 PM UTC
+    const T0 = new Date('2024-03-15T16:00:00Z');
     await page.clock.install({ time: T0 });
 
     // Mock Google Script

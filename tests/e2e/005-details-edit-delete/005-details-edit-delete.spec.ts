@@ -7,7 +7,8 @@ test('US-018 to US-022: Details, Edit and Delete', async ({ page }, testInfo) =>
     tester.setMetadata('Edit/Delete', 'Verifying details page, edit and delete.');
 
     // Mock Auth & Clock
-    await page.clock.install({ time: new Date('2024-03-15T12:00:00') });
+    // 12:00 PM EDT = 16:00 PM UTC
+    await page.clock.install({ time: new Date('2024-03-15T16:00:00Z') });
     await page.addInitScript(() => {
         (window as any).google = {
             accounts: {
@@ -27,7 +28,7 @@ test('US-018 to US-022: Details, Edit and Delete', async ({ page }, testInfo) =>
     });
 
     // FORCE Fixture File Timestamp to match Mocked Clock
-    const mockDate = new Date('2024-03-15T12:00:00');
+    const mockDate = new Date('2024-03-15T16:00:00Z');
     fs.utimesSync('tests/e2e/fixtures/apple.png', mockDate, mockDate);
     await page.route('**googleapis.com**', async route => {
         const url = route.request().url();

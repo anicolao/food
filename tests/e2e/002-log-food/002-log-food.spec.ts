@@ -11,7 +11,9 @@ test('US-003 to US-010: User logs food flow', async ({ page }, testInfo) => {
 
     // Mock Auth & Services
     // Mock Auth & Services
-    await page.clock.install({ time: new Date('2024-03-15T12:00:00') });
+    // Use UTC to ensure it maps to 12:00 PM EDT (UTC-4) in the browser
+    // 12:00 PM EDT = 16:00 PM UTC
+    await page.clock.install({ time: new Date('2024-03-15T16:00:00Z') });
     await page.addInitScript(() => {
         (window as any).google = {
             accounts: {
@@ -41,9 +43,11 @@ test('US-003 to US-010: User logs food flow', async ({ page }, testInfo) => {
         await route.fulfill({ body: buffer, contentType: 'image/png' });
     });
 
-    // FORCE Fixture File Timestamp to match Mocked Clock
-    // This allows file.lastModified to align with our deterministic tests
-    const mockDate = new Date('2024-03-15T12:00:00');
+    // FORCE Fixture File Timestamp to match Mocked Clock (UTC-4 logic handled by browser, but fs uses system time)
+    // We want fs.utimesSync to match the UTC time so that when the browser reads it (and converts to local), it sees the right time?
+    // Actually, File.lastModified is an integer timestamp (ms since epoch).
+    // So if we set it to '2024-03-15T16:00:00Z' (12:00 EDT), the browser in NY will see 12:00 EDT.
+    const mockDate = new Date('2024-03-15T16:00:00Z');
     fs.utimesSync('tests/e2e/fixtures/apple.png', mockDate, mockDate);
 
     await page.route('**googleapis.com**', async route => {
