@@ -109,17 +109,37 @@
                  <StatsRing 
                     value={stats.totalCalories} 
                     max={GOALS.calories} 
-                    size={220} 
+                    size={260} 
                     gradientId="calories-ring"
-                    label="Tokens"
-                    suffix=""
+                    label="kcal"
                  />
              </div>
              
              <div class="macros-row">
-                 <MacroBubble label="Protein" value={stats.totalProtein} max={GOALS.protein} color="url(#protein-grad)" />
-                 <MacroBubble label="Carbs" value={stats.totalCarbs} max={GOALS.carbs} color="url(#carbs-grad)" />
-                 <MacroBubble label="Fat" value={stats.totalFat} max={GOALS.fat} color="url(#fat-grad)" />
+                 <MacroBubble 
+                    label="Protein" 
+                    value={stats.totalProtein} 
+                    max={GOALS.protein} 
+                    color="#c471ed"
+                    gradientId="protein-grad" 
+                    iconSrc="/images/icon-protein.png" 
+                />
+                 <MacroBubble 
+                    label="Carbs" 
+                    value={stats.totalCarbs} 
+                    max={GOALS.carbs} 
+                    color="#24c6dc"
+                    gradientId="carbs-grad" 
+                    iconSrc="/images/icon-carbs.png" 
+                />
+                 <MacroBubble 
+                    label="Fat" 
+                    value={stats.totalFat} 
+                    max={GOALS.fat} 
+                    color="#D1913C" 
+                    gradientId="fat-grad" 
+                    iconSrc="/images/icon-fat.png" 
+                />
              </div>
              
              <!-- SVG Gradients for Macros -->
