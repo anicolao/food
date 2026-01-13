@@ -30,7 +30,7 @@ export default defineConfig({
         viewport: { width: 393, height: 852 },
         deviceScaleFactor: 1, // Enforce 1x for manageable screenshot sizes
         timezoneId: 'America/New_York',
-        locale: 'en-US',
+        locale: 'en-CA', // Forces Date Input to ISO format (YYYY-MM-DD) which is more consistent across platforms than en-US
     },
     snapshotPathTemplate: '{testDir}/{testFileDir}/screenshots/{arg}.png',
     projects: [
