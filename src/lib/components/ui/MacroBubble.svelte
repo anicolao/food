@@ -157,6 +157,8 @@
         width: 70%; 
         height: 70%;
         gap: 2px;
+        background-color: var(--bg-card); /* Provides backdrop for mix-blend-mode */
+        border-radius: 50%; /* Fits inside the ring */
     }
     
     .macro-icon {

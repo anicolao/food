@@ -19,3 +19,4 @@
 - [x] Round 3 Refinements <!-- id: 14 -->
     - [x] Apply `mix-blend-mode: screen` to icons <!-- id: 15 -->
     - [x] Update PR <!-- id: 16 -->
+    - [x] Fix blending stacking context (add background to inner-content) <!-- id: 17 -->

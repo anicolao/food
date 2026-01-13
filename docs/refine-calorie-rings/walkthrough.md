@@ -9,7 +9,8 @@
 
 ### 2. MacroBubble Enhancements
 - **Icons**: Generated 3D neon icons (Protein/Chicken, Carbs/Bread, Fat/Avocado) using `generate_image`, saved to `static/images/`, and integrated via `<img>` tags.
-- **Icon Transparency**: Applied `mix-blend-mode: screen` to remove black backgrounds from the generated icons, creating a seamless neon effect.
+- **Icon Transparency**: Applied `mix-blend-mode: screen` to remove black backgrounds from the generated icons.
+- **Blending Fix**: Added `background-color: var(--bg-card)` and `border-radius: 50%` to the inner content container to establish a correct stacking context for the blend mode to work against.
 - **Layout**: Complete overhaul. Stats (Label + Value/Max) are now inside the ring along with the icon. 
 - **Typography on Path**: Implemented SVG `<textPath>` to rotate the percentage text (e.g., "83%") so it follows the curvature of the ring progress.
 - **Visuals**: Increased `strokeWidth` to 14px (Fatter rings) and added specific glow filters.
