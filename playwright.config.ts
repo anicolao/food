@@ -33,7 +33,7 @@ export default defineConfig({
     projects: [
         {
             name: 'chromium',
-            // use: { ...devices['Desktop Chrome'] }, // Removed to enforce global mobile viewport
+            use: { ...devices['Desktop Chrome'] },
         },
     ],
     webServer: {

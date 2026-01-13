@@ -15,8 +15,8 @@
 
 **Verifications:**
 - [x] Food Log title visible
-- [x] Log Food button visible
-- [x] Sign Out button visible
+- [x] Log Food link visible
+- [x] Settings link visible
 
 ---
 
