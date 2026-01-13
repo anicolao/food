@@ -224,7 +224,7 @@
             carbs: form.carbohydrates.total,
             protein: form.protein,
             imageDriveUrl: driveUrls, // Comma separated URLs
-            rawJson: form
+            rawJson: JSON.parse(JSON.stringify(form))
         };
         
         store.dispatch(dispatchEvent('log/entryConfirmed', { entry }));

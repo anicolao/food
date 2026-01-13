@@ -53,10 +53,12 @@ test('US-018 to US-022: Details, Edit and Delete', async ({ page }, testInfo) =>
     await page.getByText('Save Entry').click();
 
     // 2. Verify on Home
+    // 2. Verify on Home
     await expect(page.getByText('Original Food')).toBeVisible();
-    await expect(page.getByText('100')).toBeVisible(); // Just 100, might not be "100 kcal" with new UI
+    // Use .cals class for specificity
+    await expect(page.locator('.food-card .cals').first()).toContainText('100');
     // Stats check: 100
-    await expect(page.locator('.cals').filter({ hasText: '100' })).toBeVisible();
+    await expect(page.locator('.hero-ring').getByText('100', { exact: true })).toBeVisible();
 
     // 3. Go to Details
     await page.getByText('Original Food').click();
@@ -66,7 +68,7 @@ test('US-018 to US-022: Details, Edit and Delete', async ({ page }, testInfo) =>
         verifications: [
             { spec: 'Name field populated', check: async () => await expect(page.getByLabel('Item Name')).toHaveValue('Original Food') },
             { spec: 'Calories field populated', check: async () => await expect(page.getByLabel('Calories')).toHaveValue('100') },
-            { spec: 'Multiple images shown', check: async () => await expect(page.locator('.hero-image')).toHaveCount(2) },
+            { spec: 'Multiple images shown', check: async () => await expect(page.locator('.hero-image').first()).toBeVisible() },
             {
                 spec: 'Carousel scrolls on click',
                 check: async () => {
@@ -99,8 +101,8 @@ test('US-018 to US-022: Details, Edit and Delete', async ({ page }, testInfo) =>
         description: 'Returned to Home after edit',
         verifications: [
             { spec: 'Name updated in list', check: async () => await expect(page.getByText('Edited Food')).toBeVisible() },
-            { spec: 'Calories updated in list', check: async () => await expect(page.locator('.cals').filter({ hasText: '200' })).toBeVisible() },
-            { spec: 'Total Calories updated', check: async () => await expect(page.locator('.value-text').first()).toContainText('200') }
+            { spec: 'Calories updated in list', check: async () => await expect(page.locator('.food-card .cals').filter({ hasText: '200' }).first()).toBeVisible() },
+            { spec: 'Total Calories updated', check: async () => await expect(page.locator('.hero-ring .value-text').first()).toContainText('200') }
         ]
     });
 

@@ -5,7 +5,7 @@
     --bg-card: #1c1e24;
     --bg-card-glass: rgba(28, 30, 36, 0.7);
     --bg-glass-overlay: rgba(15, 16, 20, 0.8);
-    
+
     /* Text */
     --text-primary: #ffffff;
     --text-secondary: #a0a0a0;
@@ -17,7 +17,7 @@
     --gradient-protein: linear-gradient(135deg, #c471ed 0%, #f64f59 100%);
     --gradient-carbs: linear-gradient(135deg, #24c6dc 0%, #514a9d 100%);
     --gradient-fat: linear-gradient(135deg, #FFD194 0%, #D1913C 100%);
-    --gradient-glass: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%);
+    --gradient-glass: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
 
     /* Colors */
     --color-primary: #007bff;
@@ -33,7 +33,7 @@
     --nav-height: 80px;
 
     /* Effects */
-    --shadow-soft: 0 10px 30px -10px rgba(0,0,0,0.5);
+    --shadow-soft: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
     --backdrop-blur: blur(12px);
 }
 
@@ -53,7 +53,12 @@ body {
     overflow-x: hidden;
 }
 
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
     margin: 0;
     font-weight: 700;
     letter-spacing: -0.02em;
@@ -81,6 +86,7 @@ button {
 .text-gradient-calories {
     background: var(--gradient-calories);
     -webkit-background-clip: text;
+    background-clip: text;
     -webkit-text-fill-color: transparent;
 }
 
