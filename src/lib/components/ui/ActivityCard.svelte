@@ -2,6 +2,7 @@
   import type { ActivityGroup } from '$lib/activity-grouping';
   import { base } from '$app/paths';
   import { resolveDriveImage } from '$lib/images';
+  import MacroSummary from './MacroSummary.svelte';
   
   // Props
   export let group: ActivityGroup;
@@ -33,9 +34,7 @@
     <div class="right-col">
         <span class="total-cals">{group.calories} <span class="unit">kcal</span></span>
         <div class="mini-macros">
-            <span class="macro p">{Math.round(group.protein)}p</span>
-            <span class="macro c">{Math.round(group.carbs)}c</span>
-            <span class="macro f">{Math.round(group.fat)}f</span>
+            <MacroSummary protein={group.protein} carbs={group.carbs} fat={group.fat} size="sm" />
         </div>
     </div>
   </button>
@@ -60,7 +59,12 @@
                 </div>
 
                 <div class="item-info">
-                    <div class="item-name">{item.description}</div>
+                    <div class="info-main">
+                        <div class="item-name">{item.description}</div>
+                        <div class="item-macros">
+                            <MacroSummary protein={item.protein} carbs={item.carbs} fat={item.fat} size="xs" />
+                        </div>
+                    </div>
                     <div class="item-stats">
                         {#if item.calories}
                             <span class="item-cal">{item.calories} kcal</span>
@@ -123,7 +127,6 @@
     font-weight: 700;
     font-size: 1.1rem;
     color: var(--text-accent, #ff9966); /* Orange default */
-    /* Neon glow could go here */
   }
   
   .unit {
@@ -134,16 +137,9 @@
 
   .mini-macros {
       margin-top: 4px;
-      font-size: 0.75rem;
       display: flex;
-      gap: 8px;
       justify-content: flex-end;
-      opacity: 0.8;
   }
-  
-  .macro.p { color: #c471ed; }
-  .macro.c { color: #24c6dc; }
-  .macro.f { color: #D1913C; }
 
   /* Details */
   .details-list {
@@ -155,7 +151,7 @@
       display: flex;
       align-items: center;
       gap: 12px;
-      padding: 12px 20px;
+      padding: 10px 20px; /* Reducing padding slightly for compacter look */
       text-decoration: none;
       color: var(--text-secondary);
       font-size: 0.95rem;
@@ -175,8 +171,9 @@
   /* Image Area */
   .item-visual {
       position: relative;
-      width: 48px;
-      height: 48px;
+      /* 15% smaller than original 48px -> approx 40px */
+      width: 40px; 
+      height: 40px;
       border-radius: 8px;
       overflow: hidden;
       flex-shrink: 0;
@@ -205,6 +202,7 @@
       font-weight: 700;
       color: var(--text-muted);
       background: rgba(255,255,255,0.03);
+      font-size: 0.8rem; /* Smaller fallback text */
   }
 
   .item-info {
@@ -213,10 +211,17 @@
       justify-content: space-between;
       align-items: center;
   }
+  
+  .info-main {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+  }
 
   .item-name {
       font-weight: 500;
       color: var(--text-primary, #fff);
+      font-size: 0.95rem; /* Slightly smaller text */
   }
 
   .item-cal {
