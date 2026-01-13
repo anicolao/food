@@ -51,12 +51,12 @@ test('US-001: User signs in', async ({ page }, testInfo) => {
         verifications: [
             { spec: 'Food Log title visible', check: async () => await expect(page.getByText('Today\'s Logs')).toBeVisible() },
             { spec: 'Log Food link visible', check: async () => await expect(page.getByText('Log New')).toBeVisible() },
-            { spec: 'Settings link visible', check: async () => await expect(page.locator('a').filter({ hasText: 'Settings' }).first()).toBeVisible() }
+            { spec: 'Settings link visible', check: async () => await expect(page.locator('a[href*="/settings"]').first()).toBeVisible() }
         ]
     });
 
     // Go to settings to sign out
-    await page.locator('a').filter({ hasText: 'Settings' }).first().click();
+    await page.locator('a[href*="/settings"]').first().click();
     await page.getByText('Sign Out').click();
 
     await tester.step('signed-out', {
