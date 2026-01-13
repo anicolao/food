@@ -103,8 +103,8 @@
     </div>
   {:else}
     <div class="dashboard-grid">
-        <!-- Left Col / Top Section: Stats -->
-        <section class="stats-section glass-panel">
+        <div class="left-col">
+            <section class="stats-section glass-panel">
              <div class="hero-ring">
                  <StatsRing 
                     value={stats.totalCalories} 
@@ -140,6 +140,7 @@
                 </defs>
              </svg>
         </section>
+        </div>
 
         <!-- Right Col / Bottom Section: Feed -->
         <section class="feed-section">

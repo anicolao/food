@@ -185,7 +185,7 @@ test('US-003 to US-010: User logs food flow', async ({ page }, testInfo) => {
             { spec: 'On Dashboard', check: async () => await expect(page.getByText('Today\'s Logs')).toBeVisible() },
             { spec: 'Card appears', check: async () => await expect(page.locator('.food-card').first()).toBeVisible() },
             { spec: 'Calories updated', check: async () => await expect(page.locator('.cals').first()).toContainText('100') },
-            { spec: 'History name shown', check: async () => await expect(page.getByRole('heading', { name: 'Mock Apple' })).toBeVisible() },
+            { spec: 'History name shown', check: async () => await expect(page.locator('.description').first()).toContainText('Mock Apple') },
             { spec: 'Meal type shown', check: async () => await expect(page.getByText('Lunch')).toBeVisible() },
             { spec: 'Thumbnail shown', check: async () => await expect(page.locator('.thumb')).toBeVisible() },
             // Check Gallery opening logic is removed from Dashboard in this plan, so we might skip or fail if gallery check is strict.
