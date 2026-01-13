@@ -11,9 +11,15 @@
 </script>
 
 {#if open}
+    <!-- svelte-ignore a11y_click_events_have_key_events -->
+    <!-- svelte-ignore a11y_no_static_element_interactions -->
     <div class="backdrop" onclick={onClose} transition:fly={{ duration: 200, opacity: 0 }}>
         <!-- Stop propagation on content click to prevent closing -->
+        <!-- svelte-ignore a11y_click_events_have_key_events -->
+        <!-- svelte-ignore a11y_no_static_element_interactions -->
         <div class="sheet glass-panel" onclick={(e) => e.stopPropagation()} transition:fly={{ y: 300, duration: 300 }}>
+            <!-- svelte-ignore a11y_click_events_have_key_events -->
+            <!-- svelte-ignore a11y_no_static_element_interactions -->
             <div class="handle-bar" onclick={onClose}>
                 <div class="handle"></div>
             </div>

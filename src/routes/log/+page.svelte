@@ -12,8 +12,8 @@
   
   import LogSheet from '$lib/components/ui/LogSheet.svelte';
 
-  let fileInput: HTMLInputElement;
-  let videoElement: HTMLVideoElement;
+  let fileInput = $state<HTMLInputElement>();
+  let videoElement = $state<HTMLVideoElement>();
   let stream: MediaStream | null = null;
   let showCamera = $state(false);
 
@@ -377,7 +377,7 @@
         <div class="camera-ui">
              <video bind:this={videoElement} autoplay playsinline muted></video>
              <div class="cam-controls">
-                 <button class="cam-btn capture" onclick={capturePhoto}></button>
+                 <button class="cam-btn capture" onclick={capturePhoto} aria-label="Capture photo"></button>
                  <button class="cam-btn cancel" onclick={stopCamera}>Cancel</button>
              </div>
         </div>

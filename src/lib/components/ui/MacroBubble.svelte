@@ -16,8 +16,8 @@
     const strokeWidth = 4;
     const radius = (size - strokeWidth) / 2;
     const circumference = 2 * Math.PI * radius;
-    const progress = Math.min(Math.max(value / max, 0), 1);
-    const dashOffset = circumference * (1 - progress);
+    const progress = $derived(Math.min(Math.max(value / max, 0), 1));
+    const dashOffset = $derived(circumference * (1 - progress));
 </script>
 
 <div class="macro-bubble">
