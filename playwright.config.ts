@@ -30,10 +30,15 @@ export default defineConfig({
         viewport: { width: 393, height: 852 },
         deviceScaleFactor: 1, // Enforce 1x for manageable screenshot sizes
     },
+    snapshotPathTemplate: '{testDir}/{testFileDir}/screenshots/{arg}.png',
     projects: [
         {
             name: 'chromium',
-            use: { ...devices['Desktop Chrome'] },
+            use: {
+                // Ensure we use the global viewport settings by not overriding them with desktop defaults
+                browserName: 'chromium',
+                channel: 'chrome', // or just use default chromium
+            },
         },
     ],
     webServer: {
@@ -43,6 +48,7 @@ export default defineConfig({
     },
     timeout: 15000, // Shorten timeout to fail faster
     expect: {
-        timeout: 5000 // Shorten assertion timeout
+        timeout: 5000, // Shorten assertion timeout
+        toHaveScreenshot: { maxDiffPixels: 0 } // Zero tolerance
     }
 });

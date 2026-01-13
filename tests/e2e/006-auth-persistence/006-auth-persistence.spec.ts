@@ -43,7 +43,7 @@ test('US-023: Auth Persistence', async ({ page }, testInfo) => {
     // Allow polling to initialize tokenClient
     await page.waitForFunction(() => (window as any)._authReady);
     await page.getByText('Sign In with Google').click();
-    await expect(page.locator('a').filter({ hasText: 'Settings' }).first()).toBeVisible();
+    await expect(page.locator('.mobile-nav a').filter({ hasText: 'Settings' }).first()).toBeVisible();
 
     await tester.step('persisted', {
         description: 'Reload page and verify session',
@@ -59,7 +59,7 @@ test('US-023: Auth Persistence', async ({ page }, testInfo) => {
                 spec: 'User still logged in after reload',
                 check: async () => {
                     await page.reload();
-                    await expect(page.locator('a').filter({ hasText: 'Settings' }).first()).toBeVisible();
+                    await expect(page.locator('.mobile-nav a').filter({ hasText: 'Settings' }).first()).toBeVisible();
                     // Should NOT see "Sign In" button
                     await expect(page.getByText('Sign In with Google')).not.toBeVisible();
                 }
