@@ -1,15 +1,11 @@
-# Auth Persistence Improvements
+# Description
+Implemented PWA 'Add to Homescreen' support with custom icons and manifest.
 
 ## User Prompt
-> There is a problem where auth really doesn't last at all for hte client. I'd like the user to stay logged in as long as possible to avoid ahving to re-authenticate all the time.
+When the user adds the bookmark to homescreen on iOS or Android, I want them to get a smooth, as app-like experience as possible from the resulting bookmark. Let's update our site so that it looks as near as possible to a native app when bookmarked this way. Use nano banana to generate a homescreen icon that is visually similar to the rest of the UI design, by showing it existing mockups it has made as inspiration.
 
 ## Changes
-- Implemented proactive token refresh in `src/lib/auth.ts`.
-- Added `scheduleRefresh` to refresh token 5 minutes before expiry.
-- Added `visibilitychange` listener to refresh token when tab becomes visible if near expiry.
-- Improved `initializeAuth` to handle session restoration with accurate remaining time.
-- Fixed TS errors in `src/routes/log/+page.svelte`.
-
-## Artifacts
-- [Implementation Plan](docs/auth_persistence/implementation_plan.md)
-- [Walkthrough](docs/auth_persistence/walkthrough.md)
+- Created `static/manifest.webmanifest`.
+- Generated app icons (192, 512, apple-touch-icon).
+- Updated `src/app.html` with iOS meta tags.
+- Added documentation in `docs/pwa/`.
