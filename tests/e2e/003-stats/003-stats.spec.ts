@@ -63,7 +63,7 @@ test('US-012: Stats persist after reload', async ({ page }, testInfo) => {
 
     await page.goto('/');
     // Allow polling to initialize tokenClient
-    await page.waitForTimeout(500);
+    await page.waitForFunction(() => (window as any)._authReady);
     await page.getByText('Sign In with Google').click();
 
     await tester.step('stats-loaded', {

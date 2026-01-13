@@ -38,7 +38,7 @@ test('US-018 to US-022: Details, Edit and Delete', async ({ page }, testInfo) =>
 
     await page.goto('/');
     // Allow polling to initialize tokenClient
-    await page.waitForTimeout(500);
+    await page.waitForFunction(() => (window as any)._authReady);
     await page.getByText('Sign In with Google').click();
 
     // 1. Create Entry
@@ -77,7 +77,10 @@ test('US-018 to US-022: Details, Edit and Delete', async ({ page }, testInfo) =>
                         // Click on the right side (80% width)
                         await page.mouse.click(box.x + box.width * 0.9, box.y + box.height / 2);
                         // Wait for scroll
-                        await page.waitForTimeout(500);
+                        await page.waitForFunction((init) => {
+                            const params = init as unknown as number; // Cast via unknown
+                            return document.querySelector('.gallery')!.scrollLeft > params;
+                        }, initialScroll);
                         const newScroll = await gallery.evaluate(el => el.scrollLeft);
                         expect(newScroll).toBeGreaterThan(initialScroll);
                     }

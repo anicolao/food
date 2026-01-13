@@ -33,9 +33,12 @@ export function initializeAuth(onSuccess: (token: string) => void) {
         if (Date.now() < parseInt(storedExpiry)) {
             accessToken = storedToken;
             onSuccess(accessToken);
+            (window as any)._authReady = true;
         } else {
             // Expired
             signOut();
+            // Still ready, just not authenticated
+            (window as any)._authReady = true;
         }
     }
 
@@ -72,6 +75,8 @@ function initClient(onSuccess: (token: string) => void) {
             }
         },
     });
+    // Signal tests that client is initialized
+    (window as any)._authReady = true;
 }
 
 export function signIn() {

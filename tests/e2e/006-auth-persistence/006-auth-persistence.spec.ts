@@ -41,7 +41,7 @@ test('US-023: Auth Persistence', async ({ page }, testInfo) => {
 
     await page.goto('/');
     // Allow polling to initialize tokenClient
-    await page.waitForTimeout(500);
+    await page.waitForFunction(() => (window as any)._authReady);
     await page.getByText('Sign In with Google').click();
     await expect(page.getByText('Log Food')).toBeVisible();
 
