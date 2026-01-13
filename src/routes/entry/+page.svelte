@@ -3,7 +3,7 @@
   import { store, dispatchEvent } from '$lib/store';
   import { goto } from '$app/navigation';
   import { base } from '$app/paths';
-  import { onMount } from 'svelte';
+  import { onMount, tick } from 'svelte';
   import { getAccessToken } from '$lib/auth';
   import { appendRow } from '$lib/sheets';
   import { formatLogDate } from '$lib/formatDate';
@@ -25,18 +25,19 @@
   let imageUrls: string[] = [];
   let entryDateTimeStr = '';
 
-  onMount(() => {
+  onMount(async () => {
       if (!id) {
           console.error("No ID provided in query params");
           goto(`${base}/`);
           return;
       }
 
+      await tick(); // Ensure store/nav settles
+
       const state = store.getState();
       entry = state.projections.log.find(e => e.id === id);
       
       if (!entry) {
-          alert('Entry not found');
           goto(`${base}/`);
           return;
       }

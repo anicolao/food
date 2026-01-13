@@ -9,7 +9,14 @@ test('US-012: Stats persist after reload', async ({ page }, testInfo) => {
 
     // Mock Auth
     await page.addInitScript(() => {
-        (window as any).google = { accounts: { oauth2: { initTokenClient: (c: any) => ({ requestAccessToken: () => c.callback({ access_token: 'mock' }) }) } } };
+        (window as any).google = {
+            accounts: {
+                oauth2: {
+                    initTokenClient: (c: any) => ({ requestAccessToken: () => c.callback({ access_token: 'mock' }) }),
+                    revoke: (token: string, cb: any) => cb()
+                }
+            }
+        };
     });
 
     // Block real Google Identity script to prevent overwriting mocks
@@ -55,6 +62,8 @@ test('US-012: Stats persist after reload', async ({ page }, testInfo) => {
     });
 
     await page.goto('/');
+    // Allow polling to initialize tokenClient
+    await page.waitForTimeout(500);
     await page.getByText('Sign In with Google').click();
 
     await tester.step('stats-loaded', {
