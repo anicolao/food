@@ -11,16 +11,74 @@
   import MacroBubble from '$lib/components/ui/MacroBubble.svelte';
   import ActivityCard from '$lib/components/ui/ActivityCard.svelte';
 
+  // Reactive State
   let authenticated = $state(false);
-  
-  // Stats derived from today's filtered logs
-  let stats = $state({ totalCalories: 0, totalProtein: 0, totalFat: 0, totalCarbs: 0 });
-  
-  // Grouped entries for the feed
-  let groupedEntries: ActivityGroup[] = $state([]);
+  let allLogs = $state<any[]>([]); // Synced from Redux
   
   // Current Business Date (4AM cutoff)
   const today = getBusinessDate(new Date());
+  
+  // Reactive selected date state
+  let selectedDate = $state(today);
+
+  // Helper to format Date to YYYY-MM-DD (Local)
+  function toISOLocalDate(d: Date) {
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+  }
+
+  // Derived display title
+  let dateTitle = $derived.by(() => {
+      if (selectedDate === today) return 'Today';
+      
+      const sel = new Date(selectedDate + 'T00:00:00'); // Force local
+      const now = new Date(today + 'T00:00:00'); // Force local
+      const diffTime = now.getTime() - sel.getTime();
+      const diffDays = Math.round(diffTime / (1000 * 3600 * 24));
+      
+      if (diffDays === 1) return 'Yesterday';
+      
+      return sel.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+  });
+
+  function goToPrevDay() {
+      // Safely parse LOCAL YYYY-MM-DD by appending time
+      const d = new Date(selectedDate + 'T12:00:00'); 
+      d.setDate(d.getDate() - 1);
+      selectedDate = toISOLocalDate(d);
+  }
+
+  function goToNextDay() {
+      if (selectedDate === today) return;
+      const d = new Date(selectedDate + 'T12:00:00');
+      d.setDate(d.getDate() + 1);
+      selectedDate = toISOLocalDate(d);
+  }
+  
+  // Derived filtered logs
+  let visibleLogs = $derived.by(() => {
+     return allLogs.filter(entry => {
+          const dateObj = new Date(`${entry.date}T${entry.time}`);
+          return getBusinessDate(dateObj) === selectedDate;
+      });
+  });
+
+  // Derived groups
+  let groupedEntries = $derived(groupLogs(visibleLogs));
+
+  // Derived stats
+  let stats = $derived.by(() => {
+      const newStats = { totalCalories: 0, totalProtein: 0, totalFat: 0, totalCarbs: 0 };
+      visibleLogs.forEach(entry => {
+          newStats.totalCalories += Number(entry.calories || 0);
+          newStats.totalProtein += Number(entry.protein || 0);
+          newStats.totalFat += Number(entry.fat || 0);
+          newStats.totalCarbs += Number(entry.carbs || 0);
+      });
+      return newStats;
+  });
 
   // Daily Goals (Mock for now, should be in settings/store)
   const GOALS = {
@@ -66,28 +124,8 @@
 
     const unsubscribe = store.subscribe(() => {
       const state = store.getState();
-      const allLogs = state.projections.log;
-
-      // 1. Filter logs for "Today" (Business Day)
-      const todaysLogs = allLogs.filter(entry => {
-          // Construct full date object to check business date
-          // Handling potential missing time with default if needed, but store guarantees time
-          const dateObj = new Date(`${entry.date}T${entry.time}`);
-          return getBusinessDate(dateObj) === today;
-      });
-
-      // 2. Group them
-      groupedEntries = groupLogs(todaysLogs);
-
-      // 3. Calculate Stats from these specific logs (ignoring store pre-calc which uses calendar date)
-      const newStats = { totalCalories: 0, totalProtein: 0, totalFat: 0, totalCarbs: 0 };
-      todaysLogs.forEach(entry => {
-          newStats.totalCalories += Number(entry.calories || 0);
-          newStats.totalProtein += Number(entry.protein || 0);
-          newStats.totalFat += Number(entry.fat || 0);
-          newStats.totalCarbs += Number(entry.carbs || 0);
-      });
-      stats = newStats;
+      // Sync Redux -> Local State
+      allLogs = state.projections.log;
     });
 
     return unsubscribe;
@@ -170,14 +208,23 @@
         <!-- Right Col / Bottom Section: Feed -->
         <section class="feed-section">
             <div class="feed-header">
-                <h2>Today's Logs</h2>
-                <a href="{base}/log" class="text-link">Log New</a>
+                <button class="nav-btn prev" onclick={goToPrevDay} aria-label="Previous Day">
+                    &lt;
+                </button>
+                <h2>{dateTitle}</h2>
+                <button class="nav-btn next" onclick={goToNextDay} disabled={selectedDate === today} aria-label="Next Day">
+                    &gt;
+                </button>
             </div>
             
+            <div class="log-action">
+                 <a href="{base}/log" class="text-link">Log New</a>
+            </div>
+
             <div class="feed-list">
                 {#if groupedEntries.length === 0}
                     <div class="empty-state">
-                        <p>No food logged today (since 4 AM).</p>
+                        <p>No food logged for this day.</p>
                     </div>
                 {:else}
                     {#each groupedEntries as group (group.id)}
@@ -248,6 +295,40 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
+        margin-bottom: 12px;
+        background: rgba(255, 255, 255, 0.05);
+        padding: 8px 16px;
+        border-radius: 12px;
+    }
+
+    .feed-header h2 {
+        font-size: 1.1rem;
+        margin: 0;
+        font-weight: 600;
+    }
+
+    .nav-btn {
+        background: none;
+        border: none;
+        color: var(--text-secondary);
+        font-size: 1.2rem;
+        cursor: pointer;
+        padding: 4px 12px;
+        transition: color 0.2s;
+    }
+
+    .nav-btn:hover:not(:disabled) {
+        color: white;
+    }
+
+    .nav-btn:disabled {
+        opacity: 0.3;
+        cursor: not-allowed;
+    }
+
+    .log-action {
+        display: flex;
+        justify-content: flex-end;
         margin-bottom: 16px;
     }
 
@@ -255,6 +336,7 @@
         color: var(--color-primary);
         font-size: 0.9rem;
         font-weight: 500;
+        text-decoration: none;
     }
 
     .empty-state {
