@@ -1,4 +1,5 @@
-if git grep -q 'waitForTimeout' .; then
+#!/bin/sh
+if git grep -q 'waitForTimeout' -- ':!*.md' ':!.husky/pre-commit'; then
   echo 'Error: waitForTimeout is forbidden. Use event-based waiting instead.'
   exit 1
 fi
