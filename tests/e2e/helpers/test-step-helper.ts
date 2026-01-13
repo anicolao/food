@@ -38,14 +38,10 @@ export class TestStepHelper {
         const paddedIndex = String(this.stepCount++).padStart(3, '0');
         const filename = `${paddedIndex}-${id}.png`;
 
-        // 3. Capture
-        // Ensure the screenshots directory exists
-        const screenshotDir = path.join(path.dirname(this.testInfo.file), 'screenshots');
-        if (!fs.existsSync(screenshotDir)) {
-            fs.mkdirSync(screenshotDir, { recursive: true });
-        }
-
-        await this.page.screenshot({ path: path.join(screenshotDir, filename) });
+        // 3. Capture & Verify (Zero-Pixel Tolerance)
+        // This will check against the baseline in 'screenshots/{filename}'.
+        // If the file doesn't exist, it will fail (unless --update-snapshots is used).
+        await expect(this.page).toHaveScreenshot(filename.replace(/\.png$/, ''));
 
         // 4. Record for Docs
         this.steps.push({
