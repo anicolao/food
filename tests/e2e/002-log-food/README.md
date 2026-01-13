@@ -48,7 +48,6 @@
 - [x] Activity Card appears
 - [x] Meal type shown in header
 - [x] Total Cals shown in header
-- [x] Expand Group
 - [x] Item name shown
 - [x] Item calories shown
 

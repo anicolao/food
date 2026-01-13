@@ -8,7 +8,6 @@
 - [x] Calories = 500
 - [x] Calories = 500
 - [x] Protein = 20
-- [x] Expand card
 - [x] History shows entry
 
 ---
