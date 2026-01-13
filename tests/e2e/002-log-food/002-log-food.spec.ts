@@ -41,6 +41,11 @@ test('US-003 to US-010: User logs food flow', async ({ page }, testInfo) => {
         await route.fulfill({ body: buffer, contentType: 'image/png' });
     });
 
+    // FORCE Fixture File Timestamp to match Mocked Clock
+    // This allows file.lastModified to align with our deterministic tests
+    const mockDate = new Date('2024-03-15T12:00:00');
+    fs.utimesSync('tests/e2e/fixtures/apple.png', mockDate, mockDate);
+
     await page.route('**googleapis.com**', async route => {
         const url = route.request().url();
         console.log('MOCKING:', url);

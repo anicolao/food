@@ -25,6 +25,10 @@ test('US-018 to US-022: Details, Edit and Delete', async ({ page }, testInfo) =>
         const buffer = fs.readFileSync('tests/e2e/fixtures/apple.png');
         await route.fulfill({ body: buffer, contentType: 'image/png' });
     });
+
+    // FORCE Fixture File Timestamp to match Mocked Clock
+    const mockDate = new Date('2024-03-15T12:00:00');
+    fs.utimesSync('tests/e2e/fixtures/apple.png', mockDate, mockDate);
     await page.route('**googleapis.com**', async route => {
         const url = route.request().url();
         if (url.includes('generativelanguage')) {
@@ -50,6 +54,7 @@ test('US-018 to US-022: Details, Edit and Delete', async ({ page }, testInfo) =>
 
     await expect(page.getByLabel('Log Description')).toHaveValue('Original Food');
     await page.getByLabel('Date').fill('2024-03-15');
+    await page.getByLabel('Time').fill('12:00'); // Explicit time to match expect
     await page.getByText('Save Entry').click();
 
     // 2. Verify on Home

@@ -111,12 +111,22 @@
            const exifData = await exifr.parse(file);
            if (exifData && (exifData.DateTimeOriginal || exifData.CreateDate)) {
                const date = exifData.DateTimeOriginal || exifData.CreateDate;
-               entryDate = date.toISOString().split('T')[0];
+               // Date to Local YYYY-MM-DD
+               const year = date.getFullYear();
+               const month = String(date.getMonth() + 1).padStart(2, '0');
+               const day = String(date.getDate()).padStart(2, '0');
+               entryDate = `${year}-${month}-${day}`;
+               
                entryTime = date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
                updateMealType(date);
            } else if (imageFiles.length === 0) {
                const date = new Date(file.lastModified || Date.now());
-               entryDate = date.toISOString().split('T')[0];
+               // Date to Local YYYY-MM-DD
+               const year = date.getFullYear();
+               const month = String(date.getMonth() + 1).padStart(2, '0');
+               const day = String(date.getDate()).padStart(2, '0');
+               entryDate = `${year}-${month}-${day}`;
+               
                entryTime = date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
                updateMealType(date);
            }
