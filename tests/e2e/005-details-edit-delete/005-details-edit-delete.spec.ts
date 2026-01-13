@@ -53,8 +53,7 @@ test('US-018 to US-022: Details, Edit and Delete', async ({ page }, testInfo) =>
     await page.getByText('Save Entry').click();
 
     // 2. Verify on Home
-    // 2. Verify on Home
-    await expect(page.getByText('Original Food')).toBeVisible();
+    await expect(page.getByText('Original Food').first()).toBeVisible();
     // Use .cals class for specificity
     await expect(page.locator('.food-card .cals').first()).toContainText('100');
     // Stats check: 100

@@ -21,15 +21,14 @@
   let imagePreviews: string[] = $state([]);
   
   let analyzing = $state(false);
-  let form = $state<NutritionEstimate>({
-    is_label: false,
-    item_name: '',
-    rationale: '',
-    calories: 0,
-    fat: { total: 0 },
-    carbohydrates: { total: 0 },
-    protein: 0
-  });
+  
+  // Flat State for inputs to avoid reactivity issues with nested objects in Svelte 5
+  let itemName = $state('');
+  let rationale = $state('');
+  let calories = $state(0);
+  let fat = $state(0);
+  let carbs = $state(0);
+  let protein = $state(0);
   
   let mealType: 'Breakfast' | 'Lunch' | 'Dinner' | 'Snack' = $state('Snack');
   let entryDate = $state(new Date().toISOString().split('T')[0]);
@@ -158,18 +157,15 @@
           }
       });
       
-      const previousRationale = form.rationale;
+      const previousRationale = rationale;
       const result = await analyzeImage(images, correction ? previousRationale : undefined, correction);
       
-      form = { 
-          ...result, 
-          rationale: result.rationale || '',
-          fat: result.fat || { total: 0 },
-          carbohydrates: result.carbohydrates || { total: 0 },
-          calories: result.calories || 0,
-          protein: result.protein || 0,
-          item_name: result.item_name || ''
-      };
+      itemName = result.item_name || '';
+      rationale = result.rationale || '';
+      calories = result.calories || 0;
+      protein = result.protein || 0;
+      carbs = result.carbohydrates?.total || 0;
+      fat = result.fat?.total || 0;
       
       if (correction) {
           showCorrectionInput = false;
@@ -212,17 +208,27 @@
 
         const isoDateTime = new Date(`${entryDate}T${entryTime}`).toISOString();
 
+        // Construct object for Redux/Storage, avoiding proxy issues by using plain collected values
+        const form = {
+            item_name: itemName,
+            rationale,
+            calories,
+            protein,
+            carbohydrates: { total: carbs },
+            fat: { total: fat }
+        };
+
         const entry = {
             id: crypto.randomUUID(),
             date: entryDate,
             time: entryTime, 
             mealType,
-            description: form.item_name,
-            rationale: form.rationale, 
-            calories: form.calories,
-            fat: form.fat.total,
-            carbs: form.carbohydrates.total,
-            protein: form.protein,
+            description: itemName,
+            rationale, 
+            calories,
+            fat,
+            carbs,
+            protein,
             imageDriveUrl: driveUrls, // Comma separated URLs
             rawJson: JSON.parse(JSON.stringify(form))
         };
@@ -335,7 +341,12 @@
   function resetForm() {
       imageFiles = [];
       imagePreviews = [];
-      form = { is_label: false, item_name: '', rationale: '', calories: 0, fat: { total: 0 }, carbohydrates: { total: 0 }, protein: 0 };
+      itemName = '';
+      rationale = '';
+      calories = 0;
+      protein = 0;
+      carbs = 0;
+      fat = 0;
       showCorrectionInput = false;
       userCorrection = '';
   }
@@ -416,35 +427,35 @@
 
                       <div class="field">
                           <label>Log Description
-                            <input type="text" bind:value={form.item_name} class="bg-input big-text" placeholder="What is this?" />
+                            <input type="text" bind:value={itemName} class="bg-input big-text" placeholder="What is this?" />
                           </label>
                       </div>
                       
                       <div class="macros-row">
                           <div class="macro-field">
                               <label>Cals
-                                <input type="number" bind:value={form.calories} class="bg-input highlight-cal" />
+                                <input type="number" bind:value={calories} class="bg-input highlight-cal" />
                               </label>
                           </div>
                           <div class="macro-field">
                               <label>Prot
-                                <input type="number" bind:value={form.protein} class="bg-input" />
+                                <input type="number" bind:value={protein} class="bg-input" />
                               </label>
                           </div>
                           <div class="macro-field">
                               <label>Carb
-                                <input type="number" bind:value={form.carbohydrates.total} class="bg-input" />
+                                <input type="number" bind:value={carbs} class="bg-input" />
                               </label>
                           </div>
                           <div class="macro-field">
                               <label>Fat
-                                <input type="number" bind:value={form.fat.total} class="bg-input" />
+                                <input type="number" bind:value={fat} class="bg-input" />
                               </label>
                           </div>
                       </div>
 
                       <div class="rationale-box">
-                          <p class="rationale-text">{form.rationale}</p>
+                          <p class="rationale-text">{rationale}</p>
                           <button class="correct-btn" onclick={() => showCorrectionInput = !showCorrectionInput}>
                              {showCorrectionInput ? 'Cancel Correction' : 'Correct AI'}
                           </button>
@@ -463,7 +474,6 @@
          </div>
     </LogSheet>
 </div>
-
 <style>
     .log-page {
         min-height: 100vh;

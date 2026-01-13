@@ -1,6 +1,7 @@
 <script lang="ts">
     import { resolveDriveImage } from '$lib/images';
     import { base } from '$app/paths';
+    import { formatLogDate } from '$lib/formatDate';
 
     interface Props {
         id: string;
@@ -31,8 +32,8 @@
     const imageUrls = $derived(imageDriveUrl ? imageDriveUrl.split(',').map(u => u.trim()) : []);
     const mainImage = $derived(imageUrls.length > 0 ? imageUrls[0] : null);
 
-    // Format time (e.g., 12:30 PM)
-    const formattedTime = $derived(new Date(`2000-01-01T${time}`).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }));
+    // Smart Date Format
+    const formattedDate = $derived(formatLogDate(`${date}T${time}`));
 </script>
 
 <a href="{base}/entry?id={id}" class="food-card glass-panel">
@@ -57,7 +58,7 @@
         <div class="info-area">
              <div class="top-row">
                  <span class="meal-type">{mealType}</span>
-                 <span class="time">{formattedTime}</span>
+                 <span class="time">{formattedDate}</span>
              </div>
              <h3 class="description">{description}</h3>
              <div class="stats-row">
