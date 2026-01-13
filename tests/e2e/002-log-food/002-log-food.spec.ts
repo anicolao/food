@@ -191,7 +191,7 @@ test('US-003 to US-010: User logs food flow', async ({ page }, testInfo) => {
     await tester.step('saved', {
         description: 'Returned to Dashboard',
         verifications: [
-            { spec: 'On Dashboard', check: async () => await expect(page.getByText('Today\'s Logs')).toBeVisible() },
+            { spec: 'On Dashboard', check: async () => await expect(page.locator('.feed-header h2')).toHaveText('Today') },
 
             // 1. Verify Activity Card exists (Group)
             { spec: 'Activity Card appears', check: async () => await expect(page.locator('.activity-card').first()).toBeVisible() },
