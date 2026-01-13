@@ -29,6 +29,8 @@ export default defineConfig({
         },
         viewport: { width: 393, height: 852 },
         deviceScaleFactor: 1, // Enforce 1x for manageable screenshot sizes
+        timezoneId: 'America/New_York',
+        locale: 'en-US',
     },
     snapshotPathTemplate: '{testDir}/{testFileDir}/screenshots/{arg}.png',
     projects: [
