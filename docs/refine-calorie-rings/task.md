@@ -15,3 +15,7 @@
     - [x] Move stats inside MacroBubble <!-- id: 11 -->
     - [x] Generate AI icons for Protein, Carbs, Fat <!-- id: 12 -->
     - [x] Integrate new icons <!-- id: 13 -->
+
+- [x] Round 3 Refinements <!-- id: 14 -->
+    - [x] Apply `mix-blend-mode: screen` to icons <!-- id: 15 -->
+    - [x] Update PR <!-- id: 16 -->
