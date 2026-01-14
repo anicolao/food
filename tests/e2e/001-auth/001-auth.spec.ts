@@ -57,7 +57,7 @@ test('US-001: User signs in', async ({ page }, testInfo) => {
 
     // Go to settings to sign out
     await page.locator('.mobile-nav a[href*="/settings"]').first().click();
-    await page.getByText('Sign Out').click();
+    await page.getByText('Sign Out').first().click();
     await page.waitForURL('**/'); // Wait for navigation to home
 
     await tester.step('signed-out', {

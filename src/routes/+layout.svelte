@@ -4,9 +4,21 @@
 
 	import MobileNav from '$lib/components/ui/MobileNav.svelte';
 	import DesktopSidebar from '$lib/components/ui/DesktopSidebar.svelte';
+	import { page } from '$app/stores';
+	import { getTransitionDirection, getTransitionParams } from '$lib/transitions';
 
 	let { children } = $props();
+
+	let width = $state(0);
+	let height = $state(0);
 </script>
+
+<script module>
+	// Track navigation history for direction calculation
+	let previousUrl: URL | null = null;
+</script>
+
+<svelte:window bind:innerWidth={width} bind:innerHeight={height} />
 
 <svelte:head>
 	<link rel="icon" href={favicon} />
@@ -17,9 +29,22 @@
 		<DesktopSidebar />
 	</div>
 	
-	<main class="main-content">
-		{@render children()}
-	</main>
+	<div class="main-content">
+		{#key $page.url.pathname}
+			{@const direction = previousUrl ? getTransitionDirection(previousUrl, $page.url) : 'crossfade'}
+			{@const config = getTransitionParams(direction, width, height)}
+			<!-- Update previousUrl after determining direction for *this* transition -->
+			{@const _ = (previousUrl = new URL($page.url.href))} 
+
+			<div 
+				class="transition-wrapper"
+				in:config.in={config.inParams}
+				out:config.out={config.outParams}
+			>
+				{@render children()}
+			</div>
+		{/key}
+	</div>
 
 	<div class="mobile-nav-wrapper">
 		<MobileNav />
@@ -45,6 +70,17 @@
 		padding-bottom: 100px; /* Space for mobile nav */
 		width: 100%;
 		max-width: 100%;
+		
+		/* Grid Stacking for Transitions */
+		display: grid;
+		grid-template-areas: "content";
+		overflow-x: hidden; /* Prevent horizontal scrollbar during slide */
+	}
+
+	.transition-wrapper {
+		grid-area: content;
+		width: 100%;
+		/* Ensure wrapper takes full height/width of the cell */
 	}
 
 	@media (min-width: 1024px) {
