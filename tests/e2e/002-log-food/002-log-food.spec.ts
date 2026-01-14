@@ -140,8 +140,8 @@ test('US-003 to US-010: User logs food flow', async ({ page }, testInfo) => {
     await tester.step('log-page', {
         description: 'User on log page',
         verifications: [
-            { spec: 'Camera button visible', check: async () => await expect(page.getByText('Camera')).toBeVisible() },
-            { spec: 'Upload button visible', check: async () => await expect(page.getByText('Photo Library')).toBeVisible() }
+            { spec: 'Camera button visible', check: async () => await expect(page.getByText('Camera').first()).toBeVisible() },
+            { spec: 'Upload button visible', check: async () => await expect(page.getByText('Photo Library').first()).toBeVisible() }
         ]
     });
 
@@ -186,12 +186,12 @@ test('US-003 to US-010: User logs food flow', async ({ page }, testInfo) => {
     });
 
     // Save
-    await page.getByText('Save Entry').click();
+    await page.getByText('Save Entry').first().click();
 
     await tester.step('saved', {
         description: 'Returned to Dashboard',
         verifications: [
-            { spec: 'On Dashboard', check: async () => await expect(page.locator('.feed-header h2')).toHaveText('Today') },
+            { spec: 'On Dashboard', check: async () => await expect(page.locator('.feed-header h2').first()).toHaveText('Today') },
 
             // 1. Verify Activity Card exists (Group)
             { spec: 'Activity Card appears', check: async () => await expect(page.locator('.activity-card').first()).toBeVisible() },
