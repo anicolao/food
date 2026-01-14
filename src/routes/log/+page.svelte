@@ -4,6 +4,7 @@
   import { uploadImage, appendRow } from '$lib/sheets';
   import { dispatchEvent, store } from '$lib/store';
   import { signIn } from '$lib/auth';
+  import { toasts } from '$lib/toast';
   import { goto } from '$app/navigation';
   import { base } from '$app/paths';
   // @ts-ignore
@@ -112,9 +113,9 @@
              // Token exists but init failed? Retry once
              await initPickerSession();
              if (pickerUri) {
-                console.warn('Photos ready. Please tap again.');
+                toasts.info('Photos ready. Please tap again.');
              } else {
-                console.error('Could not initialize Google Photos. Please check network.');
+                toasts.error('Could not initialize Google Photos. Please check network.');
              }
           }
           return;
@@ -200,7 +201,7 @@
         }, 100);
     } catch (e) {
         console.error('Camera failed', e);
-        console.error('Could not access camera');
+        toasts.error('Could not access camera');
         showCamera = false;
     }
   }
@@ -303,6 +304,7 @@
               };
           } catch (e) {
               console.error(`Failed to parse image ${i}`, e);
+              toasts.error('Failed to process one or more images');
               throw e;
           }
       });
@@ -328,7 +330,7 @@
       }));
     } catch (e) {
       console.error('Analysis failed', e);
-      console.warn('Analysis failed: ' + e);
+      toasts.error('Gemini analysis failed. Please try again.');
     } finally {
       analyzing = false;
     }

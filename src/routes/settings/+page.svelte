@@ -3,6 +3,7 @@
     import { signOut } from '$lib/auth';
     import { goto } from '$app/navigation';
     import { base } from '$app/paths';
+    import { toasts } from '$lib/toast';
     import { store, dispatchEvent, selectSettings, updateGoals, type SettingsState, type MacroRatios } from '$lib/store';
     import DonutChart from '$lib/components/ui/DonutChart.svelte';
 
@@ -142,7 +143,7 @@
             goto(`${base}/`);
         } catch (e) {
             console.error(e);
-            console.error('Failed to save settings.');
+            toasts.error('Failed to save settings.');
         }
     }
 </script>

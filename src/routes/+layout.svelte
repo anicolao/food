@@ -4,10 +4,12 @@
 
 	import MobileNav from '$lib/components/ui/MobileNav.svelte';
 	import DesktopSidebar from '$lib/components/ui/DesktopSidebar.svelte';
+	import ToastContainer from '$lib/components/ui/ToastContainer.svelte';
 	import { page } from '$app/stores';
 	import { getTransitionDirection, getTransitionParams } from '$lib/transitions';
 	import { onMount } from 'svelte';
     import { initializeAuth } from '$lib/auth';
+    import { afterNavigate } from '$app/navigation';
 
 	let { children } = $props();
 
@@ -22,6 +24,14 @@
 		reducedMotion = mediaQuery.matches;
 		transitionsEnabled = true;
 	});
+
+    // Handle history updates for direction calculation
+    afterNavigate((nav) => {
+        if (nav.to) {
+            previousUrl = new URL(nav.to.url.href);
+        }
+    });
+
 </script>
 
 <script module>
@@ -49,8 +59,6 @@
 			{#key $page.url.pathname}
 				{@const direction = previousUrl ? getTransitionDirection(previousUrl, $page.url) : 'crossfade'}
 				{@const config = getTransitionParams(direction, width, height)}
-				<!-- Update previousUrl after determining direction for *this* transition -->
-				{@const _ = (previousUrl = new URL($page.url.href))} 
 
 				<div 
 					class="transition-wrapper"
@@ -66,6 +74,8 @@
 	<div class="mobile-nav-wrapper">
 		<MobileNav />
 	</div>
+
+    <ToastContainer />
 </div>
 
 <style>
