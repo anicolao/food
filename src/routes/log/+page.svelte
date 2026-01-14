@@ -296,6 +296,9 @@
     
     analyzing = true;
     try {
+      // Force render tick to ensure 'analyzing' state is visible even if analyzeImage fails fast
+      await new Promise(r => setTimeout(r, 1)); 
+
       const images = imagePreviews.map((preview, i) => {
           try {
               return {
