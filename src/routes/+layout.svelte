@@ -13,10 +13,12 @@
 	let width = $state(0);
 	let height = $state(0);
 	let reducedMotion = $state(false);
+	let transitionsEnabled = $state(false);
 
 	onMount(() => {
 		const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
 		reducedMotion = mediaQuery.matches;
+		transitionsEnabled = true;
 	});
 </script>
 
@@ -37,7 +39,7 @@
 	</div>
 	
 	<div class="main-content">
-		{#if reducedMotion}
+		{#if reducedMotion || !transitionsEnabled}
 			<div class="transition-wrapper">
 				{@render children()}
 			</div>
