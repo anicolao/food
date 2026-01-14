@@ -292,9 +292,11 @@
   }
 
   async function runAnalysis(correction?: string) {
+    console.log('DEBUG: runAnalysis called. Previews:', imagePreviews.length);
     if (imagePreviews.length === 0) return;
     
     analyzing = true;
+    console.log('DEBUG: analyzing set to true');
     try {
       const images = imagePreviews.map((preview, i) => {
           try {
@@ -308,8 +310,10 @@
           }
       });
       
+      console.log('DEBUG: Calling analyzeImage...');
       const previousRationale = rationale;
       const result = await analyzeImage(images, correction ? previousRationale : undefined, correction);
+      console.log('DEBUG: analyzeImage returned', result);
       
       itemName = result.item_name || '';
       rationale = result.rationale || '';
@@ -328,10 +332,11 @@
         rawJson: result 
       }));
     } catch (e) {
-      console.error('Analysis failed', e);
+      console.error('DEBUG: Analysis failed', e);
       alert('Analysis failed: ' + e);
     } finally {
       analyzing = false;
+      console.log('DEBUG: analyzing set to false');
     }
   }
 
