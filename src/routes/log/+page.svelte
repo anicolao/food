@@ -60,7 +60,7 @@
   // Sheet State
   // We consider the sheet 'open' (preview mode) if we have images OR we have pending text data with "AI Found" image
   // We consider the sheet 'open' (preview mode) if we have images, pending text data with "AI Found" image, OR if we are analyzing
-  let sheetOpen = $derived(imagePreviews.length > 0 || analyzing);
+  let sheetOpen = $derived(imagePreviews.length > 0 || analyzing || itemName.length > 0);
 
   function updateMealType(dateObj: Date) {
      const hour = dateObj.getHours();

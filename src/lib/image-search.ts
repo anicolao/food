@@ -7,7 +7,7 @@
  * @returns A promise that resolves to an image URL
  */
 // Image search service using Gemini Grounding (User OAuth)
-import { findImageWithGemini, generateImageWithGemini } from '$lib/gemini';
+import { findImageWithGemini } from '$lib/gemini';
 
 /**
  * Searches for an image URL based on the query.
@@ -18,7 +18,6 @@ export async function searchFoodImage(query: string): Promise<string | null> {
     console.log(`[ImageSearch] Searching for: "${query}"`);
 
     // 1. Try Gemini Search (User OAuth)
-    let imageUrl: string | null = null;
     try {
         const geminiUrl = await findImageWithGemini(query);
         if (geminiUrl) {
@@ -29,31 +28,18 @@ export async function searchFoodImage(query: string): Promise<string | null> {
                 const res = await fetch(geminiUrl);
                 if (res.status === 404) {
                     console.warn('[ImageSearch] Gemini returned 404, ignoring');
+                    return null;
                 } else {
                     // 200, 403 (CORS), etc. - attempt to use it
-                    imageUrl = geminiUrl;
+                    return geminiUrl;
                 }
             } catch (e) {
                 // Network/CORS error on verification - optimistic return
-                imageUrl = geminiUrl;
+                return geminiUrl;
             }
         }
     } catch (e) {
         console.warn('[ImageSearch] Gemini search failed', e);
-    }
-
-    if (imageUrl) return imageUrl;
-
-    // 2. Fallback: Generate Image (Imagen 3)
-    console.log('[ImageSearch] Search failed/404. Attempting to generate image...');
-    try {
-        const generatedUrl = await generateImageWithGemini(query);
-        if (generatedUrl) {
-            console.log('[ImageSearch] Generated image successfully.');
-            return generatedUrl;
-        }
-    } catch (e) {
-        console.warn('[ImageSearch] Generation failed', e);
     }
 
     return null;
