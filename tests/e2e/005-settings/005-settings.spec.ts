@@ -84,18 +84,15 @@ test('User configures macro settings', async ({ page }, testInfo) => {
     });
 
     // 5. Save
-    // Mock the window.alert
-    page.on('dialog', dialog => dialog.accept());
+    // 5. Save
     await page.click('.save-btn');
 
     await tester.step('save-changes', {
-        description: 'Saved settings',
+        description: 'Saved settings and redirected',
         verifications: [
             {
-                spec: 'Save button disabled (clean state)', check: async () => {
-                    const debug = await page.locator('[data-testid="debug-state"]').innerText();
-                    console.log('Debug State:', debug);
-                    await expect(page.locator('.save-btn')).toBeDisabled();
+                spec: 'Redirected to dashboard', check: async () => {
+                    await expect(page).toHaveURL(/\/$/); // Ends in slash (root)
                 }
             }
         ]

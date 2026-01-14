@@ -1,7 +1,7 @@
 # Polishing Macro Settings UI
 
 ## Summary
-This PR implements comprehensive polishing for the Macro Settings UI. It addresses visual regressions, layout constraints, and specific visual artifacts like glow clipping and segment overlap issues. It also enhances interactivity by making the chart segments and center calorie target editable.
+This PR implements comprehensive polishing for the Macro Settings UI. It addresses visual regressions, layout constraints, and specific visual artifacts like glow clipping and segment overlap issues. It also enhances interactivity by making the chart segments and center calorie target editable, and improves UX by redirecting on save.
 
 ## Changes
 - **Visual Polish**:
@@ -13,9 +13,10 @@ This PR implements comprehensive polishing for the Macro Settings UI. It address
     - Removed "Macro Split" title to reduce height.
     - Removed separate "Daily Target" row and moved interaction to chart center.
     - Compacted vertical spacing.
-- **Interactivity**:
+- **Interactivity & UX**:
     - Made center calorie text an editable input.
     - Made chart segments clickable (increments percentage).
+    - **Replaced Save Alert with Dashboard Redirect**: Clicking "Save Changes" now automatically redirects the user to the dashboard instead of showing an alert.
 
 ## Original User Prompt
 The user's main objective is to polish the Macro Settings UI. This involves:
@@ -32,3 +33,5 @@ The user's main objective is to polish the Macro Settings UI. This involves:
 > So very close. I can see an edge around the red ball - maybe this is caused by the blocker circle? Whatever causes it, it must go - the circle must seem to be part of the red not overlapping it.
 
 > A very strange border artifact appears only when the user clicks on the chart to edit it (screenshot attached). Otherwise this is close to perfect.
+
+> Let's get rid of the alert on save. Have save simply return to the dashboard instead.

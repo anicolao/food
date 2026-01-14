@@ -63,6 +63,10 @@ The feature allows users to set daily calorie targets and macronutrient ratios (
 - **Artifact Removal**: Disabled the default browser focus outline on interactive chart segments (`.segment-path { outline: none; }`).
     - This removes the unsightly yellow/blue border box that appeared when clicking on segments to edit them.
 
+### 10. UX Improvement (Feedback Round 8)
+- **Save Action**: Replaced the interstitial `alert('Goals saved!')` with an automatic redirection to the dashboard (`/`).
+    - This streamlines the flow, allowing users to immediately see their new goals in context.
+
 ## Verification Results
 
 ### Automated E2E Tests
@@ -74,7 +78,7 @@ Running 1 test using 1 worker
 Debug State: Dirty: false
             DiffCals: 0
             DiffP: 0
-  1 passed (1.5s)
+  1 passed (1.9s)
 ```
 
 ### Key Logic Verification

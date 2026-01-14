@@ -139,11 +139,11 @@
         try {
             // Pass plain object to Redux to avoid Svelte proxy conflicts
             store.dispatch(dispatchEvent('settings/goalsUpdated', snap));
+            goto(`${base}/`);
         } catch (e) {
             console.error('Dispatch failed:', e);
+            alert('Failed to save settings.');
         }
-        
-        alert('Goals saved!');
     }
 </script>
 
