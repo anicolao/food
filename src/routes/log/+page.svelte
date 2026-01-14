@@ -562,7 +562,13 @@
          <div class="sheet-content">
              <div class="preview-strip">
                  {#each imagePreviews as preview}
-                     <img src={preview} alt="Thumb" class="sheet-thumb" />
+                     <img 
+                       src={preview} 
+                       alt="Thumb" 
+                       class="sheet-thumb" 
+                       referrerpolicy="no-referrer" 
+                       onerror="this.style.display='none'"
+                     />
                  {/each}
                 <button class="add-more-btn" onclick={() => fileInput?.click()}>+</button>
              </div>
