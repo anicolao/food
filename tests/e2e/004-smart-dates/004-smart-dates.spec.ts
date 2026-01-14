@@ -6,6 +6,24 @@ import * as path from 'path';
 test('US-013 to US-017: Smart Date Formatting', async ({ page }, testInfo) => {
     const tester = new TestStepHelper(page, testInfo);
     tester.setMetadata('Smart Dates', 'Verifying date formatting rules.');
+
+    // Promise Gate for Gemini
+    let resolveGemini: () => void;
+    // Re-initialize for each sub-test/iteration if needed, or just one if only called once?
+    // 004 calls logItem 3 times! We need a way to reset it.
+    // Actually, logItem does the interaction. We should create a new promise for each call?
+    // Or just a queue?
+    // Let's make it a queue or a resettable gate.
+    // Simplest: expose a function to reset it.
+
+    let geminiGate: Promise<void> = Promise.resolve();
+    let releaseGemini: () => void = () => { };
+
+    const resetGate = () => {
+        geminiGate = new Promise(r => { releaseGemini = r; });
+    };
+    resetGate();
+
     page.on('console', msg => console.log(`BROWSER LOG: ${msg.text()}`));
     page.on('pageerror', err => console.log(`BROWSER ERR: ${err}`));
 
@@ -78,7 +96,7 @@ test('US-013 to US-017: Smart Date Formatting', async ({ page }, testInfo) => {
                 await route.fulfill({ json: {} });
             }
         } else if (url.includes('generativelanguage')) {
-            await new Promise(r => setTimeout(r, 2000));
+            await geminiGate;
             await route.fulfill({ json: { candidates: [{ content: { parts: [{ text: JSON.stringify({ is_label: false, item_name: 'Test Food', calories: 100, fat: { total: 0 }, carbohydrates: { total: 0 }, protein: 0 }) }] } }] } });
         } else {
             await route.continue();
@@ -99,6 +117,7 @@ test('US-013 to US-017: Smart Date Formatting', async ({ page }, testInfo) => {
         const fileInput = page.locator('input[type="file"]:not([capture])');
         await fileInput.setInputFiles('tests/e2e/fixtures/apple.png');
         await expect(page.getByText('Analyzing 1 images with Gemini...')).toBeVisible();
+        releaseGemini(); // Release the mock
 
         await expect(async () => {
             const val = await page.getByLabel('Log Description').first().inputValue();
@@ -112,6 +131,8 @@ test('US-013 to US-017: Smart Date Formatting', async ({ page }, testInfo) => {
 
         // Wait for feed to load (it loads TODAY by default)
         await expect(page.locator('.feed-header h2').first()).toHaveText('Today');
+        // Reset gate for next run
+        resetGate();
     }
 
     // 1. Log Today's Item (2024-03-15)

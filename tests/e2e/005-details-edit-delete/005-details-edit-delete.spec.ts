@@ -6,6 +6,10 @@ test('US-018 to US-022: Details, Edit and Delete', async ({ page }, testInfo) =>
     const tester = new TestStepHelper(page, testInfo);
     tester.setMetadata('Edit/Delete', 'Verifying details page, edit and delete.');
 
+    // Promise Gate for Gemini
+    let resolveGemini: () => void = () => { };
+    const geminiPromise = new Promise<void>(r => { resolveGemini = r; });
+
     // Mock Auth & Clock
     // 12:00 PM EDT = 16:00 PM UTC
     await page.clock.install({ time: new Date('2024-03-15T16:00:00Z') });
@@ -47,7 +51,7 @@ test('US-018 to US-022: Details, Edit and Delete', async ({ page }, testInfo) =>
                 else await route.fulfill({ json: { mediaItemsSet: true } });
             }
         } else if (url.includes('generativelanguage')) {
-            await new Promise(r => setTimeout(r, 2000));
+            await geminiPromise;
             // Original Food Logic
             await route.fulfill({ json: { candidates: [{ content: { parts: [{ text: JSON.stringify({ is_label: false, item_name: 'Original Food', calories: 100, fat: { total: 10 }, carbohydrates: { total: 10 }, protein: 10 }) }] } }] } });
         } else if (url.includes('sheets')) {
@@ -71,6 +75,7 @@ test('US-018 to US-022: Details, Edit and Delete', async ({ page }, testInfo) =>
         'tests/e2e/fixtures/apple.png'
     ]);
     await expect(page.getByText('Analyzing 2 images with Gemini...')).toBeVisible();
+    resolveGemini();
 
     await expect(async () => {
         const val = await page.getByLabel('Log Description').first().inputValue();
