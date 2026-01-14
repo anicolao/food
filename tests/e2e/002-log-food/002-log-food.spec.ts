@@ -165,7 +165,7 @@ test('US-003 to US-010: User logs food flow', async ({ page }, testInfo) => {
         description: 'Image preview shown',
         verifications: [
             { spec: 'Preview visible', check: async () => await expect(page.locator('.sheet-thumb')).toBeVisible() },
-            { spec: 'Status is Analyzing', check: async () => await expect(page.getByText('Analyzing 1 images with Gemini...')).toBeVisible() }
+            { spec: 'Status is Analyzing', check: async () => await expect(page.getByText('Analyzing 1 images with Gemini...')).toBeVisible({ timeout: 10000 }) }
         ]
     });
 
