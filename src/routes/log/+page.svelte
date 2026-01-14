@@ -116,9 +116,9 @@
              await initPickerSession();
              if (pickerUri) {
                 // If fast enough? unlikely. User has to click again usually.
-                alert('Photos ready. Please tap again.');
+                console.warn('Photos ready. Please tap again.');
              } else {
-                alert('Could not initialize Google Photos. Please check network.');
+                console.error('Could not initialize Google Photos. Please check network.');
              }
           }
           return;
@@ -204,7 +204,7 @@
         }, 100);
     } catch (e) {
         console.error('Camera failed', e);
-        alert('Could not access camera');
+        console.error('Could not access camera');
         showCamera = false;
     }
   }
@@ -332,7 +332,7 @@
       }));
     } catch (e) {
       console.error('Analysis failed', e);
-      alert('Analysis failed: ' + e);
+      console.warn('Analysis failed: ' + e);
     } finally {
       analyzing = false;
     }
@@ -404,7 +404,7 @@
         goto(`${base}/`);
     } catch (e) {
         console.error(e);
-        alert('Failed to save');
+        console.error('Failed to save');
     }
   }
 

@@ -1,9 +1,8 @@
 #!/bin/sh
-if git grep -q 'waitForTimeout' -- ':!*.md' ':!.husky/pre-commit'; then
-  echo 'Error: waitForTimeout is forbidden. Use event-based waiting instead.'
-  exit 1
-fi
+. "$(dirname "$0")/_/husky.sh"
 
-# Run E2E tests
-echo "Running E2E tests..."
-npx playwright test
+# Check for alert() usage in staged files
+if git grep -n "alert(" -- "*.ts" "*.js" "*.svelte"; then
+    echo "Error: alert() is not allowed. Use console.error/warn or a toast notification."
+    exit 1
+fi

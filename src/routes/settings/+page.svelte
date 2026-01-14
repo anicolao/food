@@ -141,8 +141,8 @@
             store.dispatch(dispatchEvent('settings/goalsUpdated', snap));
             goto(`${base}/`);
         } catch (e) {
-            console.error('Dispatch failed:', e);
-            alert('Failed to save settings.');
+            console.error(e);
+            console.error('Failed to save settings.');
         }
     }
 </script>
