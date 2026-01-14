@@ -147,3 +147,43 @@ export async function findImageWithGemini(query: string): Promise<string | null>
 
     return null;
 }
+
+export async function generateImageWithGemini(prompt: string): Promise<string | null> {
+    const token = getAccessToken();
+    if (!token) return null;
+
+    // Use Imagen 3 endpoint
+    const url = 'https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-001:predict';
+
+    try {
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({
+                instances: [{ prompt: `A delicious, professional food photography shot of: ${prompt}. Studio lighting, high quality.` }],
+                parameters: {
+                    sampleCount: 1,
+                    aspectRatio: "1:1"
+                }
+            })
+        });
+
+        if (!response.ok) {
+            console.warn('Gemini Image Gen failed', response.status, await response.text());
+            return null;
+        }
+
+        const result = await response.json();
+        const base64 = result.predictions?.[0]?.bytesBase64Encoded;
+        if (base64) {
+            return `data:image/jpeg;base64,${base64}`;
+        }
+    } catch (e) {
+        console.error('Image gen error', e);
+    }
+
+    return null;
+}
