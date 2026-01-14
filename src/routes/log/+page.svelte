@@ -466,7 +466,6 @@
             fat,
             carbs,
             protein,
-            protein,
             imageDriveUrl: driveUrls || (imagePreviews.length > 0 && imagePreviews[0].startsWith('http') ? imagePreviews[0] : ''), 
             rawJson: JSON.parse(JSON.stringify(form))
         };
@@ -567,7 +566,7 @@
                        alt="Thumb" 
                        class="sheet-thumb" 
                        referrerpolicy="no-referrer" 
-                       onerror="this.style.display='none'"
+                       onerror={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
                      />
                  {/each}
                 <button class="add-more-btn" onclick={() => fileInput?.click()}>+</button>
