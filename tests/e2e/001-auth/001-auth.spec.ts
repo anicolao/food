@@ -5,6 +5,8 @@ test('US-001: User signs in', async ({ page }, testInfo) => {
     const tester = new TestStepHelper(page, testInfo);
     tester.setMetadata('Authentication', 'Verify user can sign in.');
 
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+
     // Mock Google Auth & Drive Discovery
     await page.addInitScript(() => {
         (window as any).google = {
