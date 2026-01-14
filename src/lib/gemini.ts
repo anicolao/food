@@ -8,15 +8,18 @@ export interface NutritionEstimate {
     fat: { total: number };
     carbohydrates: { total: number };
     protein: number;
+    searchQuery?: string; // For text/voice inputs
     // ... expand as needed
 }
 
 const SYSTEM_PROMPT = `
-You are an expert dietician. Analyze the provided image(s).
+You are an expert dietician. Analyze the provided input (image or text description).
 1. If multiple images are provided, treat them as different angles or components of a **single meal/entry**. Aggregate the nutrition facts into one total estimate.
 2. If it is a **Nutrition Facts label**, extract the data exactly as shown.
 3. If it is a **food item/meal**, estimate the nutrition facts based on visible portion sizes and standard values using Canadian standards.
-4. Return the data **exclusively** in the following JSON format (a SINGLE object, not a list):
+4. If the input is **text only**, estimate based on standard portions for the described items.
+5. **ALWAYS** provide a "searchQuery" field: a short, descriptive string to search for an image of this food (e.g., "Starbucks Grande Latte with oat milk" or "Grilled Salmon with Asparagus").
+6. Return the data **exclusively** in the following JSON format (a SINGLE object, not a list):
 {
   "is_label": boolean,
   "item_name": "string",
@@ -24,7 +27,8 @@ You are an expert dietician. Analyze the provided image(s).
   "calories": number,
   "fat": { "total": number },
   "carbohydrates": { "total": number },
-  "protein": number
+  "protein": number,
+  "searchQuery": "string"
 }
 `;
 
@@ -33,29 +37,40 @@ export interface ImageInput {
     mimeType: string;
 }
 
-export async function analyzeImage(images: ImageInput[], previousRationale?: string, userCorrection?: string): Promise<NutritionEstimate> {
+export async function analyzeFood(inputs: { images?: ImageInput[], text?: string }, previousRationale?: string, userCorrection?: string): Promise<NutritionEstimate> {
     const token = getAccessToken();
     if (!token) throw new Error('User not authenticated for Gemini analysis');
 
     const url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
 
     let prompt = SYSTEM_PROMPT;
+
+    if (inputs.text) {
+        prompt += `\n\nUSER TEXT DESCRIPTION: "${inputs.text}"\n`;
+    }
+
     if (previousRationale && userCorrection) {
         prompt += `
         
         CONTEXT FOR RE-ANALYSIS:
         The previous analysis provided this rationale: "${previousRationale}".
         The user has provided this correction: "${userCorrection}".
-        Please re-evaluate the image and nutrition facts based on this correction.
+        Please re-evaluate the nutrition facts based on this correction.
         `;
     }
 
-    const imageParts = images.map(img => ({
-        inlineData: {
-            mimeType: img.mimeType,
-            data: img.base64
-        }
-    }));
+    const parts: any[] = [{ text: prompt }];
+
+    if (inputs.images) {
+        inputs.images.forEach(img => {
+            parts.push({
+                inlineData: {
+                    mimeType: img.mimeType,
+                    data: img.base64
+                }
+            });
+        });
+    }
 
     const response = await fetch(url, {
         method: 'POST',
@@ -65,10 +80,7 @@ export async function analyzeImage(images: ImageInput[], previousRationale?: str
         },
         body: JSON.stringify({
             contents: [{
-                parts: [
-                    { text: prompt },
-                    ...imageParts
-                ]
+                parts: parts
             }],
             generationConfig: {
                 responseMimeType: "application/json"
