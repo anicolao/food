@@ -12,10 +12,10 @@
   let error = $state<string | null>(null);
   let status = $state('Initializing...');
   
-  let pollInterval: any = null;
-  let sessionId: string | null = null;
-  let pickerUri: string | null = null;
-  let pickerWindow: Window | null = null;
+  let pollInterval = $state<any>(null);
+  let sessionId = $state<string | null>(null);
+  let pickerUri = $state<string | null>(null);
+  let pickerWindow = $state<Window | null>(null);
 
   $effect(() => {
       // Auto-initialize session when opened
