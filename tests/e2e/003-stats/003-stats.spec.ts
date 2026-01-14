@@ -7,6 +7,9 @@ test('US-012: Stats persist after reload', async ({ page }, testInfo) => {
     page.on('console', msg => console.log(`BROWSER LOG: ${msg.text()}`));
     page.on('pageerror', err => console.log(`BROWSER ERROR: ${err}`));
 
+    // Fix Clock to 2024-03-15 12:00 Local
+    await page.clock.install({ time: new Date('2024-03-15T12:00:00') });
+
     // Mock Auth
     await page.addInitScript(() => {
         (window as any).google = {
@@ -25,7 +28,7 @@ test('US-012: Stats persist after reload', async ({ page }, testInfo) => {
     // Mock Sheets fetching existing events AND Drive Discovery
     await page.route('**googleapis.com**', async route => {
         const url = route.request().url();
-        console.log('MOCKING:', url);
+        // console.log('MOCKING:', url);
 
         if (url.includes('drive/v3/files')) {
             if (url.includes('foodlog') || url.includes('FoodLog')) {
@@ -39,12 +42,12 @@ test('US-012: Stats persist after reload', async ({ page }, testInfo) => {
             await route.fulfill({
                 json: {
                     values: [
-                        ['HeaderID', 'Time', 'Type', 'Payload'], // Row 1 implied header or skipped? Logic didn't skip, but try/catch might handle.
+                        ['HeaderID', 'Time', 'Type', 'Payload'],
                         // Row 2: Confirmed Entry
-                        ['uuid-1', '2023-01-01', 'log/entryConfirmed', JSON.stringify({
+                        ['uuid-1', '2024-03-15', 'log/entryConfirmed', JSON.stringify({
                             entry: {
                                 id: '1',
-                                date: new Date().toISOString().split('T')[0], // Today
+                                date: '2024-03-15', // Matches fixed clock
                                 time: '12:00',
                                 description: 'Mock Apple',
                                 calories: 500,
@@ -70,12 +73,9 @@ test('US-012: Stats persist after reload', async ({ page }, testInfo) => {
     await tester.step('stats-loaded', {
         description: 'Stats loaded from sheet',
         verifications: [
-
-            { spec: 'Calories = 500', check: async () => await expect(page.locator('.value-text').first()).toHaveText('500') },
-            { spec: 'Calories = 500', check: async () => await expect(page.locator('.value-text').first()).toHaveText('500') },
+            { spec: 'Calories = 500', check: async () => await expect(page.locator('.hero-ring .value-text').first()).toHaveText('500') },
             // Bubble value format is now "Value/Max" e.g. "20/180" inside the bubble.
             { spec: 'Protein = 20', check: async () => await expect(page.locator('.bubble-value').first()).toHaveText('20/180') },
-
             { spec: 'History shows entry', check: async () => await expect(page.getByText('Mock Apple')).toBeVisible() }
         ]
     });
