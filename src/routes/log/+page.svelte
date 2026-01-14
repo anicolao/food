@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { analyzeImage, type NutritionEstimate } from '$lib/gemini';
+  import { analyzeFood, type NutritionEstimate } from '$lib/gemini';
+  import { searchFoodImage } from '$lib/image-search';
   import { uploadImage, appendRow } from '$lib/sheets';
   import { dispatchEvent, store } from '$lib/store';
   import { signIn } from '$lib/auth';
@@ -12,12 +13,19 @@
   import { createPickerSession, pollPickerSession, listSessionMediaItems } from '$lib/google-photos';
   
   import LogSheet from '$lib/components/ui/LogSheet.svelte';
+  import InputGrid from '$lib/components/ui/InputGrid.svelte';
+  import TextInputModal from '$lib/components/ui/TextInputModal.svelte';
+  import VoiceRecorder from '$lib/components/ui/VoiceRecorder.svelte';
 
   let fileInput = $state<HTMLInputElement>();
   let videoElement = $state<HTMLVideoElement>();
   let stream: MediaStream | null = null;
-  let showCamera = $state(false);
-  let showPhotosSelector = $state(false);
+  
+  type LogMode = 'IDLE' | 'CAMERA' | 'VOICE' | 'TEXT' | 'LIBRARY';
+  let currentMode = $state<LogMode>('IDLE');
+  $effect(() => { console.log('MODE CHANGED:', currentMode); });
+  
+  // let showPhotosSelector = $state(false); // Unused, logic handled by picker
 
   let imageFiles: File[] = $state([]);
   let imagePreviews: string[] = $state([]);
@@ -50,6 +58,7 @@
   let userCorrection = $state('');
   
   // Sheet State
+  // We consider the sheet 'open' (preview mode) if we have images OR we have pending text data with "AI Found" image
   let sheetOpen = $derived(imagePreviews.length > 0);
 
   function updateMealType(dateObj: Date) {
@@ -191,7 +200,7 @@
   }
 
   async function startCamera() {
-    showCamera = true;
+    currentMode = 'CAMERA';
     try {
         stream = await navigator.mediaDevices.getUserMedia({ 
             video: { facingMode: 'environment' } 
@@ -202,7 +211,7 @@
     } catch (e) {
         console.error('Camera failed', e);
         toasts.error('Could not access camera');
-        showCamera = false;
+        currentMode = 'IDLE';
     }
   }
 
@@ -211,7 +220,7 @@
         stream.getTracks().forEach(track => track.stop());
         stream = null;
     }
-    showCamera = false;
+    currentMode = 'IDLE';
   }
 
   function capturePhoto() {
@@ -310,7 +319,11 @@
       });
       
       const previousRationale = rationale;
-      const result = await analyzeImage(images, correction ? previousRationale : undefined, correction);
+      // Use analyzeFood which supports both
+      const result = await analyzeFood({ 
+          images: images.length > 0 ? images : undefined,
+          text: (currentMode === 'TEXT' || currentMode === 'VOICE') ? rationale : undefined // If we re-analyze, rationale holds the text
+      }, correction ? previousRationale : undefined, correction);
       
       itemName = result.item_name || '';
       rationale = result.rationale || '';
@@ -334,6 +347,48 @@
     } finally {
       analyzing = false;
     }
+  }
+
+  async function handleTextAnalyze(text: string) {
+      currentMode = 'IDLE'; // Close modal
+      rationale = text; // Store user text temporarily? 
+      // Or better: pass directly to analyzeFood and let it return the rationale
+      
+      analyzing = true;
+      try {
+          const result = await analyzeFood({ text });
+          applyAnalysisResult(result);
+          
+          if (result.searchQuery) {
+              const imageUrl = await searchFoodImage(result.searchQuery);
+              // We need to add this image to the previews so the UI logic works
+              // But it's a URL, not a File/Base64. 
+              // Our UI expects base64 in imagePreviews for display, or we can adapt it.
+              // For now, let's treat it as a "remote" reference.
+              // Hack: display the URL directly in imagePreviews? 
+              imagePreviews = [imageUrl];
+          }
+      } catch (e) {
+          console.error(e);
+          toasts.error('Analysis failed');
+      } finally {
+          analyzing = false;
+      }
+  }
+  
+  function applyAnalysisResult(result: NutritionEstimate) {
+      itemName = result.item_name || '';
+      rationale = result.rationale || '';
+      calories = result.calories || 0;
+      protein = result.protein || 0;
+      carbs = result.carbohydrates?.total || 0;
+      fat = result.fat?.total || 0;
+      
+      store.dispatch(dispatchEvent('log/aiEstimateReceived', { 
+         imagesCount: imageFiles.length, 
+         rawJson: result,
+         inputType: 'text'
+      }));
   }
 
   function handleReanalyze() {
@@ -381,7 +436,7 @@
             fat,
             carbs,
             protein,
-            imageDriveUrl: driveUrls, // Comma separated URLs
+            imageDriveUrl: driveUrls || (imagePreviews[0]?.startsWith('http') ? imagePreviews[0] : ''), 
             rawJson: JSON.parse(JSON.stringify(form))
         };
         
@@ -423,11 +478,23 @@
       fat = 0;
       showCorrectionInput = false;
       userCorrection = '';
+      currentMode = 'IDLE';
+  }
+  
+  function handleModeSelect(mode: LogMode) {
+      if (mode === 'IDLE') return;
+      if (mode === 'CAMERA') {
+          startCamera();
+      } else if (mode === 'LIBRARY') {
+          handleGooglePhotosPick();
+      } else {
+          currentMode = mode;
+      }
   }
 </script>
 
 <div class="log-page">
-    {#if showCamera}
+    {#if currentMode === 'CAMERA'}
         <div class="camera-ui">
              <video bind:this={videoElement} autoplay playsinline muted></video>
              <div class="cam-controls">
@@ -436,24 +503,25 @@
              </div>
         </div>
     {:else}
-        <!-- Pre-capture State / Background -->
+        <!-- Pre-capture State / Unified Grid -->
         <div class="start-ui">
             <h1>Log Food</h1>
-            <div class="action-buttons">
-                <button class="big-btn glass-panel" onclick={startCamera}>
-                    <div class="icon">📷</div>
-                    <span>Camera</span>
-                </button>
-                <button class="big-btn glass-panel" onclick={handleGooglePhotosPick}>
-                    <div class="icon">🖼️</div>
-                    <span>Photo Library</span>
-                </button>
-                <!-- Hidden file input for file picker fallback if library fails or just standard upload -->
-                <button class="big-btn glass-panel" onclick={() => fileInput?.click()}>
-                    <div class="icon">📁</div>
-                    <span>File</span>
-                </button>
-            </div>
+            
+            <InputGrid on:select={(e) => handleModeSelect(e.detail)} />
+
+            {#if currentMode === 'TEXT'}
+                <TextInputModal 
+                    on:close={() => currentMode = 'IDLE'}
+                    on:analyze={(e) => handleTextAnalyze(e.detail)}
+                />
+            {/if}
+
+            {#if currentMode === 'VOICE'}
+                <VoiceRecorder 
+                    on:close={() => currentMode = 'IDLE'}
+                    on:analyze={(e) => handleTextAnalyze(e.detail)} 
+                />
+            {/if}
             
             <input type="file" accept="image/*" multiple bind:this={fileInput} onchange={handleFileSelect} hidden />
         </div>
@@ -572,35 +640,13 @@
         gap: 40px;
     }
 
-    .action-buttons {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 20px;
-        width: 100%;
-        max-width: 500px;
-    }
 
-    .big-btn {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        height: 120px;
-        color: var(--text-primary);
-        background: var(--bg-card-glass);
-        border: 1px solid rgba(255,255,255,0.1);
-        border-radius: var(--radius-m);
-        gap: 10px;
-        transition: transform 0.2s;
-    }
 
-    .big-btn:active {
-        transform: scale(0.95);
-    }
 
-    .icon {
-        font-size: 2.5rem;
-    }
+
+
+
+
 
     /* Camera UI */
     .camera-ui {
