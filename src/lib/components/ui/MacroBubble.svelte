@@ -1,5 +1,7 @@
 <script lang="ts">
     import { base } from '$app/paths';
+    import { tweened } from 'svelte/motion';
+    import { cubicOut } from 'svelte/easing';
 
     interface Props {
         label: string;
@@ -22,15 +24,35 @@
     }: Props = $props();
     
     // Fatter ring
-    const size = 100; // Larger to fit content
+    const size = 100;
     const strokeWidth = 14;
     const radius = (size - strokeWidth) / 2;
-    const circumference = 2 * Math.PI * radius;
-    const progress = $derived(Math.min(Math.max(value / max, 0.01), 1)); // Min 0.01 to show something
-    
-    // Calculate arc path for progress
+    // const circumference = 2 * Math.PI * radius; // Not needed for path method
+
+    // Tweened store for smooth animation logic
+    const displayedValue = tweened(value, {
+        duration: 800,
+        easing: cubicOut
+    });
+
+    // Reactively update tween when props change
+    $effect(() => {
+        displayedValue.set(value);
+    });
+
+    // Computed Progress from tweened value
+    // Clamp visual progress to 0.9999 to avoid "full circle" arc reset or inversion
+    // allowing > 1 for text but visually capping at full ring.
+    // Also handle 0 properly.
+    const progress = $derived.by(() => {
+        const p = $displayedValue / max;
+        return Math.min(Math.max(p, 0.0001), 0.9999);
+    });
+
+    // Calculate arc path
     // Start at -90deg (top)
     const startAngle = -Math.PI / 2;
+    // End angle based on visual progress
     const endAngle = $derived(startAngle + (progress * 2 * Math.PI));
     
     // Helper to get coordinates
@@ -46,14 +68,15 @@
     // Path for the progress arc
     const arcPath = $derived(`M ${start.x} ${start.y} A ${radius} ${radius} 0 ${largeArc} 1 ${end.x} ${end.y}`);
     
-    const percent = $derived(Math.round((value/max) * 100));
+    // Display Percentage (can go over 100%)
+    const percent = $derived(Math.round(($displayedValue/max) * 100));
 </script>
 
 <div class="macro-bubble">
     <div class="ring-wrapper" style="width: {size}px; height: {size}px;">
         <svg width={size} height={size} viewBox="0 0 {size} {size}" class="ring-svg">
             <defs>
-                 <filter id="glow-{label}" x="-50%" y="-50%" width="200%" height="200%">
+                 <filter id="glow-{label}" filterUnits="userSpaceOnUse" x="0" y="0" width={size} height={size}>
                    <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
                    <feMerge>
                        <feMergeNode in="coloredBlur"/>
@@ -75,11 +98,6 @@
             />
             
              <!-- Progress Path -->
-             <!-- We use a path instead of circle for 'd' attribute access if needed, 
-                  but stroke-dasharray on circle is smoother for animation usually.
-                  However, for textPath 'href', we need a path in defs. 
-                  Let's use the path for drawing too to ensure exact match. 
-             -->
              <path
                 d={arcPath}
                 fill="none"
@@ -91,11 +109,6 @@
             />
             
             <!-- Percentage at Tip (Rotated along path) -->
-            <!-- startOffset="100%" puts it at the end. 
-                 text-anchor="end" aligns the end of the text to that point. 
-                 dy gives vertical offset to center in stroke. 
-                 Using tiny black letters.
-            -->
             <text dy="3" fill="#000" font-size="9" font-weight="900" style="pointer-events: none;">
                 <textPath 
                     href="#path-{label}" 
@@ -115,7 +128,7 @@
             {/if}
             <div class="stats">
                 <span class="bubble-label">{label}</span>
-                <span class="bubble-value">{Math.round(value)}/{max}</span>
+                <span class="bubble-value">{Math.round($displayedValue)}/{max}</span>
             </div>
         </div>
     </div>
@@ -143,7 +156,7 @@
     }
 
     .progress-path {
-        transition: d 0.5s ease-out;
+        /* transition: d 0.5s ease-out; Removed to prevent arc deformation artifacts */
     }
     
     .inner-content {

@@ -1,37 +1,22 @@
-# Polishing Macro Settings UI
+# Macro Settings Wiring and Animation Fix
 
-## Summary
-This PR implements comprehensive polishing for the Macro Settings UI. It addresses visual regressions, layout constraints, and specific visual artifacts like glow clipping and segment overlap issues. It also enhances interactivity by making the chart segments and center calorie target editable, and improves UX by redirecting on save.
+## User Prompts
+> OK we've just finished the macros settings UI and it looks good, but it is not properly wired into the system. Settings changes need to be written to the google sheet, and the main dashboard needs to read and respect them for showing the macro bubbles.
+>
+> Also there is a good animation fix for the donut chart htat keeps the shapes in their tracks, which needs to be replicated for the animations on the macro bubbles which deform quite a bit on the way to the desired state. 
+
+> The macro bubbles don't draw peroperly any more and also don't animate when they transition. They shoudl animate to their new position. They should be able to draw all states well, low percentages, high percentages, and even > 100%.
+
+> tweening looks great. But when teh bubble is very low (like 6%) it is clipped into a rectangel that makes the curve look wrong/bad.
 
 ## Changes
-- **Visual Polish**:
-    - Implemented "Butt-Cap + Start-Circle" strategy for Donut Chart segments to fix cyan glow protrusion.
-    - Added "Blocker Circle" behind red cap to prevent edge artifacts.
-    - Removed default focus outline from chart segments.
-    - Restored styling for "Sign Out" button and input fields.
-- **Layout**:
-    - Removed "Macro Split" title to reduce height.
-    - Removed separate "Daily Target" row and moved interaction to chart center.
-    - Compacted vertical spacing.
-- **Interactivity & UX**:
-    - Made center calorie text an editable input.
-    - Made chart segments clickable (increments percentage).
-    - **Replaced Save Alert with Dashboard Redirect**: Clicking "Save Changes" now automatically redirects the user to the dashboard instead of showing an alert.
+- **Persistence**: Wired `store.ts` to append `settings/goalsUpdated` events to the Google Sheet.
+- **Dashboard**: Updated `routes/+page.svelte` to use real setting values from the store instead of mocks.
+- **Animation**: 
+  - Replaced CSS transition with `tweened` store in `MacroBubble.svelte` for smooth, deformation-free animation.
+  - Implemented robust arc calculation for 0%, 100%, and >100% states.
+  - Fixed clipping on small values by switching SVG filter to `userSpaceOnUse`.
+- **Tests**: Updated `003-stats.spec.ts` to align with the default store settings (150g protein vs old 180g mock).
 
-## Original User Prompt
-The user's main objective is to polish the Macro Settings UI. This involves:
-1. Fixing styling regressions.
-2. Resolving Donut Chart visual issues.
-3. Improving layout.
-
-## Relevant User Comments
-
-> Ok the biggest problem remaining is the cyan glow. If we can but-end one end of the arc and round cap the other end, that should fix it - is that possible?
-
-> Also the UI is still a shade too tall. I think we can just remove the "Macro Split" title on the chart card and it'll fit nicely.
-
-> So very close. I can see an edge around the red ball - maybe this is caused by the blocker circle? Whatever causes it, it must go - the circle must seem to be part of the red not overlapping it.
-
-> A very strange border artifact appears only when the user clicks on the chart to edit it (screenshot attached). Otherwise this is close to perfect.
-
-> Let's get rid of the alert on save. Have save simply return to the dashboard instead.
+## Verification
+See `docs/walkthroughs/macro-settings-fixing.md` for detailed verification steps and results.

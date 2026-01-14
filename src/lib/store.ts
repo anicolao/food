@@ -1,4 +1,5 @@
 import { configureStore, createSlice, type PayloadAction } from '@reduxjs/toolkit';
+import { appendRow } from './sheets';
 
 // --- Event Types ---
 export interface FoodEvent {
@@ -242,7 +243,7 @@ export const selectMacroTargetsGrams = (state: RootState) => {
 };
 
 // --- Thunks / Helpers ---
-export const dispatchEvent = (type: string, payload: any) => (dispatch: any) => {
+export const dispatchEvent = (type: string, payload: any) => async (dispatch: any, getState: any) => {
   const event: FoodEvent = {
     eventId: crypto.randomUUID(),
     type,
@@ -261,8 +262,24 @@ export const dispatchEvent = (type: string, payload: any) => (dispatch: any) => 
     dispatch(updateGoals(payload));
   }
 
-  // 4. Side Effects (Sync to Sheets) would go here or in a listener
-  // syncToSheets(event);
+  // 4. Side Effects (Sync to Sheets)
+  const state = getState();
+  const { spreadsheetId } = state.config;
+
+  if (spreadsheetId) {
+    try {
+      // Columns: ID, Timestamp, Type, Payload
+      await appendRow(spreadsheetId, 'Events', [
+        event.eventId,
+        event.timestamp,
+        event.type,
+        JSON.stringify(event.payload)
+      ]);
+    } catch (e) {
+      console.error('Failed to sync to sheets:', e);
+      // In a real app we might want to queue this for retry
+    }
+  }
 };
 
 export type RootState = ReturnType<typeof store.getState>;
