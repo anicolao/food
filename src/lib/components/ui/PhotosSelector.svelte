@@ -14,11 +14,13 @@
   
   let pollInterval: any = null;
   let sessionId: string | null = null;
+  let pickerUri: string | null = null;
   let pickerWindow: Window | null = null;
 
   $effect(() => {
-      if (open && !sessionId && !loading) {
-          startPickerFlow();
+      // Auto-initialize session when opened
+      if (open && !sessionId && !loading && !error) {
+          initSession();
       }
       
       return () => {
@@ -29,7 +31,8 @@
   // Handle visibility change to aggressively poll when user returns to tab
   $effect(() => {
       const handleVisibility = () => {
-          if (document.visibilityState === 'visible' && sessionId) {
+          // If we are polling and become visible, check immediately
+          if (document.visibilityState === 'visible' && sessionId && pollInterval) {
               console.log('App visible, checking picker status immediately...');
               checkSession();
           }
@@ -39,41 +42,47 @@
       return () => document.removeEventListener('visibilitychange', handleVisibility);
   });
 
-  async function startPickerFlow() {
+  async function initSession() {
       loading = true;
       error = null;
-      status = 'Opening Google Photos...';
+      status = 'Preparing Google Photos...';
       
       try {
           const session = await createPickerSession();
           sessionId = session.id;
           
           let uri = session.pickerUri;
-          // Ensure auto-close is set for better UX
           if (!uri.endsWith("/autoclose")) uri = uri.endsWith("/") ? `${uri}autoclose` : `${uri}/autoclose`;
+          pickerUri = uri;
           
-          // Open in new tab for mobile reliability
-          pickerWindow = window.open(uri, '_blank');
-          
-          status = 'Waiting for selection...';
-          startPolling();
-          
+          status = 'Ready';
       } catch (e: any) {
           console.error(e);
           if (e.message && e.message.includes('Forbidden')) {
              error = 'Access denied. You may need to sign in again.';
           } else {
-             error = 'Failed to open Picker. ' + (e.message || 'Unknown error');
+             error = 'Failed to prepare Picker. ' + (e.message || 'Unknown error');
           }
       } finally {
           loading = false;
       }
   }
 
+  function launchPicker() {
+      if (!pickerUri) return;
+      
+      // Open synchronously on user click
+      pickerWindow = window.open(pickerUri, '_blank');
+      
+      status = 'Waiting for selection...';
+      startPolling();
+  }
+
   function startPolling() {
       stopPolling();
+      const checkFn = () => checkSession();
       // Poll slower to save resources, rely on visibility change for the "instant" feel
-      pollInterval = setInterval(checkSession, 2000);
+      pollInterval = setInterval(checkFn, 2000);
   }
 
   function stopPolling() {
@@ -111,7 +120,8 @@
 
   async function handleGrantPermission() {
      signIn();
-     handleClose();
+     // Reset state to try init again
+     handleRetry();
   }
   
   async function handleSignOut() {
@@ -124,13 +134,17 @@
   function handleClose() {
       stopPolling();
       sessionId = null;
+      pickerUri = null;
       error = null;
       open = false;
   }
   
   function handleRetry() {
+      stopPolling();
       sessionId = null;
-      startPickerFlow();
+      pickerUri = null;
+      error = null;
+      // Effect will trigger initSession
   }
 </script>
 
@@ -151,11 +165,18 @@
                         <button class="text-btn small" onclick={handleSignOut}>Sign Out</button>
                     </div>
                 </div>
+            {:else if pickerUri && !pollInterval}
+                <!-- Ready State -->
+                <div class="state ready">
+                    <p>Ready to select photos.</p>
+                    <button class="primary-btn big" onclick={launchPicker}>Open Photos Picker</button>
+                    <button class="text-btn" onclick={handleClose}>Cancel</button>
+                </div>
             {:else}
+                <!-- Loading or Polling State -->
                 <div class="state waiting">
                     <div class="spinner"></div>
                     <p>{status}</p>
-                    <p class="sub-text">Select photos in the new tab to continue.</p>
                     <button class="text-btn" onclick={handleClose}>Cancel</button>
                 </div>
             {/if}
