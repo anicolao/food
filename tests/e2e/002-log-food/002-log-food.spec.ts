@@ -6,6 +6,11 @@ import * as path from 'path';
 test('US-003 to US-010: User logs food flow', async ({ page }, testInfo) => {
     const tester = new TestStepHelper(page, testInfo);
     tester.setMetadata('Logging', 'User logs a meal.');
+
+    // Promise Gate for Gemini
+    let resolveGemini: () => void = () => { };
+    const geminiPromise = new Promise<void>(r => { resolveGemini = r; });
+
     page.on('console', msg => console.log(`BROWSER LOG: ${msg.text()}`));
     page.on('pageerror', err => console.log(`BROWSER ERROR: ${err}`));
 
@@ -106,8 +111,8 @@ test('US-003 to US-010: User logs food flow', async ({ page }, testInfo) => {
                 await route.fulfill({ json: {} });
             }
         } else if (url.includes('generativelanguage')) {
-            // Simulate network/processing delay
-            await new Promise(r => setTimeout(r, 2000));
+            // Wait for test to signal readiness (Analyzing UI visible)
+            await geminiPromise;
             await route.fulfill({
                 json: {
                     candidates: [{
@@ -156,6 +161,9 @@ test('US-003 to US-010: User logs food flow', async ({ page }, testInfo) => {
             { spec: 'Status is Analyzing', check: async () => await expect(page.getByText('Analyzing 1 images with Gemini...')).toBeVisible() }
         ]
     });
+
+    // Release Mock
+    resolveGemini();
 
     // Wait for Gemini Mock
     await expect(page.getByLabel('Log Description')).toHaveValue('Mock Apple');
