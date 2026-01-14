@@ -12,8 +12,8 @@ export type TransitionConfig = {
 
 // Priority Heuristic
 export function getTransitionDirection(from: URL, to: URL): Direction {
-    const fromPath = from.pathname;
-    const toPath = to.pathname;
+    const fromPath = from.pathname.replace(/\/$/, '') || '/';
+    const toPath = to.pathname.replace(/\/$/, '') || '/';
 
     // 1. Vertical overrides (Logging) - HIGHEST PRIORITY
     // Going TO Log -> Always Slide UP (Enter Bottom)
@@ -40,34 +40,38 @@ export function getTransitionParams(direction: Direction, width: number, height:
     const duration = reducedMotion ? 0 : 300;
     const easing = cubicOut;
 
+    // Fallbacks for initial render (avoid fly(0))
+    const w = width || (typeof window !== 'undefined' ? window.innerWidth : 100);
+    const h = height || (typeof window !== 'undefined' ? window.innerHeight : 100);
+
     switch (direction) {
         case 'up':
             return {
                 in: fly,
                 out: fly,
-                inParams: { y: height, duration, easing },
-                outParams: { y: -height, duration, easing }
+                inParams: { y: h, duration, easing },
+                outParams: { y: -h, duration, easing }
             };
         case 'down':
             return {
                 in: fly,
                 out: fly,
-                inParams: { y: -height, duration, easing },
-                outParams: { y: height, duration, easing }
+                inParams: { y: -h, duration, easing },
+                outParams: { y: h, duration, easing }
             };
         case 'right':
             return {
                 in: fly,
                 out: fly,
-                inParams: { x: width, duration, easing },
-                outParams: { x: -width, duration, easing }
+                inParams: { x: w, duration, easing },
+                outParams: { x: -w, duration, easing }
             };
         case 'left':
             return {
                 in: fly,
                 out: fly,
-                inParams: { x: -width, duration, easing },
-                outParams: { x: width, duration, easing }
+                inParams: { x: -w, duration, easing },
+                outParams: { x: w, duration, easing }
             };
         case 'crossfade':
         default:
