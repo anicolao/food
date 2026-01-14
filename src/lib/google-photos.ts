@@ -95,3 +95,41 @@ export async function listSessionMediaItems(sessionId: string): Promise<MediaIte
         creationTime: item.mediaFile?.mediaMetadata?.creationTime,
     }));
 }
+
+export async function listLibraryItems(pageToken?: string): Promise<{ items: MediaItem[], nextPageToken?: string }> {
+    const token = getAccessToken();
+    if (!token) throw new Error("Not authenticated");
+
+    const params = new URLSearchParams({
+        pageSize: '100',
+    });
+    if (pageToken) params.append('pageToken', pageToken);
+
+    const response = await fetch(
+        `https://photoslibrary.googleapis.com/v1/mediaItems?${params.toString()}`,
+        {
+            method: "GET",
+            headers: { Authorization: `Bearer ${token}` },
+        },
+    );
+
+    if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Library API Error:', response.status, errorText);
+        throw new Error(`Failed to list library items: ${response.status} ${response.statusText} - ${errorText}`);
+    }
+
+    const data = await response.json();
+    const items = (data.mediaItems || []).map((item: any) => ({
+        id: item.id,
+        baseUrl: item.baseUrl, // Library API returns it at root level (unlike Picker API wrapped in meidaFile usually, or did I misread Picker API?)
+        // Actually Library API format: { id, baseUrl, mimeType, filename, mediaMetadata }
+        // Let's verify structure quickly.
+        // Yes, Library API has baseUrl at top level.
+        mimeType: item.mimeType,
+        filename: item.filename,
+        creationTime: item.mediaMetadata?.creationTime,
+    }));
+
+    return { items, nextPageToken: data.nextPageToken };
+}

@@ -2,7 +2,6 @@ export const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_OAUTH_ID;
 export const SCOPES = [
     'https://www.googleapis.com/auth/drive.file',
     'https://www.googleapis.com/auth/spreadsheets',
-    'https://www.googleapis.com/auth/photoslibrary.readonly',
     'https://www.googleapis.com/auth/photospicker.mediaitems.readonly',
     'https://www.googleapis.com/auth/generative-language.retriever'
 ].join(' ');
@@ -87,6 +86,9 @@ function initClient(onSuccess: (token: string) => void) {
 }
 
 function handleTokenResponse(response: any, onSuccess: (token: string) => void) {
+    if (response.scope) {
+        console.log('[Auth] Granted scopes:', response.scope);
+    }
     accessToken = response.access_token as string;
     const expiresInSeconds = response.expires_in || 3599; // Default to 1h
     const expiryTime = Date.now() + (expiresInSeconds * 1000);
@@ -142,13 +144,14 @@ export function refreshAuth() {
     if (tokenClient) {
         console.log('Refreshing auth token...');
         // prompt: '' is the key for silent refresh if user is already signed in
-        tokenClient.requestAccessToken({ prompt: '' });
+        tokenClient.requestAccessToken({ prompt: '', scope: SCOPES });
     }
 }
 
 export function signIn() {
     if (tokenClient) {
-        tokenClient.requestAccessToken();
+        // Force account selection to ensure fresh consent and correct account
+        tokenClient.requestAccessToken({ prompt: 'select_account', scope: SCOPES });
     } else {
         console.error('Auth not initialized yet');
     }

@@ -11,11 +11,13 @@
   import { createPickerSession, pollPickerSession, listSessionMediaItems } from '$lib/google-photos';
   
   import LogSheet from '$lib/components/ui/LogSheet.svelte';
+  import PhotosSelector from '$lib/components/ui/PhotosSelector.svelte';
 
   let fileInput = $state<HTMLInputElement>();
   let videoElement = $state<HTMLVideoElement>();
   let stream: MediaStream | null = null;
   let showCamera = $state(false);
+  let showPhotosSelector = $state(false);
 
   let imageFiles: File[] = $state([]);
   let imagePreviews: string[] = $state([]);
@@ -286,40 +288,8 @@
          alert('Please Sign In first');
          return;
      }
-
-     try {
-         const session = await createPickerSession();
-         const sessionId = session.id;
-         let uri = session.pickerUri;
-         if (!uri.endsWith("/autoclose")) uri = uri.endsWith("/") ? `${uri}autoclose` : `${uri}/autoclose`;
-         const popup = window.open(uri, 'googlePicker', 'width=800,height=600');
-         
-         let attempts = 0;
-         const MAX_ATTEMPTS = 60; 
-         const poll = setInterval(async () => {
-             attempts++;
-             if (attempts > MAX_ATTEMPTS) {
-                 clearInterval(poll);
-                 alert('Selection timed out.');
-                 return;
-             }
-             try {
-                const status = await pollPickerSession(sessionId);
-                if (status.mediaItemsSet) {
-                    clearInterval(poll);
-                    if (popup && !popup.closed) popup.close();
-                    const items = await listSessionMediaItems(sessionId);
-                    if (items.length > 0) {
-                        for (const item of items) await processPickedItem(item, token);
-                    } else {
-                        alert('No photos selected');
-                    }
-                }
-             } catch (e) {}
-         }, 2000); 
-     } catch (e) {
-         alert('Failed to open Photos Picker: ' + e);
-     }
+     
+     showPhotosSelector = true;
   }
 
   async function processPickedItem(item: any, token: string) {
@@ -501,6 +471,16 @@
              {/if}
          </div>
     </LogSheet>
+     
+    <PhotosSelector 
+       bind:open={showPhotosSelector} 
+       onSelect={async (items) => {
+           const token = await import('$lib/auth').then(m => m.getAccessToken() || '');
+           for (const item of items) {
+               await processPickedItem(item, token);
+           }
+       }} 
+    />
 </div>
 <style>
     .log-page {
