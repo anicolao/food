@@ -32,7 +32,20 @@ export async function searchFoodImage(query: string): Promise<string> {
         const geminiUrl = await findImageWithGemini(query);
         if (geminiUrl) {
             console.log('[ImageSearch] Found via Gemini:', geminiUrl);
-            return geminiUrl;
+
+            // Verify reachability (filter out 404s)
+            try {
+                const res = await fetch(geminiUrl);
+                if (res.status === 404) {
+                    console.warn('[ImageSearch] Gemini returned 404, falling back');
+                } else {
+                    // 200, 403 (CORS), etc. - attempt to use it
+                    return geminiUrl;
+                }
+            } catch (e) {
+                // Network/CORS error on verification - optimistic return
+                return geminiUrl;
+            }
         }
     } catch (e) {
         console.warn('[ImageSearch] Gemini search failed', e);
