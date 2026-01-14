@@ -1,17 +1,9 @@
-# Grouped Logging
+# Design: Macro Goals Settings
 
-## Original User Request
-Read DEVELOPMENT.md, WORKFLOW.md, and GROUPED_LOGGING_UX.md and implement the grouped logging.
+## User Prompt
+Let's design some settings for the user. They should be able to pick their overall calorie goal and macro goals. Let's call this MACRO_SETTINGS_DESIGN.md and specify both the internals and UX of how it will work. use nano banana as usual to create the visual mockups.
 
-## Comments (Internal)
-I have implemented the "Grouped Logging" feature as per `GROUPED_LOGGING_UX.md`.
-
-## Changes
-- **Grouping Logic**: Implemented `src/lib/activity-grouping.ts` to handling 4AM day rollovers and meal/snack activity clustering.
-- **UI Components**: created `ActivityCard.svelte` to display grouped logs.
-- **Dashboard**: Updated `+page.svelte` to use the new grouping logic and component.
-- **Store**: Exported `LogEntry` interface.
-- **Verification**: Added `tests/unit/activity-grouping.test.ts` and updated `002-log-food.spec.ts` with new assertions and snapshots.
-
-## Artifacts
-Detailed plans and walkthroughs are in `docs/grouped-logging/`.
+## Summary
+This PR adds the design document and visual mockup for the new Macro Settings feature.
+- Adds `MACRO_SETTINGS_DESIGN.md`
+- Adds high-fidelity mockup to `assets/`
