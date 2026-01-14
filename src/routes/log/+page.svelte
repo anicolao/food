@@ -340,8 +340,12 @@
       runAnalysis(userCorrection);
   }
 
-  async function handleSubmit() {
-    console.log('[CI-DEBUG] handleSubmit called');
+  // [CI-DEBUG] Instrumenting to catch phantom calls
+  async function handleSubmit(e?: Event) {
+    console.log('[CI-DEBUG] handleSubmit called', e);
+    if (e) console.log('[CI-DEBUG] Event type:', e.type, 'Target:', e.target);
+    console.trace('[CI-DEBUG] handleSubmit trace');
+
     if (imageFiles.length === 0) return;
     try {
         const state = store.getState();
