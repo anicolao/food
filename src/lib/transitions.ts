@@ -10,10 +10,24 @@ export type TransitionConfig = {
     outParams: FlyParams | FadeParams;
 };
 
+import { base } from '$app/paths';
+
+// Helper to strip base path and normalize
+function normalizePath(path: string): string {
+    let normalized = path;
+    // Remove base path if present
+    if (base && normalized.startsWith(base)) {
+        normalized = normalized.slice(base.length);
+    }
+    // Remove trailing slash unless it's just '/'
+    normalized = normalized.replace(/\/$/, '') || '/';
+    return normalized;
+}
+
 // Priority Heuristic
 export function getTransitionDirection(from: URL, to: URL): Direction {
-    const fromPath = from.pathname.replace(/\/$/, '') || '/';
-    const toPath = to.pathname.replace(/\/$/, '') || '/';
+    const fromPath = normalizePath(from.pathname);
+    const toPath = normalizePath(to.pathname);
 
     // 1. Vertical overrides (Logging) - HIGHEST PRIORITY
     // Going TO Log -> Always Slide UP (Enter Bottom)
