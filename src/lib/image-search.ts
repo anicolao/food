@@ -1,55 +1,62 @@
-// Image search service with Generative Fallback
-// Uses Pollinations.ai if no Google Search keys are present.
-
 /**
- * Searches for an image URL based on the query.
+ * Searches for an image URL based on the query using Wikimedia Commons.
+ * This is a public, CORS-friendly API that requires no authentication.
  * @param query The food description or search term
- * @returns A promise that resolves to an image URL
- */
-// Image search service using Gemini Grounding (User OAuth)
-import { findImageWithGemini } from '$lib/gemini';
-
-/**
- * Searches for an image URL based on the query.
- * @param query The food description or search term
- * @returns A promise that resolves to an image URL, or null if not found.
+ * @returns A promise that resolves to a direct image URL, or null if not found.
  */
 export async function searchFoodImage(query: string): Promise<string | null> {
-    console.log(`[ImageSearch] Searching for: "${query}"`);
+    console.log(`[ImageSearch] Searching Wikimedia for: "${query}"`);
 
-    // 1. Try Gemini Search (User OAuth)
     try {
-        const geminiUrl = await findImageWithGemini(query);
-        if (geminiUrl) {
-            console.log('[ImageSearch] Found via Gemini:', geminiUrl);
+        // Wikimedia Commons API
+        // action=query: Query the API
+        // generator=search: Use search generator
+        // gsrnamespace=6: Search in 'File' namespace only (images/media)
+        // gsrlimit=1: Return only 1 result
+        // prop=imageinfo: Get image info
+        // iiprop=url: specifically the URL
+        // origin=*: CORS header
+        const endpoint = 'https://commons.wikimedia.org/w/api.php';
+        const params = new URLSearchParams({
+            action: 'query',
+            generator: 'search',
+            gsrnamespace: '6', // File namespace
+            gsrsearch: query,
+            gsrlimit: '1',
+            prop: 'imageinfo',
+            iiprop: 'url',
+            format: 'json',
+            origin: '*'
+        });
 
-            // Filter out known non-image pages (Wikimedia "File:" pages are HTML, not images)
-            // Also require an image extension
-            const isInvalidUrl = geminiUrl.includes('wikimedia.org/wiki/') ||
-                !geminiUrl.match(/\.(jpeg|jpg|png|webp)($|\?)/i);
-
-            if (isInvalidUrl) {
-                console.warn('[ImageSearch] Rejected URL: Not a direct image file.', geminiUrl);
-                return null;
-            }
-
-            // Verify reachability (filter out 404s)
-            try {
-                const res = await fetch(geminiUrl);
-                if (res.status === 404) {
-                    console.warn('[ImageSearch] Gemini returned 404, ignoring');
-                    return null;
-                } else {
-                    // 200, 403 (CORS), etc. - attempt to use it
-                    return geminiUrl;
-                }
-            } catch (e) {
-                // Network/CORS error on verification - optimistic return
-                return geminiUrl;
-            }
+        const res = await fetch(`${endpoint}?${params.toString()}`);
+        if (!res.ok) {
+            console.warn('[ImageSearch] API request failed', res.status);
+            return null;
         }
+
+        const data = await res.json();
+        const pages = data.query?.pages;
+
+        if (!pages) {
+            console.warn('[ImageSearch] No results found');
+            return null;
+        }
+
+        // extract first page
+        const firstPageId = Object.keys(pages)[0];
+        if (!firstPageId || firstPageId === '-1') return null;
+
+        const imageInfo = pages[firstPageId]?.imageinfo?.[0];
+        const imageUrl = imageInfo?.url;
+
+        if (imageUrl) {
+            console.log('[ImageSearch] Found:', imageUrl);
+            return imageUrl;
+        }
+
     } catch (e) {
-        console.warn('[ImageSearch] Gemini search failed', e);
+        console.warn('[ImageSearch] Error searching Wikimedia', e);
     }
 
     return null;

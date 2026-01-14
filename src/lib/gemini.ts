@@ -101,53 +101,6 @@ export async function analyzeFood(inputs: { images?: ImageInput[], text?: string
     return JSON.parse(candidate) as NutritionEstimate;
 }
 
-export async function findImageWithGemini(query: string): Promise<string | null> {
-    const token = getAccessToken();
-    if (!token) return null;
-
-    const url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
-
-    const response = await fetch(url, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-            contents: [{
-                parts: [{ text: `Find a direct, public image URL for: "${query}". Return ONLY the raw URL (ending in .jpg, .png, or .webp). Do NOT return Wikimedia "File:" or "Page" URLs.` }]
-            }],
-            tools: [{ googleSearch: {} }] // Request Google Search grounding
-        })
-    });
-
-    if (!response.ok) {
-        console.warn('Gemini Image Search failed', response.status);
-        return null;
-    }
-
-    const result = await response.json();
-    // Try to extract a grounded URL or the text response if it's a URL
-    const candidate = result.candidates?.[0]?.content?.parts?.[0]?.text;
-
-    // Heuristic extraction of URL from text (e.g. if it returns "Here is a link: https://...")
-    if (candidate) {
-        // Regex to find http/https url
-        const match = candidate.match(/https?:\/\/[^\s"']+/);
-        if (match) {
-            return match[0];
-        }
-    }
-
-    // Check grounding metadata if available (often contains standard web results)
-    const groundingChunk = result.candidates?.[0]?.groundingMetadata?.groundingChunks?.[0];
-    if (groundingChunk?.web?.uri) {
-        return groundingChunk.web.uri;
-    }
-
-    return null;
-}
-
 export async function generateImageWithGemini(prompt: string): Promise<string | null> {
     const token = getAccessToken();
     if (!token) return null;
