@@ -11,6 +11,7 @@ export default defineConfig({
         baseURL: 'http://localhost:5174',
         trace: 'on-first-retry',
         contextOptions: { reducedMotion: 'reduce' },
+        serviceWorkers: 'block',
         launchOptions: {
             args: [
                 '--font-render-hinting=none',

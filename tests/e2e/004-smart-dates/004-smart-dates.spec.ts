@@ -3,9 +3,17 @@ import { TestStepHelper } from '../helpers/test-step-helper';
 import * as fs from 'fs';
 import * as path from 'path';
 
-test.fixme('US-013 to US-017: Smart Date Formatting', async ({ page }, testInfo) => {
+test('US-013 to US-017: Smart Date Formatting', async ({ page }, testInfo) => {
     const tester = new TestStepHelper(page, testInfo);
     tester.setMetadata('Smart Dates', 'Verifying date formatting rules.');
+    page.on('console', msg => console.log(`BROWSER LOG: ${msg.text()}`));
+    page.on('pageerror', err => console.log(`BROWSER ERR: ${err}`));
+
+    // Debug requests
+    await page.route('**', async route => {
+        console.log('REQUEST:', route.request().url());
+        await route.continue();
+    });
 
     // Mock Services (Copied from 002-log-food)
     // Fixed Time: Friday, March 15, 2024 at 12:00:00 EDT (16:00 UTC)
@@ -33,14 +41,45 @@ test.fixme('US-013 to US-017: Smart Date Formatting', async ({ page }, testInfo)
 
     await page.route('**googleapis.com**', async route => {
         const url = route.request().url();
-        if (url.includes('drive/v3/files') || url.includes('photospicker') || url.includes('sheets') || url.includes('generativelanguage')) {
-            if (url.includes('generativelanguage')) {
-                await route.fulfill({ json: { candidates: [{ content: { parts: [{ text: JSON.stringify({ is_label: false, item_name: 'Test Food', calories: 100, fat: { total: 0 }, carbohydrates: { total: 0 }, protein: 0 }) }] } }] } });
+        console.log('MOCKING:', url);
+
+        // Drive Discovery Mocks (ensureDataStructures)
+        if (url.includes('drive/v3/files')) {
+            if (url.includes('foodlog') || url.includes('FoodLog')) {
+                // Search for Folder
+                await route.fulfill({ json: { files: [{ id: 'mock-folder-id', name: 'FoodLog' }] } });
+            } else if (url.includes('TheFoodTrackerEventLog')) {
+                // Search for File
+                await route.fulfill({ json: { files: [{ id: 'mock-spreadsheet-id', name: 'TheFoodTrackerEventLog' }] } });
             } else if (url.includes('uploadType=multipart')) {
+                // Upload
                 await route.fulfill({ json: { id: 'file-123', webViewLink: 'https://drive.mock/img.jpg', thumbnailLink: 'https://drive.mock/thumb.jpg' } });
             } else {
-                await route.fulfill({ json: { files: [], values: [] } }); // Generic success
+                // Creation Fallback
+                await route.fulfill({ json: { id: 'new-mock-id' } });
             }
+        } else if (url.includes('photospicker.googleapis.com')) {
+            if (url.includes('sessions') && !url.includes('mediaItems')) {
+                if (route.request().method() === 'POST') {
+                    // Create Session
+                    await route.fulfill({ json: { id: 'sess-1', pickerUri: 'http://mock-picker.com' } });
+                } else {
+                    // Poll Session
+                    await route.fulfill({ json: { mediaItemsSet: true } });
+                }
+            } else if (url.includes('mediaItems')) {
+                // List Items
+                await route.fulfill({ json: { mediaItems: [{ id: 'item-1', mediaFile: { baseUrl: 'https://lh3.googleusercontent.com/picker-img', mimeType: 'image/jpeg', filename: 'picked.jpg' } }] } });
+            }
+        } else if (url.includes('sheets.googleapis.com')) {
+            if (url.includes('values/Events')) {
+                await route.fulfill({ json: { values: [] } });
+            } else {
+                await route.fulfill({ json: {} });
+            }
+        } else if (url.includes('generativelanguage')) {
+            await new Promise(r => setTimeout(r, 2000));
+            await route.fulfill({ json: { candidates: [{ content: { parts: [{ text: JSON.stringify({ is_label: false, item_name: 'Test Food', calories: 100, fat: { total: 0 }, carbohydrates: { total: 0 }, protein: 0 }) }] } }] } });
         } else {
             await route.continue();
         }
@@ -55,12 +94,15 @@ test.fixme('US-013 to US-017: Smart Date Formatting', async ({ page }, testInfo)
     // Note: Creating a log redirects to TODAY.
     async function logItem(date: string, time: string, name: string) {
         await page.getByText('Log New').first().click();
-        const fileInput = page.locator('input[type="file"]:not([capture])').first();
+        await expect(page).toHaveURL(/\/log/);
+        await expect(page.getByText('Camera').first()).toBeVisible();
+        const fileInput = page.locator('input[type="file"]:not([capture])');
         await fileInput.setInputFiles('tests/e2e/fixtures/apple.png');
+        await expect(page.getByText('Analyzing 1 images with Gemini...')).toBeVisible();
 
         await expect(async () => {
             const val = await page.getByLabel('Log Description').first().inputValue();
-            expect(val === 'Test Food' || val === 'Mock Apple' || val === '').toBeTruthy();
+            expect(val === 'Test Food').toBeTruthy();
         }).toPass();
 
         await page.getByLabel('Log Description').first().fill(name);
