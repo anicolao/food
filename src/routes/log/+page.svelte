@@ -68,8 +68,19 @@
   // Pre-fetch session when page mounts to enable synchronous Click-to-Open
   onMount(() => {
      updateMealType(new Date());
-     console.log('[CI-DEBUG] Log Page Mounted');
-     // NO INIT. NO LISTENERS.
+     initPickerSession();
+     
+     const handleVisibility = () => {
+         if (document.visibilityState === 'visible' && pickerSessionId) {
+             console.log('App visible, checking picker status...');
+             checkPickerSession();
+         }
+     };
+     document.addEventListener('visibilitychange', handleVisibility);
+     return () => {
+         document.removeEventListener('visibilitychange', handleVisibility);
+         stopPollingPicker();
+     };
   });
 
   async function initPickerSession() {
