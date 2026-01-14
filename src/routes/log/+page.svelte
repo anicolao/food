@@ -363,7 +363,8 @@
           if (result.searchQuery) {
               const imageUrl = await searchFoodImage(result.searchQuery);
               
-              // Fetch the image to convert to a File object (needed for Drive upload)
+              // Try to fetch to Blob (best for Drive persistence)
+              // If fails (CORS/403), use URL directly (fallback)
               try {
                   const res = await fetch(imageUrl);
                   if (res.ok) {
@@ -371,10 +372,12 @@
                       const file = new File([blob], `${result.searchQuery.replace(/[^a-z0-9]/gi, '-').toLowerCase()}.jpg`, { type: blob.type });
                       await addImage(file);
                   } else {
-                      console.warn('Failed to fetch matched image');
+                      console.warn('Failed to fetch matched image, using direct URL');
+                      if (imagePreviews.length === 0) imagePreviews = [imageUrl];
                   }
               } catch (err) {
-                  console.error('Network error fetching matched image', err);
+                  console.error('Network error fetching matched image, using direct URL', err);
+                  if (imagePreviews.length === 0) imagePreviews = [imageUrl];
               }
           }
       } catch (e) {
