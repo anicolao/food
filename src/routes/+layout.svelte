@@ -6,6 +6,20 @@
 	import DesktopSidebar from '$lib/components/ui/DesktopSidebar.svelte';
 	import { page } from '$app/stores';
 	import { getTransitionDirection, getTransitionParams } from '$lib/transitions';
+	import { onMount } from 'svelte';
+
+	let { children } = $props();
+
+	let width = $state(0);
+	let height = $state(0);
+	let reducedMotion = $state(false);
+	let transitionsEnabled = $state(false);
+
+	onMount(() => {
+		const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+		reducedMotion = mediaQuery.matches;
+		transitionsEnabled = true;
+	});
 </script>
 
 <script module>
