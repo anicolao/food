@@ -115,7 +115,7 @@ export async function findImageWithGemini(query: string): Promise<string | null>
         },
         body: JSON.stringify({
             contents: [{
-                parts: [{ text: `Find a shared, public image URL for: "${query}". Prefer Wikimedia Commons or Unsplash. Return ONLY the URL.` }]
+                parts: [{ text: `Find a direct, public image URL for: "${query}". Return ONLY the raw URL (ending in .jpg, .png, or .webp). Do NOT return Wikimedia "File:" or "Page" URLs.` }]
             }],
             tools: [{ googleSearch: {} }] // Request Google Search grounding
         })
