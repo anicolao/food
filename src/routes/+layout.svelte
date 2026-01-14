@@ -6,11 +6,18 @@
 	import DesktopSidebar from '$lib/components/ui/DesktopSidebar.svelte';
 	import { page } from '$app/stores';
 	import { getTransitionDirection, getTransitionParams } from '$lib/transitions';
+	import { onMount } from 'svelte';
 
 	let { children } = $props();
 
 	let width = $state(0);
 	let height = $state(0);
+	let reducedMotion = $state(false);
+
+	onMount(() => {
+		const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+		reducedMotion = mediaQuery.matches;
+	});
 </script>
 
 <script module>
@@ -30,20 +37,26 @@
 	</div>
 	
 	<div class="main-content">
-		{#key $page.url.pathname}
-			{@const direction = previousUrl ? getTransitionDirection(previousUrl, $page.url) : 'crossfade'}
-			{@const config = getTransitionParams(direction, width, height)}
-			<!-- Update previousUrl after determining direction for *this* transition -->
-			{@const _ = (previousUrl = new URL($page.url.href))} 
-
-			<div 
-				class="transition-wrapper"
-				in:config.in={config.inParams}
-				out:config.out={config.outParams}
-			>
+		{#if reducedMotion}
+			<div class="transition-wrapper">
 				{@render children()}
 			</div>
-		{/key}
+		{:else}
+			{#key $page.url.pathname}
+				{@const direction = previousUrl ? getTransitionDirection(previousUrl, $page.url) : 'crossfade'}
+				{@const config = getTransitionParams(direction, width, height)}
+				<!-- Update previousUrl after determining direction for *this* transition -->
+				{@const _ = (previousUrl = new URL($page.url.href))} 
+
+				<div 
+					class="transition-wrapper"
+					in:config.in={config.inParams}
+					out:config.out={config.outParams}
+				>
+					{@render children()}
+				</div>
+			{/key}
+		{/if}
 	</div>
 
 	<div class="mobile-nav-wrapper">

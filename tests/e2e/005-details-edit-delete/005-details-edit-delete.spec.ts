@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 import { TestStepHelper } from '../helpers/test-step-helper';
 import * as fs from 'fs';
 
-test.fixme('US-018 to US-022: Details, Edit and Delete', async ({ page }, testInfo) => {
+test('US-018 to US-022: Details, Edit and Delete', async ({ page }, testInfo) => {
     const tester = new TestStepHelper(page, testInfo);
     tester.setMetadata('Edit/Delete', 'Verifying details page, edit and delete.');
 
@@ -32,12 +32,28 @@ test.fixme('US-018 to US-022: Details, Edit and Delete', async ({ page }, testIn
     fs.utimesSync('tests/e2e/fixtures/apple.png', mockDate, mockDate);
     await page.route('**googleapis.com**', async route => {
         const url = route.request().url();
-        if (url.includes('generativelanguage')) {
+
+        if (url.includes('drive/v3/files')) {
+            if (url.includes('foodlog') || url.includes('FoodLog')) {
+                await route.fulfill({ json: { files: [{ id: 'mock-folder-id', name: 'FoodLog' }] } });
+            } else if (url.includes('uploadType=multipart')) {
+                await route.fulfill({ json: { id: 'file-123', webViewLink: 'https://drive.mock/img.jpg', thumbnailLink: 'https://drive.mock/thumb.jpg' } });
+            } else {
+                await route.fulfill({ json: { id: 'new-mock-id' } });
+            }
+        } else if (url.includes('photospicker.googleapis.com')) {
+            if (url.includes('sessions')) {
+                if (route.request().method() === 'POST') await route.fulfill({ json: { id: 'sess-1', pickerUri: 'http://mock-picker.com' } });
+                else await route.fulfill({ json: { mediaItemsSet: true } });
+            }
+        } else if (url.includes('generativelanguage')) {
+            await new Promise(r => setTimeout(r, 2000));
+            // Original Food Logic
             await route.fulfill({ json: { candidates: [{ content: { parts: [{ text: JSON.stringify({ is_label: false, item_name: 'Original Food', calories: 100, fat: { total: 10 }, carbohydrates: { total: 10 }, protein: 10 }) }] } }] } });
-        } else if (url.includes('uploadType=multipart')) {
-            await route.fulfill({ json: { id: 'file-123', webViewLink: 'https://drive.mock/img.jpg', thumbnailLink: 'https://drive.mock/thumb.jpg' } });
+        } else if (url.includes('sheets')) {
+            await route.fulfill({ json: {} });
         } else {
-            await route.fulfill({ json: { files: [], values: [] } });
+            await route.continue();
         }
     });
 
@@ -48,14 +64,17 @@ test.fixme('US-018 to US-022: Details, Edit and Delete', async ({ page }, testIn
 
     // 1. Create Entry
     await page.getByText('Log New').click();
+    await expect(page).toHaveURL(/\/log/);
+    await expect(page.getByText('Camera').first()).toBeVisible();
     await page.locator('input[type="file"]:not([capture])').first().setInputFiles([
         'tests/e2e/fixtures/apple.png',
         'tests/e2e/fixtures/apple.png'
     ]);
+    await expect(page.getByText('Analyzing 2 images with Gemini...')).toBeVisible();
 
     await expect(async () => {
         const val = await page.getByLabel('Log Description').first().inputValue();
-        expect(val === 'Original Food' || val === 'Mock Apple' || val === '').toBeTruthy();
+        expect(val === 'Original Food').toBeTruthy();
     }).toPass();
     await page.getByLabel('Date').fill('2024-03-15', { force: true });
     await page.getByLabel('Time').fill('12:00', { force: true }); // Explicit time to match expect
@@ -66,19 +85,19 @@ test.fixme('US-018 to US-022: Details, Edit and Delete', async ({ page }, testIn
     // ActivityCard shows "Lunch" (based on 12:00 PM), verified expanded by default
     await expect(page.locator('.activity-card').first()).toBeVisible();
 
-    await expect(page.locator('.item-name').filter({ hasText: /Original Food|Mock Apple/ }).first()).toBeVisible();
+    await expect(page.locator('.item-name').filter({ hasText: 'Original Food' }).first()).toBeVisible();
 
     // Stats check: 100
     await expect(page.locator('.hero-ring').getByText('100', { exact: true })).toBeVisible();
 
     // 3. Go to Details
-    await page.locator('.item-name').filter({ hasText: /Original Food|Mock Apple/ }).first().click();
+    await page.getByText('Original Food').first().click();
 
     await tester.step('details-view', {
         description: 'Details page loaded',
         verifications: [
-            { spec: 'Name field populated', check: async () => await expect(page.getByLabel('Item Name').first()).toHaveValue(/Original Food|Mock Apple/) },
-            { spec: 'Calories field populated', check: async () => await expect(page.getByLabel('Calories').first()).toHaveValue(/100|95/) },
+            { spec: 'Name field populated', check: async () => await expect(page.getByLabel('Item Name').first()).toHaveValue('Original Food') },
+            { spec: 'Calories field populated', check: async () => await expect(page.getByLabel('Calories').first()).toHaveValue('100') },
             { spec: 'Multiple images shown', check: async () => await expect(page.locator('.hero-image').first()).toBeVisible() },
             {
                 spec: 'Carousel scrolls on click',
