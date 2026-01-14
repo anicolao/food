@@ -23,6 +23,16 @@ export async function searchFoodImage(query: string): Promise<string | null> {
         if (geminiUrl) {
             console.log('[ImageSearch] Found via Gemini:', geminiUrl);
 
+            // Filter out known non-image pages (Wikimedia "File:" pages are HTML, not images)
+            // Also require an image extension
+            const isInvalidUrl = geminiUrl.includes('wikimedia.org/wiki/') ||
+                !geminiUrl.match(/\.(jpeg|jpg|png|webp)($|\?)/i);
+
+            if (isInvalidUrl) {
+                console.warn('[ImageSearch] Rejected URL: Not a direct image file.', geminiUrl);
+                return null;
+            }
+
             // Verify reachability (filter out 404s)
             try {
                 const res = await fetch(geminiUrl);
