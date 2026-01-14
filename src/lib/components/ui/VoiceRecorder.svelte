@@ -116,43 +116,62 @@
 
           ctx.clearRect(0, 0, canvas.width, canvas.height);
           
-          // Simple symmetric wave
           const cx = canvas.width / 2;
           const cy = canvas.height / 2;
-          const radius = 30 + (dataArray[0] / 255) * 20; // Pulse center
+          
+          // Calculate average volume for pulse
+          let sum = 0;
+          for(let i=0; i<bufferLength; i++) sum += dataArray[i];
+          const average = sum / bufferLength;
+          const pulse = (average / 255); // 0 to 1
 
-          ctx.beginPath();
-          ctx.arc(cx, cy, radius, 0, 2 * Math.PI);
-          ctx.fillStyle = 'rgba(0, 198, 255, 0.2)'; // Cyan glow
-          ctx.fill();
+          // 1. Glowing Orb Background
+          const gradient = ctx.createRadialGradient(cx, cy, 10, cx, cy, 100);
+          gradient.addColorStop(0, `rgba(0, 198, 255, ${0.1 + pulse * 0.4})`); // Core
+          gradient.addColorStop(0.5, `rgba(0, 198, 255, ${0.05 + pulse * 0.1})`);
+          gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
+          
+          ctx.fillStyle = gradient;
+          ctx.fillRect(0,0, canvas.width, canvas.height);
 
-          // Bar graph mirrored
-          /* 
-            This is a very simple placeholders visualizer. 
-            Real implementation would be more "Siri-like" per specs, but this proves audio is live.
-          */
-           ctx.beginPath();
-           ctx.strokeStyle = '#00C6FF';
-           ctx.lineWidth = 2;
-           
-           const sliceWidth = canvas.width * 1.0 / bufferLength;
-           let x = 0;
-           
-           for(let i = 0; i < bufferLength; i++) {
-               const v = dataArray[i] / 128.0;
-               const y = v * canvas.height/2;
-
-               if(i === 0) {
-                 ctx.moveTo(x, cy - y + (canvas.height/2));
-               } else {
-                 ctx.lineTo(x, cy - y + (canvas.height/2));
-               }
-               x += sliceWidth;
-           }
-           ctx.stroke();
-
+          // 2. Multi-wave visualization (Siri-like)
+          ctx.lineWidth = 2;
+          
+          // Wave 1: Cyan
+          drawWave(ctx, dataArray, bufferLength, cx, cy, 1.0, '#00C6FF', 0);
+          
+          // Wave 2: Purple (Offset)
+          drawWave(ctx, dataArray, bufferLength, cx, cy, 0.8, '#9D50BB', 50);
+          
+          // Wave 3: White (Highlight)
+          drawWave(ctx, dataArray, bufferLength, cx, cy, 0.5, 'rgba(255,255,255,0.5)', 25);
       };
       draw();
+  }
+
+  function drawWave(ctx: CanvasRenderingContext2D, data: Uint8Array, bufferLen: number, cx: number, cy: number, scale: number, color: string, timeOffset: number) {
+      ctx.beginPath();
+      ctx.strokeStyle = color;
+      
+      const time = Date.now() / 1000;
+      const sliceWidth = canvas.width / bufferLen;
+      let x = 0;
+
+      for(let i = 0; i < bufferLen; i++) {
+          // Sine wave modulation + FFT data modulation
+          const v = data[i] / 128.0; 
+          const sine = Math.sin((i * 0.1) + (time * 2) + timeOffset);
+          
+          // Combine FFT amplitude with sine wave motion
+          const amplitude = (v * 40 * scale) * sine; 
+          const y = cy + amplitude;
+
+          if(i === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+
+          x += sliceWidth;
+      }
+      ctx.stroke();
   }
 
   function stop() {
@@ -188,25 +207,25 @@
 
 <div class="modal-backdrop" onclick={close} role="presentation">
     <div class="voice-modal glass-panel" onclick={(e) => e.stopPropagation()} role="dialog">
-        <canvas bind:this={canvas} width="300" height="150" class="visualizer"></canvas>
+        <canvas bind:this={canvas} width="400" height="200" class="visualizer"></canvas>
         
         <div class="transcript-box">
             {#if transcript}
-                <p>{transcript}</p>
+                <p class="scrolling-text">{transcript}</p>
             {:else}
                 <p class="placeholder">Listening...</p>
             {/if}
         </div>
 
         <div class="controls">
-            <button class="stop-btn" onclick={done}>
+            <button class="action-btn stop" onclick={done}>
                 {#if recognizing}
-                   ⏹ Stop & Analyze
+                   <span class="icon">stop_circle</span> Stop & Analyze
                 {:else}
-                   Analyze
+                   <span class="icon">check_circle</span> Analyze
                 {/if}
             </button>
-            <button class="close-btn" onclick={close}>Cancel</button>
+            <button class="action-btn cancel" onclick={close}>Cancel</button>
         </div>
     </div>
 </div>
@@ -218,8 +237,8 @@
         left: 0;
         width: 100%;
         height: 100%;
-        background: rgba(0,0,0,0.8);
-        backdrop-filter: blur(8px);
+        background: rgba(0,0,0,0.85);
+        backdrop-filter: blur(12px);
         z-index: 100;
         display: flex;
         align-items: center;
@@ -227,61 +246,100 @@
     }
 
     .voice-modal {
-        width: 90%;
-        max-width: 400px;
-        background: black;
-        border: 1px solid rgba(255,255,255,0.2);
-        border-radius: 30px;
-        padding: 30px;
+        width: 95%;
+        max-width: 450px;
+        background: rgba(20, 20, 20, 0.8);
+        border: 1px solid rgba(255,255,255,0.1);
+        border-radius: 32px;
+        padding: 32px;
         display: flex;
         flex-direction: column;
         align-items: center;
-        gap: 20px;
+        gap: 24px;
+        box-shadow: 0 20px 50px rgba(0,0,0,0.6);
     }
 
     .visualizer {
         width: 100%;
-        height: 150px;
+        height: 200px;
+        border-radius: 16px;
+        background: rgba(0,0,0,0.3);
+        box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
     }
 
     .transcript-box {
         width: 100%;
         min-height: 80px;
-        max-height: 200px;
+        max-height: 150px;
         overflow-y: auto;
         text-align: center;
-        font-size: 1.2rem;
+        font-size: 1.3rem;
+        line-height: 1.5;
         color: white;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        padding: 10px;
+    }
+    
+    .scrolling-text {
+        animation: fadeIn 0.3s ease-out;
     }
 
     .placeholder {
-        color: rgba(255,255,255,0.5);
+        color: rgba(255,255,255,0.4);
         font-style: italic;
+        font-weight: 300;
+        animation: pulse 2s infinite;
     }
 
     .controls {
         display: flex;
-        gap: 15px;
+        gap: 16px;
         width: 100%;
     }
 
-    button {
+    .action-btn {
         flex: 1;
-        padding: 15px;
+        padding: 16px;
         border-radius: 99px;
-        font-size: 1rem;
+        font-size: 1.1rem;
         font-weight: 600;
         border: none;
         cursor: pointer;
-    }
-
-    .stop-btn {
-        background: white;
-        color: black;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        transition: transform 0.2s, box-shadow 0.2s;
     }
     
-    .close-btn {
+    .action-btn:active {
+        transform: scale(0.96);
+    }
+
+    .stop {
+        background: linear-gradient(135deg, #00C6FF, #0072FF);
+        color: white;
+        box-shadow: 0 4px 15px rgba(0, 198, 255, 0.3);
+    }
+    
+    .cancel {
         background: rgba(255,255,255,0.1);
         color: white;
+    }
+    
+    .icon {
+        font-family: 'Material Symbols Outlined';
+        font-size: 1.2rem;
+    }
+
+    @keyframes pulse {
+        0% { opacity: 0.4; }
+        50% { opacity: 0.8; }
+        100% { opacity: 0.4; }
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
     }
 </style>
