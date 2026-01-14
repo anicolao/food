@@ -144,7 +144,7 @@ test('US-003 to US-010: User logs food flow', async ({ page }, testInfo) => {
     // Wait for Dashboard to stabilize (Auth confirmed)
     await expect(page.locator('.feed-header h2').first()).toHaveText('Today');
 
-    await page.getByText('Log New').click();
+    await page.getByText('Log New').first().click();
 
     // Mandatory URL Wait for stability
     await expect(page).toHaveURL(/\/log/);
