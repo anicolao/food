@@ -158,6 +158,7 @@ const projectionsSlice = createSlice({
   }
 });
 
+
 // 3. Configuration (Session State)
 interface ConfigState {
   spreadsheetId: string | null;
@@ -175,18 +176,70 @@ const configSlice = createSlice({
   }
 });
 
+// 4. Settings (Macro Goals)
+export interface MacroRatios {
+  protein: number; // 0.0 - 1.0
+  fat: number;     // 0.0 - 1.0
+  carbs: number;   // 0.0 - 1.0
+}
+
+export interface SettingsState {
+  targetCalories: number;
+  macroRatios: MacroRatios;
+}
+
+const initialSettings: SettingsState = {
+  targetCalories: 2000,
+  macroRatios: {
+    protein: 0.3, // 30%
+    fat: 0.35,    // 35%
+    carbs: 0.35   // 35%
+  }
+};
+
+const settingsSlice = createSlice({
+  name: 'settings',
+  initialState: initialSettings,
+  reducers: {
+    updateGoals: (state, action: PayloadAction<SettingsState>) => {
+      state.targetCalories = action.payload.targetCalories;
+      state.macroRatios = action.payload.macroRatios;
+    }
+  }
+});
+
 // --- Store ---
 export const store = configureStore({
   reducer: {
     events: eventLogSlice.reducer,
     projections: projectionsSlice.reducer,
-    config: configSlice.reducer
+    config: configSlice.reducer,
+    settings: settingsSlice.reducer
   }
 });
 
 export const { appendEvent } = eventLogSlice.actions;
 export const { processEvent } = projectionsSlice.actions;
 export const { setConfig } = configSlice.actions;
+export const { updateGoals } = settingsSlice.actions;
+
+// --- Selectors ---
+export const selectSettings = (state: RootState) => state.settings;
+
+export const CALORIES_PER_GRAM = {
+  PROTEIN: 4,
+  FAT: 9,
+  CARBS: 4
+};
+
+export const selectMacroTargetsGrams = (state: RootState) => {
+  const { targetCalories, macroRatios } = state.settings;
+  return {
+    protein: Math.round((targetCalories * macroRatios.protein) / CALORIES_PER_GRAM.PROTEIN),
+    fat: Math.round((targetCalories * macroRatios.fat) / CALORIES_PER_GRAM.FAT),
+    carbs: Math.round((targetCalories * macroRatios.carbs) / CALORIES_PER_GRAM.CARBS)
+  };
+};
 
 // --- Thunks / Helpers ---
 export const dispatchEvent = (type: string, payload: any) => (dispatch: any) => {
@@ -203,7 +256,12 @@ export const dispatchEvent = (type: string, payload: any) => (dispatch: any) => 
   // 2. Update Projections
   dispatch(processEvent(event));
 
-  // 3. Side Effects (Sync to Sheets) would go here or in a listener
+  // 3. Update Settings if applicable
+  if (type === 'settings/goalsUpdated') {
+    dispatch(updateGoals(payload));
+  }
+
+  // 4. Side Effects (Sync to Sheets) would go here or in a listener
   // syncToSheets(event);
 };
 
