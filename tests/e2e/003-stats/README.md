@@ -6,7 +6,6 @@
 
 **Verifications:**
 - [x] Calories = 500
-- [x] Calories = 500
 - [x] Protein = 20
 - [x] History shows entry
 
