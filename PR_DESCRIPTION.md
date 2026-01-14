@@ -1,26 +1,13 @@
-# Fix Google Photos Mobile Picker
+# Fix iOS App Icon and Add Meta Tag
 
-## Original Request
-"Selecting photos from my Google Photos doesn't work on mobile. On my desktop it works fine, but on my phone there's no reaciton when I tap the button and eventually I get a 'selection timed out' popup. 
-
-I think on all platforms the photos selector should be inline rather than a popup, and perhaps that will fix the problem."
-
-## Additional Context
-"It just keeps re-requesting permission every time now, not making progress"
-
-"Error: Failed to list library items: 403  - {
-  "error": {
-    "code": 403,
-    "message": "Request had insufficient authentication scopes.",
-    "status": "PERMISSION_DENIED"
-  }
-}"
-
-"Still no dice. Are you sure this API isn't deprecated in favour of the picker?"
+## Summary
+This PR fixes the issue where the app icon was not appearing on the iOS homescreen. It adds the missing `mobile-web-app-capable` meta tag and converts the icon files from renamed JPEGs to actual PNG format, as iOS is strict about image formats.
 
 ## Changes
-- Replaced the deprecated Google Photos Library API polling mechanism with the Google Photos Picker API.
-- Implemented a robust "visibility-aware" polling strategy to handle mobile browser throttling (checking for photos immediately when the app regains focus).
-- Updated authentication scopes to `photospicker.mediaitems.readonly`.
-- Added a "Sign Out & Retry" flow for stuck authentication states.
-- Cleaned up the UI to remove the popup loop and provide clear status feedback.
+- Added `<meta name="mobile-web-app-capable" content="yes">` to `src/app.html`.
+- Converted `static/apple-touch-icon.png`, `static/android-chrome-192x192.png`, and `static/android-chrome-512x512.png` from JPEG to PNG format using `sips`.
+
+## Original User Prompt
+The app icon on iOS is still not working. I notice my chrome console says <meta name="apple-mobile-web-app-capable" content="yes"> is deprecated. Please include <meta name="mobile-web-app-capable" content="yes">
+
+Doesn't seem like this could be the culprit but something is making the app icon not load onto the homescreen.
