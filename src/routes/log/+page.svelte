@@ -285,7 +285,7 @@
               if (analysisTimer) clearTimeout(analysisTimer);
               analysisTimer = setTimeout(() => {
                   runAnalysis();
-              }, 1000);
+              }, 500);
           }
       };
       reader.readAsDataURL(file);
