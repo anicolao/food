@@ -14,66 +14,110 @@ The settings screen will follow the "Immersive Utility" glassmorphism aesthetic.
 2.  **Input**:
     *   **Daily Calories**: Numeric input (e.g., 2000).
     *   **Macros**: Three sliders/inputs for Protein, Fat, Carbs.
-        *   Primary input: Grams.
-        *   Secondary display: Percentage of total calories.
-        *   *Logic*: Changing grams updates percentage. Changing calories updates percentages (keeping grams constant).
-3.  **Visualization**: A donut chart reflecting the current macro split (Calorie contribution).
-4.  **Save**: "Save Goals" button dispatches the update event and persists to local storage / backend.
+        *   Primary input: Grams (for precision).
+        *   Secondary display: Percentage/Ratio (the underlying source of truth).
+        *   **Cascading Logic**: The user adjusts one macro, and the "next" macro in the priority chain automatically adjusts to keep the total at 100%.
+3.  **Visualization**: A donut chart reflecting the current macro split.
+4.  **Save**: "Save Goals" button dispatches the update event.
+
+### Priority Cascading Logic
+To maintain the invariant that `Protein % + Fat % + Carbs % = 1.0`, we define a priority ring:
+**Protein -> Fat -> Carbs -> (Protein)**
+
+When the user modifies a specific macro:
+1.  **Adjust Protein**: Excess/Deficit is taken from **Fat**. If Fat is depleted (hits 0%), the remainder is taken from **Carbs**.
+2.  **Adjust Fat**: Excess/Deficit is taken from **Carbs**. If Carbs is depleted, remainder taken from **Protein**.
+3.  **Adjust Carbs**: Excess/Deficit is taken from **Protein**. If Protein is depleted, remainder taken from **Fat**.
+
+This "Rob Peter to Pay Paul" strategy ensures a seamless user experience where the user doesn't have to manually balance the equation.
 
 ## Technical Implementation
 
 ### 1. Data Model (Redux Store)
 
-We will introduce a new `settings` slice to the Redux store.
+We will introduce a new `settings` slice to the Redux store using percentages (0.0 - 1.0) for macros.
 
-**State Interface:**
+**Constants:**
 ```typescript
-interface MacroTargets {
-  calories: number;
-  protein: number;
-  fat: number;
-  carbs: number;
-}
-
-interface SettingsState {
-  targets: MacroTargets;
-}
-
-const initialSettings: SettingsState = {
-  targets: {
-    calories: 2000,
-    protein: 150,
-    fat: 70,
-    carbs: 200
-  }
+const CALORIES_PER_GRAM = {
+  PROTEIN: 4,
+  FAT: 9,
+  CARBS: 4
 };
 ```
 
-### 2. Event Sourcing (`events`)
+**State Interface:**
+```typescript
+interface MacroRatios {
+  protein: number; // 0.0 - 1.0
+  fat: number;     // 0.0 - 1.0
+  carbs: number;   // 0.0 - 1.0
+}
 
-We will define a new event type to track these changes over time.
+interface SettingsState {
+  targetCalories: number;
+  macroRatios: MacroRatios;
+}
+
+const initialSettings: SettingsState = {
+  targetCalories: 2000,
+  macroRatios: {
+    protein: 0.3, // 30%
+    fat: 0.35,    // 35%
+    carbs: 0.35   // 35%
+  }
+};
+// Invariant check: sum(values) must equal 1.0
+```
+
+### 2. Formulas
+
+#### Convert Percentage to Grams
+Used for displaying distinct values to the user.
+```typescript
+function getGrams(totalCalories: number, ratio: number, type: 'PROTEIN' | 'FAT' | 'CARBS'): number {
+  const caloriesForMacro = totalCalories * ratio;
+  return Math.round(caloriesForMacro / CALORIES_PER_GRAM[type]);
+}
+```
+
+#### Convert Grams to Percentage
+Used when the user inputs a specific gram value.
+```typescript
+function getRatio(totalCalories: number, grams: number, type: 'PROTEIN' | 'FAT' | 'CARBS'): number {
+  const caloriesForMacro = grams * CALORIES_PER_GRAM[type];
+  return caloriesForMacro / totalCalories;
+}
+```
+
+### 3. Event Sourcing (`events`)
+
+We will define a new event type. **Persistence is handled entirely by the Event Log**; replays will restore the state. No separate local storage or config sheet Logic is explicitly required for the MVP, as the event log *is* the persistence layer.
 
 **Event Type:** `settings/goalsUpdated`
 
 **Payload:**
 ```typescript
 {
-  targets: MacroTargets;
+  targetCalories: number;
+  macroRatios: {
+    protein: number;
+    fat: number;
+    carbs: number;
+  };
 }
 ```
 
-### 3. Store Integration (`store.ts`)
+### 4. Store Integration (`store.ts`)
 
 *   **New Slice**: `settingsSlice`
-*   **Reducer**: Handles `settings/goalsUpdated` by replacing the current `targets`.
+*   **Reducer**: Handles `settings/goalsUpdated` by replacing the current state.
 *   **Selectors**:
-    *   `selectMacroTargets`: Returns the current targets.
-    *   `selectDailyProgress`: (Updated) Returns current progress relative to these dynamic targets.
-
-### 4. Persistence
-*   Settings should be persisted to `localStorage` or the Google Sheet "Config" tab to survive reloads.
-*   *MVP approach*: Persist to `localStorage` first, sync to Sheet later.
+    *   `selectSettings`: Returns full settings object.
+    *   `selectMacroTargetsGrams`: Derived selector that applies the `getGrams` formula to return `{ proteinG, fatG, carbsG }` for UI consumption.
+    *   `selectDailyProgress`: Updates to compare actual logged nutrition against these dynamic targets.
 
 ## UI Components to Update
-1.  `src/routes/settings/+page.svelte`: Implement the new form.
-2.  `src/lib/components/DailyRings.svelte`: Subscribe to `selectMacroTargets` to compute progress percentages.
+1.  `src/routes/settings/+page.svelte`: Implement the form with the cascading logic handlers.
+    *   *Input Handlers*: When `onChange` fires for propery `X`, calculate new ratio `rX`, compute delta, apply `-delta` to `next(X)`.
+2.  `src/lib/components/DailyRings.svelte`: Subscribe to `selectSettings` instead of hardcoded defaults.
