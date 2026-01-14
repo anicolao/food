@@ -295,9 +295,11 @@
     if (imagePreviews.length === 0) return;
     
     analyzing = true;
+    console.log('[TRACE] Svelte: analyzing = true');
     try {
       // Force render tick to ensure 'analyzing' state is visible even if analyzeImage fails fast
       await new Promise(r => setTimeout(r, 1)); 
+      console.log('[TRACE] Svelte: Render tick complete. Calling analyzeImage...'); 
 
       const images = imagePreviews.map((preview, i) => {
           try {
@@ -335,6 +337,7 @@
       console.warn('Analysis failed: ' + e);
     } finally {
       analyzing = false;
+      console.log('[TRACE] Svelte: analyzing = false');
     }
   }
 
