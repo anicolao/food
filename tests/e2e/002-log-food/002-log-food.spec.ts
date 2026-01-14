@@ -81,9 +81,8 @@ test('US-003 to US-010: User logs food flow', async ({ page }, testInfo) => {
                     await route.fulfill({ json: { id: 'sess-1', pickerUri: 'http://mock-picker.com' } });
                 } else {
                     // Poll Session
-                    // First poll -> not done. Second -> Done.
-                    // Mock simple 'done' for speed.
-                    await route.fulfill({ json: { mediaItemsSet: true } });
+                    // Default to NOT SET to avoid auto-picker running in tests
+                    await route.fulfill({ json: { mediaItemsSet: false } });
                 }
             } else if (url.includes('mediaItems')) {
                 // List Items with googleusercontent style URL
@@ -144,21 +143,17 @@ test('US-003 to US-010: User logs food flow', async ({ page }, testInfo) => {
     // Wait for Dashboard to stabilize (Auth confirmed)
     await expect(page.locator('.feed-header h2').first()).toHaveText('Today');
 
-    console.log('[CI-DEBUG] Attempting to click Log New...');
     const logBtn = page.getByText('Log New').first();
     await expect(logBtn).toBeVisible();
     await expect(logBtn).toBeEnabled();
     const isVisible = await logBtn.isVisible();
-    console.log('[CI-DEBUG] Log New Button Visible:', isVisible);
 
     // Fallback if click fails silently: force click
     // await logBtn.click({ force: true });
     await logBtn.click();
-    console.log('[CI-DEBUG] Clicked Log New. Waiting for URL change...');
 
     // Mandatory URL Wait for stability
     await expect(page).toHaveURL(/\/log/);
-    console.log('[CI-DEBUG] URL changed to /log');
     await page.waitForLoadState('domcontentloaded');
 
     await tester.step('log-page', {

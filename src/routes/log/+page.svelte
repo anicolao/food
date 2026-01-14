@@ -68,7 +68,7 @@
   // Pre-fetch session when page mounts to enable synchronous Click-to-Open
   onMount(() => {
      updateMealType(new Date());
-     // initPickerSession(); // [CI-DEBUG] Disabled to isolate instability
+     initPickerSession();
      
      const handleVisibility = () => {
          if (document.visibilityState === 'visible' && pickerSessionId) {
@@ -288,7 +288,6 @@
   }
 
   async function runAnalysis(correction?: string) {
-    console.log('[CI-DEBUG] runAnalysis called');
     if (imagePreviews.length === 0) return;
     
     analyzing = true;
@@ -340,12 +339,7 @@
       runAnalysis(userCorrection);
   }
 
-  // [CI-DEBUG] Instrumenting to catch phantom calls
-  async function handleSubmit(e?: Event) {
-    console.log('[CI-DEBUG] handleSubmit called', e);
-    if (e) console.log('[CI-DEBUG] Event type:', e.type, 'Target:', e.target);
-    console.trace('[CI-DEBUG] handleSubmit trace');
-
+  async function handleSubmit() {
     if (imageFiles.length === 0) return;
     try {
         const state = store.getState();
