@@ -19,7 +19,7 @@ export const authState = writable<{ token: string | null, ready: boolean }>({ to
 // Simple wrapper around Google Identity Services (GIS)
 // Assumes <script src="https://accounts.google.com/gsi/client" async defer></script> in app.html derived layout
 
-declare const google: any;
+// declare const google: any; // Removing implicit global to force window usage
 
 let tokenClient: any;
 let accessToken: string | null = null;
@@ -65,8 +65,10 @@ export function initializeAuth(onSuccess: (token: string) => void) {
     // 2. Poll for Google Script (max 5s)
     let attempts = 0;
     const interval = setInterval(() => {
-        if (typeof google !== 'undefined') {
+        const g = (window as any).google;
+        if (typeof g !== 'undefined' && g.accounts) {
             clearInterval(interval);
+            console.log('[Auth] Google Identity Services found');
             initClient(onSuccess);
         } else {
             attempts++;
@@ -79,7 +81,8 @@ export function initializeAuth(onSuccess: (token: string) => void) {
 }
 
 function initClient(onSuccess: (token: string) => void) {
-    tokenClient = google.accounts.oauth2.initTokenClient({
+    const g = (window as any).google;
+    tokenClient = g.accounts.oauth2.initTokenClient({
         client_id: GOOGLE_CLIENT_ID,
         scope: SCOPES,
         callback: (response: any) => {
@@ -179,7 +182,8 @@ export function signOut() {
     localStorage.removeItem(TOKEN_KEY);
     localStorage.removeItem(EXPIRY_KEY);
     authState.update(s => ({ ...s, token: null }));
-    if (typeof google !== 'undefined' && google.accounts) {
-        google.accounts.oauth2.revoke(accessToken, () => { });
+    const g = (window as any).google;
+    if (typeof g !== 'undefined' && g.accounts) {
+        g.accounts.oauth2.revoke(accessToken, () => { });
     }
 }
