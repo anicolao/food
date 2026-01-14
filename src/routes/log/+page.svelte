@@ -363,7 +363,7 @@
           if (result.searchQuery) {
               const imageUrl = await searchFoodImage(result.searchQuery);
               
-              // Try to fetch to Blob (best for Drive persistence)
+              // Fetch the image to convert to a File object (needed for Drive upload)
               // If fails (CORS/403), use URL directly (fallback)
               try {
                   const res = await fetch(imageUrl);
@@ -372,8 +372,13 @@
                       const file = new File([blob], `${result.searchQuery.replace(/[^a-z0-9]/gi, '-').toLowerCase()}.jpg`, { type: blob.type });
                       await addImage(file);
                   } else {
-                      console.warn('Failed to fetch matched image, using direct URL');
-                      if (imagePreviews.length === 0) imagePreviews = [imageUrl];
+                      // Only fallback if it's NOT a 404 (e.g. 403 or opaque might be loadable via img tag)
+                      if (res.status !== 404) {
+                          console.warn('Failed to fetch matched image, using direct URL');
+                          if (imagePreviews.length === 0) imagePreviews = [imageUrl];
+                      } else {
+                           console.error('Image is 404, not adding to previews');
+                      }
                   }
               } catch (err) {
                   console.error('Network error fetching matched image, using direct URL', err);
