@@ -2,7 +2,7 @@
   import { onMount } from 'svelte';
   import { initializeAuth, signIn, signOut, getAccessToken } from '$lib/auth';
   import { fetchRows, ensureDataStructures } from '$lib/sheets';
-  import { store, dispatchEvent, setConfig } from '$lib/store';
+  import { store, dispatchEvent, setConfig, appendEvent, processEvent, updateGoals } from '$lib/store';
   import { base } from '$app/paths';
   import { resolveDriveImage } from '$lib/images';
   import { getBusinessDate, groupLogs, type ActivityGroup } from '$lib/activity-grouping';
@@ -14,6 +14,7 @@
   // Reactive State
   let authenticated = $state(false);
   let allLogs = $state<any[]>([]); // Synced from Redux
+  let settings = $state(store.getState().settings);
   
   // Current Business Date (4AM cutoff)
   const today = getBusinessDate(new Date());
@@ -80,13 +81,16 @@
       return newStats;
   });
 
-  // Daily Goals (Mock for now, should be in settings/store)
-  const GOALS = {
-      calories: 2500,
-      protein: 180,
-      carbs: 250,
-      fat: 80
-  };
+  // Derived goals from settings
+  let goals = $derived.by(() => {
+    const { targetCalories, macroRatios } = settings;
+    return {
+        calories: targetCalories,
+        protein: Math.round((targetCalories * macroRatios.protein) / 4),
+        fat: Math.round((targetCalories * macroRatios.fat) / 9),
+        carbs: Math.round((targetCalories * macroRatios.carbs) / 4)
+    };
+  });
 
   async function syncData() {
         try {
@@ -95,12 +99,28 @@
 
             const rows = await fetchRows(spreadsheetId, 'Events');
             rows.forEach(row => {
+               // Expect: [eventId, timestamp, type, payloadJson]
                if (row[2] && row[3]) {
                    const type = row[2];
                    try {
                        const payload = JSON.parse(row[3]);
-                       store.dispatch(dispatchEvent(type, payload)); 
-                   } catch (e) {}
+                       const event = {
+                           eventId: row[0],
+                           timestamp: row[1],
+                           type,
+                           payload
+                       };
+                       
+                       // Replay to store WITHOUT side-effects (writing back to sheet)
+                       store.dispatch(appendEvent(event));
+                       store.dispatch(processEvent(event));
+                       
+                       if (type === 'settings/goalsUpdated') {
+                           store.dispatch(updateGoals(payload));
+                       }
+                   } catch (e) {
+                       console.error('Failed to parse event row', row, e);
+                   }
                }
             });
         } catch (e) {
@@ -126,6 +146,7 @@
       const state = store.getState();
       // Sync Redux -> Local State
       allLogs = state.projections.log;
+      settings = state.settings;
     });
 
     return unsubscribe;
@@ -151,7 +172,7 @@
              <div class="hero-ring">
                  <StatsRing 
                     value={stats.totalCalories} 
-                    max={GOALS.calories} 
+                    max={goals.calories}  
                     size={260} 
                     gradientId="calories-ring"
                     label="kcal"
@@ -162,7 +183,7 @@
                  <MacroBubble 
                     label="Protein" 
                     value={stats.totalProtein} 
-                    max={GOALS.protein} 
+                    max={goals.protein} 
                     color="#c471ed"
                     gradientId="protein-grad" 
                     iconSrc="/images/icon-protein.png" 
@@ -170,7 +191,7 @@
                  <MacroBubble 
                     label="Carbs" 
                     value={stats.totalCarbs} 
-                    max={GOALS.carbs} 
+                    max={goals.carbs} 
                     color="#24c6dc"
                     gradientId="carbs-grad" 
                     iconSrc="/images/icon-carbs.png" 
@@ -178,7 +199,7 @@
                  <MacroBubble 
                     label="Fat" 
                     value={stats.totalFat} 
-                    max={GOALS.fat} 
+                    max={goals.fat} 
                     color="#D1913C" 
                     gradientId="fat-grad" 
                     iconSrc="/images/icon-fat.png" 
