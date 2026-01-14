@@ -236,8 +236,10 @@
   }
 
   async function handleFileSelect(e: Event) {
+    console.log('[CI-TRACE] handleFileSelect triggered');
     const target = e.target as HTMLInputElement;
     if (target.files) {
+      console.log(`[CI-TRACE] Files selected: ${target.files.length}`);
       for (let i = 0; i < target.files.length; i++) {
           await addImage(target.files[i]);
       }
@@ -276,14 +278,18 @@
       }
 
       imageFiles = [...imageFiles, file];
+      console.log('[CI-TRACE] File added to imageFiles');
 
       const reader = new FileReader();
       reader.onload = (e) => {
           if (e.target?.result) {
+              console.log('[CI-TRACE] FileReader loaded preview');
               imagePreviews = [...imagePreviews, e.target.result as string];
               
               if (analysisTimer) clearTimeout(analysisTimer);
+              console.log('[CI-TRACE] Setting analysis debounce timer...');
               analysisTimer = setTimeout(() => {
+                  console.log('[CI-TRACE] Debounce timer fired. Calling runAnalysis...');
                   runAnalysis();
               }, 500);
           }
