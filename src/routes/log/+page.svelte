@@ -466,7 +466,8 @@
             fat,
             carbs,
             protein,
-            imageDriveUrl: driveUrls || (imagePreviews[0]?.startsWith('http') ? imagePreviews[0] : ''), 
+            protein,
+            imageDriveUrl: driveUrls || (imagePreviews.length > 0 && imagePreviews[0].startsWith('http') ? imagePreviews[0] : ''), 
             rawJson: JSON.parse(JSON.stringify(form))
         };
         
