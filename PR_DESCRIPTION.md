@@ -1,13 +1,9 @@
-# Fix iOS App Icon and Add Meta Tag
+# Rename Spreadsheet to TheFoodTrackerEventLog
 
-## Summary
-This PR fixes the issue where the app icon was not appearing on the iOS homescreen. It adds the missing `mobile-web-app-capable` meta tag and converts the icon files from renamed JPEGs to actual PNG format, as iOS is strict about image formats.
+## Description
+Renamed the Google Sheet used for logging events from the generic "Events" to "TheFoodTrackerEventLog" to prevent naming collisions with users' existing Drive files.
 
-## Changes
-- Added `<meta name="mobile-web-app-capable" content="yes">` to `src/app.html`.
-- Converted `static/apple-touch-icon.png`, `static/android-chrome-192x192.png`, and `static/android-chrome-512x512.png` from JPEG to PNG format using `sips`.
+## User Prompts
+> The spreadsheet name is too generic - might collide with a sheet hte user has. Let's call it TheFoodTrackerEventLog to avoid collisions with the user's own documents.
 
-## Original User Prompt
-The app icon on iOS is still not working. I notice my chrome console says <meta name="apple-mobile-web-app-capable" content="yes"> is deprecated. Please include <meta name="mobile-web-app-capable" content="yes">
-
-Doesn't seem like this could be the culprit but something is making the app icon not load onto the homescreen.
+> Let's follow WORKFLOW.md and put this up as a PR

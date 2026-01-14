@@ -59,9 +59,9 @@ test('US-003 to US-010: User logs food flow', async ({ page }, testInfo) => {
             if (url.includes('foodlog') || url.includes('FoodLog')) {
                 // Search for Folder
                 await route.fulfill({ json: { files: [{ id: 'mock-folder-id', name: 'FoodLog' }] } });
-            } else if (url.includes('Events')) {
+            } else if (url.includes('TheFoodTrackerEventLog')) {
                 // Search for File
-                await route.fulfill({ json: { files: [{ id: 'mock-spreadsheet-id', name: 'Events' }] } });
+                await route.fulfill({ json: { files: [{ id: 'mock-spreadsheet-id', name: 'TheFoodTrackerEventLog' }] } });
             } else if (url.includes('uploadType=multipart')) {
                 // Upload
                 await route.fulfill({ json: { id: 'file-123', webViewLink: 'https://drive.mock/img.jpg', thumbnailLink: 'https://drive.mock/thumb.jpg' } });
