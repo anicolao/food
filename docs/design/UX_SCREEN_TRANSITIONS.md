@@ -5,78 +5,73 @@ Replace the instantaneous "pop" of screen changes with smooth, physical sliding 
 
 ## Navigation Topology
 
-We define a "Depth" hierarchy to determine transition direction.
+We define a hybrid **Spatial + Contextual** system.
 
-| Route | Depth | Interaction Type |
-|-------|-------|------------------|
-| `/` (Feed) | 0 | Root View |
-| `/entry` | 1 | Detail View (Drill Down) |
-| `/log` | 1 | Action View (Modal-like) |
-| `/settings` | 1 | Context View (Side/Overlay) |
+### 1. Horizontal Axis (Main <-> Settings)
+*   **Visual Logic**: Home is **Left**, Settings is **Right**.
+*   **Routes**: `/` (Left) <---> `/settings` (Right).
+*   **Transition**:
+    *   **To Settings**: Home slides out **Left**, Settings slides in from **Right**.
+    *   **Back to Home**: Settings slides out **Right**, Home slides in from **Left**.
 
-### Flows & Transitions
+### 2. Vertical Axis (The "Log" Modal)
+*   **Visual Logic**: The Log screen lives "below" the viewport, acting like a full-screen sheet.
+*   **Routes**: To/From `/log`.
+*   **Transition**:
+    *   **Open Log**: Log slides **UP** from bottom. The underlying screen (Home or Settings) is pushed **UP** off the top.
+    *   **Close Log**: Log slides **DOWN** off the bottom. The destination screen slides **DOWN** from the top.
 
-The transition direction logic is based on the delta between **New Depth** and **Old Depth**.
-
-1.  **Drill Down (0 -> 1)**:
-    *   *Context*: User taps a feed item, logs food, or opens settings.
-    *   *Animation*: **Slide Left**.
-    *   *Details*: The Current Screen (Feed) slides out to the **Left**. The New Screen enters from the **Right**.
-
-2.  **Return / Back (1 -> 0)**:
-    *   *Context*: User saves an entry, closes logging, or navigates back.
-    *   *Animation*: **Slide Right**.
-    *   *Details*: The Current Screen (Detail) slides out to the **Right**. The New Screen (Feed) enters from the **Left**.
-
-3.  **Lateral (1 -> 1)** (Rare):
-    *   *Context*: Switching between Log and Settings directly (if possible).
-    *   *Animation*: **Crossfade** or **No Transition** (maintain Context).
-    *   *Default*: Treat as discrete jumps or go via Root.
+### 3. Drill Down (Contextual Items)
+*   **Visual Logic**: Detail view is "inside" or "to the right" of the parent list item.
+*   **Routes**: `/` -> `/entry/[id]`.
+*   **Transition**:
+    *   **View Entry**: Feed slides out **Left**. Entry slides in from **Right**. (Standard Drill-Down).
+    *   **Back to Feed**: Entry slides out **Right**. Feed slides in from **Left**.
 
 ## Implementation Specification
 
-### 1. Viewport Management
-To allow two screens to exist simultaneously during the transition (sliding over each other), the main content container must utilize a CSS Grid or Absolute Positioning strategy.
+### 1. Direction Calculation
+We need a robust resolver to determine the animation params based on `from` and `to` paths. We will create a `getTransitionParams(from, to)` helper.
 
-*   **Container**: `grid-area: 1 / 1 / 2 / 2;`
-*   **Pages**: child elements must occupy the same grid cell so they overlay perfectly during the animation flux.
-
-### 2. Svelte 5 Transition Logic
-We will implement this in `src/routes/+layout.svelte`.
-
-*   **Key**: Use a unique identifier for the transition key, typically `$page.url.pathname`.
-*   **State**: Track `currentDepth` and `prevDepth` to calculate `direction`.
-*   **Transition**: Use `fly` from `svelte/transition`.
-
-#### Algorithm
 ```typescript
-// Pseudo-code for Layout.svelte
-let depth = $derived(getDepth(page.url.pathname));
-let direction = $state(0);
+type Direction = 'left' | 'right' | 'up' | 'down';
 
-$effect.pre(() => {
-    // Determine direction before update
-    if (newDepth > oldDepth) direction = 1; // Slide Left (Enter Right)
-    else if (newDepth < oldDepth) direction = -1; // Slide Right (Enter Left)
-    else direction = 0;
-});
+// Heuristic Mapper
+function getTransition(from: string, to: string) {
+    // 1. Vertical overrides (Logging)
+    // Going TO Log -> Always Slide UP (Enter Bottom)
+    if (to.includes('/log')) return { enter: 'bottom', exit: 'top' }; 
+    // Leaving Log -> Always Slide DOWN (Enter Top)
+    if (from.includes('/log')) return { enter: 'top', exit: 'bottom' };
 
-// Transition Params
-const transitionIn = { x: direction * 100%, duration: 300, easing: cubicOut };
-const transitionOut = { x: -direction * 100%, duration: 300, easing: cubicOut };
+    // 2. Horizontal Axis (Main <-> Settings)
+    if (from === '/' && to === '/settings') return { enter: 'right', exit: 'left' };
+    if (from === '/settings' && to === '/') return { enter: 'left', exit: 'right' };
+
+    // 3. Drill Down (Feed <-> Entry)
+    if (from === '/' && to.includes('/entry')) return { enter: 'right', exit: 'left' };
+    if (from.includes('/entry') && to === '/') return { enter: 'left', exit: 'right' };
+
+    // Default: Fade or None
+    return null; 
+}
 ```
 
-### 3. Edge Cases
-*   **Initial Load**: No transition (direction 0).
-*   **Browser Back Button**: Must correctly infer direction (History API integration or just rely on Depth map). *Note: Depth map is robust for Back button usage as it relies on target URL, not history stack delta.*
-*   **Scroll Position**: SvelteKit handles scroll restoration. We must ensure the `fly` transition doesn't cause scroll jumping (overflow hidden on container during transit).
+### 2. Layout Transitions
+We will use Svelte's `fly` transition with dynamic parameters in `src/routes/+layout.svelte`.
 
-## Technical Requirements
-*   **Modify**: `src/routes/+layout.svelte`
-*   **New Util**: `src/lib/route-depth.ts` (Map paths to depth integers).
-*   **Style**: Ensure `.app-shell` or `main` has `overflow-x: hidden` to prevent horizontal scrollbars during the slide.
+*   **View Management**: The pages will need to be absolutely positioned or grid-stacked to allow overlap during the transition.
+*   **Params**:
+    *   `enter: 'bottom'` -> `in: fly={{ y: 100% }}`, `out: fly={{ y: -100% }}` (Push Up)
+    *   `enter: 'top'` -> `in: fly={{ y: -100% }}`, `out: fly={{ y: 100% }}` (Push Down)
+    *   `enter: 'right'` -> `in: fly={{ x: 100% }}`, `out: fly={{ x: -100% }}` (Slide Left)
+    *   `enter: 'left'` -> `in: fly={{ x: -100% }}`, `out: fly={{ x: 100% }}` (Slide Right)
+
+### 3. Edge Cases
+*   **Browser Back Button**: The `from` and `to` logic must be robust enough to handle history navigation. The defined rules above are stateless (based only on path), so hitting "Back" from `/log` correctly maps to `from: /log, to: /` which triggers the "Slide Down" animation.
+*   **Scroll Restoration**: SvelteKit handles this, but we must ensure the outgoing page doesn't flick to top before sliding out.
 
 ## Verification
-*   **Manual**: Navigate Feed -> Entry -> Back. Observe Slide Left then Slide Right.
-*   **Manual**: Navigate Feed -> Log -> Save. Observe Slide Left then Slide Right.
-*   **Manual**: Browser Back button behaves consistently with UI Back button.
+*   **Manual**: Open Settings -> Slide Left. Click Back -> Slide Right.
+*   **Manual**: Open Log -> Slide Up (Push Top). close Log -> Slide Down (Push Bottom).
+*   **Manual**: Tap Entry -> Slide Left. Back -> Slide Right.
