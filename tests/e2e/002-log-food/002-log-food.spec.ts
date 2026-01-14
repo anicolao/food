@@ -28,20 +28,6 @@ test('US-003 to US-010: User logs food flow', async ({ page }, testInfo) => {
                 }
             }
         };
-
-        // Spy on History API to find the redirect culprit
-        const originalPush = history.pushState;
-        history.pushState = function (...args) {
-            console.log(`HISTORY PUSH: ${args[2]}`);
-            console.log(new Error().stack);
-            return originalPush.apply(this, args);
-        };
-        const originalReplace = history.replaceState;
-        history.replaceState = function (...args) {
-            console.log(`HISTORY REPLACE: ${args[2]}`);
-            console.log(new Error().stack);
-            return originalReplace.apply(this, args);
-        };
     });
 
     // Debug requests
@@ -162,6 +148,7 @@ test('US-003 to US-010: User logs food flow', async ({ page }, testInfo) => {
 
     // Mandatory URL Wait for stability
     await expect(page).toHaveURL(/\/log/);
+    await page.waitForLoadState('domcontentloaded');
 
     await tester.step('log-page', {
         description: 'User on log page',
