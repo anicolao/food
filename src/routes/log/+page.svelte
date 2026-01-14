@@ -68,7 +68,11 @@
   // Pre-fetch session when page mounts to enable synchronous Click-to-Open
   onMount(() => {
      updateMealType(new Date());
-     initPickerSession();
+     
+     // Disable auto-picker in E2E tests to prevent race conditions
+     if (!(window as any)._isPlaywright) {
+        initPickerSession();
+     }
      
      const handleVisibility = () => {
          if (document.visibilityState === 'visible' && pickerSessionId) {
