@@ -140,6 +140,10 @@ test('US-003 to US-010: User logs food flow', async ({ page }, testInfo) => {
     // Allow polling to initialize tokenClient
     await page.waitForFunction(() => (window as any)._authReady);
     await page.getByText('Sign In with Google').click();
+
+    // Wait for Dashboard to stabilize (Auth confirmed)
+    await expect(page.locator('.feed-header h2').first()).toHaveText('Today');
+
     await page.getByText('Log New').click();
 
     // Mandatory URL Wait for stability
