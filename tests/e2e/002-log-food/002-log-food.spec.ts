@@ -48,6 +48,13 @@ test('US-003 to US-010: User logs food flow', async ({ page }, testInfo) => {
         await route.fulfill({ body: buffer, contentType: 'image/png' });
     });
 
+    // FORCE Fixture File Timestamp to match Mocked Clock (UTC-4 logic handled by browser, but fs uses system time)
+    // We want fs.utimesSync to match the UTC time so that when the browser reads it (and converts to local), it sees the right time?
+    // Actually, File.lastModified is an integer timestamp (ms since epoch).
+    // So if we set it to '2024-03-15T16:00:00Z' (12:00 EDT), the browser in NY will see 12:00 EDT.
+    const mockDate = new Date('2024-03-15T16:00:00Z');
+    fs.utimesSync('tests/e2e/fixtures/apple.png', mockDate, mockDate);
+
     await page.route('**googleapis.com**', async route => {
         const url = route.request().url();
         console.log('MOCKING:', url);
