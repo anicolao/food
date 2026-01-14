@@ -18,7 +18,12 @@
 	let reducedMotion = $state(false);
 	let transitionsEnabled = $state(false);
 
+	// Track navigation history for direction calculation
+	let previousUrl = $state<URL | null>(null);
+
 	onMount(() => {
+        // Initialize previousUrl with current url so first navigation works
+        previousUrl = new URL($page.url.href);
         initializeAuth(() => { console.log('[Auth] Initialized in Layout'); });
 		const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
 		reducedMotion = mediaQuery.matches;
@@ -34,10 +39,7 @@
 
 </script>
 
-<script module>
-	// Track navigation history for direction calculation
-	let previousUrl: URL | null = null;
-</script>
+
 
 <svelte:window bind:innerWidth={width} bind:innerHeight={height} />
 
