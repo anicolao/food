@@ -59,7 +59,8 @@
   
   // Sheet State
   // We consider the sheet 'open' (preview mode) if we have images OR we have pending text data with "AI Found" image
-  let sheetOpen = $derived(imagePreviews.length > 0);
+  // We consider the sheet 'open' (preview mode) if we have images, pending text data with "AI Found" image, OR if we are analyzing
+  let sheetOpen = $derived(imagePreviews.length > 0 || analyzing);
 
   function updateMealType(dateObj: Date) {
      const hour = dateObj.getHours();
@@ -397,7 +398,8 @@
   }
 
   async function handleSubmit() {
-    if (imageFiles.length === 0) return;
+    // We allow saving if we have images OR if we have populated data (itemName)
+    if (imagePreviews.length === 0 && !itemName) return;
     try {
         const state = store.getState();
         // @ts-ignore
