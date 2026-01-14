@@ -8,8 +8,14 @@ test('US-003 to US-010: User logs food flow', async ({ page }, testInfo) => {
     tester.setMetadata('Logging', 'User logs a meal.');
 
     // Promise Gate for Gemini
-    let resolveGemini: () => void = () => { };
-    const geminiPromise = new Promise<void>(r => { resolveGemini = r; });
+    let resolveGemini: () => void = () => { console.log('[CI-TRACE] resolveGemini (No-op) called'); };
+    const geminiPromise = new Promise<void>(r => {
+        console.log('[CI-TRACE] Gemini Gate Created');
+        resolveGemini = () => {
+            console.log('[CI-TRACE] Gemini Gate Resolved by Test');
+            r();
+        };
+    });
 
     page.on('console', msg => console.log(`BROWSER LOG: ${msg.text()}`));
     page.on('pageerror', err => console.log(`BROWSER ERROR: ${err}`));
@@ -111,8 +117,10 @@ test('US-003 to US-010: User logs food flow', async ({ page }, testInfo) => {
                 await route.fulfill({ json: {} });
             }
         } else if (url.includes('generativelanguage')) {
+            console.log('[CI-TRACE] Mock Gemini HIT. Waiting for gate...');
             // Wait for test to signal readiness (Analyzing UI visible)
             await geminiPromise;
+            console.log('[CI-TRACE] Mock Gemini Released.');
             await route.fulfill({
                 json: {
                     candidates: [{
@@ -160,13 +168,21 @@ test('US-003 to US-010: User logs food flow', async ({ page }, testInfo) => {
 
     // Upload File
     const fileInput = page.locator('input[type="file"]:not([capture])');
+    console.log('[CI-TRACE] Setting input files...');
     await fileInput.setInputFiles('tests/e2e/fixtures/apple.png');
+    console.log('[CI-TRACE] Files set. Verifying preview...');
 
     await tester.step('preview', {
         description: 'Image preview shown',
         verifications: [
             { spec: 'Preview visible', check: async () => await expect(page.locator('.sheet-thumb')).toBeVisible() },
-            { spec: 'Status is Analyzing', check: async () => await expect(page.getByText('Analyzing 1 images with Gemini...')).toBeVisible({ timeout: 10000 }) }
+            {
+                spec: 'Status is Analyzing', check: async () => {
+                    console.log('[CI-TRACE] Expecting Analyzing text...');
+                    await expect(page.getByText('Analyzing 1 images with Gemini...')).toBeVisible({ timeout: 10000 });
+                    console.log('[CI-TRACE] Analyzing Text Found.');
+                }
+            }
         ]
     });
 
