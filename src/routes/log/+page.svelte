@@ -23,7 +23,7 @@
   
   let analyzing = $state(false);
   
-  // Flat State for inputs to avoid reactivity issues with nested objects in Svelte 5
+  // Flat State for inputs to avoid reactivity issues with Svelte 5 nested objects
   let itemName = $state('');
   let rationale = $state('');
   let calories = $state(0);
@@ -107,15 +107,11 @@
           if (!token) {
              signIn();
              // After sign in, we can't synchronously open, but we can try to init for next time
-             // or show a "Please try again after sign-in" logic.
-             // Ideally signIn() would return a promise we could await, but the popup behavior varies.
-             // For now, let's just trigger init.
              setTimeout(initPickerSession, 1000); 
           } else {
              // Token exists but init failed? Retry once
              await initPickerSession();
              if (pickerUri) {
-                // If fast enough? unlikely. User has to click again usually.
                 console.warn('Photos ready. Please tap again.');
              } else {
                 console.error('Could not initialize Google Photos. Please check network.');
@@ -236,10 +232,8 @@
   }
 
   async function handleFileSelect(e: Event) {
-    console.log('[CI-TRACE] handleFileSelect triggered');
     const target = e.target as HTMLInputElement;
     if (target.files) {
-      console.log(`[CI-TRACE] Files selected: ${target.files.length}`);
       for (let i = 0; i < target.files.length; i++) {
           await addImage(target.files[i]);
       }
@@ -278,18 +272,14 @@
       }
 
       imageFiles = [...imageFiles, file];
-      console.log('[CI-TRACE] File added to imageFiles');
 
       const reader = new FileReader();
       reader.onload = (e) => {
           if (e.target?.result) {
-              console.log('[CI-TRACE] FileReader loaded preview');
               imagePreviews = [...imagePreviews, e.target.result as string];
               
               if (analysisTimer) clearTimeout(analysisTimer);
-              console.log('[CI-TRACE] Setting analysis debounce timer...');
               analysisTimer = setTimeout(() => {
-                  console.log('[CI-TRACE] Debounce timer fired. Calling runAnalysis...');
                   runAnalysis();
               }, 500);
           }
@@ -301,11 +291,9 @@
     if (imagePreviews.length === 0) return;
     
     analyzing = true;
-    console.log('[TRACE] Svelte: analyzing = true');
     try {
       // Force render tick to ensure 'analyzing' state is visible even if analyzeImage fails fast
       await new Promise(r => setTimeout(r, 1)); 
-      console.log('[TRACE] Svelte: Render tick complete. Calling analyzeImage...'); 
 
       const images = imagePreviews.map((preview, i) => {
           try {
@@ -343,7 +331,6 @@
       console.warn('Analysis failed: ' + e);
     } finally {
       analyzing = false;
-      console.log('[TRACE] Svelte: analyzing = false');
     }
   }
 
@@ -418,9 +405,6 @@
   }
 
   function handleCloseSheet() {
-      // Don't actually close it if we deleted images? 
-      // Actually closer behavior is usually "reset" or "minimize".
-      // For now, dragging down just clears everything? Or maybe confirm?
       if (confirm('Discard entry?')) {
           resetForm();
       }
@@ -801,58 +785,65 @@
     }
     
     .rationale-text {
-        font-size: 0.85rem;
-        color: var(--text-muted);
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+        line-height: 1.5;
+        font-style: italic;
         margin-bottom: 8px;
-        line-height: 1.4;
     }
     
     .correct-btn {
-        font-size: 0.75rem;
-        color: var(--color-primary);
         background: none;
         border: none;
-        padding: 0;
+        color: var(--color-primary);
+        font-size: 0.85rem;
+        padding: 4px;
+        cursor: pointer;
         text-decoration: underline;
     }
     
     .correction-area {
         display: flex;
         flex-direction: column;
-        gap: 10px;
+        gap: 8px;
+        align-items: flex-end;
     }
     
-    .primary-btn.small {
-        padding: 8px;
-        align-self: flex-end;
-        border: none;
-        border-radius: 8px;
+    textarea.bg-input {
+        width: 100%;
+        resize: vertical;
+    }
+
+    .save-btn-primary {
         background: var(--color-primary);
         color: white;
-    }
-    
-    .save-btn-primary {
-        margin-top: 20px;
-        background: var(--gradient-calories);
-        color: white;
-        border: none;
         padding: 16px;
-        border-radius: 30px;
+        border-radius: var(--radius-m);
+        border: none;
         font-size: 1.1rem;
-        font-weight: 700;
+        font-weight: 600;
+        margin-top: 10px;
+        cursor: pointer;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
     }
     
     .analyzing-state {
-        text-align: center;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
         padding: 40px;
-        color: var(--text-secondary);
+        gap: 20px;
     }
     
     .magic-sparkle {
         font-size: 3rem;
-        margin-bottom: 20px;
-        animation: spin 3s infinite linear;
+        animation: pulse 1.5s infinite;
     }
     
-    @keyframes spin { 100% { transform: rotate(360deg); } }
+    @keyframes pulse {
+        0% { transform: scale(1); opacity: 1; }
+        50% { transform: scale(1.2); opacity: 0.7; }
+        100% { transform: scale(1); opacity: 1; }
+    }
 </style>

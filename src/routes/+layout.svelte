@@ -7,6 +7,7 @@
 	import { page } from '$app/stores';
 	import { getTransitionDirection, getTransitionParams } from '$lib/transitions';
 	import { onMount } from 'svelte';
+    import { initializeAuth } from '$lib/auth';
 
 	let { children } = $props();
 
@@ -16,6 +17,7 @@
 	let transitionsEnabled = $state(false);
 
 	onMount(() => {
+        initializeAuth(() => { console.log('[Auth] Initialized in Layout'); });
 		const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
 		reducedMotion = mediaQuery.matches;
 		transitionsEnabled = true;
