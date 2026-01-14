@@ -11,7 +11,6 @@
   import { createPickerSession, pollPickerSession, listSessionMediaItems } from '$lib/google-photos';
   
   import LogSheet from '$lib/components/ui/LogSheet.svelte';
-  import PhotosSelector from '$lib/components/ui/PhotosSelector.svelte';
 
   let fileInput = $state<HTMLInputElement>();
   let videoElement = $state<HTMLVideoElement>();
@@ -60,9 +59,139 @@
      else mealType = 'Snack';
   }
 
+  // --- Google Photos Logic ---
+  let pickerUri = $state<string | null>(null);
+  let pickerSessionId = $state<string | null>(null);
+  let pickerWindow = $state<Window | null>(null);
+  let pickerPollInterval = $state<any>(null);
+
+  // Pre-fetch session when page mounts to enable synchronous Click-to-Open
   onMount(() => {
-    updateMealType(new Date());
+     updateMealType(new Date());
+     initPickerSession();
+     
+     const handleVisibility = () => {
+         if (document.visibilityState === 'visible' && pickerSessionId) {
+             console.log('App visible, checking picker status...');
+             checkPickerSession();
+         }
+     };
+     document.addEventListener('visibilitychange', handleVisibility);
+     return () => {
+         document.removeEventListener('visibilitychange', handleVisibility);
+         stopPollingPicker();
+     };
   });
+
+  async function initPickerSession() {
+      try {
+          // Check if signed in first to avoid immediate prompt on load if not needed
+          const token = await import('$lib/auth').then(m => m.getAccessToken());
+          if (!token) return; // Wait for explicit sign in if no token
+
+          console.log('Pre-fetching Google Photos Picker session...');
+          const session = await createPickerSession();
+          pickerSessionId = session.id;
+          let uri = session.pickerUri;
+          if (!uri.endsWith("/autoclose")) uri = uri.endsWith("/") ? `${uri}autoclose` : `${uri}/autoclose`;
+          pickerUri = uri;
+      } catch (e) {
+          console.warn('Failed to pre-fetch picker session', e);
+      }
+  }
+
+  async function handleGooglePhotosPick() {
+      if (!pickerUri) {
+          // If no URI yet (e.g. not signed in), try to sign in and initiate
+          const token = await import('$lib/auth').then(m => m.getAccessToken());
+          if (!token) {
+             signIn();
+             // After sign in, we can't synchronously open, but we can try to init for next time
+             // or show a "Please try again after sign-in" logic.
+             // Ideally signIn() would return a promise we could await, but the popup behavior varies.
+             // For now, let's just trigger init.
+             setTimeout(initPickerSession, 1000); 
+          } else {
+             // Token exists but init failed? Retry once
+             await initPickerSession();
+             if (pickerUri) {
+                // If fast enough? unlikely. User has to click again usually.
+                alert('Photos ready. Please tap again.');
+             } else {
+                alert('Could not initialize Google Photos. Please check network.');
+             }
+          }
+          return;
+      }
+
+      // Synchronous open
+      pickerWindow = window.open(pickerUri, '_blank');
+      startPollingPicker();
+  }
+
+  function startPollingPicker() {
+      stopPollingPicker();
+      pickerPollInterval = setInterval(() => checkPickerSession(), 2000);
+  }
+
+  function stopPollingPicker() {
+      if (pickerPollInterval) {
+          clearInterval(pickerPollInterval);
+          pickerPollInterval = null;
+      }
+  }
+
+  async function checkPickerSession() {
+      if (!pickerSessionId) return;
+      try {
+          const sessionStatus = await pollPickerSession(pickerSessionId);
+          if (sessionStatus.mediaItemsSet) {
+              stopPollingPicker();
+              if (pickerWindow && !pickerWindow.closed) pickerWindow.close();
+              
+              const items = await listSessionMediaItems(pickerSessionId);
+              if (items.length > 0) {
+                  const token = await import('$lib/auth').then(m => m.getAccessToken() || '');
+                  for (const item of items) {
+                      await processPickedItem(item, token);
+                  }
+                  // Reset session for next time
+                  pickerSessionId = null;
+                  pickerUri = null;
+                  initPickerSession(); 
+              }
+          }
+      } catch (e) {
+          console.error('Picker poll failed', e);
+      }
+  }
+
+  async function processPickedItem(item: any, token: string) {
+      if (!item.baseUrl) return;
+      if (item.creationTime && imageFiles.length === 0) {
+          const date = new Date(item.creationTime);
+          entryDate = date.toISOString().split('T')[0];
+          entryTime = date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+          updateMealType(date);
+      }
+      let fetchUrl = item.baseUrl;
+      if (fetchUrl.includes("drive.google.com/thumbnail")) {
+           const match = fetchUrl.match(/id=([^&]+)/);
+           if (match) fetchUrl = `https://www.googleapis.com/drive/v3/files/${match[1]}?alt=media`;
+      } else if (fetchUrl.includes("googleusercontent.com")) {
+           fetchUrl = `${fetchUrl}=w2048-h2048`; 
+      }
+      try {
+          const res = await fetch(fetchUrl, { headers: { Authorization: `Bearer ${token}` } });
+          if (res.ok) {
+              const blob = await res.blob();
+              const file = new File([blob], item.filename || `photo-${Date.now()}.jpg`, { type: item.mimeType || blob.type || 'image/jpeg' });
+              await addImage(file);
+          }
+      } catch (e) {
+          console.error('Failed to download media', e);
+      }
+  }
 
   async function startCamera() {
     showCamera = true;
@@ -276,49 +405,6 @@
     }
   }
 
-  // --- Google Photos Logic ---
-  // (Simplified for brevity, reusing existing logic structure but wrapping in new UI trigger)
-  async function handleGooglePhotosPick() {
-     const token = await new Promise<string>((resolve) => {
-         import('$lib/auth').then(m => resolve(m.getAccessToken() || ''));
-     });
-
-     if (!token) {
-         signIn();
-         alert('Please Sign In first');
-         return;
-     }
-     
-     showPhotosSelector = true;
-  }
-
-  async function processPickedItem(item: any, token: string) {
-      if (!item.baseUrl) return;
-      if (item.creationTime && imageFiles.length === 0) {
-          const date = new Date(item.creationTime);
-          entryDate = date.toISOString().split('T')[0];
-          entryTime = date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
-          updateMealType(date);
-      }
-      let fetchUrl = item.baseUrl;
-      if (fetchUrl.includes("drive.google.com/thumbnail")) {
-           const match = fetchUrl.match(/id=([^&]+)/);
-           if (match) fetchUrl = `https://www.googleapis.com/drive/v3/files/${match[1]}?alt=media`;
-      } else if (fetchUrl.includes("googleusercontent.com")) {
-           fetchUrl = `${fetchUrl}=w2048-h2048`; 
-      }
-      try {
-          const res = await fetch(fetchUrl, { headers: { Authorization: `Bearer ${token}` } });
-          if (res.ok) {
-              const blob = await res.blob();
-              const file = new File([blob], item.filename || `photo-${Date.now()}.jpg`, { type: item.mimeType || blob.type || 'image/jpeg' });
-              await addImage(file);
-          }
-      } catch (e) {
-          console.error('Failed to download media', e);
-      }
-  }
-
   function handleCloseSheet() {
       // Don't actually close it if we deleted images? 
       // Actually closer behavior is usually "reset" or "minimize".
@@ -472,15 +558,7 @@
          </div>
     </LogSheet>
      
-    <PhotosSelector 
-       bind:open={showPhotosSelector} 
-       onSelect={async (items) => {
-           const token = await import('$lib/auth').then(m => m.getAccessToken() || '');
-           for (const item of items) {
-               await processPickedItem(item, token);
-           }
-       }} 
-    />
+
 </div>
 <style>
     .log-page {
