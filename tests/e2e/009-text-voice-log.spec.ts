@@ -72,6 +72,24 @@ test('US-009: User logs food via Text and Voice', async ({ page, context }, test
             await geminiPromise;
 
             const reqBody = route.request().postDataJSON();
+            const tools = reqBody.tools;
+
+            // Handle Tool Use (Image Search)
+            if (tools && tools[0]?.googleSearch) {
+                console.log('MOCKING GEMINI IMAGE SEARCH');
+                await route.fulfill({
+                    json: {
+                        candidates: [{
+                            content: {
+                                parts: [{ text: 'https://example.com/mock-apple.jpg' }]
+                            }
+                        }]
+                    }
+                });
+                return;
+            }
+
+            // Handle Text Analysis
             const textPrompt = reqBody.contents?.[0]?.parts?.find((p: any) => p.text)?.text || '';
 
             let result;
@@ -115,6 +133,9 @@ test('US-009: User logs food via Text and Voice', async ({ page, context }, test
         } else if (url.includes('drive/v3/files') || url.includes('sheets.googleapis.com')) {
             // Standard Drive/Sheets mocks
             await route.fulfill({ json: { id: 'mock-id', files: [] } });
+        } else if (url === 'https://example.com/mock-apple.jpg') {
+            // Mock the image fetch verification
+            await route.fulfill({ status: 200, body: Buffer.from('fake-image-data') });
         } else {
             await route.continue();
         }
@@ -165,24 +186,24 @@ test('US-009: User logs food via Text and Voice', async ({ page, context }, test
              { spec: 'Listening text visible', check: async () => await expect(page.getByText('Listening...')).toBeVisible() }
         ]
     });
-    
+     
     // Reset resolve for next call
     let resolveVoice: (value: unknown) => void = () => {};
     const voicePromise = new Promise(r => resolveVoice = r);
     resolveGemini = () => resolveVoice(null);
-
-    await page.getByRole('button', { name: 'Voice' }).click({ force: true });
     
+    await page.getByRole('button', { name: 'Voice' }).click({ force: true });
+     
     // Voice Mock should auto-run after 500ms and populate "I had a grilled cheese sandwich"
     // Then user clicks Analyze (or we auto-submit, but current UI has "Stop & Analyze" button which turns to Analyze)
     // Wait for transcript
     await expect(page.getByText('I had a grilled cheese sandwich')).toBeVisible({ timeout: 5000 });
-    
+     
     await page.getByText('Stop & Analyze').click();
-    
+     
     // Release Gemini Mock for "grilled cheese"
     resolveGemini(); // Actually uses the re-assigned resolveVoice
-    
+     
     await expect(page.getByLabel('Log Description')).toHaveValue('Grilled Cheese');
     await expect(page.getByLabel('Cals')).toHaveValue('400');
     */

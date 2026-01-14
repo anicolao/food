@@ -253,7 +253,7 @@
 
   let analysisTimer: NodeJS.Timeout;
 
-  async function addImage(file: File) {
+  async function addImage(file: File, triggerAnalysis: boolean = true) {
       try {
            // @ts-ignore
            const exifData = await exifr.parse(file);
@@ -289,10 +289,12 @@
           if (e.target?.result) {
               imagePreviews = [...imagePreviews, e.target.result as string];
               
-              if (analysisTimer) clearTimeout(analysisTimer);
-              analysisTimer = setTimeout(() => {
-                  runAnalysis();
-              }, 500);
+              if (triggerAnalysis) {
+                  if (analysisTimer) clearTimeout(analysisTimer);
+                  analysisTimer = setTimeout(() => {
+                      runAnalysis();
+                  }, 500);
+              }
           }
       };
       reader.readAsDataURL(file);
@@ -363,24 +365,34 @@
           if (result.searchQuery) {
               const imageUrl = await searchFoodImage(result.searchQuery);
               
+              if (!imageUrl) {
+                  console.log('No representative image found.');
+                  return;
+              }
+
               // Fetch the image to convert to a File object (needed for Drive upload)
               // If fails (CORS/403), use URL directly (fallback)
               try {
                   const res = await fetch(imageUrl);
+                  
+                  // Double check it's not a 404 before proceeding
+                  if (res.status === 404) {
+                       console.warn('Image URL is 404, valid image not found.');
+                       return;
+                  }
+
                   if (res.ok) {
                       const blob = await res.blob();
                       const file = new File([blob], `${result.searchQuery.replace(/[^a-z0-9]/gi, '-').toLowerCase()}.jpg`, { type: blob.type });
-                      await addImage(file);
+                      // PASS FALSE to skip re-analysis!
+                      await addImage(file, false);
                   } else {
                       // Only fallback if it's NOT a 404 (e.g. 403 or opaque might be loadable via img tag)
-                      if (res.status !== 404) {
-                          console.warn('Failed to fetch matched image, using direct URL');
-                          if (imagePreviews.length === 0) imagePreviews = [imageUrl];
-                      } else {
-                           console.error('Image is 404, not adding to previews');
-                      }
+                      console.warn('Failed to fetch matched image, using direct URL');
+                      if (imagePreviews.length === 0) imagePreviews = [imageUrl];
                   }
               } catch (err) {
+                  // Network/CORS error on verification - optimistic usage
                   console.error('Network error fetching matched image, using direct URL', err);
                   if (imagePreviews.length === 0) imagePreviews = [imageUrl];
               }
