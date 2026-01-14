@@ -1,3 +1,5 @@
+import { writable } from 'svelte/store';
+
 export const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_OAUTH_ID;
 export const SCOPES = [
     'https://www.googleapis.com/auth/drive.file',
@@ -11,6 +13,8 @@ export interface UserProfile {
     email: string;
     picture: string;
 }
+
+export const authState = writable<{ token: string | null, ready: boolean }>({ token: null, ready: false });
 
 // Simple wrapper around Google Identity Services (GIS)
 // Assumes <script src="https://accounts.google.com/gsi/client" async defer></script> in app.html derived layout
@@ -41,8 +45,10 @@ export function initializeAuth(onSuccess: (token: string) => void) {
         const expiryTime = parseInt(storedExpiry);
         if (Date.now() < expiryTime) {
             accessToken = storedToken;
+            authState.update(s => ({ ...s, token: storedToken }));
             onSuccess(accessToken);
             (window as any)._authReady = true;
+            authState.update(s => ({ ...s, ready: true }));
 
             // Schedule refresh based on remaining time
             const remainingSeconds = (expiryTime - Date.now()) / 1000;
@@ -52,6 +58,7 @@ export function initializeAuth(onSuccess: (token: string) => void) {
             signOut();
             // Still ready, just not authenticated
             (window as any)._authReady = true;
+            authState.update(s => ({ ...s, ready: true }));
         }
     }
 
@@ -83,6 +90,7 @@ function initClient(onSuccess: (token: string) => void) {
     });
     // Signal tests that client is initialized
     (window as any)._authReady = true;
+    authState.update(s => ({ ...s, ready: true }));
 }
 
 function handleTokenResponse(response: any, onSuccess: (token: string) => void) {
@@ -96,6 +104,7 @@ function handleTokenResponse(response: any, onSuccess: (token: string) => void) 
     localStorage.setItem(TOKEN_KEY, accessToken);
     localStorage.setItem(EXPIRY_KEY, expiryTime.toString());
 
+    authState.update(s => ({ ...s, token: accessToken }));
     onSuccess(accessToken);
     scheduleRefresh(expiresInSeconds, onSuccess);
 }
@@ -169,6 +178,7 @@ export function signOut() {
     }
     localStorage.removeItem(TOKEN_KEY);
     localStorage.removeItem(EXPIRY_KEY);
+    authState.update(s => ({ ...s, token: null }));
     if (typeof google !== 'undefined' && google.accounts) {
         google.accounts.oauth2.revoke(accessToken, () => { });
     }

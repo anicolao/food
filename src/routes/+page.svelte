@@ -129,18 +129,18 @@
   }
 
   onMount(() => {
-    const existingToken = getAccessToken();
-    if (existingToken) {
-        authenticated = true;
-        syncData();
-    }
-
-    initializeAuth((token) => {
-      authenticated = !!token;
-      if (authenticated) {
-        syncData();
+      // Subscribe to auth state from store (initialized in Layout)
+      const unsubAuth = authState.subscribe(state => {
+          authenticated = !!state.token;
+          if (authenticated) {
+              syncData();
+          }
+      });
+      // Trigger sync if already auth (e.g. from local storage restore)
+      if (getAccessToken()) {
+          authenticated = true;
+          syncData();
       }
-    });
 
     const unsubscribe = store.subscribe(() => {
       const state = store.getState();
@@ -149,7 +149,10 @@
       settings = state.settings;
     });
 
-    return unsubscribe;
+    return () => {
+        unsubAuth();
+        unsubscribe();
+    };
   });
 
   function handleSignIn() {
