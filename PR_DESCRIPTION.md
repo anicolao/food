@@ -1,12 +1,1 @@
-# Implement Screen Transitions
-
-## User Request
-> pull the latest. Read the UX_SCREEN_TRANSITIONS.md, DEVELOPMENT.md, WORKFLOW.md, and implement hte screen transitions.
-
-## Changes
-- **Docs**: Located `docs/design/UX_SCREEN_TRANSITIONS.md` and used it as the spec.
-- **Logic**: Created `src/lib/transitions.ts` to handle "Spatial + Contextual" transition logic (Left/Right for nested views, Up/Down for modals).
-- **Layout**: Updated `src/routes/+layout.svelte` to use Svelte 5 keyed blocks and CSS Grid stacking for smooth, overlapping animations.
-
-## Verification
-- User manually verified the transitions.
+We've decided that in addition to image input, teh user should be able to type or speak a short phrase describing what htey ate in order ot log their food that way. In this case we'll give gemini the text description and let it create food log. FOr example, the user might say "a starbuck latte grande" and we expect Gemini to be able to make that into a reasonable food log, potentially including an image of it from the internet. Write the UI design for this as UI_TEXT_VOICE_LOGGING.md. Write the design doc ony but include any UX mockups from nano banana            tha tyou need and any technical details for the implementor.
