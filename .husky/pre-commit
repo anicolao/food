@@ -6,3 +6,19 @@ if git grep -n "alert(" -- "*.ts" "*.js" "*.svelte"; then
     echo "Error: alert() is not allowed. Use console.error/warn or a toast notification."
     exit 1
 fi
+
+# Run Type Checking
+echo "running type check..."
+npm run check
+if [ $? -ne 0 ]; then
+    echo "Type check failed! Please fix errors before committing."
+    exit 1
+fi
+
+# Run E2E Tests
+echo "running e2e tests..."
+npm run test:e2e
+if [ $? -ne 0 ]; then
+    echo "E2E tests failed! Please fix tests before committing."
+    exit 1
+fi
