@@ -253,11 +253,12 @@
 
   let analysisTimer: NodeJS.Timeout;
 
-  async function addImage(file: File, triggerAnalysis: boolean = true) {
-      try {
-           // @ts-ignore
-           const exifData = await exifr.parse(file);
-           if (exifData && (exifData.DateTimeOriginal || exifData.CreateDate)) {
+  async function addImage(file: File, triggerAnalysis: boolean = true, skipExif: boolean = false) {
+      if (!skipExif) {
+          try {
+               // @ts-ignore
+               const exifData = await exifr.parse(file);
+               if (exifData && (exifData.DateTimeOriginal || exifData.CreateDate)) {
                const date = exifData.DateTimeOriginal || exifData.CreateDate;
                // Date to Local YYYY-MM-DD
                const year = date.getFullYear();
@@ -278,8 +279,9 @@
                entryTime = date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
                updateMealType(date);
            }
-      } catch (e) {
-           console.warn('EXIF parse failed', e);
+          } catch (e) {
+               console.warn('EXIF parse failed', e);
+          }
       }
 
       imageFiles = [...imageFiles, file];
@@ -385,7 +387,8 @@
                       const blob = await res.blob();
                       const file = new File([blob], `${result.searchQuery.replace(/[^a-z0-9]/gi, '-').toLowerCase()}.jpg`, { type: blob.type });
                       // PASS FALSE to skip re-analysis!
-                      await addImage(file, false);
+                      // PASS TRUE to skip EXIF (use current time for search/generated images)
+                      await addImage(file, false, true);
                   } else {
                       // Only fallback if it's NOT a 404 (e.g. 403 or opaque might be loadable via img tag)
                       console.warn('Failed to fetch matched image, using direct URL');
