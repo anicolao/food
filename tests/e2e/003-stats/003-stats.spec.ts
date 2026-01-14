@@ -33,8 +33,8 @@ test('US-012: Stats persist after reload', async ({ page }, testInfo) => {
         if (url.includes('drive/v3/files')) {
             if (url.includes('foodlog') || url.includes('FoodLog')) {
                 await route.fulfill({ json: { files: [{ id: 'mock-folder-id', name: 'FoodLog' }] } });
-            } else if (url.includes('Events')) {
-                await route.fulfill({ json: { files: [{ id: 'mock-spreadsheet-id', name: 'Events' }] } });
+            } else if (url.includes('TheFoodTrackerEventLog')) {
+                await route.fulfill({ json: { files: [{ id: 'mock-spreadsheet-id', name: 'TheFoodTrackerEventLog' }] } });
             } else {
                 await route.fulfill({ json: { id: 'new-mock-id' } });
             }

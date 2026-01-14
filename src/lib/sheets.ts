@@ -77,7 +77,7 @@ export async function ensureDataStructures() {
     const folderId = await findOrCreateFolder('FoodLog');
     console.log('Folder ID:', folderId);
 
-    const spreadsheetId = await findOrCreateFile('Events', folderId, 'application/vnd.google-apps.spreadsheet');
+    const spreadsheetId = await findOrCreateFile('TheFoodTrackerEventLog', folderId, 'application/vnd.google-apps.spreadsheet');
     console.log('Spreadsheet ID:', spreadsheetId);
 
     // Ensure "Events" tab exists (default is Sheet1)
