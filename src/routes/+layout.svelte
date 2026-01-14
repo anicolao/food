@@ -19,7 +19,7 @@
 	let transitionsEnabled = $state(false);
 
 	// Track navigation history for direction calculation
-	let previousUrl = $state<URL | null>(null);
+	let previousUrl: URL | null = null; 
 
 	onMount(() => {
         // Initialize previousUrl with current url so first navigation works
