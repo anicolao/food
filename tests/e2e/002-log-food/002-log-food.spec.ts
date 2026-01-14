@@ -20,6 +20,7 @@ test('US-003 to US-010: User logs food flow', async ({ page }, testInfo) => {
     // 12:00 PM EDT = 16:00 PM UTC
     await page.clock.install({ time: new Date('2024-03-15T16:00:00Z') });
     await page.addInitScript(() => {
+        (window as any)._isPlaywright = true;
         (window as any).google = {
             accounts: {
                 oauth2: {
