@@ -115,7 +115,7 @@ export async function findImageWithGemini(query: string): Promise<string | null>
         },
         body: JSON.stringify({
             contents: [{
-                parts: [{ text: `Find a high-quality, representative image URL for: "${query}". Return ONLY the URL string, nothing else.` }]
+                parts: [{ text: `Find a shared, public image URL for: "${query}". Prefer Wikimedia Commons or Unsplash. Return ONLY the URL.` }]
             }],
             tools: [{ googleSearch: {} }] // Request Google Search grounding
         })
@@ -130,9 +130,13 @@ export async function findImageWithGemini(query: string): Promise<string | null>
     // Try to extract a grounded URL or the text response if it's a URL
     const candidate = result.candidates?.[0]?.content?.parts?.[0]?.text;
 
-    // Check purely for a URL in the text
-    if (candidate && candidate.startsWith('http')) {
-        return candidate.trim();
+    // Heuristic extraction of URL from text (e.g. if it returns "Here is a link: https://...")
+    if (candidate) {
+        // Regex to find http/https url
+        const match = candidate.match(/https?:\/\/[^\s"']+/);
+        if (match) {
+            return match[0];
+        }
     }
 
     // Check grounding metadata if available (often contains standard web results)
