@@ -352,22 +352,30 @@
 
   async function handleTextAnalyze(text: string) {
       currentMode = 'IDLE'; // Close modal
-      rationale = text; // Store user text temporarily? 
-      // Or better: pass directly to analyzeFood and let it return the rationale
       
       analyzing = true;
       try {
+          // 1. Get Nutrition Analysis
           const result = await analyzeFood({ text });
           applyAnalysisResult(result);
           
+          // 2. Fetch Representative Image
           if (result.searchQuery) {
               const imageUrl = await searchFoodImage(result.searchQuery);
-              // We need to add this image to the previews so the UI logic works
-              // But it's a URL, not a File/Base64. 
-              // Our UI expects base64 in imagePreviews for display, or we can adapt it.
-              // For now, let's treat it as a "remote" reference.
-              // Hack: display the URL directly in imagePreviews? 
-              imagePreviews = [imageUrl];
+              
+              // Fetch the image to convert to a File object (needed for Drive upload)
+              try {
+                  const res = await fetch(imageUrl);
+                  if (res.ok) {
+                      const blob = await res.blob();
+                      const file = new File([blob], `${result.searchQuery.replace(/[^a-z0-9]/gi, '-').toLowerCase()}.jpg`, { type: blob.type });
+                      await addImage(file);
+                  } else {
+                      console.warn('Failed to fetch matched image');
+                  }
+              } catch (err) {
+                  console.error('Network error fetching matched image', err);
+              }
           }
       } catch (e) {
           console.error(e);

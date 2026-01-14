@@ -1,17 +1,5 @@
-
-// Mock image search service
-// Since we don't have a Google Custom Search API key yet, we'll return
-// high-quality placeholder images based on keywords or a default.
-
-const PLACEHOLDERS: Record<string, string> = {
-    'coffee': 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=1000&q=80',
-    'latte': 'https://images.unsplash.com/photo-1541167760496-1628856ab772?auto=format&fit=crop&w=1000&q=80',
-    'burger': 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=1000&q=80',
-    'salad': 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=1000&q=80',
-    'pizza': 'https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&w=1000&q=80',
-    'breakfast': 'https://images.unsplash.com/photo-1533089862017-ec329abb0a51?auto=format&fit=crop&w=1000&q=80',
-    'default': 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=1000&q=80' // Healthy bowl
-};
+// Image search service with Generative Fallback
+// Uses Pollinations.ai if no Google Search keys are present.
 
 /**
  * Searches for an image URL based on the query.
@@ -19,19 +7,32 @@ const PLACEHOLDERS: Record<string, string> = {
  * @returns A promise that resolves to an image URL
  */
 export async function searchFoodImage(query: string): Promise<string> {
-    console.log(`[MockImageSearch] Searching for: "${query}"`);
+    console.log(`[ImageSearch] Searching for: "${query}"`);
 
-    // Simulate network delay
-    await new Promise(r => setTimeout(r, 800));
+    // 1. Try Google Custom Search Engine (CSE) if configured
+    const apiKey = import.meta.env.VITE_GOOGLE_SEARCH_API_KEY;
+    const cx = import.meta.env.VITE_GOOGLE_SEARCH_CX;
 
-    const lowerQuery = query.toLowerCase();
-
-    // Simple keyword matching for better mock experience
-    for (const key of Object.keys(PLACEHOLDERS)) {
-        if (lowerQuery.includes(key)) {
-            return PLACEHOLDERS[key];
+    if (apiKey && cx) {
+        try {
+            console.log('[ImageSearch] Using Google CSE');
+            const url = `https://www.googleapis.com/customsearch/v1?q=${encodeURIComponent(query)}&cx=${cx}&key=${apiKey}&searchType=image&num=1&safe=high`;
+            const res = await fetch(url);
+            const data = await res.json();
+            if (data.items && data.items.length > 0) {
+                return data.items[0].link;
+            }
+            console.warn('[ImageSearch] CSE returned no results, falling back.');
+        } catch (e) {
+            console.error('[ImageSearch] CSE failed', e);
         }
     }
 
-    return PLACEHOLDERS['default'];
+    // 2. Fallback: Generative AI via Pollinations.ai
+    // This provides a high-quality, free, "search-like" result without API keys.
+    console.log('[ImageSearch] Using Pollinations.ai Fallback');
+    const safeQuery = encodeURIComponent(query);
+    // Add "realistic food photography" to prompt to ensure style consistency
+    // seed is random if not specified, which is fine
+    return `https://image.pollinations.ai/prompt/realistic%20food%20photography%20of%20${safeQuery}?width=1024&height=1024&nologo=true`;
 }
