@@ -142,6 +142,9 @@ test('US-003 to US-010: User logs food flow', async ({ page }, testInfo) => {
     await page.getByText('Sign In with Google').click();
     await page.getByText('Log New').click();
 
+    // Mandatory URL Wait for stability
+    await expect(page).toHaveURL(/\/log/);
+
     await tester.step('log-page', {
         description: 'User on log page',
         verifications: [
