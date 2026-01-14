@@ -6,33 +6,45 @@
  * @param query The food description or search term
  * @returns A promise that resolves to an image URL
  */
+// Image search service using Gemini Grounding (User OAuth)
+import { findImageWithGemini } from '$lib/gemini';
+
+const PLACEHOLDERS: Record<string, string> = {
+    'coffee': 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=1000&q=80',
+    'latte': 'https://images.unsplash.com/photo-1541167760496-1628856ab772?auto=format&fit=crop&w=1000&q=80',
+    'burger': 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=1000&q=80',
+    'salad': 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=1000&q=80',
+    'pizza': 'https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&w=1000&q=80',
+    'breakfast': 'https://images.unsplash.com/photo-1533089862017-ec329abb0a51?auto=format&fit=crop&w=1000&q=80',
+    'default': 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=1000&q=80' // Healthy bowl
+};
+
+/**
+ * Searches for an image URL based on the query.
+ * @param query The food description or search term
+ * @returns A promise that resolves to an image URL
+ */
 export async function searchFoodImage(query: string): Promise<string> {
     console.log(`[ImageSearch] Searching for: "${query}"`);
 
-    // 1. Try Google Custom Search Engine (CSE) if configured
-    const apiKey = import.meta.env.VITE_GOOGLE_SEARCH_API_KEY;
-    const cx = import.meta.env.VITE_GOOGLE_SEARCH_CX;
+    // 1. Try Gemini Search (User OAuth)
+    try {
+        const geminiUrl = await findImageWithGemini(query);
+        if (geminiUrl) {
+            console.log('[ImageSearch] Found via Gemini:', geminiUrl);
+            return geminiUrl;
+        }
+    } catch (e) {
+        console.warn('[ImageSearch] Gemini search failed', e);
+    }
 
-    if (apiKey && cx) {
-        try {
-            console.log('[ImageSearch] Using Google CSE');
-            const url = `https://www.googleapis.com/customsearch/v1?q=${encodeURIComponent(query)}&cx=${cx}&key=${apiKey}&searchType=image&num=1&safe=high`;
-            const res = await fetch(url);
-            const data = await res.json();
-            if (data.items && data.items.length > 0) {
-                return data.items[0].link;
-            }
-            console.warn('[ImageSearch] CSE returned no results, falling back.');
-        } catch (e) {
-            console.error('[ImageSearch] CSE failed', e);
+    // 2. Fallback: Local Placeholders (never fails, no 403s)
+    const lowerQuery = query.toLowerCase();
+    for (const key of Object.keys(PLACEHOLDERS)) {
+        if (lowerQuery.includes(key)) {
+            return PLACEHOLDERS[key];
         }
     }
 
-    // 2. Fallback: Generative AI via Pollinations.ai
-    // This provides a high-quality, free, "search-like" result without API keys.
-    console.log('[ImageSearch] Using Pollinations.ai Fallback');
-    const safeQuery = encodeURIComponent(query);
-    // Add "realistic food photography" to prompt to ensure style consistency
-    // seed is random if not specified, which is fine
-    return `https://image.pollinations.ai/prompt/realistic%20food%20photography%20of%20${safeQuery}?width=1024&height=1024&nologo=true`;
+    return PLACEHOLDERS['default'];
 }
