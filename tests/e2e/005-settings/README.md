@@ -47,12 +47,12 @@
 
 ---
 
-## Saved settings
+## Saved settings and redirected
 
-![Saved settings](./screenshots/004-save-changes.png)
+![Saved settings and redirected](./screenshots/004-save-changes.png)
 
 **Verifications:**
-- [x] Save button disabled (clean state)
+- [x] Redirected to dashboard
 
 ---
 
