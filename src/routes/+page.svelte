@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { initializeAuth, signIn, signOut, getAccessToken } from '$lib/auth';
+  import { initializeAuth, signIn, signOut, getAccessToken, authState } from '$lib/auth';
   import { fetchRows, ensureDataStructures } from '$lib/sheets';
   import { store, dispatchEvent, setConfig, appendEvent, processEvent, updateGoals } from '$lib/store';
   import { base } from '$app/paths';
