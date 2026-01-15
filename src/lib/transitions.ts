@@ -11,6 +11,10 @@ export type TransitionConfig = {
 };
 
 import { base } from '$app/paths';
+import { writable } from 'svelte/store';
+
+// Global store for page snapshots to support frozen exit transitions
+export const transitionSnapshots = writable<Record<string, string>>({});
 
 // Helper to strip base path and normalize
 function normalizePath(path: string): string {

@@ -5,11 +5,12 @@
 	import MobileNav from '$lib/components/ui/MobileNav.svelte';
 	import DesktopSidebar from '$lib/components/ui/DesktopSidebar.svelte';
 	import ToastContainer from '$lib/components/ui/ToastContainer.svelte';
+	import PageTransitionWrapper from '$lib/components/ui/PageTransitionWrapper.svelte';
 	import { page } from '$app/stores';
 	import { getTransitionDirection, getTransitionParams } from '$lib/transitions';
 	import { onMount } from 'svelte';
     import { initializeAuth } from '$lib/auth';
-    import { afterNavigate } from '$app/navigation';
+    import { afterNavigate, beforeNavigate } from '$app/navigation';
 
 	let { children } = $props();
 
@@ -30,10 +31,28 @@
 		transitionsEnabled = true;
 	});
 
-    // Handle history updates for direction calculation
+    // Handle history updates for direction calculation    // Handle history updates for direction calculation
+    import { transitionSnapshots } from '$lib/transitions';
+
+    beforeNavigate(() => {
+        // Snapshot the current page content before it updates
+        const currentPath = $page.url.pathname;
+        const wrapperId = 'ptw-' + currentPath.replace(/[^a-zA-Z0-9-]/g, '_');
+        const element = document.getElementById(wrapperId);
+        if (element) {
+            transitionSnapshots.update(s => ({ ...s, [currentPath]: element.innerHTML }));
+        }
+    });
+
     afterNavigate((nav) => {
         if (nav.to) {
             previousUrl = new URL(nav.to.url.href);
+            // Clear the snapshot for the NEW page so it renders live content
+            const newPath = nav.to.url.pathname;
+            transitionSnapshots.update(s => {
+                const { [newPath]: _, ...rest } = s;
+                return rest;
+            });
         }
     });
 
@@ -67,7 +86,7 @@
 					in:config.in={config.inParams}
 					out:config.out={config.outParams}
 				>
-					{@render children()}
+					<PageTransitionWrapper {children} pageKey={$page.url.pathname} />
 				</div>
 			{/key}
 		{/if}
