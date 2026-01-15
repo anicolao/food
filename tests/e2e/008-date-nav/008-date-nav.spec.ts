@@ -69,7 +69,7 @@ test('US-023: Date Navigation', async ({ page }, testInfo) => {
     await tester.step('view-today', {
         description: 'Default view is Today',
         verifications: [
-            { spec: 'Header says Today', check: async () => await expect(page.locator('.feed-header h2')).toHaveText('Today') },
+            { spec: 'Header says Today', check: async () => await expect(page.locator('.feed-header h2:not([inert])')).toHaveText('Today') },
             { spec: 'Next button disabled', check: async () => await expect(page.locator('.nav-btn.next')).toBeDisabled() },
             { spec: 'Today food visible', check: async () => await expect(page.getByText('Today Food')).toBeVisible() },
             { spec: 'Yesterday food NOT visible', check: async () => await expect(page.getByText('Yesterday Food')).not.toBeVisible() },
@@ -83,7 +83,7 @@ test('US-023: Date Navigation', async ({ page }, testInfo) => {
     await tester.step('view-yesterday', {
         description: 'Navigated to Yesterday',
         verifications: [
-            { spec: 'Header says Yesterday', check: async () => await expect(page.locator('.feed-header h2')).toHaveText('Yesterday') },
+            { spec: 'Header says Yesterday', check: async () => await expect(page.locator('.feed-header h2:not([inert])')).toHaveText('Yesterday') },
             { spec: 'Next button enabled', check: async () => await expect(page.locator('.nav-btn.next')).toBeEnabled() },
             { spec: 'Yesterday food visible', check: async () => await expect(page.getByText('Yesterday Food')).toBeVisible() },
             { spec: 'Today food NOT visible', check: async () => await expect(page.getByText('Today Food')).not.toBeVisible() },
@@ -97,7 +97,7 @@ test('US-023: Date Navigation', async ({ page }, testInfo) => {
     await tester.step('return-today', {
         description: 'Navigated back to Today',
         verifications: [
-            { spec: 'Header says Today', check: async () => await expect(page.locator('.feed-header h2')).toHaveText('Today') },
+            { spec: 'Header says Today', check: async () => await expect(page.locator('.feed-header h2:not([inert])')).toHaveText('Today') },
             { spec: 'Total Cals restored', check: async () => await expect(page.locator('.hero-ring .value-text').first()).toHaveText('500') }
         ]
     });
