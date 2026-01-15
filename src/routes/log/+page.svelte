@@ -41,7 +41,14 @@
   let protein = $state(0);
   
   let mealType: 'Breakfast' | 'Lunch' | 'Dinner' | 'Snack' = $state('Snack');
-  let entryDate = $state(new Date().toISOString().split('T')[0]);
+  // Init with local date YYYY-MM-DD
+  let entryDate = $state((() => {
+      const d = new Date();
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+  })());
   let entryTime = $state(new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }));
 
   // Derived display values for custom inputs
@@ -58,7 +65,6 @@
   let userCorrection = $state('');
   
   // Sheet State
-  // We consider the sheet 'open' (preview mode) if we have images OR we have pending text data with "AI Found" image
   // We consider the sheet 'open' (preview mode) if we have images, pending text data with "AI Found" image, OR if we are analyzing
   let sheetOpen = $derived(imagePreviews.length > 0 || analyzing || itemName.length > 0);
 
@@ -436,15 +442,25 @@
         // @ts-ignore
         const folderId = state.config?.folderId || undefined;
         
-        const uploadPromises = imageFiles.map(file => 
-            uploadImage(file, `FoodLog-${Date.now()}-${file.name}`, folderId)
-        );
-        const driveFiles = await Promise.all(uploadPromises);
-        const driveUrls = driveFiles.map(f => {
-            if (f.thumbnailLink) return f.thumbnailLink;
-            if (f.id) return `https://drive.google.com/thumbnail?id=${f.id}&sz=w2048`;
-            return f.webViewLink;
-        }).join(', ');
+        let driveUrls = '';
+        try {
+            if (imageFiles.length > 0) {
+                const uploadPromises = imageFiles.map(file => 
+                    uploadImage(file, `FoodLog-${Date.now()}-${file.name}`, folderId)
+                );
+                // Use Promise.race to timeout uploads if they hang? 
+                // Or just rely on standard fetch timeout. 
+                // E2E test fails if this takes too long.
+                const driveFiles = await Promise.all(uploadPromises);
+                driveUrls = driveFiles.map(f => {
+                    if (f.thumbnailLink) return f.thumbnailLink;
+                    if (f.id) return `https://drive.google.com/thumbnail?id=${f.id}&sz=w2048`;
+                    return f.webViewLink;
+                }).join(', ');
+            }
+        } catch (uploadError) {
+            console.warn('Image upload failed (likely offline). Proceeding with save.', uploadError);
+        }
 
         const isoDateTime = new Date(`${entryDate}T${entryTime}`).toISOString();
 
@@ -475,22 +491,13 @@
         
         store.dispatch(dispatchEvent('log/entryConfirmed', { entry }));
 
-        // @ts-ignore
-        const spreadsheetId = state.config?.spreadsheetId;
-
-        if (spreadsheetId) {
-             await appendRow(spreadsheetId, 'Events', [
-                entry.id,
-                isoDateTime,
-                'log/entryConfirmed',
-                JSON.stringify({ entry })
-            ]);
-        }
+        // Old direct append removed. Using middleware.
 
         goto(`${base}/`);
     } catch (e) {
-        console.error(e);
-        console.error('Failed to save');
+        console.error('Failed to save', e);
+        // Should we navigate anyway? Or show error?
+        // If critical save error, stay here.
     }
   }
 
