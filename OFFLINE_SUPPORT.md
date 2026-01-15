@@ -42,7 +42,7 @@ The synchronization logic is bidirectional but "Local-First".
     -   Sort by `timestamp`.
     -   Loop through events and call `sheets.appendRow`.
     -   **On Success**: Update IndexedDB event to `syncStatus: 'synced'`.
-    -   **On Failure**: Leave as `pending`. Update global "Sync Health" state (see UI).
+    -   **On Failure**: Leave as `pending`. Update global "Sync Health" state.
 
 #### C. Inbound Sync (Hydration & Replay)
 1.  **App Start**:
@@ -60,70 +60,56 @@ The synchronization logic is bidirectional but "Local-First".
 ## Idempotency & Conflict Resolution
 
 ### Idempotency
-To prevent double-counting (e.g., if a network call times out but the row was actually written), strictly enforce **UUIDs** for all events.
+To prevent double-counting, we strictly enforce **UUIDs** for all events.
 -   **Client**: Generates a UUID for every action.
 -   **Redux Reducer**: Maintains a `seenEventIds: Set<string>` state.
     -   If an action comes in with a known ID, **ignore it**.
     -   This allows us to aggressively "replay" the Sheet or IndexedDB without fear of corruption.
 
-### Multi-Client Conflicts
-Since the application usage is primarily an **append-only log** of food entries:
--   **Insertions**: Order is not strictly critical for data integrity, only for display. Two clients logging "Breakfast" offline will result in both entries appearing when online.
--   **Edits/Deletes**: These must be modeled as new events (`log/entryUpdated`, `log/entryDeleted`) referencing the `targetEventId`.
-    -   The Redux Reducer applies these in timestamp order.
-    -   *Edge Case*: Client A deletes Entry X offline. Client B edits Entry X offline.
-    -   *Resolution*: Upon sync, both events arrive. The Reducer logic dictates the final state (e.g., a Delete event effectively "wins" by removing the item, rendering the Edit moot).
+### Deletion & Order Independence (Soft Deletes)
+It is **not possible** to delete an event from the log (Sheet). Deletion is modeled as a new event type (e.g., `log/entryDeleted`).
+
+-   **State Management**: The Redux Reducer must **never** destructively remove an event from its internal source list based on a delete event.
+-   **Mark Not Delete**: Instead, the reducer tracks the state of entities. When a `log/entryDeleted` event is processed, the target entity is marked `{ deleted: true }` in the state.
+-   **Order Independence**: This ensures that even if events arrive out of order (e.g. via sync), the final state typically converges.
+    -   *Example*: If `log/entryUpdated` arrives *after* `log/entryDeleted` (but with an earlier timestamp), the logic can respect the timestamp or simply treat "Deleted" as a terminal state for that ID.
+    -   By keeping the record in state (marked deleted), we prevent "zombie" recreation if an old update arrives late.
+
+## Simplicity: No Sharding
+We will **not** implement sharding or annual partitioning.
+-   **Capacity**: A single Google Sheet can hold up to 10 million cells (approx 1M rows with typical 10 cols), which is sufficient for decades of personal food logging.
+-   **Loading**: On startup, we fetch the full event history. This simplifies logic significantly.
 
 ## UI Considerations
 
-### Offline & Sync Indicators
-We need a visible status indicator in the header or footer:
--   **🟢 Saved**: All local events are synced.
--   **🟡 Syncing...**: Outbound requests in progress.
--   **🟠 Offline (3 items pending)**: Network is down, items queued locally.
--   **🔴 Sync Failed**: Retryable error occurred (e.g., auth expired).
+### Status Indicator (Tappable)
+A strict "No Toasts" policy for network state. Instead, a discreet status indicator in the header:
+-   **Icons**:
+    -   Cloud Check (Synced)
+    -   Cloud Up Arrow (Syncing)
+    -   Cloud Off (Offline / Pending Changes)
+-   **Interaction**: Tapping the icon opens the **Network Settings** screen.
 
-### Toast Notifications
--   Show a "You are offline" toast once when connection drops.
--   Show "Back online - Syncing..." when restored.
-
-## Sheet Limits & Partitioning
-
-Google Sheets has a 10 million cell limit. While high, infinite logging will eventually hit it.
-
-### Strategy: Annual Partitioning
-We will effectively "sharding" the log by year using **Sheet Tabs (Worksheets)**.
-
-1.  **Naming Convention**: `Events_2025`, `Events_2026`.
-2.  **Writing**:
-    -   Calculate target sheet name based on `new Date().getFullYear()`.
-    -   Ensure that sheet exists (create if missing).
-    -   Append to that specific sheet.
-3.  **Reading**:
-    -   Ideally, we only fetch the *current* year's events for the initial render to keep it fast.
-    -   We can provide a "Load History" button to fetch previous years' tabs if needed for analytics.
-4.  **Overflow**:
-    -   If a single year exceeds limits (unlikely for a personal food tracker ~20k rows/year is tiny compared to 5M cells), we can fallback to `Events_2026_Part2`.
-    -   *Calculation*: 20k rows * 10 columns = 200k cells. 10M cells is plenty for decades. We primarily partition for *performance*, not storage limits.
+### Network Settings Screen
+A new dedicated view (`/settings/network`) containing:
+1.  **Connection Status**: Online/Offline boolean.
+2.  **Sync Health**: "All caught up" vs "3 items pending upload".
+3.  **Configuration**:
+    -   **Sheet Name**: Input field to rename the target Google Sheet (default: `TheFoodTrackerEventLog`).
+    -   **Force Sync**: A button to manually trigger a full re-sync/re-fetch.
 
 ## Implementation Steps
 
 1.  **Install `idb`**: `npm install idb`.
 2.  **Create `src/lib/db.ts`**: Encapsulate all IndexedDB logic.
-    -   `initDB()`
-    -   `saveEvent(event)`
-    -   `getPendingEvents()`
-    -   `markEventSynced(id)`
 3.  **Create Middleware `src/lib/redux-sync-middleware.ts`**:
     -   Intercept actions, persist to DB.
     -   Trigger sync manager.
 4.  **Update `src/lib/sheets.ts`**:
-    -   Add `ensureYearlySheet(year)` logic.
-    -   Update `appendRow` to target dynamic sheet names.
+    -   Simplify to single sheet usage.
 5.  **Refactor `App.svelte` / `Layout`**:
     -   Init DB on mount.
-    -   Load initial state from DB.
-    -   Start background sync polling or event listeners.
-
-## Dependency Additions
-- `idb`: Lightweight Promise-based IndexedDB wrapper.
+    -   Implement "Load All" strategy.
+6.  **Build Network Settings UI**:
+    -   New route `src/routes/settings/network/+page.svelte`.
+    -   Status Component for Header.
