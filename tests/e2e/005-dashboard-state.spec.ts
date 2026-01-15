@@ -110,6 +110,8 @@ test('US-014: Dashboard State Persistence', async ({ page }, testInfo) => {
 
     // 3. Deep Link Reload
     await page.reload();
+    // Wait for hydration/render before screenshotting
+    await expect(page.locator('.feed-header h2')).toBeVisible();
     await tester.step('reload', {
         description: 'Reload preserves date',
         verifications: [
