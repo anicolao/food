@@ -305,7 +305,16 @@
                 <button class="nav-btn prev" onclick={() => goToPrevDay()} aria-label="Previous Day">
                     &lt;
                 </button>
-                <h2>{dateTitle}</h2>
+                <div class="title-container">
+                    {#key selectedDate}
+                        <h2
+                            in:slideTransition={{ offset: 300, duration: 300, easing: cubicOut }}
+                            out:slideTransition={{ offset: -300, duration: 300, easing: cubicOut }}
+                        >
+                            {dateTitle}
+                        </h2>
+                    {/key}
+                </div>
                 <button class="nav-btn next" onclick={() => goToNextDay()} disabled={selectedDate === today} aria-label="Next Day">
                     &gt;
                 </button>
@@ -405,10 +414,21 @@
         border-radius: 12px;
     }
 
+    .title-container {
+        display: grid;
+        grid-template-areas: "stack";
+        overflow: hidden;
+        flex: 1;
+        justify-items: center;
+        align-items: center;
+    }
+
     .feed-header h2 {
+        grid-area: stack;
         font-size: 1.1rem;
         margin: 0;
         font-weight: 600;
+        white-space: nowrap;
     }
 
     .nav-btn {
