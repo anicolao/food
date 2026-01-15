@@ -1,7 +1,6 @@
 <script lang="ts">
     import { base } from '$app/paths';
     import NavItem from './NavItem.svelte';
-    import NetworkStatus from './NetworkStatus.svelte';
 
     // Desktop sidebar is vertical
 </script>
@@ -32,7 +31,6 @@
     </nav>
     
     <div class="spacer"></div>
-    <NetworkStatus />
 </aside>
 
 <style>
