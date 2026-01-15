@@ -2,7 +2,7 @@
   import { onMount } from 'svelte';
   import { initializeAuth, signIn, signOut, ensureValidToken, authState } from '$lib/auth';
   import { fetchRows, ensureDataStructures } from '$lib/sheets';
-  import { store, dispatchEvent, setConfig, appendEvent, processEvent, updateGoals } from '$lib/store';
+  import { store, dispatchEvent, setConfig, appendEvent, processEvent, updateGoals, ingestSyncedEvent } from '$lib/store';
   import { base } from '$app/paths';
   import { goto } from '$app/navigation';
   import { page } from '$app/stores';
@@ -175,10 +175,8 @@
                            type,
                            payload
                        };
-                       
-                       // Replay to store WITHOUT side-effects (writing back to sheet)
-                       store.dispatch(appendEvent(event));
-                       store.dispatch(processEvent(event));
+                                              // Replay to store WITHOUT side-effects (not writing back to pending IDB)
+                        store.dispatch(ingestSyncedEvent(event));
                        
                        if (type === 'settings/goalsUpdated') {
                            store.dispatch(updateGoals(payload));
