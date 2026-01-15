@@ -71,9 +71,16 @@
   // Directional Transition Logic
   let lastDate = $state(selectedDate);
   let direction = $state<number>(0); // -1 (left), 1 (right)
+  let manualDirection = 0; // Transient override for button clicks
 
   $effect.pre(() => {
-      if (selectedDate !== lastDate) {
+      // Prioritize manual direction if set (button clicks)
+      if (manualDirection !== 0) {
+          direction = manualDirection;
+          manualDirection = 0; // Consume
+          lastDate = selectedDate; // Sync lastDate
+      } else if (selectedDate !== lastDate) {
+          // Fallback to date comparison (browser back/forward)
           const newD = new Date(selectedDate);
           const oldD = new Date(lastDate);
           direction = newD > oldD ? 1 : -1;
@@ -90,7 +97,7 @@
   }
 
   function goToPrevDay() {
-      // Safely parse LOCAL YYYY-MM-DD by appending time
+      manualDirection = -1; // Force "Past" direction
       const d = new Date(selectedDate + 'T12:00:00'); 
       d.setDate(d.getDate() - 1);
       setDate(toISOLocalDate(d));
@@ -98,6 +105,7 @@
 
   function goToNextDay() {
       if (selectedDate === today) return;
+      manualDirection = 1; // Force "Future" direction
       const d = new Date(selectedDate + 'T12:00:00');
       d.setDate(d.getDate() + 1);
       setDate(toISOLocalDate(d));
@@ -295,11 +303,11 @@
         <!-- Right Col / Bottom Section: Feed -->
         <section class="feed-section">
             <div class="feed-header">
-                <button class="nav-btn prev" onclick={goToPrevDay} aria-label="Previous Day">
+                <button class="nav-btn prev" onclick={() => goToPrevDay()} aria-label="Previous Day">
                     &lt;
                 </button>
                 <h2>{dateTitle}</h2>
-                <button class="nav-btn next" onclick={goToNextDay} disabled={selectedDate === today} aria-label="Next Day">
+                <button class="nav-btn next" onclick={() => goToNextDay()} disabled={selectedDate === today} aria-label="Next Day">
                     &gt;
                 </button>
             </div>
