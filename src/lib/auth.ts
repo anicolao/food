@@ -33,6 +33,7 @@ export function initializeAuth(onSuccess: (token: string) => void) {
     // 1. Try to restore from localStorage first
     const storedToken = localStorage.getItem(TOKEN_KEY);
     const storedExpiry = localStorage.getItem(EXPIRY_KEY);
+    let shouldTrySilentRefresh = false;
 
     // Setup visibility listener to catch expiry when waking from sleep
     document.addEventListener('visibilitychange', () => {
@@ -43,7 +44,16 @@ export function initializeAuth(onSuccess: (token: string) => void) {
 
     if (storedToken && storedExpiry) {
         const expiryTime = parseInt(storedExpiry);
-        if (Date.now() < expiryTime) {
+        const now = Date.now();
+
+        // Logic for "Much longer" local expiry:
+        // Users want to stay logged in for ~48h even if the actual token expires in 1h.
+        // If the token is expired but within 48h of its original expiry, we consider the session "recoverable" via silent refresh.
+        // If it's been > 48h, we force a full sign-in.
+
+        const FORTY_EIGHT_HOURS_MS = 48 * 60 * 60 * 1000;
+
+        if (now < expiryTime) {
             accessToken = storedToken;
             authState.update(s => ({ ...s, token: storedToken }));
             onSuccess(accessToken);
@@ -51,12 +61,19 @@ export function initializeAuth(onSuccess: (token: string) => void) {
             authState.update(s => ({ ...s, ready: true }));
 
             // Schedule refresh based on remaining time
-            const remainingSeconds = (expiryTime - Date.now()) / 1000;
+            const remainingSeconds = (expiryTime - now) / 1000;
             scheduleRefresh(remainingSeconds, onSuccess);
+        } else if (now < expiryTime + FORTY_EIGHT_HOURS_MS) {
+            // Expired, but within the 48h "recoverable" window.
+            console.log('[Auth] Token expired but within 48h grace period. Attempting silent refresh...');
+            shouldTrySilentRefresh = true;
+            // Still signal ready so UI doesn't hang, but not authenticated yet
+            (window as any)._authReady = true;
+            authState.update(s => ({ ...s, ready: true }));
         } else {
-            // Expired
+            console.log('[Auth] Session expired > 48h ago. Requiring full sign-in.');
+            // Do nothing (don't set ready=true with token), just let it fall through to unauthenticated state.
             signOut();
-            // Still ready, just not authenticated
             (window as any)._authReady = true;
             authState.update(s => ({ ...s, ready: true }));
         }
@@ -70,6 +87,9 @@ export function initializeAuth(onSuccess: (token: string) => void) {
             clearInterval(interval);
             console.log('[Auth] Google Identity Services found');
             initClient(onSuccess);
+            if (shouldTrySilentRefresh) {
+                refreshAuth();
+            }
         } else {
             attempts++;
             if (attempts > 50) { // 5 seconds
@@ -86,9 +106,7 @@ function initClient(onSuccess: (token: string) => void) {
         client_id: GOOGLE_CLIENT_ID,
         scope: SCOPES,
         callback: (response: any) => {
-            if (response.access_token) {
-                handleTokenResponse(response, onSuccess);
-            }
+            handleTokenResponse(response, onSuccess);
         },
     });
     // Signal tests that client is initialized
@@ -97,6 +115,15 @@ function initClient(onSuccess: (token: string) => void) {
 }
 
 function handleTokenResponse(response: any, onSuccess: (token: string) => void) {
+    if (response.error) {
+        console.error('[Auth] Token request failed:', response.error);
+        signOut();
+        // Redirect to signin if silent refresh fails
+        // Use window.location as we are in a lib file and might not have router active or this is the safest full reset
+        window.location.href = '/';
+        return;
+    }
+
     if (response.scope) {
         console.log('[Auth] Granted scopes:', response.scope);
     }
@@ -141,13 +168,12 @@ function checkAndRefreshIfNeeded(onSuccess: (token: string) => void) {
         // We are within the buffer window or expired
         if (accessToken) {
             refreshAuth();
+        } else {
+            // If we have an expiry but no access token (e.g. from expired state), try refresh
+            refreshAuth();
         }
     } else {
         // We are fine, but ensure scheduler is running if it was lost (e.g. reload?)
-        // Actually, initializeAuth calls scheduleRefresh, so likely fine.
-        // But if we just woke up, we might need to adjust the timer if it drifted?
-        // JS timers usually pause/delay on sleep.
-        // Re-scheduling is safe.
         scheduleRefresh(remainingSeconds, onSuccess);
     }
 }
@@ -174,6 +200,7 @@ export function getAccessToken() {
 }
 
 export function signOut() {
+    const tokenToRevoke = accessToken;
     accessToken = null;
     if (refreshTimeoutId) {
         clearTimeout(refreshTimeoutId);
@@ -183,7 +210,7 @@ export function signOut() {
     localStorage.removeItem(EXPIRY_KEY);
     authState.update(s => ({ ...s, token: null }));
     const g = (window as any).google;
-    if (typeof g !== 'undefined' && g.accounts) {
-        g.accounts.oauth2.revoke(accessToken, () => { });
+    if (typeof g !== 'undefined' && g.accounts && tokenToRevoke) {
+        g.accounts.oauth2.revoke(tokenToRevoke, () => { });
     }
 }
