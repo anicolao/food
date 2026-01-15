@@ -1,5 +1,5 @@
 
-import { test, expect } from '@playwright/test';
+import { test, expect } from '../fixtures';
 import { TestStepHelper } from '../helpers/test-step-helper';
 
 test('US-023: Date Navigation', async ({ page }, testInfo) => {

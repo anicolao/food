@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from '../fixtures';
 import { TestStepHelper } from '../helpers/test-step-helper';
 
 test('User configures macro settings', async ({ page }, testInfo) => {
