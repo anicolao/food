@@ -143,6 +143,7 @@ test('US-014: Dashboard State Persistence', async ({ page }, testInfo) => {
     });
 
     await page.reload();
+    await expect(page.locator('.activity-card')).toBeVisible(); // Ensure content rerendered
     await tester.step('reload-collapse', {
         description: 'Reload preserves collapse state',
         verifications: [
