@@ -63,6 +63,9 @@ test('US-009: User logs food via Text and Voice', async ({ page, context }, test
         navigator.mediaDevices.getUserMedia = async () => mockStream as any;
     });
 
+    // Block real Google Identity script to prevent overwriting mocks
+    await page.route('https://accounts.google.com/gsi/client', route => route.abort());
+
     await page.route('**googleapis.com**', async route => {
         const url = route.request().url();
         console.log('MOCKING:', url);
