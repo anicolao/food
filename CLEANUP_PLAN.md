@@ -9,12 +9,13 @@ This plan distills the findings from the comprehensive State of the Union review
 
 ## Prioritized Items
 
-### 1. Fix Authentication Token Revocation (Bug)
+### 1. Fix Authentication Token Revocation (Bug) [FIXED]
 **Severity:** Medium | **Effort:** Low
 
 - **Issue:** In `src/lib/auth.ts`, the `accessToken` is set to `null` *before* the revocation call is made. This results in `g.accounts.oauth2.revoke(null, ...)` being called, failing to actually revoke the token on Google's side.
 - **Location:** `src/lib/auth.ts`
 - **Action:** Store the token in a temporary variable before nullifying the state, then pass the stored token to the revoke function.
+- **Status:** **Fixed** in PR #38. `signOut` now captures the token before revocation. Also implemented 48h silent recovery window.
 
 ### 2. Implement Redux Event Store Idempotency (Data Safety)
 **Severity:** Medium | **Effort:** Medium
