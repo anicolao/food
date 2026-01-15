@@ -160,7 +160,9 @@ test('US-003 to US-010: User logs food flow', async ({ page }, testInfo) => {
         description: 'User on log page',
         verifications: [
             { spec: 'Camera button visible', check: async () => await expect(page.getByText('Camera').first()).toBeVisible() },
-            { spec: 'Upload button visible', check: async () => await expect(page.getByText('Library').first()).toBeVisible() }
+            { spec: 'Upload button visible', check: async () => await expect(page.getByText('Library').first()).toBeVisible() },
+            { spec: 'Voice button visible', check: async () => await expect(page.getByText('Voice').first()).toBeVisible() },
+            { spec: 'Text button visible', check: async () => await expect(page.getByText('Text').first()).toBeVisible() }
         ]
     });
 
