@@ -71,19 +71,18 @@
   // Directional Transition Logic
   let lastDate = $state(selectedDate);
   let direction = $state<number>(0); // -1 (left), 1 (right)
-  let manualDirection = 0; // Transient override for button clicks
 
   $effect.pre(() => {
-      // Prioritize manual direction if set (button clicks)
-      if (manualDirection !== 0) {
-          direction = manualDirection;
-          manualDirection = 0; // Consume
-          lastDate = selectedDate; // Sync lastDate
-      } else if (selectedDate !== lastDate) {
-          // Fallback to date comparison (browser back/forward)
+      // Fallback for browser navigation (if direction wasn't set by buttons)
+      if (selectedDate !== lastDate) {
           const newD = new Date(selectedDate);
           const oldD = new Date(lastDate);
-          direction = newD > oldD ? 1 : -1;
+          const calcDir = newD > oldD ? 1 : -1;
+          
+          // Only update if not already set correctly (avoids redundant updates)
+          if (direction !== calcDir) {
+               direction = calcDir;
+          }
           lastDate = selectedDate;
       }
   });
@@ -97,7 +96,7 @@
   }
 
   function goToPrevDay() {
-      manualDirection = -1; // Force "Past" direction
+      direction = -1; // Sync update before nav
       const d = new Date(selectedDate + 'T12:00:00'); 
       d.setDate(d.getDate() - 1);
       setDate(toISOLocalDate(d));
@@ -105,15 +104,17 @@
 
   function goToNextDay() {
       if (selectedDate === today) return;
-      manualDirection = 1; // Force "Future" direction
+      direction = 1; // Sync update before nav
       const d = new Date(selectedDate + 'T12:00:00');
       d.setDate(d.getDate() + 1);
       setDate(toISOLocalDate(d));
   }
   
-  function slideTransition(node: Element, { x = 0, duration = 300, easing = cubicOut }) {
+  function slideTransition(node: Element, { offset = 100, duration = 300, easing = cubicOut }) {
     const style = getComputedStyle(node);
     const transform = style.transform === 'none' ? '' : style.transform;
+    // Capture the *current* direction when the transition starts
+    const x = direction * offset;
     return {
         duration,
         easing,
@@ -315,8 +316,8 @@
             <div class="feed-list">
                 {#key selectedDate}
                     <div 
-                        in:slideTransition={{ x: direction * 100, duration: 300, easing: cubicOut }}
-                        out:slideTransition={{ x: direction * -100, duration: 300, easing: cubicOut }}
+                        in:slideTransition={{ offset: 100, duration: 300, easing: cubicOut }}
+                        out:slideTransition={{ offset: -100, duration: 300, easing: cubicOut }}
                         class="slide-wrapper"
                     >
                         {#if groupedEntries.length === 0}
