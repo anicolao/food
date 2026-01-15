@@ -9,7 +9,7 @@ fi
 
 # Run Zero Tolerance Check
 echo "verifying zero tolerance policy..."
-node scripts/verify-zero-tolerance.js
+npx tsx scripts/verify-zero-tolerance.ts
 if [ $? -ne 0 ]; then
     exit 1
 fi
