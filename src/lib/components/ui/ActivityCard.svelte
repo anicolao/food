@@ -1,16 +1,18 @@
 <script lang="ts">
-  import type { ActivityGroup } from '$lib/activity-grouping';
+  import { createEventDispatcher } from 'svelte';
   import { base } from '$app/paths';
   import { resolveDriveImage } from '$lib/images';
+  import type { ActivityGroup } from '$lib/activity-grouping';
   import MacroSummary from './MacroSummary.svelte';
-  
+
   // Props
   export let group: ActivityGroup;
+  export let expanded = true;
 
-  let expanded = true;
+  const dispatch = createEventDispatcher();
 
   function toggle() {
-    expanded = !expanded;
+    dispatch('toggle');
   }
 
   function getMainImage(urlStr?: string) {

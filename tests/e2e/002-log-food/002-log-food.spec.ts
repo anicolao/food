@@ -143,7 +143,7 @@ test('US-003 to US-010: User logs food flow', async ({ page }, testInfo) => {
     // Wait for Dashboard to stabilize (Auth confirmed)
     await expect(page.locator('.feed-header h2').first()).toHaveText('Today');
 
-    const logBtn = page.getByText('Log New').first();
+    const logBtn = page.getByLabel('Log new food entry').first();
     await expect(logBtn).toBeVisible();
     await expect(logBtn).toBeEnabled();
     const isVisible = await logBtn.isVisible();

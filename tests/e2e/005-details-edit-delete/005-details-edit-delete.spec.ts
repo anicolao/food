@@ -67,7 +67,7 @@ test('US-018 to US-022: Details, Edit and Delete', async ({ page }, testInfo) =>
     await page.getByText('Sign In with Google').click();
 
     // 1. Create Entry
-    await page.getByText('Log New').click();
+    await page.getByLabel('Log new food entry').first().click();
     await expect(page).toHaveURL(/\/log/);
     await expect(page.getByText('Camera').first()).toBeVisible();
     await page.locator('input[type="file"]:not([capture])').first().setInputFiles([
