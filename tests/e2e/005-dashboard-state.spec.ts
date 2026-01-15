@@ -8,7 +8,7 @@ test('US-014: Dashboard State Persistence', async ({ page }, testInfo) => {
 
     page.on('console', msg => console.log(`BROWSER: ${msg.text()}`));
 
-    await page.emulateMedia({ reducedMotion: 'reduce' });
+    // await page.emulateMedia({ reducedMotion: 'reduce' });
 
     // Install Clock to ensure deterministic dates (12:00 PM Local)
     // Using a fixed date avoids "Previous Day" crossing boundaries or timezone issues
