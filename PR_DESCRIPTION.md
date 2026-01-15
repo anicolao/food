@@ -1,23 +1,15 @@
-Cleanup Plan Proposal
+# Offline Support Design
 
-## Verbatim User Prompt
-Fix item #1 on the cleanup plan. While you are at it, investigate ways to fix up auth generally so that auth persists — it is very hard to stay logged into the app at the moment and I would like authentication to persist as long as possible.
+This PR introduces the design document for implementing offline support using IndexedDB and Google Sheets synchronization.
 
-## Relevant User Comments
-- "Can we make local token expiry *much longer* than 1h? I suggest 48h. Also, if silent refresh fails, let's redirect the user to the signin screen."
-- "no, do a git reset HEAD^ and follow WORKFLOW.md to do it"
+## User Prompt
 
-## Summary of Changes
-- Created `CLEANUP_PLAN.md` based on the analysis of `STATE_OF_THE_UNION.md` (previous context).
-- **Implemented Fix for Cleanup Item #1 (Auth Token Revocation):**
-  - Updated `signOut` in `src/lib/auth.ts` to capture the token before nulling it, ensuring `google.accounts.oauth2.revoke` is called with the valid token.
-- **Improved Auth Persistence (On-Demand Strategy):**
-  - Refactored `src/lib/auth.ts` to export `ensureValidToken()`, which checks expiry and awaits a silent refresh if needed *before* returning.
-  - Updated all API consumers (`gemini.ts`, `sheets.ts`, `google-photos.ts`, `images.ts`) to use `await ensureValidToken()` instead of `getAccessToken()`.
-  - This guarantees that even if the app was backgrounded for hours, the next API call will seamlessly refresh the token before execution.
-  - Implemented 48h "recovery window" logic: if token is expired but <48h old, it silent refreshes. If >48h, it forces sign-in.
+Read CLEANUP.md DEVELOPMENT.md and WORKFLOW.md. I'd like to address cleanup item #2 by adding an indexed db table that is a write-through cache to the underlying google sheet. On load, the app should replay from cache and fetch from the sheet only those actions which are new on the server. 
 
-## Verification
-- **Auth Fixes:**
-  - Ran `npm run check` (passed).
-  - Verified logic for 48h window and silent refresh triggers.
+Write a design doc OFFLINE_SUPPORT.md that describes the setup in detail, including how idempotency will work, how this will work if multiple clients are disconnected and log different food items, what UI is needed to indicate an offline/out of sync state, and any considerations on the size limit of a single google sheet and how to use multiple subsheets in the spreadsheet to enable evading the single google sheet limit. 
+
+Read WORKFLOW.md and follow procedures to put this new design document up as a PR.
+
+## Changes
+
+-   Added `OFFLINE_SUPPORT.md`: Detailed architecture for Local-First Sync, Idempotency, and Sheet Partitioning.
