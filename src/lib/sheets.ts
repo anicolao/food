@@ -1,11 +1,11 @@
-import { getAccessToken } from './auth';
+import { ensureValidToken } from './auth';
 
 // --- Sheets API ---
 // --- Sheets API ---
 
 // Helper: Search or create folder
 async function findOrCreateFolder(name: string): Promise<string> {
-    const token = getAccessToken();
+    const token = await ensureValidToken();
     if (!token) throw new Error('Not authenticated');
 
     // 1. Search
@@ -39,7 +39,7 @@ async function findOrCreateFolder(name: string): Promise<string> {
 
 // Helper: Search or create file inside folder
 async function findOrCreateFile(name: string, parentId: string, mimeType: string): Promise<string> {
-    const token = getAccessToken();
+    const token = await ensureValidToken();
     if (!token) throw new Error('Not authenticated');
 
     // 1. Search
@@ -87,7 +87,7 @@ export async function ensureDataStructures() {
 }
 
 async function ensureSheetExists(spreadsheetId: string, title: string) {
-    const token = getAccessToken();
+    const token = await ensureValidToken();
     if (!token) return; // Should be checked earlier
 
     try {
@@ -123,7 +123,7 @@ async function ensureSheetExists(spreadsheetId: string, title: string) {
 }
 
 export async function appendRow(spreadsheetId: string, sheetName: string, values: any[]) {
-    const token = getAccessToken();
+    const token = await ensureValidToken();
     if (!token) throw new Error('Not authenticated');
 
     const range = `${sheetName}!A1`;
@@ -148,7 +148,7 @@ export async function appendRow(spreadsheetId: string, sheetName: string, values
 }
 
 export async function fetchRows(spreadsheetId: string, sheetName: string): Promise<any[]> {
-    const token = getAccessToken();
+    const token = await ensureValidToken();
     if (!token) throw new Error('Not authenticated');
 
     const url = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${sheetName}!A:Z`;
@@ -166,7 +166,7 @@ export async function fetchRows(spreadsheetId: string, sheetName: string): Promi
 // --- Drive API ---
 
 export async function uploadImage(file: Blob, filename: string, folderId?: string) {
-    const token = getAccessToken();
+    const token = await ensureValidToken();
     if (!token) throw new Error('Not authenticated');
 
     const metadata: any = {

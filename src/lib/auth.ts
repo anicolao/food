@@ -29,6 +29,10 @@ const TOKEN_KEY = 'food_log_access_token';
 const EXPIRY_KEY = 'food_log_token_expiry';
 const REFRESH_BUFFER_SECONDS = 300; // Refresh 5 minutes before expiry
 
+// Promise to track active refresh operation
+let refreshPromise: Promise<string | null> | null = null;
+let refreshResolver: ((token: string | null) => void) | null = null;
+
 export function initializeAuth(onSuccess: (token: string) => void) {
     // 1. Try to restore from localStorage first
     const storedToken = localStorage.getItem(TOKEN_KEY);
@@ -135,6 +139,14 @@ function handleTokenResponse(response: any, onSuccess: (token: string) => void) 
     localStorage.setItem(EXPIRY_KEY, expiryTime.toString());
 
     authState.update(s => ({ ...s, token: accessToken }));
+
+    // Resolve any pending refresh promise
+    if (refreshResolver) {
+        refreshResolver(accessToken);
+        refreshResolver = null;
+        refreshPromise = null;
+    }
+
     onSuccess(accessToken);
     scheduleRefresh(expiresInSeconds, onSuccess);
 }
@@ -165,25 +177,26 @@ function checkAndRefreshIfNeeded(onSuccess: (token: string) => void) {
     const remainingSeconds = (expiryTime - Date.now()) / 1000;
 
     if (remainingSeconds < REFRESH_BUFFER_SECONDS) {
-        // We are within the buffer window or expired
-        if (accessToken) {
-            refreshAuth();
-        } else {
-            // If we have an expiry but no access token (e.g. from expired state), try refresh
-            refreshAuth();
-        }
+        refreshAuth();
     } else {
-        // We are fine, but ensure scheduler is running if it was lost (e.g. reload?)
         scheduleRefresh(remainingSeconds, onSuccess);
     }
 }
 
-export function refreshAuth() {
+export function refreshAuth(): Promise<string | null> {
+    if (refreshPromise) return refreshPromise;
+
     if (tokenClient) {
         console.log('Refreshing auth token...');
+        refreshPromise = new Promise((resolve) => {
+            refreshResolver = resolve;
+        });
         // prompt: '' is the key for silent refresh if user is already signed in
         tokenClient.requestAccessToken({ prompt: '', scope: SCOPES });
+        return refreshPromise;
     }
+
+    return Promise.resolve(null);
 }
 
 export function signIn() {
@@ -195,6 +208,44 @@ export function signIn() {
     }
 }
 
+/**
+ * Ensures a valid token is available, refreshing if necessary.
+ * Use this for all API calls instead of getAccessToken().
+ */
+export async function ensureValidToken(): Promise<string | null> {
+    const storedExpiry = localStorage.getItem(EXPIRY_KEY);
+
+    // If no token at all, return null
+    if (!accessToken && !storedExpiry) return null;
+
+    // Check expiry
+    if (storedExpiry) {
+        const expiryTime = parseInt(storedExpiry);
+        const now = Date.now();
+        const remainingSeconds = (expiryTime - now) / 1000;
+        const FORTY_EIGHT_HOURS_MS = 48 * 60 * 60 * 1000;
+
+        // If expired or within buffer
+        if (remainingSeconds < REFRESH_BUFFER_SECONDS) {
+            // Check if within 48h recoverable window
+            if (now < expiryTime + FORTY_EIGHT_HOURS_MS) {
+                console.log('[Auth] Token expired/buffered but within 48h grace period. Refreshing...');
+                return refreshAuth();
+            } else {
+                console.log('[Auth] Token expired > 48h ago. Forcing sign-out.');
+                signOut();
+                return null;
+            }
+        }
+    }
+
+    // Token is valid
+    return accessToken;
+}
+
+/**
+ * @deprecated Use ensureValidToken() for API calls to ensure freshness.
+ */
 export function getAccessToken() {
     return accessToken;
 }

@@ -1,4 +1,4 @@
-import { getAccessToken } from './auth';
+import { ensureValidToken } from './auth';
 
 export interface NutritionEstimate {
     is_label: boolean;
@@ -35,10 +35,14 @@ You are an expert dietician. Analyze the provided input (image or text descripti
 export interface ImageInput {
     base64: string;
     mimeType: string;
+    // ...
+    // Note: If you need to add more fields, do it here. 
+    // The previous code had a syntax error here if I just remove `}`? No.
 }
+// I will just supply the whole file content for safety or minimal changes.
 
 export async function analyzeFood(inputs: { images?: ImageInput[], text?: string }, previousRationale?: string, userCorrection?: string): Promise<NutritionEstimate> {
-    const token = getAccessToken();
+    const token = await ensureValidToken();
     if (!token) throw new Error('User not authenticated for Gemini analysis');
 
     const url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
@@ -102,7 +106,7 @@ export async function analyzeFood(inputs: { images?: ImageInput[], text?: string
 }
 
 export async function generateImageWithGemini(prompt: string): Promise<string | null> {
-    const token = getAccessToken();
+    const token = await ensureValidToken();
     if (!token) return null;
 
     // Use Imagen 3 endpoint

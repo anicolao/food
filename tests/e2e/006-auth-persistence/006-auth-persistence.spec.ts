@@ -68,16 +68,38 @@ test('US-023: Auth Persistence', async ({ page }, testInfo) => {
         ]
     });
 
-    // Test Expiry
-    await tester.step('expiry', {
-        description: 'Simulate token expiration',
+    // Test Silent Recovery (< 48h)
+    await tester.step('silent_recovery', {
+        description: 'Simulate token expiration within 48h window',
         verifications: [
             {
-                spec: 'Logged out after expiry',
+                spec: 'Silent refresh keeps user logged in',
                 check: async () => {
-                    // Update stored expiry to be in the past
+                    // Update stored expiry to be in the past (expired 1s ago)
                     await page.evaluate(() => {
                         localStorage.setItem('food_log_token_expiry', (Date.now() - 1000).toString());
+                    });
+
+                    await page.reload();
+                    // Should attempt silent refresh and SUCCEED because of mocked Google client
+                    await expect(page.locator('.mobile-nav a').filter({ hasText: 'Settings' }).first()).toBeVisible();
+                    await expect(page.getByText('Sign In with Google')).not.toBeVisible();
+                }
+            }
+        ]
+    });
+
+    // Test Hard Expiry (> 48h)
+    await tester.step('hard_expiry', {
+        description: 'Simulate token expiration beyond 48h window',
+        verifications: [
+            {
+                spec: 'Logged out after 48h expiry',
+                check: async () => {
+                    // Update stored expiry to be > 48h in the past
+                    await page.evaluate(() => {
+                        const FORTY_EIGHT_HOURS_MS = 48 * 60 * 60 * 1000;
+                        localStorage.setItem('food_log_token_expiry', (Date.now() - FORTY_EIGHT_HOURS_MS - 10000).toString());
                     });
 
                     await page.reload();

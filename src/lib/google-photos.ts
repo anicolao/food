@@ -1,4 +1,4 @@
-import { getAccessToken } from './auth';
+import { ensureValidToken } from './auth';
 
 export interface PickerSession {
     id: string;
@@ -19,7 +19,7 @@ export interface MediaItem {
 }
 
 export async function createPickerSession(): Promise<PickerSession> {
-    const token = getAccessToken();
+    const token = await ensureValidToken();
     if (!token) throw new Error("Not authenticated");
 
     console.log('[GooglePhotos] Creating session...');
@@ -47,7 +47,7 @@ export async function createPickerSession(): Promise<PickerSession> {
 }
 
 export async function pollPickerSession(sessionId: string): Promise<PickerSession> {
-    const token = getAccessToken();
+    const token = await ensureValidToken();
     if (!token) throw new Error("Not authenticated");
 
     const response = await fetch(
@@ -68,7 +68,7 @@ export async function pollPickerSession(sessionId: string): Promise<PickerSessio
 }
 
 export async function listSessionMediaItems(sessionId: string): Promise<MediaItem[]> {
-    const token = getAccessToken();
+    const token = await ensureValidToken();
     if (!token) throw new Error("Not authenticated");
 
     const response = await fetch(
@@ -97,7 +97,7 @@ export async function listSessionMediaItems(sessionId: string): Promise<MediaIte
 }
 
 export async function listLibraryItems(pageToken?: string): Promise<{ items: MediaItem[], nextPageToken?: string }> {
-    const token = getAccessToken();
+    const token = await ensureValidToken();
     if (!token) throw new Error("Not authenticated");
 
     const params = new URLSearchParams({
