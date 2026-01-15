@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { initializeAuth, signIn, signOut, getAccessToken, authState } from '$lib/auth';
+  import { initializeAuth, signIn, signOut, ensureValidToken, authState } from '$lib/auth';
   import { fetchRows, ensureDataStructures } from '$lib/sheets';
   import { store, dispatchEvent, setConfig, appendEvent, processEvent, updateGoals } from '$lib/store';
   import { base } from '$app/paths';
@@ -201,10 +201,12 @@
           }
       });
       // Trigger sync if already auth (e.g. from local storage restore)
-      if (getAccessToken()) {
-          authenticated = true;
-          syncData();
-      }
+      ensureValidToken().then(token => {
+          if (token) {
+              authenticated = true;
+              syncData(); // This is async but we don't await it here to avoid blocking
+          }
+      });
 
     const unsubscribe = store.subscribe(() => {
       const state = store.getState();

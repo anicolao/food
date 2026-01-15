@@ -97,7 +97,7 @@
   async function initPickerSession() {
       try {
           // Check if signed in first to avoid immediate prompt on load if not needed
-          const token = await import('$lib/auth').then(m => m.getAccessToken());
+          const token = await import('$lib/auth').then(m => m.ensureValidToken());
           if (!token) return; // Wait for explicit sign in if no token
 
           console.log('Pre-fetching Google Photos Picker session...');
@@ -114,7 +114,7 @@
   async function handleGooglePhotosPick() {
       if (!pickerUri) {
           // If no URI yet (e.g. not signed in), try to sign in and initiate
-          const token = await import('$lib/auth').then(m => m.getAccessToken());
+          const token = await import('$lib/auth').then(m => m.ensureValidToken());
           if (!token) {
              signIn();
              // After sign in, we can't synchronously open, but we can try to init for next time
@@ -158,7 +158,7 @@
               
               const items = await listSessionMediaItems(pickerSessionId);
               if (items.length > 0) {
-                  const token = await import('$lib/auth').then(m => m.getAccessToken() || '');
+                  const token = await import('$lib/auth').then(async m => (await m.ensureValidToken()) || '');
                   for (const item of items) {
                       await processPickedItem(item, token);
                   }

@@ -1,4 +1,4 @@
-import { getAccessToken } from './auth';
+import { ensureValidToken } from './auth';
 
 const imageCache = new Map<string, string>();
 
@@ -16,7 +16,7 @@ export async function resolveDriveImage(url: string): Promise<string> {
     // const match2 = url.match(/\/file\/d\/([^/]+)/);
 
     if (fileId) {
-        const token = getAccessToken();
+        const token = await ensureValidToken();
         if (token) {
             try {
                 const res = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`, {

@@ -10,12 +10,21 @@
 
 ---
 
-## Simulate token expiration
+## Simulate token expiration within 48h window
 
-![Simulate token expiration](./screenshots/001-expiry.png)
+![Simulate token expiration within 48h window](./screenshots/001-silent_recovery.png)
 
 **Verifications:**
-- [x] Logged out after expiry
+- [x] Silent refresh keeps user logged in
+
+---
+
+## Simulate token expiration beyond 48h window
+
+![Simulate token expiration beyond 48h window](./screenshots/002-hard_expiry.png)
+
+**Verifications:**
+- [x] Logged out after 48h expiry
 
 ---
 
