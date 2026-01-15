@@ -103,6 +103,16 @@
       setDate(toISOLocalDate(d));
   }
   
+  function slideTransition(node: Element, { x = 0, duration = 300, easing = cubicOut }) {
+    const style = getComputedStyle(node);
+    const transform = style.transform === 'none' ? '' : style.transform;
+    return {
+        duration,
+        easing,
+        css: (t: number, u: number) => `transform: ${transform} translateX(${u * x}%);`
+    };
+  }
+
   // Derived filtered logs
   let visibleLogs = $derived.by(() => {
      return allLogs.filter(entry => {
@@ -294,13 +304,12 @@
             
 
 
-            <div class="feed-list" style="position: relative;">
+            <div class="feed-list">
                 {#key selectedDate}
                     <div 
-                        in:fly={{ x: direction * 50, duration: 300, delay: 90, easing: cubicOut, opacity: 0 }}
-                        out:fly={{ x: direction * -50, duration: 300, easing: cubicOut, opacity: 0 }}
+                        in:slideTransition={{ x: direction * 100, duration: 300, easing: cubicOut }}
+                        out:slideTransition={{ x: direction * -100, duration: 300, easing: cubicOut }}
                         class="slide-wrapper"
-                        style="position: {direction !== 0 ? 'absolute' : 'relative'}; width: 100%; top: 0;"
                     >
                         {#if groupedEntries.length === 0}
                             <div class="empty-state">
@@ -412,7 +421,16 @@
         cursor: not-allowed;
     }
 
+    .feed-list {
+        display: grid;
+        grid-template-areas: "stack";
+        overflow-x: hidden;
+    }
 
+    .slide-wrapper {
+        grid-area: stack;
+        width: 100%;
+    }
 
     .empty-state {
         text-align: center;
