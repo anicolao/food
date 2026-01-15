@@ -7,6 +7,13 @@ if git grep -n "alert(" -- "*.ts" "*.js" "*.svelte"; then
     exit 1
 fi
 
+# Run Zero Tolerance Check
+echo "verifying zero tolerance policy..."
+node scripts/verify-zero-tolerance.js
+if [ $? -ne 0 ]; then
+    exit 1
+fi
+
 # Run Type Checking
 echo "running type check..."
 npm run check
