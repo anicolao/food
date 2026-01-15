@@ -1,27 +1,19 @@
-Fix Screen Transitions
+Cleanup Plan Proposal
 
 ## Verbatim User Prompt
-The screen transitions turn out to be fakery - we are animating the same screen that is coming in going out - it should be the old screen exiting, and the new screen entering. Study the implementation and design adn figure out how to make it truly fly out hte old screen while bringing in teh new
+Review STATE_OF_THE_UNION*.md (two files) and make a CLEANUP_PLAN.md that identifies any items worth addressing in priority order. Some of the criticisms there aren't critical and can be ignored for now, but you can probalby find 2-5 higher priority items for the cleanup plan.
 
 ## Relevant User Comments
-- "nope, no change. still animating the new screen in and out."
-- "Still no dice, new screens in both locations"
-- "Yes! that is working."
+- "Follow WORKFLOW.md rigidly and put up a PR with the plan."
 
 ## Summary of Changes
-- Implemented a "Snapshot Strategy" to fix screen transitions.
-- Created `src/lib/components/ui/PageTransitionWrapper.svelte` to wrap page content.
-    - Checks a global store for a snapshot of the *exiting* page.
-    - Renders static HTML snapshot if available (freezing the exiting view).
-    - Renders live `children` snippet for the entering view.
-- Updated `src/lib/transitions.ts` to include `transitionSnapshots` writable store.
-- Updated `src/routes/+layout.svelte`:
-    - Uses `beforeNavigate` to capture the `innerHTML` of the current view into the store.
-    - Uses `afterNavigate` to clear the snapshot for the *new* (entering) route.
-    - Replaces direct `{@render children()}` with `<PageTransitionWrapper>`.
-- Added documentation in `docs/fix_screen_transitions/`.
+- Created `CLEANUP_PLAN.md` based on the analysis of `STATE_OF_THE_UNION.md` and `STATE_OF_THE_UNION_AG.md`.
+- Identified 5 high-priority items:
+    1. Fix Authentication Token Revocation (Bug)
+    2. Implement Redux Event Store Idempotency (Data Safety)
+    3. Add Error Notifications for Sync Failures (UX/Reliability)
+    4. Remove Production Debug Logging (Code Hygiene)
+    5. Harden Type Definitions (Maintainability)
 
 ## Verification
-- `npm run check` passed.
-- E2E tests (`002-log-food`) passed.
-- Manual verification confirmed transitions are now correct (Old screen leaves, new screen enters).
+- N/A (Documentation/Planning artifact only)
