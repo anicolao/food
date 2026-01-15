@@ -53,6 +53,6 @@ export default defineConfig({
     timeout: 15000, // Shorten timeout to fail faster
     expect: {
         timeout: 5000, // Shorten assertion timeout
-        toHaveScreenshot: { maxDiffPixels: 20 } // Allow small anti-aliasing drift
+        toHaveScreenshot: { maxDiffPixels: 0 } // Zero tolerance
     }
 });
