@@ -110,7 +110,7 @@
       setDate(toISOLocalDate(d));
   }
   
-  function slideTransition(node: Element, { offset = 100, duration = 300, easing = cubicOut }) {
+  function slideTransition(node: Element, { offset = 100, unit = '%', duration = 300, easing = cubicOut }) {
     const style = getComputedStyle(node);
     const transform = style.transform === 'none' ? '' : style.transform;
     // Capture the *current* direction when the transition starts
@@ -118,7 +118,7 @@
     return {
         duration,
         easing,
-        css: (t: number, u: number) => `transform: ${transform} translateX(${u * x}%);`
+        css: (t: number, u: number) => `transform: ${transform} translateX(${u * x}${unit});`
     };
   }
 
@@ -308,8 +308,8 @@
                 <div class="title-container">
                     {#key selectedDate}
                         <h2
-                            in:slideTransition={{ offset: 300, duration: 300, easing: cubicOut }}
-                            out:slideTransition={{ offset: -300, duration: 300, easing: cubicOut }}
+                            in:slideTransition={{ offset: 50, unit: 'vw', duration: 300, easing: cubicOut }}
+                            out:slideTransition={{ offset: -50, unit: 'vw', duration: 300, easing: cubicOut }}
                         >
                             {dateTitle}
                         </h2>
