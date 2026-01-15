@@ -52,7 +52,7 @@ test('US-001: User signs in', async ({ page }, testInfo) => {
         description: 'User is signed in',
         verifications: [
             { spec: 'Food Log title visible', check: async () => await expect(page.locator('.feed-header h2')).toHaveText('Today') },
-            { spec: 'Log Food link visible', check: async () => await expect(page.getByText('Log New')).toBeVisible() },
+            { spec: 'Log Food link visible', check: async () => await expect(page.getByLabel('Log new food entry')).toBeVisible() },
             { spec: 'Settings link visible', check: async () => await expect(page.locator('.mobile-nav a[href*="/settings"]').first()).toBeVisible() }
         ]
     });

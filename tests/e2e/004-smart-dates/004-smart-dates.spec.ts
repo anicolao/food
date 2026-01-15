@@ -111,7 +111,7 @@ test('US-013 to US-017: Smart Date Formatting', async ({ page }, testInfo) => {
     // Helper to log an item with specific date
     // Note: Creating a log redirects to TODAY.
     async function logItem(date: string, time: string, name: string) {
-        await page.getByText('Log New').first().click();
+        await page.getByLabel('Log new food entry').first().click();
         await expect(page).toHaveURL(/\/log/);
         await expect(page.getByText('Camera').first()).toBeVisible();
         const fileInput = page.locator('input[type="file"]:not([capture])');

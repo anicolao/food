@@ -4,6 +4,10 @@
   import { fetchRows, ensureDataStructures } from '$lib/sheets';
   import { store, dispatchEvent, setConfig, appendEvent, processEvent, updateGoals } from '$lib/store';
   import { base } from '$app/paths';
+  import { goto } from '$app/navigation';
+  import { page } from '$app/stores';
+  import { fly } from 'svelte/transition';
+  import { cubicOut } from 'svelte/easing';
   import { resolveDriveImage } from '$lib/images';
   import { getBusinessDate, groupLogs, type ActivityGroup } from '$lib/activity-grouping';
   
@@ -19,8 +23,8 @@
   // Current Business Date (4AM cutoff)
   const today = getBusinessDate(new Date());
   
-  // Reactive selected date state
-  let selectedDate = $state(today);
+  // Reactive selected date state from URL
+  let selectedDate = $derived($page.url.searchParams.get('date') || today);
 
   // Helper to format Date to YYYY-MM-DD (Local)
   function toISOLocalDate(d: Date) {
@@ -38,24 +42,65 @@
       const now = new Date(today + 'T00:00:00'); // Force local
       const diffTime = now.getTime() - sel.getTime();
       const diffDays = Math.round(diffTime / (1000 * 3600 * 24));
-      
       if (diffDays === 1) return 'Yesterday';
       
       return sel.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
   });
 
+
+  // Manage collapsed state via URL
+  let collapsedIds = $derived(($page.url.searchParams.get('collapsed') || '').split(',').filter(Boolean));
+
+  function toggleGroup(id: string) {
+      const newCollapsed = new Set(collapsedIds);
+      if (newCollapsed.has(id)) {
+          newCollapsed.delete(id);
+      } else {
+          newCollapsed.add(id);
+      }
+      
+      const url = new URL($page.url);
+      if (newCollapsed.size > 0) {
+          url.searchParams.set('collapsed', Array.from(newCollapsed).join(','));
+      } else {
+          url.searchParams.delete('collapsed');
+      }
+      goto(url.toString(), { noScroll: true, keepFocus: true, replaceState: true });
+  }
+
+  // Directional Transition Logic
+  let lastDate = $state(selectedDate);
+  let direction = $state<number>(0); // -1 (left), 1 (right)
+
+  $effect.pre(() => {
+      if (selectedDate !== lastDate) {
+          const newD = new Date(selectedDate);
+          const oldD = new Date(lastDate);
+          direction = newD > oldD ? 1 : -1;
+          lastDate = selectedDate;
+      }
+  });
+
+  function setDate(newDate: string) {
+       const url = new URL($page.url);
+       url.searchParams.set('date', newDate);
+       url.searchParams.delete('collapsed'); 
+       
+       goto(url.toString(), { noScroll: true, keepFocus: true });
+  }
+
   function goToPrevDay() {
       // Safely parse LOCAL YYYY-MM-DD by appending time
       const d = new Date(selectedDate + 'T12:00:00'); 
       d.setDate(d.getDate() - 1);
-      selectedDate = toISOLocalDate(d);
+      setDate(toISOLocalDate(d));
   }
 
   function goToNextDay() {
       if (selectedDate === today) return;
       const d = new Date(selectedDate + 'T12:00:00');
       d.setDate(d.getDate() + 1);
-      selectedDate = toISOLocalDate(d);
+      setDate(toISOLocalDate(d));
   }
   
   // Derived filtered logs
@@ -247,20 +292,31 @@
                 </button>
             </div>
             
-            <div class="log-action">
-                 <a href="{base}/log" class="text-link">Log New</a>
-            </div>
 
-            <div class="feed-list">
-                {#if groupedEntries.length === 0}
-                    <div class="empty-state">
-                        <p>No food logged for this day.</p>
+
+            <div class="feed-list" style="position: relative;">
+                {#key selectedDate}
+                    <div 
+                        in:fly={{ x: direction * 50, duration: 300, delay: 90, easing: cubicOut, opacity: 0 }}
+                        out:fly={{ x: direction * -50, duration: 300, easing: cubicOut, opacity: 0 }}
+                        class="slide-wrapper"
+                        style="position: {direction !== 0 ? 'absolute' : 'relative'}; width: 100%; top: 0;"
+                    >
+                        {#if groupedEntries.length === 0}
+                            <div class="empty-state">
+                                <p>No food logged for this day.</p>
+                            </div>
+                        {:else}
+                            {#each groupedEntries as group (group.id)}
+                                <ActivityCard 
+                                    {group} 
+                                    expanded={!collapsedIds.includes(group.id)}
+                                    on:toggle={() => toggleGroup(group.id)} 
+                                />
+                            {/each}
+                        {/if}
                     </div>
-                {:else}
-                    {#each groupedEntries as group (group.id)}
-                        <ActivityCard {group} />
-                    {/each}
-                {/if}
+                {/key}
             </div>
         </section>
     </div>
@@ -356,18 +412,7 @@
         cursor: not-allowed;
     }
 
-    .log-action {
-        display: flex;
-        justify-content: flex-end;
-        margin-bottom: 16px;
-    }
 
-    .text-link {
-        color: var(--color-primary);
-        font-size: 0.9rem;
-        font-weight: 500;
-        text-decoration: none;
-    }
 
     .empty-state {
         text-align: center;
