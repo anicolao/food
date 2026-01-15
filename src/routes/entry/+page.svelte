@@ -194,7 +194,7 @@
 
       <div class="field">
           <label>Rationale / Notes
-            <textarea class="bg-input" bind:value={form.rationale} rows="4"></textarea>
+            <textarea class="bg-input fixed-height" bind:value={form.rationale}></textarea>
           </label>
       </div>
 
@@ -328,5 +328,10 @@
       font-size: 1.1rem;
       font-weight: 700;
       cursor: pointer;
+  }
+
+  .fixed-height {
+      height: 100px; /* Enforce consistency between OS/Browsers for regression testing */
+      resize: vertical;
   }
 </style>
