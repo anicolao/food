@@ -103,9 +103,11 @@
       setDate(toISOLocalDate(d));
   }
   
-  function slideTransition(node: Element, { x = 0, duration = 300, easing = cubicOut }) {
+  function slideTransition(node: Element, { offset = 100, duration = 300, easing = cubicOut }) {
     const style = getComputedStyle(node);
     const transform = style.transform === 'none' ? '' : style.transform;
+    // Capture the *current* direction when the transition starts
+    const x = direction * offset;
     return {
         duration,
         easing,
@@ -307,8 +309,8 @@
             <div class="feed-list">
                 {#key selectedDate}
                     <div 
-                        in:slideTransition={{ x: direction * 100, duration: 300, easing: cubicOut }}
-                        out:slideTransition={{ x: direction * -100, duration: 300, easing: cubicOut }}
+                        in:slideTransition={{ offset: 100, duration: 300, easing: cubicOut }}
+                        out:slideTransition={{ offset: -100, duration: 300, easing: cubicOut }}
                         class="slide-wrapper"
                     >
                         {#if groupedEntries.length === 0}
