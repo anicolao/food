@@ -445,14 +445,23 @@
         let driveUrls = '';
         try {
             if (imageFiles.length > 0) {
+                // Wrap upload in a race with a timeout (e.g., 3s)
+                // If offline, native fetch usually fails fast, but this guarantees UI responsiveness.
+                const timeoutProm = new Promise<never>((_, reject) => 
+                    setTimeout(() => reject(new Error('Upload timed out')), 3000)
+                );
+
                 const uploadPromises = imageFiles.map(file => 
                     uploadImage(file, `FoodLog-${Date.now()}-${file.name}`, folderId)
                 );
-                // Use Promise.race to timeout uploads if they hang? 
-                // Or just rely on standard fetch timeout. 
-                // E2E test fails if this takes too long.
-                const driveFiles = await Promise.all(uploadPromises);
-                driveUrls = driveFiles.map(f => {
+
+                // @ts-ignore
+                const driveFiles = await Promise.race([
+                    Promise.all(uploadPromises),
+                    timeoutProm
+                ]);
+
+                driveUrls = driveFiles.map((f: any) => {
                     if (f.thumbnailLink) return f.thumbnailLink;
                     if (f.id) return `https://drive.google.com/thumbnail?id=${f.id}&sz=w2048`;
                     return f.webViewLink;
