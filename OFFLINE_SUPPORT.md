@@ -40,8 +40,11 @@ The synchronization logic is bidirectional but "Local-First".
 2.  **Process**:
     -   Query IndexedDB for all events where `syncStatus === 'pending'`.
     -   Sort by `timestamp`.
-    -   Loop through events and call `sheets.appendRow`.
-    -   **On Success**: Update IndexedDB event to `syncStatus: 'synced'`.
+    -   **Batch Append**:
+        -   Collect all pending event payloads into a single array.
+        -   Call `sheets.appendRow` (or a new `appendRows`) with the batch of values.
+        -   *Note*: The Google Sheets API `append` endpoint accepts multiple rows in a single request body (`values: [[row1], [row2], ...]`). This reduces N network calls to 1.
+    -   **On Success**: Update all synced events in IndexedDB to `syncStatus: 'synced'`.
     -   **On Failure**: Leave as `pending`. Update global "Sync Health" state.
 
 #### C. Inbound Sync (Hydration & Replay)
