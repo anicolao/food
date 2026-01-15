@@ -11,6 +11,9 @@
 	import { onMount } from 'svelte';
     import { initializeAuth } from '$lib/auth';
     import { afterNavigate, beforeNavigate } from '$app/navigation';
+    import { getAllEvents } from '$lib/db';
+    import { syncManager } from '$lib/sync-manager';
+    import { store, ingestSyncedEvent } from '$lib/store';
 
 	let { children } = $props();
 
@@ -22,10 +25,37 @@
 	// Track navigation history for direction calculation
 	let previousUrl: URL | null = null; 
 
-	onMount(() => {
+    onMount(async () => {
         // Initialize previousUrl with current url so first navigation works
         previousUrl = new URL($page.url.href);
         initializeAuth(() => { console.log('[Auth] Initialized in Layout'); });
+        
+        // Offline Support Initialization
+        try {
+            console.log('[Layout] Hydrating from DB...');
+            const events = await getAllEvents();
+            console.log(`[Layout] Found ${events.length} events in DB.`);
+            
+            // Batch hydrate? Or individually?
+            // Store's ingestSyncedEvent handles one by one.
+            // For 1000s of events, this might be slow to dispatch individually.
+            // But for MVP, let's just loop.
+            // NOTE: We should sort by timestamp first? `getAllEvents` already sorts by timestamp index.
+            for (const event of events) {
+                 store.dispatch(ingestSyncedEvent(event) as any);
+            }
+            
+            console.log('[Layout] Hydration complete.');
+            
+            // Kick off sync manager (it checks online status itself)
+            // Just access it to ensure it's imported? No, we have explicit sync call in network status and middleware.
+            // But we might want to auto-sync on load if online?
+            syncManager.sync();
+            
+        } catch (e) {
+            console.error('[Layout] Failed to initialize offline support', e);
+        }
+
 		const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
 		reducedMotion = mediaQuery.matches;
 		transitionsEnabled = true;

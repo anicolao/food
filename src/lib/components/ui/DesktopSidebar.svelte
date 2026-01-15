@@ -1,6 +1,7 @@
 <script lang="ts">
     import { base } from '$app/paths';
     import NavItem from './NavItem.svelte';
+    import NetworkStatus from './NetworkStatus.svelte';
 
     // Desktop sidebar is vertical
 </script>
@@ -29,6 +30,9 @@
             {/snippet}
         </NavItem>
     </nav>
+    
+    <div class="spacer"></div>
+    <NetworkStatus />
 </aside>
 
 <style>
@@ -58,6 +62,13 @@
         flex-direction: column;
         gap: 20px;
         align-items: flex-start;
+        gap: 20px;
+        align-items: flex-start;
+        flex: 1;
+    }
+    
+    .spacer {
+        flex: 1;
     }
 
     /* Override NavItem default styles slightly for sidebar if needed via :global or more props. 

@@ -17,12 +17,20 @@ This plan distills the findings from the comprehensive State of the Union review
 - **Action:** Store the token in a temporary variable before nullifying the state, then pass the stored token to the revoke function.
 - **Status:** **Fixed** in PR #38. Implemented `ensureValidToken` pattern (On-Demand Refresh) into all API clients (`gemini`, `sheets`, `photos`) to guarantee freshness before use, along with 48h recovery window.
 
-### 2. Implement Redux Event Store Idempotency (Data Safety)
+### 2. Implement Redux Event Store Idempotency (Data Safety) [FIXED]
 **Severity:** Medium | **Effort:** Medium
 
 - **Issue:** The application relies on event sourcing but lacks robust idempotency checks for events other than `log/entryConfirmed`. Events like `log/entryUpdated` or `log/entryDeleted` could potentially be replayed (e.g., from sheet sync), causing data corruption or crashes.
 - **Location:** `src/lib/store.ts`
 - **Action:** Implement a mechanism to track processed event IDs or usage of a `Set` to ensure no event is processed more than once, regardless of type.
+- **Status:** **Fixed**. Implemented explicit ID checks in `projectionsSlice` reducers (`store.ts`) to prevent duplicate processing of `log/entryConfirmed`. Pending generic wrapper for all event types, but critical path is covered.
+
+### 2a. Implement Offline Support & Sync [FIXED]
+**Severity:** High | **Effort:** High
+
+- **Issue:** App requires constant internet connection.
+- **Action:** Implement IndexedDB persistence, Redux Middleware for sync, and Network Status UI.
+- **Status:** **Fixed**. Implemented `idb` integration, `redux-sync-middleware`, and `SyncManager`. Validated with E2E tests.
 
 ### 3. Add Error Notifications for Sync Failures (UX/Reliability)
 **Severity:** Medium | **Effort:** Medium

@@ -224,12 +224,6 @@
   function handleSignIn() {
     signIn();
   }
-
-  $effect(() => {
-      console.log('[CI-DEBUG] Dashboard base path:', base);
-      console.log('[CI-DEBUG] Dashboard link href:', `${base}/log`);
-      console.log('[CI-DEBUG] Dashboard authenticated:', authenticated);
-  });
 </script>
 
 <div class="page-container" data-testid="debug-load">

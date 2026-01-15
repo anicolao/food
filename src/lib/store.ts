@@ -1,5 +1,6 @@
-import { configureStore, createSlice, type PayloadAction } from '@reduxjs/toolkit';
+import { configureStore, createSlice, type PayloadAction, type Middleware } from '@reduxjs/toolkit';
 import { appendRow } from './sheets';
+import { syncMiddleware } from './redux-sync-middleware';
 
 // --- Event Types ---
 export interface FoodEvent {
@@ -52,6 +53,10 @@ const eventLogSlice = createSlice({
   initialState: initialState.events,
   reducers: {
     appendEvent: (state, action: PayloadAction<FoodEvent>) => {
+      state.push(action.payload);
+    },
+    hydrateEvent: (state, action: PayloadAction<FoodEvent>) => {
+      // Just add to state, no side effects expected from middleware for this action name
       state.push(action.payload);
     }
   }
@@ -216,7 +221,8 @@ export const store = configureStore({
     projections: projectionsSlice.reducer,
     config: configSlice.reducer,
     settings: settingsSlice.reducer
-  }
+  },
+  middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(syncMiddleware)
 });
 
 export const { appendEvent } = eventLogSlice.actions;
@@ -251,7 +257,7 @@ export const dispatchEvent = (type: string, payload: any) => async (dispatch: an
     payload
   };
 
-  // 1. Append to Source of Truth
+  // 1. Append to Source of Truth (Middleware will catch this and persist to IDB + Trigger Sync)
   dispatch(appendEvent(event));
 
   // 2. Update Projections
@@ -261,25 +267,18 @@ export const dispatchEvent = (type: string, payload: any) => async (dispatch: an
   if (type === 'settings/goalsUpdated') {
     dispatch(updateGoals(payload));
   }
+};
 
-  // 4. Side Effects (Sync to Sheets)
-  const state = getState();
-  const { spreadsheetId } = state.config;
+export const ingestSyncedEvent = (event: FoodEvent) => async (dispatch: any) => {
+  // 1. Process for Projections
+  dispatch(processEvent(event));
 
-  if (spreadsheetId) {
-    try {
-      // Columns: ID, Timestamp, Type, Payload
-      await appendRow(spreadsheetId, 'Events', [
-        event.eventId,
-        event.timestamp,
-        event.type,
-        JSON.stringify(event.payload)
-      ]);
-    } catch (e) {
-      console.error('Failed to sync to sheets:', e);
-      // In a real app we might want to queue this for retry
-    }
-  }
+  // 2. Append to Log in memory (but bypass middleware persistence? 
+  //    Actually we DO need it in memory state. 
+  //    We need to make sure `appendEvent` doesn't trigger middleware persistence for SYNCED events if we handle it there.
+  //    OR, we use a different action for hydration.
+  //    Let's add `hydrateEvent` action to eventLogSlice.
+  dispatch(eventLogSlice.actions.hydrateEvent(event));
 };
 
 export type RootState = ReturnType<typeof store.getState>;

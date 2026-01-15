@@ -147,6 +147,31 @@ export async function appendRow(spreadsheetId: string, sheetName: string, values
     return await response.json();
 }
 
+export async function appendRows(spreadsheetId: string, sheetName: string, rows: any[][]) {
+    const token = await ensureValidToken();
+    if (!token) throw new Error('Not authenticated');
+
+    const range = `${sheetName}!A1`;
+    const url = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${range}:append?valueInputOption=USER_ENTERED`;
+
+    const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            values: rows
+        })
+    });
+
+    if (!response.ok) {
+        throw new Error(`Sheets API Error: ${response.statusText}`);
+    }
+
+    return await response.json();
+}
+
 export async function fetchRows(spreadsheetId: string, sheetName: string): Promise<any[]> {
     const token = await ensureValidToken();
     if (!token) throw new Error('Not authenticated');
