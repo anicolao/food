@@ -366,9 +366,8 @@
         position: absolute;
         top: 12px;
         right: 12px;
-        background: rgba(0,0,0,0.2);
-        border-radius: 12px;
-        backdrop-filter: blur(4px);
+        /* background: rgba(0,0,0,0.2); Removed to prevent "black box" around icon */
+        /* backdrop-filter: blur(4px); */
     }
 
     .hero-ring {

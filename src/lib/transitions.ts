@@ -39,6 +39,12 @@ export function getTransitionDirection(from: URL, to: URL): Direction {
     // Leaving Log -> Always Slide DOWN (Enter Top)
     if (fromPath.includes('/log')) return 'down';
 
+    // 1b. Network Settings -> Slide from TOP
+    // Going TO Network -> Enter from Top (content slides DOWN)
+    if (toPath.includes('/settings/network')) return 'down';
+    // Leaving Network -> Exit to Top (content slides UP)
+    if (fromPath.includes('/settings/network')) return 'up';
+
     // 2. Global Target Rules
     // To Settings -> Always Enter Right
     if (toPath === '/settings') return 'right';

@@ -50,31 +50,36 @@
     <div class="icon-wrapper">
         {#if !isOnline}
             <!-- Cloud Off -->
-            <img src="{base}/images/icon-status-offline.png" alt="Offline" width="24" height="24" />
+            <img src="{base}/images/icon-status-offline.png" alt="Offline" width="24" height="24" class="neon-icon" />
         {:else if isSyncing}
-            <!-- Syncing -->
-            <img src="{base}/images/icon-status-syncing.png" alt="Syncing" width="24" height="24" class="animate-pulse" />
+            <!-- Syncing (Layered for neon intensity) -->
+            <div class="pulse-stack">
+                <img src="{base}/images/icon-status-syncing.png" alt="Syncing" width="24" height="24" class="neon-icon base" />
+                <img src="{base}/images/icon-status-syncing.png" alt="" width="24" height="24" class="neon-icon overlay" />
+            </div>
         {:else if pendingCount > 0}
              <!-- Pending -->
-             <img src="{base}/images/icon-status-pending.png" alt="Pending" width="24" height="24" />
+             <img src="{base}/images/icon-status-pending.png" alt="Pending" width="24" height="24" class="neon-icon" />
              <span class="badge">{pendingCount}</span>
         {:else}
             <!-- Synced -->
-            <img src="{base}/images/icon-status-synced.png" alt="Synced" width="24" height="24" />
+            <img src="{base}/images/icon-status-synced.png" alt="Synced" width="24" height="24" class="neon-icon" />
         {/if}
     </div>
 </button>
 
 <style>
     .network-status {
-        background: none;
-        border: none;
+        background: var(--bg-card-glass, rgba(28, 30, 36, 0.7));
+        /* backdrop-filter: blur(12px); Removed: User said "too much" */
+        /* border: 1px solid rgba(255, 255, 255, 0.05); Removed: User said "border" looked bad */
+        border: none; /* Re-added to prevent default User Agent button border */
         cursor: pointer;
         display: flex;
         align-items: center;
         gap: 0.5rem;
         padding: 0.5rem;
-        border-radius: 8px;
+        border-radius: 50%; /* Rounded to mask background gradient mismatch */
         transition: transform 0.2s;
     }
 
@@ -86,20 +91,47 @@
         display: flex;
         align-items: center;
         position: relative;
+        /* Ensure the wrapper serves as a positioning context if needed, though stack handles it */
+        justify-content: center;
     }
 
-    img {
+    /* Base class for all neon icons */
+    .neon-icon {
         display: block;
-        filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.2));
+        /* Revert to plus-lighter as user defended it and screen caused issues */
+        mix-blend-mode: plus-lighter;
     }
     
-    .animate-pulse {
-        animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    /* Stacking context for the pulse animation */
+    .pulse-stack {
+        position: relative;
+        width: 24px;
+        height: 24px;
     }
     
-    @keyframes pulse {
-        0%, 100% { opacity: 1; }
-        50% { opacity: .5; }
+    .pulse-stack .base {
+        position: absolute;
+        top: 0;
+        left: 0;
+        opacity: 0.8; 
+    }
+    
+    .pulse-stack .overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        /* Use plus-lighter for the glowing overlay to add intense brightness */
+        mix-blend-mode: plus-lighter;
+        animation: neon-pulse 1.5s ease-in-out infinite;
+    }
+    
+    @keyframes neon-pulse {
+        0%, 100% { 
+            opacity: 0; 
+        }
+        50% { 
+            opacity: 1; 
+        }
     }
 
     .badge {

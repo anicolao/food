@@ -1,4 +1,4 @@
-import { getPendingEvents, markEventsSynced, addSyncedEvent } from './db';
+import { getPendingEvents, markEventsSynced, addSyncedEvent, clearAllSyncedEvents } from './db';
 import { appendRow, fetchRows, appendRows } from './sheets'; // We'll need to update sheets.ts to support batch append if we want true batching, or just loop for now
 import { store, processEvent, appendEvent, ingestSyncedEvent } from './store';
 import { get } from 'svelte/store';
@@ -62,13 +62,13 @@ export const syncManager = {
             const { spreadsheetId } = state.config;
 
             if (spreadsheetId) {
-                // Get last synced row index (default to 1, as row 1 is header)
-                const lastSyncedRow = parseInt(localStorage.getItem('lastSyncedRow') || '1', 10);
+                // Get last synced row index (default to 0 if no headers involved in tracking)
+                const lastSyncedRow = parseInt(localStorage.getItem('lastSyncedRow') || '0', 10);
                 const lastSyncedEventId = localStorage.getItem('lastSyncedEventId');
 
-                // If we have synced data (row > 1), we fetch overlapping to verify.
-                // If row is 1, we fetch from 2 (no overlap check possible/needed against header).
-                const startRow = lastSyncedRow > 1 ? lastSyncedRow : 2;
+                // If we have synced data (row > 0), we fetch overlapping to verify.
+                // If row is 0, we fetch from 1.
+                const startRow = lastSyncedRow > 0 ? lastSyncedRow : 1;
 
                 console.log(`[SyncManager] Fetching from row ${startRow}...`);
                 const rows = await fetchRows(spreadsheetId, 'Events', startRow);
@@ -77,13 +77,14 @@ export const syncManager = {
                     let newRows = rows;
 
                     // Verification Logic
-                    if (lastSyncedRow > 1) {
+                    if (lastSyncedRow > 0) {
                         const overlappingRow = rows[0];
                         const overlappingEventId = overlappingRow[0];
 
-                        if (overlappingEventId !== lastSyncedEventId) {
+                        // If lastSyncedEventId exists (for safety), verify it matches
+                        if (lastSyncedEventId && overlappingEventId !== lastSyncedEventId) {
                             console.warn(`[SyncManager] Sync Mismatch! Expected ${lastSyncedEventId}, got ${overlappingEventId}. Resetting sync pointer.`);
-                            localStorage.setItem('lastSyncedRow', '1');
+                            localStorage.setItem('lastSyncedRow', '0');
                             localStorage.removeItem('lastSyncedEventId');
                             return; // Next sync will start from 1
                         }
@@ -125,12 +126,10 @@ export const syncManager = {
                         }
 
                         // Update Pointer
-                        const finalRowIndex = lastSyncedRow + newRows.length; // If verified, lastSyncedRow is base, plus new rows
-                        // Wait: if startRow was lastSyncedRow, rows.length includes overlap.
-                        // If we fetched 5 rows (1 overlap + 4 new), newRows is 4.
-                        // lastSyncedRow (old) + 4 = new lastSyncedRow. Correct.
-                        // If startRow was 2 (lastSyncedRow=1), newRows is all rows.
-                        // 1 + rows.length = new. Correct.
+                        // lastSyncedRow is base (exclusive of overlap if verified).
+                        // If lastSyncedRow=0, fetched from 1. newRows.length entries. 0 + len = len.
+                        // If lastSyncedRow=1, fetched from 1. 1 overlap. newRows slice(1). 1 + len = new index.
+                        const finalRowIndex = lastSyncedRow + newRows.length;
 
                         localStorage.setItem('lastSyncedRow', finalRowIndex.toString());
                         if (lastEventIdProcessed) {
@@ -141,15 +140,11 @@ export const syncManager = {
                         console.log('[SyncManager] Verified up to date.');
                     }
                 } else {
-                    // 400 caught below would handle "nothing found" if it threw. 
-                    // If fetchRows returns [], it means empty range? typically fetchRows throws on invalid range?
-                    // Sheets API returns "values": undefined if empty. Our wrapper returns [].
-
-                    // If we asked for startRow=lastSyncedRow and got [], it means lastSyncedRow NO LONGER EXISTS.
-                    // Because if it existed, we'd get at least 1 row (overlap).
-                    if (lastSyncedRow > 1) {
+                    // If we asked for startRow and got [], it means it's empty or truncated.
+                    // If lastSyncedRow > 0, we expected at least overlap.
+                    if (lastSyncedRow > 0) {
                         console.warn('[SyncManager] Last synced row missing. Sheet truncated? Resetting.');
-                        localStorage.setItem('lastSyncedRow', '1');
+                        localStorage.setItem('lastSyncedRow', '0');
                         localStorage.removeItem('lastSyncedEventId');
                     }
                 }
@@ -171,12 +166,28 @@ export const syncManager = {
                 // This MOST LIKELY means 2115 does not exist.
                 // So our pointer is invalid. Reset.
                 console.warn('[SyncManager] 400 Error on fetch. Pointer invalid. Resetting.');
-                localStorage.setItem('lastSyncedRow', '1');
+                localStorage.setItem('lastSyncedRow', '0');
                 localStorage.removeItem('lastSyncedEventId');
                 return;
             }
         } finally {
             this.isSyncing = false;
+        }
+    },
+
+    async hardResync() {
+        console.warn('[SyncManager] Hard Reset Initiated.');
+
+        // 1. Reset Pointer
+        localStorage.setItem('lastSyncedRow', '0');
+        localStorage.removeItem('lastSyncedEventId');
+
+        // 2. Clear Local Cache (Synced Items Only - preserve pending!)
+        await clearAllSyncedEvents();
+
+        // 3. Reload
+        if (typeof window !== 'undefined') {
+            window.location.reload();
         }
     }
 };
