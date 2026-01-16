@@ -72,12 +72,117 @@ async function findOrCreateFile(name: string, parentId: string, mimeType: string
     return createData.id;
 }
 
+
+
+// Robust Discovery Implementation
+
+// 1. Tag a file with app properties
+async function tagDatabaseFile(fileId: string) {
+    const token = await ensureValidToken();
+    if (!token) throw new Error('Not authenticated');
+
+    const url = `https://www.googleapis.com/drive/v3/files/${fileId}`;
+    const response = await fetch(url, {
+        method: 'PATCH',
+        headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            appProperties: { type: 'food_tracker_db' }
+        })
+    });
+
+    if (!response.ok) {
+        throw new Error(`Failed to tag file: ${response.statusText}`);
+    }
+}
+
+// 2. Find all database files by tag, sorted by time
+export async function findDatabaseFiles(parentId?: string) {
+    const token = await ensureValidToken();
+    if (!token) throw new Error('Not authenticated');
+
+    let q = "appProperties has { key='type' and value='food_tracker_db' } and trashed=false";
+    if (parentId) {
+        q += ` and '${parentId}' in parents`;
+    }
+
+    const url = `https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(q)}&orderBy=modifiedTime desc&fields=files(id,name,modifiedTime,createdTime)`;
+    const response = await fetch(url, {
+        headers: { Authorization: `Bearer ${token}` }
+    });
+
+    if (!response.ok) throw new Error('Failed to list database files');
+    const data = await response.json();
+    return data.files || [];
+}
+
+// 3. New Creation Logic with Tagging
+async function createDatabaseFile(name: string, parentId: string) {
+    const token = await ensureValidToken();
+    if (!token) throw new Error('Not authenticated');
+
+    const url = 'https://www.googleapis.com/drive/v3/files';
+    const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            name,
+            mimeType: 'application/vnd.google-apps.spreadsheet',
+            parents: [parentId],
+            appProperties: { type: 'food_tracker_db' }
+        })
+    });
+
+    if (!response.ok) throw new Error('File Creation Failed');
+    const data = await response.json();
+    return data.id;
+}
+
+// Modified Discovery Logic
 export async function ensureDataStructures() {
     console.log('Ensuring data structures...');
     const folderId = await findOrCreateFolder('FoodLog');
     console.log('Folder ID:', folderId);
 
-    const spreadsheetId = await findOrCreateFile('TheFoodTrackerEventLog', folderId, 'application/vnd.google-apps.spreadsheet');
+    // Step 1: Search by Tag (The new, robust way)
+    const dbFiles = await findDatabaseFiles(folderId);
+
+    let spreadsheetId;
+
+    if (dbFiles.length > 0) {
+        // Found tagged files! Use the most recently modified one.
+        console.log(`Found ${dbFiles.length} database files. Using most recent: ${dbFiles[0].name}`);
+        spreadsheetId = dbFiles[0].id;
+    } else {
+        // Step 2: Fallback - Search by Legacy Name (The old way)
+        console.log('No tagged files found. Searching for legacy file...');
+
+        // Use existing (but modified) search logic inline here or call a helper
+        const legacyName = 'TheFoodTrackerEventLog';
+        const token = await ensureValidToken();
+        const q = `name='${legacyName}' and '${folderId}' in parents and trashed=false`;
+        const searchRes = await fetch(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(q)}`, {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        const searchData = await searchRes.json();
+
+        if (searchData.files && searchData.files.length > 0) {
+            // Found legacy file! Migration time.
+            console.log('Found legacy file. Migrating (adding metadata)...');
+            spreadsheetId = searchData.files[0].id;
+            await tagDatabaseFile(spreadsheetId);
+        } else {
+            // Step 3: Create New (Clean Slate)
+            console.log('No existing file found. Creating new database...');
+            spreadsheetId = await createDatabaseFile('TheFoodTrackerEventLog', folderId);
+        }
+    }
+
     console.log('Spreadsheet ID:', spreadsheetId);
 
     // Ensure "Events" tab exists (default is Sheet1)
@@ -228,4 +333,41 @@ export async function uploadImage(file: Blob, filename: string, folderId?: strin
     }
 
     return await response.json(); // Returns file object with ID
+}
+
+export async function getFileMetadata(fileId: string) {
+    const token = await ensureValidToken();
+    if (!token) throw new Error('Not authenticated');
+
+    const url = `https://www.googleapis.com/drive/v3/files/${fileId}?fields=id,name,mimeType`;
+    const response = await fetch(url, {
+        headers: { Authorization: `Bearer ${token}` }
+    });
+
+    if (!response.ok) {
+        throw new Error(`Drive API Error: ${response.statusText}`);
+    }
+
+    return await response.json();
+}
+
+export async function renameFile(fileId: string, newName: string) {
+    const token = await ensureValidToken();
+    if (!token) throw new Error('Not authenticated');
+
+    const url = `https://www.googleapis.com/drive/v3/files/${fileId}`;
+    const response = await fetch(url, {
+        method: 'PATCH',
+        headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ name: newName })
+    });
+
+    if (!response.ok) {
+        throw new Error(`Drive API Error: ${response.statusText}`);
+    }
+
+    return await response.json();
 }
