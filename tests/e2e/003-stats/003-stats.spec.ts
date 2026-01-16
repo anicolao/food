@@ -1,5 +1,6 @@
 import { test, expect } from '../fixtures';
 import { TestStepHelper } from '../helpers/test-step-helper';
+import { mockDriveAPI } from '../helpers/mock-drive';
 
 test('US-012: Stats persist after reload', async ({ page }, testInfo) => {
     const tester = new TestStepHelper(page, testInfo);
@@ -26,19 +27,14 @@ test('US-012: Stats persist after reload', async ({ page }, testInfo) => {
     await page.route('https://accounts.google.com/gsi/client', route => route.abort());
 
     // Mock Sheets fetching existing events AND Drive Discovery
+    // Mock Drive Discovery (Robust)
+    await mockDriveAPI(page);
+
+    // Mock Sheets fetching existing events explicitly
     await page.route('**googleapis.com**', async route => {
         const url = route.request().url();
-        // console.log('MOCKING:', url);
 
-        if (url.includes('drive/v3/files')) {
-            if (url.includes('foodlog') || url.includes('FoodLog')) {
-                await route.fulfill({ json: { files: [{ id: 'mock-folder-id', name: 'FoodLog' }] } });
-            } else if (url.includes('TheFoodTrackerEventLog')) {
-                await route.fulfill({ json: { files: [{ id: 'mock-spreadsheet-id', name: 'TheFoodTrackerEventLog' }] } });
-            } else {
-                await route.fulfill({ json: { id: 'new-mock-id' } });
-            }
-        } else if (url.includes('values/Events')) {
+        if (url.includes('sheets.googleapis.com') && url.includes('values/Events')) {
             await route.fulfill({
                 json: {
                     values: [
@@ -61,7 +57,7 @@ test('US-012: Stats persist after reload', async ({ page }, testInfo) => {
                 }
             });
         } else {
-            await route.fulfill({ json: {} });
+            await route.fallback();
         }
     });
 

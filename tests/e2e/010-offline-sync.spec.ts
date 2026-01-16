@@ -1,4 +1,5 @@
 import { test, expect } from './fixtures';
+import { mockDriveAPI } from './helpers/mock-drive';
 
 test.describe('Offline Support & Sync', () => {
     // FIXME: This test is flaky in CI/Full Suite due to auth state persistence issues when offline.
@@ -8,23 +9,13 @@ test.describe('Offline Support & Sync', () => {
 
 
         // Mock Sheets & Drive
+        await mockDriveAPI(page);
         await page.route('**googleapis.com**', async route => {
             const url = route.request().url();
             if (url.includes('sheets.googleapis.com')) {
-                if (url.includes('append')) {
-                    await route.fulfill({ json: { updates: { updatedRange: 'Events!A1' } } });
-                } else if (url.includes('values/Events')) {
-                    await route.fulfill({ json: { values: [] } });
-                } else {
-                    await route.fulfill({ json: {} });
-                }
+                await route.fallback();
             } else if (url.includes('drive/v3/files')) {
-                // Discovery mocks
-                if (url.includes('files?q=')) {
-                    await route.fulfill({ json: { files: [{ id: 'mock-id', name: 'MockFile' }] } });
-                } else {
-                    await route.fulfill({ json: { id: 'mock-id' } });
-                }
+                await route.fallback();
             } else if (url.includes('generativelanguage')) {
                 await route.fulfill({
                     json: {

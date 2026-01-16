@@ -1,6 +1,7 @@
 
 import { test, expect } from '../fixtures';
 import { TestStepHelper } from '../helpers/test-step-helper';
+import { mockDriveAPI } from '../helpers/mock-drive';
 
 test('US-023: Date Navigation', async ({ page }, testInfo) => {
     const tester = new TestStepHelper(page, testInfo);
@@ -24,6 +25,7 @@ test('US-023: Date Navigation', async ({ page }, testInfo) => {
     // Mock Data: 
     // 1. Entry Today (March 15)
     // 2. Entry Yesterday (March 14)
+    await mockDriveAPI(page);
     await page.route('**googleapis.com**', async route => {
         const url = route.request().url();
         if (url.includes('values/Events')) {
@@ -50,13 +52,7 @@ test('US-023: Date Navigation', async ({ page }, testInfo) => {
             });
         } else if (url.includes('drive/v3/files')) {
             // Standard file mocks
-            if (url.includes('foodlog') || url.includes('FoodLog')) {
-                await route.fulfill({ json: { files: [{ id: 'mock-folder-id', name: 'FoodLog' }] } });
-            } else if (url.includes('TheFoodTrackerEventLog')) {
-                await route.fulfill({ json: { files: [{ id: 'mock-spreadsheet-id', name: 'TheFoodTrackerEventLog' }] } });
-            } else {
-                await route.fulfill({ json: { id: 'new-mock-id' } });
-            }
+            await route.fallback();
         } else {
             await route.fulfill({ json: {} });
         }

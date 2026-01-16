@@ -1,5 +1,6 @@
 import { test, expect } from './fixtures';
 import { TestStepHelper } from './helpers/test-step-helper';
+import { mockDriveAPI } from './helpers/mock-drive';
 import * as fs from 'fs';
 
 test('US-009: User logs food via Text and Voice', async ({ page, context }, testInfo) => {
@@ -66,6 +67,9 @@ test('US-009: User logs food via Text and Voice', async ({ page, context }, test
     // Block real Google Identity script to prevent overwriting mocks
     await page.route('https://accounts.google.com/gsi/client', route => route.abort());
 
+    await page.route('https://accounts.google.com/gsi/client', route => route.abort());
+
+    await mockDriveAPI(page);
     await page.route('**googleapis.com**', async route => {
         const url = route.request().url();
         console.log('MOCKING:', url);
@@ -135,7 +139,7 @@ test('US-009: User logs food via Text and Voice', async ({ page, context }, test
             });
         } else if (url.includes('drive/v3/files') || url.includes('sheets.googleapis.com')) {
             // Standard Drive/Sheets mocks
-            await route.fulfill({ json: { id: 'mock-id', files: [] } });
+            await route.fallback();
         } else if (url === 'https://example.com/mock-apple.jpg') {
             // Mock the image fetch verification
             await route.fulfill({ status: 200, body: Buffer.from('fake-image-data') });
