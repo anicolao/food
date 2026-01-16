@@ -85,6 +85,9 @@ test('US-014: Dashboard State Persistence', async ({ page }, testInfo) => {
     // 1. Verify Default State
     // Wait for sync to populate data to avoid screenshot mismatch (empty vs populated)
     await expect(page.locator('.activity-card').first()).toBeVisible();
+    // Wait for network to settle to Synced to avoid icon animation frame diffs
+    await expect(page.locator('img[alt="Synced"]')).toBeVisible();
+
     await tester.step('initial-load', {
         description: 'Dashboard loads today',
         verifications: [
