@@ -2,6 +2,7 @@
    import { onMount, onDestroy } from 'svelte';
    import { getPendingEvents } from '$lib/db';
    import { syncManager } from '$lib/sync-manager';
+   import { base } from '$app/paths';
    import { goto } from '$app/navigation';
    
    // We can poll or listen to events. For now, simple polling for pending count + online API
@@ -35,7 +36,7 @@
    });
 
    function handleClick() {
-       goto('/settings/network');
+       goto(`${base}/settings/network`);
    }
 </script>
 
@@ -46,20 +47,22 @@
     aria-label="Network Status: {isOnline ? 'Online' : 'Offline'}, {pendingCount} pending items"
     data-status={!isOnline ? 'offline' : (isSyncing ? 'syncing' : (pendingCount > 0 ? 'pending' : 'synced'))}
 >
-    {#if !isOnline}
-        <!-- Cloud Off -->
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22.61 16.95A5 5 0 0 0 18 10h-1.26a8 8 0 0 0-7.05-6M5 5a8 8 0 0 0 4 7h1.8a5 5 0 0 0 .8 8.65"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
-    {:else if isSyncing}
-        <!-- Syncing (Cloud Upload with animation?) -->
-        <svg class="animate-pulse" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/><path d="M12 12v9"/><path d="m16 16-4-4-4 4"/></svg>
-    {:else if pendingCount > 0}
-         <!-- Pending (Cloud with dot?) using Cloud for now -->
-         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19c0-3.037-2.463-5.5-5.5-5.5S6.5 15.963 6.5 19"/><path d="M21 16h-1.26a8 8 0 1 0-11.62 9"/><path d="M23 19a6 6 0 0 0-6-6"/></svg>
-         <span class="badge">{pendingCount}</span>
-    {:else}
-        <!-- Synced (Cloud Check) -->
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 10a4 4 0 1 1 0 8 4 4 0 0 1 0-8Z"/><path d="M20 20v-4h-4"/><path d="M4 4v4h4"/><path d="M22 2a20 20 0 0 0-20 20"/><path d="M2 22a20 20 0 0 0 20-20"/></svg>
-    {/if}
+    <div class="icon-wrapper">
+        {#if !isOnline}
+            <!-- Cloud Off -->
+            <img src="{base}/images/icon-status-offline.png" alt="Offline" width="24" height="24" />
+        {:else if isSyncing}
+            <!-- Syncing -->
+            <img src="{base}/images/icon-status-syncing.png" alt="Syncing" width="24" height="24" class="animate-pulse" />
+        {:else if pendingCount > 0}
+             <!-- Pending -->
+             <img src="{base}/images/icon-status-pending.png" alt="Pending" width="24" height="24" />
+             <span class="badge">{pendingCount}</span>
+        {:else}
+            <!-- Synced -->
+            <img src="{base}/images/icon-status-synced.png" alt="Synced" width="24" height="24" />
+        {/if}
+    </div>
 </button>
 
 <style>
@@ -67,21 +70,27 @@
         background: none;
         border: none;
         cursor: pointer;
-        color: var(--text-secondary, #666);
         display: flex;
         align-items: center;
         gap: 0.5rem;
         padding: 0.5rem;
         border-radius: 8px;
-        transition: background-color 0.2s;
+        transition: transform 0.2s;
     }
 
-    .network-status:hover {
-        background-color: rgba(0,0,0,0.05);
+    .network-status:active {
+        transform: scale(0.95);
+    }
+    
+    .icon-wrapper {
+        display: flex;
+        align-items: center;
+        position: relative;
     }
 
-    .network-status.offline {
-        color: var(--error-color, #e74c3c);
+    img {
+        display: block;
+        filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.2));
     }
     
     .animate-pulse {
@@ -94,11 +103,15 @@
     }
 
     .badge {
+        position: absolute;
+        top: -5px;
+        right: -8px;
         font-size: 0.75rem;
         background: var(--primary-color, #3498db);
         color: white;
         padding: 0.1rem 0.3rem;
         border-radius: 4px;
         min-width: 1rem;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.3);
     }
 </style>
