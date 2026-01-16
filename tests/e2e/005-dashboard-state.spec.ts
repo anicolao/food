@@ -37,10 +37,24 @@ test('US-014: Dashboard State Persistence', async ({ page }, testInfo) => {
         const url = route.request().url();
 
         if (url.includes('drive/v3/files')) {
-            if (url.includes('FoodLog')) {
+            if (url.includes('appProperties')) {
+                // Mock robust discovery search
+                // Return no files to force legacy path, OR return a mocked file to test robust path.
+                // Letting it return [] (empty) forces legacy migration path which is good to test.
+                await route.fulfill({ json: { files: [] } });
+            } else if (url.includes('FoodLog')) {
                 await route.fulfill({ json: { files: [{ id: 'mock-folder-id', name: 'FoodLog' }] } });
             } else if (url.includes('TheFoodTrackerEventLog')) {
+                // Legacy search
                 await route.fulfill({ json: { files: [{ id: 'mock-sheet-id', name: 'TheFoodTrackerEventLog' }] } });
+            } else if (url.match(/files\/[^/]+$/)) {
+                // Handle single file metadata fetch (GET) or PATCH
+                if (route.request().method() === 'GET') {
+                    await route.fulfill({ json: { id: 'mock-sheet-id', name: 'TheFoodTrackerEventLog', mimeType: 'application/vnd.google-apps.spreadsheet' } });
+                } else {
+                    // PATCH etc
+                    await route.fulfill({ json: { id: 'mock-sheet-id' } });
+                }
             } else {
                 await route.fulfill({ json: { id: 'mock-id' } });
             }
