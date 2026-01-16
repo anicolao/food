@@ -1,8 +1,8 @@
-# Service Worker Design and Offline Optimization
+# Service Worker Implementation & Versioning
 
 ## User Prompts & Context
 
-### Original Request
+### Original Design Request
 HOURS: 2026-01-16T11:28:37-05:00
 > OK the offline work from teh recent design doc is completed. See OFFLINE_SUPPORT.md. But a major gap remains: though the database is now a write-through cache, the client itself is fetched over the network every time. 
 > 
@@ -23,16 +23,31 @@ HOURS: 2026-01-16T11:28:37-05:00
 > 
 > I suggest we use VITE_ build variables and just refer to this script for the way the string should look, that's a better fit for how we are deploying this project
 
-### Follow-up Clarification
+### Follow-up Clarification (Design)
 HOURS: 2026-01-16T11:40:31-05:00
 > This looks good except for some confusion about whether we want network first or cache first. We want cache first. Refresh the cache in the background. Make a new 'Update' icon to replace teh cloud is in sync icon, that lights up only after the cache is refreshed and the user can tap it to instantly switch. Add these clarifications to the design doc, and then follow WORKFLOW.md to make a PR for this design work.
 
-## Description
-This PR introduces the `SERVICE_WORKER_DESIGN.md` document, which outlines the strategy for:
-1.  **Offline-First Caching**: Implementing a Service Worker to cache the application shell and assets, serving them immediately from cache to minimize network traffic.
-2.  **Background Updates**: A "Stale-While-Revalidate" approach where the SW checks for updates in the background.
-3.  **Update Visibility**: A new UI pattern ("Update Icon") that notifies the user when a new version is downloaded and ready to swap.
-4.  **Versioning**: Injecting git commit hash and build timestamp via Vite environment variables for better debugging.
+### Implementation Instruction
+HOURS: 2026-01-16T13:28:40-05:00
+> Please read and follow WORKFLOW.md rigidly to create the PR yourself.
 
-## Artifacts
-*   `SERVICE_WORKER_DESIGN.md`
+## Description
+This PR implements the Service Worker design finalized in PR #43.
+
+### Changes
+1.  **Service Worker (`src/service-worker.ts`)**:
+    *   Implemented Cache-First strategy for assets (`build` + `files`).
+    *   Implemented Stale-While-Revalidate/Cache-First logic for navigation (HTML).
+    *   Added update handling via `SKIP_WAITING`.
+
+2.  **Versioning (`vite.config.ts`)**:
+    *   Injected `VITE_APP_VERSION`, `VITE_APP_COMMIT_HASH`, `VITE_APP_BUILD_DATE`, `VITE_APP_DIRTY_FLAG`.
+
+3.  **UI Updates (`src/routes/settings/network/+page.svelte`)**:
+    *   Added "Application Info" section with version and storage usage.
+    *   Added "Update Ready" badge to trigger SW updates.
+
+## Verification
+*   `npm run check` passes (Typescript).
+*   `npm run build` passes.
+*   E2E tests passed.
