@@ -44,6 +44,7 @@
     class:offline={!isOnline} 
     on:click={handleClick}
     aria-label="Network Status: {isOnline ? 'Online' : 'Offline'}, {pendingCount} pending items"
+    data-status={!isOnline ? 'offline' : (isSyncing ? 'syncing' : (pendingCount > 0 ? 'pending' : 'synced'))}
 >
     {#if !isOnline}
         <!-- Cloud Off -->

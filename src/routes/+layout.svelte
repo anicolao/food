@@ -13,7 +13,8 @@
     import { afterNavigate, beforeNavigate } from '$app/navigation';
     import { getAllEvents } from '$lib/db';
     import { syncManager } from '$lib/sync-manager';
-    import { store, ingestSyncedEvent } from '$lib/store';
+    import { store, ingestSyncedEvent, setConfig } from '$lib/store';
+    import { ensureDataStructures } from '$lib/sheets';
 
 	let { children } = $props();
 
@@ -28,7 +29,15 @@
     onMount(async () => {
         // Initialize previousUrl with current url so first navigation works
         previousUrl = new URL($page.url.href);
-        initializeAuth(() => { console.log('[Auth] Initialized in Layout'); });
+        initializeAuth(async () => { 
+            console.log('[Auth] Initialized in Layout');
+            try {
+                const { spreadsheetId, folderId } = await ensureDataStructures();
+                store.dispatch(setConfig({ spreadsheetId, folderId }));
+            } catch (e) {
+                console.error('[Layout] Failed to init sheets config', e);
+            }
+        });
         
         // Offline Support Initialization
         try {

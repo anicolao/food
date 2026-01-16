@@ -1,5 +1,5 @@
 import { getPendingEvents, markEventsSynced, addSyncedEvent } from './db';
-import { appendRow, fetchRows } from './sheets'; // We'll need to update sheets.ts to support batch append if we want true batching, or just loop for now
+import { appendRow, fetchRows, appendRows } from './sheets'; // We'll need to update sheets.ts to support batch append if we want true batching, or just loop for now
 import { store, processEvent, appendEvent } from './store';
 import { get } from 'svelte/store';
 
@@ -115,7 +115,4 @@ export const syncManager = {
     }
 };
 
-async function appendRows(spreadsheetId: string, sheetName: string, rows: any[][]) {
-    const { appendRows: apiAppendRows } = await import('./sheets');
-    return apiAppendRows(spreadsheetId, sheetName, rows);
-}
+
