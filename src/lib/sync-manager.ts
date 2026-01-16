@@ -1,6 +1,6 @@
 import { getPendingEvents, markEventsSynced, addSyncedEvent } from './db';
 import { appendRow, fetchRows, appendRows } from './sheets'; // We'll need to update sheets.ts to support batch append if we want true batching, or just loop for now
-import { store, processEvent, appendEvent } from './store';
+import { store, processEvent, appendEvent, ingestSyncedEvent } from './store';
 import { get } from 'svelte/store';
 
 // We need a way to check online status.
@@ -57,53 +57,52 @@ export const syncManager = {
             }
 
             // 2. Inbound Sync
-            // Fetch all rows
+            // Fetch only new rows (Incremental Sync)
             const state = store.getState();
             const { spreadsheetId } = state.config;
 
             if (spreadsheetId) {
-                const rows = await fetchRows(spreadsheetId, 'Events');
-                // rows is array of arrays: [id, timestamp, type, payload]
-                // Skip header if any? implementation doesn't seem to have headers in `appendRow`.
+                // Get last synced row index (default to 1, as row 1 is header)
+                const lastSyncedRow = parseInt(localStorage.getItem('lastSyncedRow') || '1', 10);
+                const startRow = lastSyncedRow + 1;
 
-                for (const row of rows) {
-                    const [eventId, timestamp, type, payloadStr] = row;
-                    if (!eventId || !type) continue;
+                console.log(`[SyncManager] Fetching from row ${startRow}...`);
+                const rows = await fetchRows(spreadsheetId, 'Events', startRow);
 
-                    // Check if we have this event
-                    const existingEvent = state.events.find(e => e.eventId === eventId);
+                if (rows && rows.length > 0) {
+                    console.log(`[SyncManager] Received ${rows.length} new rows.`);
 
-                    if (!existingEvent) {
-                        // New event!
-                        let payload = {};
-                        try {
-                            payload = JSON.parse(payloadStr);
-                        } catch (e) {
-                            console.error('Failed to parse payload for event', eventId, e);
+                    for (const row of rows) {
+                        const [eventId, timestamp, type, payloadStr] = row;
+                        if (!eventId || !type) continue;
+
+                        // Check if we already have this event (deduplication still good safety net)
+                        const existingEvent = state.events.find(e => e.eventId === eventId);
+
+                        if (!existingEvent) {
+                            let payload = {};
+                            try {
+                                payload = JSON.parse(payloadStr);
+                            } catch (e) {
+                                console.error('Failed to parse payload for event', eventId, e);
+                            }
+
+                            const event = { eventId, timestamp, type, payload };
+
+                            // 1. Add to DB as synced
+                            await addSyncedEvent(event);
+
+                            // 2. Ingest into Redux
+                            store.dispatch(ingestSyncedEvent(event));
                         }
-
-                        const event = { eventId, timestamp, type, payload };
-
-                        // 1. Add to DB as synced
-                        await addSyncedEvent(event);
-
-                        // 2. Dispatch to Redux (Redux will persist again? No, we need a way to skip persistence)
-                        // Actually, we should probably just dispatch `appendEvent` but our middleware will catch it.
-                        // We need a flag or a different action to bypass middleware persistence if it's already in DB.
-                        // OR, middleware checks DB?
-                        // Better: `store.dispatch({ type: 'eventLog/hydrateEvent', payload: event })` ?
-                        // Current `appendEvent` is used for new local events.
-                        // Let's add a `hydrateEvent` or ensure middleware knows to ignore "incoming" syncs.
-                        // Or, middleware does `put` which is upsert. If we set syncStatus='synced' in payload?
-                        // The middleware sets 'pending'.
-
-                        // Simpler: Just update state directly? No, redux rules.
-                        // Let's rely on a new action `ingestSyncedEvent`.
-                        store.dispatch(processEvent(event));
-                        store.dispatch(appendEvent(event));
-                        // Wait, if I dispatch appendEvent, middleware will see it and set it to pending!
-                        // I need to update `store.ts` to handle this or middleware to filter.
                     }
+
+                    // Update Pointer
+                    const newLastSyncedRow = lastSyncedRow + rows.length;
+                    localStorage.setItem('lastSyncedRow', newLastSyncedRow.toString());
+                    console.log(`[SyncManager] Updated lastSyncedRow to ${newLastSyncedRow}`);
+                } else {
+                    console.log('[SyncManager] No new rows.');
                 }
             }
 
