@@ -5,6 +5,7 @@
 ![Settings page loads with defaults](./screenshots/000-initial-load.png)
 
 **Verifications:**
+- [x] Url is correct
 - [x] Title is visible
 - [x] Donut chart is visible
 - [x] Calories input is 2000

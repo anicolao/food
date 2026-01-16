@@ -7,6 +7,8 @@
 **Verifications:**
 - [x] Camera button visible
 - [x] Upload button visible
+- [x] Voice button visible
+- [x] Text button visible
 
 ---
 

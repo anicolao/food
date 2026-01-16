@@ -47,6 +47,9 @@ test('US-001: User signs in', async ({ page }, testInfo) => {
     await page.waitForFunction(() => (window as any)._authReady);
     await page.getByText('Sign In with Google').click();
 
+    // Verify authenticated state
+    await expect(page.locator('img[alt="Synced"]')).toBeVisible();
+
     await tester.step('authenticated', {
         description: 'User is signed in',
         verifications: [
