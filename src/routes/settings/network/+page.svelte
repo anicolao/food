@@ -3,6 +3,7 @@
     import { getPendingEvents } from '$lib/db';
     import { syncManager } from '$lib/sync-manager';
     import { store, setConfig } from '$lib/store';
+    import { getFileMetadata, renameFile, findDatabaseFiles } from '$lib/sheets';
     
     let isOnline = true;
     let pendingCount = 0;
@@ -12,7 +13,13 @@
     
     // Config state
     let spreadsheetId = '';
-    let sheetName = 'TheFoodTrackerEventLog'; // Hardcoded default based on sheets.ts knowledge
+    let sheetName = '';
+    let isRenaming = false;
+    
+    // Picker state
+    let availableFiles: any[] = [];
+    let showPicker = false;
+    let isLoadingFiles = false;
 
     async function checkStatus() {
         isOnline = navigator.onLine;
@@ -22,6 +29,17 @@
         
         const state = store.getState();
         spreadsheetId = state.config.spreadsheetId || '';
+        
+        // Initial fetch of sheet name if we have ID but no name yet
+        if (spreadsheetId && !sheetName && !isRenaming && isOnline) {
+            try {
+                const meta = await getFileMetadata(spreadsheetId);
+                sheetName = meta.name;
+            } catch (e) {
+                console.error('Failed to fetch sheet name', e);
+                sheetName = 'Unknown (Error fetching)';
+            }
+        }
     }
 
     onMount(() => {
@@ -29,7 +47,7 @@
         window.addEventListener('online', checkStatus);
         window.addEventListener('offline', checkStatus);
         
-        interval = setInterval(checkStatus, 1000); 
+        interval = setInterval(checkStatus, 2000); 
         checkStatus();
     });
 
@@ -40,7 +58,47 @@
             clearInterval(interval);
         }
     });
+
+    async function loadAvailableFiles() {
+        if (!isOnline) return;
+        isLoadingFiles = true;
+        try {
+            // Find all tagged files. (We don't need parentId for global search if we rely on tags, 
+            // but providing folderId is safer if we knew it. For now, tag search is robust enough globally or we assume FoodLog folder context implicitly).
+            // Actually, sheets.ts findDatabaseFiles accepts optional parentId. 
+            // We'll search globally for simplicity or we'd need to fetch folderId again.
+            // Let's rely on tag search which is specific enough.
+            availableFiles = await findDatabaseFiles();
+        } catch (e) {
+            console.error('Failed to load files', e);
+        } finally {
+            isLoadingFiles = false;
+        }
+    }
+
+    function togglePicker() {
+        showPicker = !showPicker;
+        if (showPicker) {
+            loadAvailableFiles();
+        }
+    }
     
+    async function switchDatabase(fileId: string) {
+        if (fileId === spreadsheetId) return;
+        
+        if (confirm('Switching databases will reset your local cache and resync from the selected file. Continue?')) {
+            // update store config
+            const current = store.getState().config;
+            setConfig({ ...current, spreadsheetId: fileId });
+            spreadsheetId = fileId;
+            sheetName = ''; // Force refresh
+            showPicker = false;
+            
+            // Hard resync logic to clear old data and fetch new
+             await syncManager.hardResync();
+        }
+    }
+
     async function handleForceSync() {
         await syncManager.sync();
         await checkStatus();
@@ -49,6 +107,24 @@
     async function handleHardResync() {
         if (confirm('This will delete your local cache of synced events and re-download everything from Google Sheets. Your pending items will be preserved. Continue?')) {
             await syncManager.hardResync();
+        }
+    }
+
+    async function handleRename() {
+        if (!spreadsheetId) return;
+        const newName = prompt('Enter new name for the Google Sheet:', sheetName);
+        if (newName && newName !== sheetName) {
+            try {
+                isRenaming = true;
+                await renameFile(spreadsheetId, newName);
+                sheetName = newName;
+                console.log('Spreadsheet renamed successfully.');
+            } catch (e) {
+                console.error('Rename failed', e);
+                console.error('Failed to rename spreadsheet.');
+            } finally {
+                isRenaming = false;
+            }
         }
     }
 </script>
@@ -103,8 +179,57 @@
     <section class="card glass-panel">
         <h2>Configuration</h2>
         <div class="field">
+            <label for="sheetName">Spreadsheet Name</label>
+            <div class="input-group">
+                <input id="sheetName" type="text" value={sheetName} readonly />
+                <button class="icon-btn" on:click={handleRename} disabled={!isOnline || isRenaming} aria-label="Rename">
+                    ✏️
+                </button>
+            </div>
+        </div>
+        
+        <div class="field">
+            <label for="picker">Active Database File</label>
+            <div class="picker-controls">
+                <button class="secondary-btn small" on:click={togglePicker}>
+                    {showPicker ? 'Hide Options' : 'Change Database File'}
+                </button>
+            </div>
+            
+            {#if showPicker}
+                <div class="file-picker glass-panel">
+                    {#if isLoadingFiles}
+                        <p class="loading">Finding databases...</p>
+                    {:else if availableFiles.length === 0}
+                        <p class="empty">No other database files found.</p>
+                    {:else}
+                        <ul class="file-list">
+                            {#each availableFiles as file}
+                                <li>
+                                    <button 
+                                        class="file-option {file.id === spreadsheetId ? 'active' : ''}" 
+                                        on:click={() => switchDatabase(file.id)}
+                                        disabled={file.id === spreadsheetId}
+                                    >
+                                        <div class="file-info">
+                                            <span class="fname">{file.name}</span>
+                                            <span class="fmeta">Last modified: {new Date(file.modifiedTime).toLocaleDateString()}</span>
+                                        </div>
+                                        {#if file.id === spreadsheetId}
+                                            <span class="check">✓</span>
+                                        {/if}
+                                    </button>
+                                </li>
+                            {/each}
+                        </ul>
+                    {/if}
+                </div>
+            {/if}
+        </div>
+
+        <div class="field mt-4">
             <label for="sheetId">Spreadsheet ID</label>
-            <input id="sheetId" type="text" value={spreadsheetId} disabled />
+            <input id="sheetId" type="text" value={spreadsheetId} disabled class="dimmed" />
         </div>
         <p class="help">Managed via Google Drive integration.</p>
     </section>
@@ -241,4 +366,85 @@
     .actions {
         margin-top: 2rem;
     }
+
+    .input-group {
+        display: flex;
+        gap: 0.5rem;
+    }
+    
+    .icon-btn {
+        width: auto;
+        padding: 0.75rem;
+        background: rgba(255,255,255,0.1);
+    }
+    
+    .dimmed {
+        opacity: 0.6;
+        font-size: 0.8rem;
+    }
+    
+    .file-picker {
+        margin-top: 1rem;
+        background: rgba(0,0,0,0.3);
+        border-radius: 8px;
+        max-height: 200px;
+        overflow-y: auto;
+    }
+    
+    .file-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+    
+    .file-option {
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.75rem;
+        background: none;
+        border: none;
+        border-bottom: 1px solid rgba(255,255,255,0.05);
+        color: white;
+        text-align: left;
+    }
+    
+    .file-option:last-child {
+        border-bottom: none;
+    }
+    
+    .file-option:hover:not(:disabled) {
+        background: rgba(255,255,255,0.05);
+    }
+    
+    .file-option.active {
+        background: rgba(52, 152, 219, 0.2);
+    }
+    
+    .file-info {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .fname { font-weight: 500; font-size: 0.9rem; }
+    .fmeta { font-size: 0.75rem; color: #888; }
+    
+    .check {
+        color: #2ecc71;
+        font-weight: bold;
+    }
+    
+    .picker-controls {
+        margin-top: 0.5rem;
+    }
+    
+    .secondary-btn.small {
+        padding: 0.4rem 0.8rem;
+        font-size: 0.8rem;
+        width: auto;
+    }
+    
+    .mt-4 { margin-top: 1rem; }
+    .loading, .empty { padding: 1rem; text-align: center; color: #888; }
 </style>
