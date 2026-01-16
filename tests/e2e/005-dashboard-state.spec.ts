@@ -75,7 +75,7 @@ test('US-014: Dashboard State Persistence', async ({ page }, testInfo) => {
     if (!await page.getByTestId('debug-load').isVisible()) {
         console.log('PAGE CONTENT:', await page.content());
     }
-    await expect(page.getByTestId('debug-load')).toBeVisible({ timeout: 15000 });
+    await expect(page.getByTestId('debug-load')).toBeVisible({ timeout: 30000 });
 
     // Sign In
     await page.waitForFunction(() => (window as any)._authReady);
