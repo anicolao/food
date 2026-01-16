@@ -1,0 +1,1 @@
+import{h as c,J as i,U as o,I as u,R as f}from"./DggDrg00.js";function y(a,n,e){c&&i();var t=new f(a),s=!o();u(()=>{var r=n();s&&r!==null&&typeof r=="object"&&(r={}),t.ensure(r,e)})}function h(a){return a}function b(a){const n=a-1;return n*n*n+1}export{b as c,y as k,h as l};
