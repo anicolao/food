@@ -8,11 +8,13 @@ interface CustomWorkerFixtures {
 export const test = base.extend<{}, CustomWorkerFixtures>({
   workerCheck: [
     async ({ }, use, testInfo) => {
-      const EXPECTED_WORKERS = 1;
-      if (testInfo.config.workers > EXPECTED_WORKERS) {
+      const EXPECTED_WORKERS = 8;
+      if (testInfo.config.workers != EXPECTED_WORKERS) {
         throw new Error(`
-Configuration Error: E2E tests must run serially to avoid race conditions.
-    **PARALLELISM IS DISABLED.**
+Configuration Error: E2E tests should run in parallel for performance.
+    **THERE ARE NO RACE CONDITIONS IN E2E TESTS.**
+    **THERE IS NO CROSS TEST STATE.**
+    **IF YOUR TESTS ARE FAILING DUE TO PARALLELISM, FIX THE TESTS.**
 Found workers: ${testInfo.config.workers}
 Expected: ${EXPECTED_WORKERS}
 
