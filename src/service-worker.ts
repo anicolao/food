@@ -33,18 +33,19 @@ self.addEventListener('activate', (event) => {
         }
     }
 
-    event.waitUntil(deleteOldCaches());
+    e.waitUntil(deleteOldCaches());
 });
 
 self.addEventListener('fetch', (event) => {
     const e = event as FetchEvent;
-    // IGNORE requests for Google APIs (handled by app logic/IndexedDB)
+
+    // IGNORE requests for Google APIs
     if (e.request.url.includes('googleapis.com')) return;
 
     // Ignore non-GET requests
     if (e.request.method !== 'GET') return;
 
-    // IGNORE chrome-extension requests (common source of errors)
+    // IGNORE chrome-extension requests
     if (e.request.url.startsWith('chrome-extension://')) return;
 
     async function respond() {
@@ -57,28 +58,34 @@ self.addEventListener('fetch', (event) => {
             if (cachedResponse) return cachedResponse;
         }
 
-        // 2. Navigation (HTML): CACHE-FIRST (stale-while-revalidate manually via SW update cycle)
-        // Since we are an SPA, we mostly care about the root HTML or specific routes serving the app shell.
-        // For strict Offline-First speed, we serve from cache if available.
+        // 2. Navigation (HTML): CACHE-FIRST 
+        if (e.request.mode === 'navigate') {
+            try {
+                const cachedResponse = await cache.match(e.request);
+                if (cachedResponse) return cachedResponse;
+
+                const networkResponse = await fetch(e.request);
+                return networkResponse;
+            } catch (error) {
+                // Offline Fallback
+                const offlineCache = await cache.match('/offline.html');
+                if (offlineCache) return offlineCache;
+
+                const rootCache = await cache.match('/');
+                if (rootCache) return rootCache;
+
+                return new Response('Offline', { status: 408 });
+            }
+        }
+
+        // 3. Other Requests
         try {
             const cachedResponse = await cache.match(e.request);
             if (cachedResponse) return cachedResponse;
 
-            // Fallback: Network
             const response = await fetch(e.request);
-
-            // Optional: Runtime caching for other GET requests?
-            // For now, adhering to strict design: Build assets + Static only.
-
-            if (response.status === 200) {
-                // cache.put(event.request, response.clone()); 
-            }
-
             return response;
         } catch {
-            // Offline fallback?
-            // If completely offline and not in cache, we failed.
-            // But usually we hit the cache above.
             return new Response('Offline', { status: 408 });
         }
     }
