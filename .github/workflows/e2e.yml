@@ -39,6 +39,7 @@ jobs:
           VITE_GOOGLE_DRIVE_CLIENT_ID: "dummy"
           VITE_GOOGLE_DRIVE_FOLDER_ID: "dummy"
           VITE_GOOGLE_PHOTOS_CLIENT_ID: "dummy"
+          COMMIT_HASH: ${{ github.event.pull_request.head.sha || github.sha }}
 
       - name: Upload Playwright report
         uses: actions/upload-artifact@v4
