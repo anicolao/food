@@ -13,7 +13,7 @@
     import { afterNavigate, beforeNavigate } from '$app/navigation';
     import { getAllEvents } from '$lib/db';
     import { syncManager } from '$lib/sync-manager';
-    import { store, ingestSyncedEvent, setConfig } from '$lib/store';
+    import { store, batchHydrateEvents, setConfig } from '$lib/store';
     import { ensureDataStructures } from '$lib/sheets';
 
 	let { children } = $props();
@@ -34,6 +34,9 @@
             try {
                 const { spreadsheetId, folderId } = await ensureDataStructures();
                 store.dispatch(setConfig({ spreadsheetId, folderId }));
+                
+                // Kick off sync manager after config is loaded
+                syncManager.sync();
             } catch (e) {
                 console.error('[Layout] Failed to init sheets config', e);
             }
@@ -45,21 +48,13 @@
             const events = await getAllEvents();
             console.log(`[Layout] Found ${events.length} events in DB.`);
             
-            // Batch hydrate? Or individually?
-            // Store's ingestSyncedEvent handles one by one.
-            // For 1000s of events, this might be slow to dispatch individually.
-            // But for MVP, let's just loop.
-            // NOTE: We should sort by timestamp first? `getAllEvents` already sorts by timestamp index.
-            for (const event of events) {
-                 store.dispatch(ingestSyncedEvent(event) as any);
-            }
+            // Batch hydrate to avoid middleware performance warnings
+            store.dispatch(batchHydrateEvents(events) as any);
             
             console.log('[Layout] Hydration complete.');
             
-            // Kick off sync manager (it checks online status itself)
-            // Just access it to ensure it's imported? No, we have explicit sync call in network status and middleware.
-            // But we might want to auto-sync on load if online?
-            syncManager.sync();
+            // Offline Support Initialization done.
+            // Sync is triggered in initializeAuth after config is ready.
             
         } catch (e) {
             console.error('[Layout] Failed to initialize offline support', e);

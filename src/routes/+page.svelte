@@ -1,8 +1,9 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { initializeAuth, signIn, signOut, ensureValidToken, authState } from '$lib/auth';
-  import { fetchRows, ensureDataStructures } from '$lib/sheets';
-  import { store, dispatchEvent, setConfig, appendEvent, processEvent, updateGoals, ingestSyncedEvent } from '$lib/store';
+
+  import { store } from '$lib/store';
+  import { syncManager } from '$lib/sync-manager';
   import { base } from '$app/paths';
   import { goto } from '$app/navigation';
   import { page } from '$app/stores';
@@ -18,7 +19,7 @@
 
   // Reactive State
   let authenticated = $state(false);
-  let allLogs = $state<any[]>([]); // Synced from Redux
+  let allLogs = $state<any[]>(store.getState().projections.log); // Synced from Redux
   let settings = $state(store.getState().settings);
   
   // Current Business Date (4AM cutoff)
@@ -125,10 +126,11 @@
 
   // Derived filtered logs
   let visibleLogs = $derived.by(() => {
-     return allLogs.filter(entry => {
-          const dateObj = new Date(`${entry.date}T${entry.time}`);
-          return getBusinessDate(dateObj) === selectedDate;
-      });
+      return allLogs.filter(entry => {
+           const dateObj = new Date(`${entry.date}T${entry.time}`);
+           // Use business date logic to match dashboard day
+           return getBusinessDate(dateObj) === selectedDate;
+       });
   });
 
   // Derived groups
@@ -157,53 +159,21 @@
     };
   });
 
-  async function syncData() {
-        try {
-            const { spreadsheetId, folderId } = await ensureDataStructures();
-            store.dispatch(setConfig({ spreadsheetId, folderId }));
 
-            const rows = await fetchRows(spreadsheetId, 'Events');
-            rows.forEach(row => {
-               // Expect: [eventId, timestamp, type, payloadJson]
-               if (row[2] && row[3]) {
-                   const type = row[2];
-                   try {
-                       const payload = JSON.parse(row[3]);
-                       const event = {
-                           eventId: row[0],
-                           timestamp: row[1],
-                           type,
-                           payload
-                       };
-                                              // Replay to store WITHOUT side-effects (not writing back to pending IDB)
-                        store.dispatch(ingestSyncedEvent(event));
-                       
-                       if (type === 'settings/goalsUpdated') {
-                           store.dispatch(updateGoals(payload));
-                       }
-                   } catch (e) {
-                       console.error('Failed to parse event row', row, e);
-                   }
-               }
-            });
-        } catch (e) {
-            console.error('Sync failed', e);
-        }
-  }
 
   onMount(() => {
       // Subscribe to auth state from store (initialized in Layout)
       const unsubAuth = authState.subscribe(state => {
           authenticated = !!state.token;
           if (authenticated) {
-              syncData();
+              syncManager.sync();
           }
       });
       // Trigger sync if already auth (e.g. from local storage restore)
       ensureValidToken().then(token => {
           if (token) {
               authenticated = true;
-              syncData(); // This is async but we don't await it here to avoid blocking
+              syncManager.sync(); // This is async but we don't await it here to avoid blocking
           }
       });
 

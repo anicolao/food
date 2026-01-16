@@ -183,7 +183,13 @@ export async function fetchRows(spreadsheetId: string, sheetName: string, startR
         headers: { Authorization: `Bearer ${token}` }
     });
 
-    if (!response.ok) throw new Error(`Sheets API Error: ${response.statusText}`);
+    if (!response.ok) {
+        throw new Error(JSON.stringify({
+            status: response.status,
+            message: response.statusText,
+            body: await response.text()
+        }));
+    }
 
     const data = await response.json();
     return data.values || [];

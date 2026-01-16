@@ -57,57 +57,124 @@ export const syncManager = {
             }
 
             // 2. Inbound Sync
-            // Fetch only new rows (Incremental Sync)
+            // Fetch starting from the last synced row to verify overlap (unless it's row 0/1)
             const state = store.getState();
             const { spreadsheetId } = state.config;
 
             if (spreadsheetId) {
                 // Get last synced row index (default to 1, as row 1 is header)
                 const lastSyncedRow = parseInt(localStorage.getItem('lastSyncedRow') || '1', 10);
-                const startRow = lastSyncedRow + 1;
+                const lastSyncedEventId = localStorage.getItem('lastSyncedEventId');
+
+                // If we have synced data (row > 1), we fetch overlapping to verify.
+                // If row is 1, we fetch from 2 (no overlap check possible/needed against header).
+                const startRow = lastSyncedRow > 1 ? lastSyncedRow : 2;
 
                 console.log(`[SyncManager] Fetching from row ${startRow}...`);
                 const rows = await fetchRows(spreadsheetId, 'Events', startRow);
 
                 if (rows && rows.length > 0) {
-                    console.log(`[SyncManager] Received ${rows.length} new rows.`);
+                    let newRows = rows;
 
-                    for (const row of rows) {
-                        const [eventId, timestamp, type, payloadStr] = row;
-                        if (!eventId || !type) continue;
+                    // Verification Logic
+                    if (lastSyncedRow > 1) {
+                        const overlappingRow = rows[0];
+                        const overlappingEventId = overlappingRow[0];
 
-                        // Check if we already have this event (deduplication still good safety net)
-                        const existingEvent = state.events.find(e => e.eventId === eventId);
-
-                        if (!existingEvent) {
-                            let payload = {};
-                            try {
-                                payload = JSON.parse(payloadStr);
-                            } catch (e) {
-                                console.error('Failed to parse payload for event', eventId, e);
-                            }
-
-                            const event = { eventId, timestamp, type, payload };
-
-                            // 1. Add to DB as synced
-                            await addSyncedEvent(event);
-
-                            // 2. Ingest into Redux
-                            store.dispatch(ingestSyncedEvent(event));
+                        if (overlappingEventId !== lastSyncedEventId) {
+                            console.warn(`[SyncManager] Sync Mismatch! Expected ${lastSyncedEventId}, got ${overlappingEventId}. Resetting sync pointer.`);
+                            localStorage.setItem('lastSyncedRow', '1');
+                            localStorage.removeItem('lastSyncedEventId');
+                            return; // Next sync will start from 1
                         }
+
+                        // Verification Passed: Discard overlapping row
+                        newRows = rows.slice(1);
                     }
 
-                    // Update Pointer
-                    const newLastSyncedRow = lastSyncedRow + rows.length;
-                    localStorage.setItem('lastSyncedRow', newLastSyncedRow.toString());
-                    console.log(`[SyncManager] Updated lastSyncedRow to ${newLastSyncedRow}`);
+                    if (newRows.length > 0) {
+                        console.log(`[SyncManager] Received ${newRows.length} new rows.`);
+                        let lastEventIdProcessed = lastSyncedEventId;
+
+                        for (const row of newRows) {
+                            const [eventId, timestamp, type, payloadStr] = row;
+                            if (!eventId || !type) continue;
+
+                            lastEventIdProcessed = eventId;
+
+                            // Check if we already have this event (deduplication still good safety net)
+                            const existingEvent = state.events.find(e => e.eventId === eventId);
+
+                            if (!existingEvent) {
+                                let payload = {};
+                                try {
+                                    payload = JSON.parse(payloadStr);
+                                } catch (e) {
+                                    console.error('Failed to parse payload for event', eventId, e);
+                                }
+
+                                const event = { eventId, timestamp, type, payload };
+
+                                // 1. Add to DB as synced
+                                // await addSyncedEvent(event); // Optimization: batch add in future?
+                                await addSyncedEvent(event);
+
+                                // 2. Ingest into Redux
+                                store.dispatch(ingestSyncedEvent(event));
+                            }
+                        }
+
+                        // Update Pointer
+                        const finalRowIndex = lastSyncedRow + newRows.length; // If verified, lastSyncedRow is base, plus new rows
+                        // Wait: if startRow was lastSyncedRow, rows.length includes overlap.
+                        // If we fetched 5 rows (1 overlap + 4 new), newRows is 4.
+                        // lastSyncedRow (old) + 4 = new lastSyncedRow. Correct.
+                        // If startRow was 2 (lastSyncedRow=1), newRows is all rows.
+                        // 1 + rows.length = new. Correct.
+
+                        localStorage.setItem('lastSyncedRow', finalRowIndex.toString());
+                        if (lastEventIdProcessed) {
+                            localStorage.setItem('lastSyncedEventId', lastEventIdProcessed);
+                        }
+                        console.log(`[SyncManager] Updated lastSyncedRow to ${finalRowIndex}`);
+                    } else {
+                        console.log('[SyncManager] Verified up to date.');
+                    }
                 } else {
-                    console.log('[SyncManager] No new rows.');
+                    // 400 caught below would handle "nothing found" if it threw. 
+                    // If fetchRows returns [], it means empty range? typically fetchRows throws on invalid range?
+                    // Sheets API returns "values": undefined if empty. Our wrapper returns [].
+
+                    // If we asked for startRow=lastSyncedRow and got [], it means lastSyncedRow NO LONGER EXISTS.
+                    // Because if it existed, we'd get at least 1 row (overlap).
+                    if (lastSyncedRow > 1) {
+                        console.warn('[SyncManager] Last synced row missing. Sheet truncated? Resetting.');
+                        localStorage.setItem('lastSyncedRow', '1');
+                        localStorage.removeItem('lastSyncedEventId');
+                    }
                 }
             }
 
-        } catch (e) {
+        } catch (e: any) {
             console.error('[SyncManager] Sync failed:', e);
+            // Check for 400 Bad Request
+            let status = 0;
+            try {
+                const errObj = JSON.parse(e.message);
+                status = errObj.status;
+            } catch (jsonErr) {
+                // Not JSON
+            }
+
+            if (status === 400) {
+                // We asked for a range (e.g. 2115:Z) and got 400.
+                // This MOST LIKELY means 2115 does not exist.
+                // So our pointer is invalid. Reset.
+                console.warn('[SyncManager] 400 Error on fetch. Pointer invalid. Resetting.');
+                localStorage.setItem('lastSyncedRow', '1');
+                localStorage.removeItem('lastSyncedEventId');
+                return;
+            }
         } finally {
             this.isSyncing = false;
         }
