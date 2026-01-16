@@ -58,6 +58,9 @@ const eventLogSlice = createSlice({
     hydrateEvent: (state, action: PayloadAction<FoodEvent>) => {
       // Just add to state, no side effects expected from middleware for this action name
       state.push(action.payload);
+    },
+    hydrateAllEvents: (state, action: PayloadAction<FoodEvent[]>) => {
+      state.push(...action.payload);
     }
   }
 });
@@ -67,99 +70,95 @@ const eventLogSlice = createSlice({
 // For the MVP with Redux, we updates them incrementally as events are dispatched.
 // Ideally, we'd use a meta-reducer or just derive selectors, but for UI performance:
 
+const applyEventToState = (state: any, event: FoodEvent) => {
+  switch (event.type) {
+    case 'log/entryConfirmed': {
+      // Payload expected: { entry: LogEntry }
+      const entry = event.payload.entry as LogEntry;
+
+      // Idempotency Check: using business ID (entry.id)
+      // Idempotency Check: using business ID (entry.id)
+      if (state.log.some((e: LogEntry) => e.id === entry.id)) {
+        return;
+      }
+
+      state.log.push(entry);
+
+      // Update Stats
+      if (!state.stats[entry.date]) {
+        state.stats[entry.date] = { date: entry.date, totalCalories: 0, totalProtein: 0, totalFat: 0, totalCarbs: 0 };
+      }
+      const stat = state.stats[entry.date];
+      stat.totalCalories += Number(entry.calories || 0);
+      stat.totalProtein += Number(entry.protein || 0);
+      stat.totalFat += Number(entry.fat || 0);
+      stat.totalCarbs += Number(entry.carbs || 0);
+      break;
+    }
+
+    case 'log/entryUpdated': {
+      const { entryId, changes } = event.payload;
+      const index = state.log.findIndex((e: LogEntry) => e.id === entryId);
+      if (index !== -1) {
+        const oldEntry = state.log[index];
+
+        // 1. Decrement old stats
+        if (state.stats[oldEntry.date]) {
+          const stat = state.stats[oldEntry.date];
+          stat.totalCalories -= Number(oldEntry.calories || 0);
+          stat.totalProtein -= Number(oldEntry.protein || 0);
+          stat.totalFat -= Number(oldEntry.fat || 0);
+          stat.totalCarbs -= Number(oldEntry.carbs || 0);
+        }
+
+        // 2. Update Entry
+        const newEntry = { ...oldEntry, ...changes };
+        state.log[index] = newEntry;
+
+        // 3. Increment new stats
+        if (!state.stats[newEntry.date]) {
+          state.stats[newEntry.date] = { date: newEntry.date, totalCalories: 0, totalProtein: 0, totalFat: 0, totalCarbs: 0 };
+        }
+        const stat = state.stats[newEntry.date];
+        stat.totalCalories += Number(newEntry.calories || 0);
+        stat.totalProtein += Number(newEntry.protein || 0);
+        stat.totalFat += Number(newEntry.fat || 0);
+        stat.totalCarbs += Number(newEntry.carbs || 0);
+      }
+      break;
+    }
+    case 'log/entryDeleted': {
+      const { entryId } = event.payload;
+      const index = state.log.findIndex((e: LogEntry) => e.id === entryId);
+      if (index !== -1) {
+        const entry = state.log[index];
+
+        // Decrement stats
+        if (state.stats[entry.date]) {
+          const stat = state.stats[entry.date];
+          stat.totalCalories -= Number(entry.calories || 0);
+          stat.totalProtein -= Number(entry.protein || 0);
+          stat.totalFat -= Number(entry.fat || 0);
+          stat.totalCarbs -= Number(entry.carbs || 0);
+        }
+
+        // Remove from log
+        state.log.splice(index, 1);
+      }
+      break;
+    }
+  }
+};
+
 const projectionsSlice = createSlice({
   name: 'projections',
   initialState: { log: initialState.log, stats: initialState.stats },
   reducers: {
     processEvent: (state, action: PayloadAction<FoodEvent>) => {
-      const event = action.payload;
-      // Idempotency Check: correct place depends on if we rely on log or projections.
-      // Ideally we check if event is in log. But projections slice acts on stream.
-      // If we assume sequential replay, we should check set of processed IDs?
-      // Or check if event is already in `log` slice?
-      // But `projections` slice has its own `log`.
-      // Removed global idempotency check as it's now specific to the event type.
-
-      switch (event.type) {
-        case 'log/entryConfirmed': {
-          // Payload expected: { entry: LogEntry }
-          const entry = event.payload.entry as LogEntry;
-
-          // Idempotency Check: using business ID (entry.id)
-          if (state.log.some(e => e.id === entry.id)) {
-            return;
-          }
-
-          state.log.push(entry);
-
-          // Update Stats
-          if (!state.stats[entry.date]) {
-            state.stats[entry.date] = { date: entry.date, totalCalories: 0, totalProtein: 0, totalFat: 0, totalCarbs: 0 };
-          }
-          const stat = state.stats[entry.date];
-          stat.totalCalories += Number(entry.calories || 0);
-          stat.totalProtein += Number(entry.protein || 0);
-          stat.totalFat += Number(entry.fat || 0);
-          stat.totalCarbs += Number(entry.carbs || 0);
-          break;
-        }
-
-        case 'log/entryUpdated': {
-          const { entryId, changes } = event.payload;
-          const index = state.log.findIndex(e => e.id === entryId);
-          if (index !== -1) {
-            const oldEntry = state.log[index];
-
-            // 1. Decrement old stats
-            if (state.stats[oldEntry.date]) {
-              const stat = state.stats[oldEntry.date];
-              stat.totalCalories -= Number(oldEntry.calories || 0);
-              stat.totalProtein -= Number(oldEntry.protein || 0);
-              stat.totalFat -= Number(oldEntry.fat || 0);
-              stat.totalCarbs -= Number(oldEntry.carbs || 0);
-            }
-
-            // 2. Update Entry
-            const newEntry = { ...oldEntry, ...changes };
-            state.log[index] = newEntry;
-
-            // 3. Increment new stats (date might have changed! but ignoring that complexity for MVP+, assuming date matches)
-            // Safety: If date changed, we'd need to handle that. Assuming date stays same for simplified logic unless prompt said editable date.
-            // Prompt said "dates/times... editable". Let's assume date CAN change.
-            // So we should look up stat for newEntry.date.
-
-            if (!state.stats[newEntry.date]) {
-              state.stats[newEntry.date] = { date: newEntry.date, totalCalories: 0, totalProtein: 0, totalFat: 0, totalCarbs: 0 };
-            }
-            const stat = state.stats[newEntry.date];
-            stat.totalCalories += Number(newEntry.calories || 0);
-            stat.totalProtein += Number(newEntry.protein || 0);
-            stat.totalFat += Number(newEntry.fat || 0);
-            stat.totalCarbs += Number(newEntry.carbs || 0);
-          }
-          break;
-        }
-        case 'log/entryDeleted': {
-          const { entryId } = event.payload;
-          const index = state.log.findIndex(e => e.id === entryId);
-          if (index !== -1) {
-            const entry = state.log[index];
-
-            // Decrement stats
-            if (state.stats[entry.date]) {
-              const stat = state.stats[entry.date];
-              stat.totalCalories -= Number(entry.calories || 0);
-              stat.totalProtein -= Number(entry.protein || 0);
-              stat.totalFat -= Number(entry.fat || 0);
-              stat.totalCarbs -= Number(entry.carbs || 0);
-            }
-
-            // Remove from log
-            state.log.splice(index, 1);
-          }
-          break;
-        }
-      }
+      applyEventToState(state, action.payload);
+    },
+    processAllEvents: (state, action: PayloadAction<FoodEvent[]>) => {
+      action.payload.forEach(event => applyEventToState(state, event));
     }
   }
 });
@@ -271,14 +270,37 @@ export const dispatchEvent = (type: string, payload: any) => async (dispatch: an
 
 export const ingestSyncedEvent = (event: FoodEvent) => async (dispatch: any) => {
   // 1. Process for Projections
-  dispatch(processEvent(event));
+  if (event.type === 'settings/goalsUpdated') {
+    dispatch(updateGoals(event.payload));
+  } else {
+    dispatch(processEvent(event));
+  }
 
-  // 2. Append to Log in memory (but bypass middleware persistence? 
-  //    Actually we DO need it in memory state. 
-  //    We need to make sure `appendEvent` doesn't trigger middleware persistence for SYNCED events if we handle it there.
-  //    OR, we use a different action for hydration.
-  //    Let's add `hydrateEvent` action to eventLogSlice.
+  // 2. Append to Log in memory
   dispatch(eventLogSlice.actions.hydrateEvent(event));
+};
+
+export const batchHydrateEvents = (events: FoodEvent[]) => async (dispatch: any) => {
+  // 1. Process all projections
+  const projectionEvents: FoodEvent[] = [];
+
+  events.forEach(event => {
+    if (event.type === 'settings/goalsUpdated') {
+      dispatch(updateGoals(event.payload));
+    } else {
+      projectionEvents.push(event);
+    }
+
+    // Also hydrate to memory log
+    // We can do this in batch below
+  });
+
+  if (projectionEvents.length > 0) {
+    dispatch(projectionsSlice.actions.processAllEvents(projectionEvents));
+  }
+
+  // 2. Hydrate all events to memory
+  dispatch(eventLogSlice.actions.hydrateAllEvents(events));
 };
 
 export type RootState = ReturnType<typeof store.getState>;

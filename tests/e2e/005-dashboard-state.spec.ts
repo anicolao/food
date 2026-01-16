@@ -87,6 +87,8 @@ test('US-014: Dashboard State Persistence', async ({ page }, testInfo) => {
     await expect(page.locator('.feed-header h2')).toBeVisible({ timeout: 10000 });
 
     // 1. Verify Default State
+    // Wait for sync to populate data to avoid screenshot mismatch (empty vs populated)
+    await expect(page.locator('.activity-card').first()).toBeVisible();
     await tester.step('initial-load', {
         description: 'Dashboard loads today',
         verifications: [
