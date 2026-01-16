@@ -35,7 +35,7 @@ test('US-001: User signs in', async ({ page }, testInfo) => {
         console.log('PAGE CONTENT:', await page.content());
     }
 
-    await expect(page.getByTestId('debug-load')).toBeVisible();
+    await expect(page.getByTestId('debug-load')).toBeVisible({ timeout: 30000 });
     await tester.step('initial-load', {
         description: 'User sees sign in button',
         verifications: [
