@@ -1,5 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte';
+  import { get } from 'svelte/store';
   import { initializeAuth, signIn, signOut, ensureValidToken, authState } from '$lib/auth';
 
   import { store } from '$lib/store';
@@ -162,6 +163,10 @@
 
 
   onMount(() => {
+      // Initialize auth state synchronously to prevent flicker
+      const initialAuthState = get(authState);
+      authenticated = !!initialAuthState.token;
+      
       // Subscribe to auth state from store (initialized in Layout)
       const unsubAuth = authState.subscribe(state => {
           authenticated = !!state.token;
@@ -169,13 +174,20 @@
               syncManager.sync();
           }
       });
+      
       // Trigger sync if already auth (e.g. from local storage restore)
-      ensureValidToken().then(token => {
-          if (token) {
-              authenticated = true;
-              syncManager.sync(); // This is async but we don't await it here to avoid blocking
-          }
-      });
+      // Only call ensureValidToken if we're not already authenticated
+      if (!authenticated) {
+          ensureValidToken().then(token => {
+              if (token) {
+                  // Don't set authenticated here, let the subscription handle it
+                  syncManager.sync();
+              }
+          });
+      } else {
+          // Already authenticated, trigger sync
+          syncManager.sync();
+      }
 
     const unsubscribe = store.subscribe(() => {
       const state = store.getState();
