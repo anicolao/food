@@ -1,23 +1,30 @@
-import { test as base, expect } from '@playwright/test';
+import { test as base, expect } from "@playwright/test";
 
 // Define custom worker fixtures
 interface CustomWorkerFixtures {
-    workerCheck: void;
+  workerCheck: void;
 }
 
 export const test = base.extend<{}, CustomWorkerFixtures>({
-    workerCheck: [async ({ }, use, testInfo) => {
-        if (testInfo.config.workers > 1) {
-            throw new Error(`
-Configuration Error: E2E tests must be run serially to avoid state pollution and concurrency flakes.
+  workerCheck: [
+    async ({}, use, testInfo) => {
+      const EXPECTED_WORKERS = 8;
+      if (testInfo.config.workers != EXPECTED_WORKERS) {
+        throw new Error(`
+Configuration Error: E2E tests should run in parallel for performance.
+    **THERE ARE NO RACE CONDITIONS IN E2E TESTS.**
+    **THERE IS NO CROSS TEST STATE.**
+    **IF YOUR TESTS ARE FAILING DUE TO PARALLELISM, FIX THE TESTS.**
 Found workers: ${testInfo.config.workers}
-Expected: 1
+Expected: ${EXPECTED_WORKERS}
 
-Please use 'npm run test:e2e' which sets '--workers=1', or explicitly pass '--workers=1' to your playwright command.
+Please use 'npm run test:e2e' which sets '--workers=${EXPECTED_WORKERS}'
             `);
-        }
-        await use();
-    }, { auto: true, scope: 'worker' }]
+      }
+      await use();
+    },
+    { auto: true, scope: "worker" },
+  ],
 });
 
 export { expect };
