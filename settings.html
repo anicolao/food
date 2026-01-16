@@ -12,10 +12,10 @@
 	<meta name="apple-mobile-web-app-title" content="Food Fixups">
 	<link rel="apple-touch-icon" href="./apple-touch-icon.png">
 	
-		<link rel="modulepreload" href="./_app/immutable/entry/start.C1ln4MfD.js">
-		<link rel="modulepreload" href="./_app/immutable/chunks/BLm5iMyw.js">
+		<link rel="modulepreload" href="./_app/immutable/entry/start.ArdcJTwJ.js">
+		<link rel="modulepreload" href="./_app/immutable/chunks/Dq7yRW-q.js">
 		<link rel="modulepreload" href="./_app/immutable/chunks/CfL-_DDI.js">
-		<link rel="modulepreload" href="./_app/immutable/entry/app.BIJ5Ipwy.js">
+		<link rel="modulepreload" href="./_app/immutable/entry/app.C2XCtiGB.js">
 		<link rel="modulepreload" href="./_app/immutable/chunks/PPVm8Dsz.js">
 		<link rel="modulepreload" href="./_app/immutable/chunks/DsnmJJEf.js">
 		<link rel="modulepreload" href="./_app/immutable/chunks/CZsjLerP.js">
@@ -28,7 +28,7 @@
 	<div style="display: contents">
 			<script>
 				{
-					__sveltekit_1si7y2a = {
+					__sveltekit_n6zkpq = {
 						base: new URL(".", location).pathname.slice(0, -1),
 						assets: "/food"
 					};
@@ -36,11 +36,17 @@
 					const element = document.currentScript.parentElement;
 
 					Promise.all([
-						import("./_app/immutable/entry/start.C1ln4MfD.js"),
-						import("./_app/immutable/entry/app.BIJ5Ipwy.js")
+						import("./_app/immutable/entry/start.ArdcJTwJ.js"),
+						import("./_app/immutable/entry/app.C2XCtiGB.js")
 					]).then(([kit, app]) => {
 						kit.start(app, element);
 					});
+
+					if ('serviceWorker' in navigator) {
+						addEventListener('load', function () {
+							navigator.serviceWorker.register('./service-worker.js');
+						});
+					}
 				}
 			</script>
 		</div>
