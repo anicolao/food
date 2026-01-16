@@ -23,6 +23,7 @@ export interface LogEntry {
   protein: number;
   imageDriveUrl?: string; // URL in Google Drive
   rawJson?: any; // Full Gemini response
+  rationale?: string; // Explainer text for the estimation
 }
 
 interface DailyStats {

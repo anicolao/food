@@ -1,6 +1,7 @@
 import { writable } from 'svelte/store';
 
-export const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_OAUTH_ID;
+// @ts-ignore
+export const GOOGLE_CLIENT_ID = (import.meta.env && import.meta.env.VITE_GOOGLE_OAUTH_ID) || 'mock_client_id';
 export const SCOPES = [
     'https://www.googleapis.com/auth/drive.file',
     'https://www.googleapis.com/auth/spreadsheets',

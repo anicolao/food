@@ -1,41 +1,39 @@
-# Sync Manager UX Improvements
+# Fix Reducer Rationale Update & Add Unit Test
 
 ## User Prompts & Context
 
 ### Original Request
-> Sync UX Verification
-> The user's main objective is to verify the implemented Sync UX improvements by simulating a sync error and observing the UI's response. This includes:
-> 1. Injecting a simulated sync failure into sync-manager.ts.
-> 2. Verifying the red error icon appears in the NetworkStatus component.
-> 3. Confirming navigation to the /settings/network page upon clicking the error icon.
-> 4. Checking for the presence of the "Problem Detected" section, the error message, and the pulsing red "Reset Cache & Resync" button on the settings page.
-> 5. Reverting the simulated error and confirming the UI returns to its normal state.
+> I need a new unit test. Here is a sequence of actions for the reducer:
+> {"imagesCount":0,"rawJson":{...},"inputType":"text"}
+> ... [Full sequence omitted for brevity in template, but will include full json in actual PR if needed by strict rules, though standard practice is usually the intent. The instructions say "ENTIRETY" so I will paste the whole block below]
+
+> I need a new unit test. Here is a sequence of actions for the reducer:
+> {"imagesCount":0,"rawJson":{"is_label":false,"item_name":"Breakfast Oatmeal with Chia and Skim Milk","rationale":"Estimated nutrition based on standard Canadian values for 1/3 cup dry old-fashioned oatmeal, 1/2 tbsp chia seeds, 1/2 tbsp oat flour, and 1 cup skim milk, considering typical portion sizes and nutritional content for each ingredient.","calories":236,"fat":{"total":4.5},"carbohydrates":{"total":36},"protein":13.4,"searchQuery":"Oatmeal with chia seeds and skim milk"},"inputType":"text"}
+> {"entry":{"id":"721341fa-83a6-40c3-b0f8-7b8225d239f1","date":"2026-01-15","time":"06:36","mealType":"Breakfast","description":"Breakfast Oatmeal with Chia and Skim Milk","rationale":"Estimated nutrition based on standard Canadian values for 1/3 cup dry old-fashioned oatmeal, 1/2 tbsp chia seeds, 1/2 tbsp oat flour, and 1 cup skim milk, considering typical portion sizes and nutritional content for each ingredient.","calories":236,"fat":4.5,"carbs":36,"protein":13.4,"imageDriveUrl":"","rawJson":{"item_name":"Breakfast Oatmeal with Chia and Skim Milk","rationale":"Estimated nutrition based on standard Canadian values for 1/3 cup dry old-fashioned oatmeal, 1/2 tbsp chia seeds, 1/2 tbsp oat flour, and 1 cup skim milk, considering typical portion sizes and nutritional content for each ingredient.","calories":236,"protein":13.4,"carbohydrates":{"total":36},"fat":{"total":4.5}}}}
+> {"imagesCount":0,"rawJson":{"is_label":false,"item_name":"Ham and creamy sauce low carb tortilla wrap","rationale":"The estimation is based on two Mission Carb Balance soft taco tortillas (approx. 60 kcal, 2g fat, 15g carbs, 4g protein each), 4 oz (113g) of lean deli ham (approx. 125 kcal, 3.5g fat, 2g carbs, 21.5g protein), and 1 tablespoon of a generic creamy sauce, assuming 'bichon sauce' is a typo for a light creamy dressing like light mayonnaise or ranch (approx. 40 kcal, 4g fat, 1g carbs, 0.5g protein).","calories":285,"fat":{"total":11.5},"carbohydrates":{"total":33},"protein":30,"searchQuery":"Ham and creamy sauce low carb tortilla wrap"},"inputType":"text"}
+> {"entry":{"id":"0377c20a-6251-4bf5-9ef5-3c59c5cf093c","date":"2026-01-15","time":"11:51","mealType":"Lunch","description":"Ham and creamy sauce low carb tortilla wrap","rationale":"The estimation is based on two Mission Carb Balance soft taco tortillas (approx. 60 kcal, 2g fat, 15g carbs, 4g protein each), 4 oz (113g) of lean deli ham (approx. 125 kcal, 3.5g fat, 2g carbs, 21.5g protein), and 1 tablespoon of a generic creamy sauce, assuming 'bichon sauce' is a typo for a light creamy dressing like light mayonnaise or ranch (approx. 40 kcal, 4g fat, 1g carbs, 0.5g protein).","calories":285,"fat":11.5,"carbs":33,"protein":30,"imageDriveUrl":"https://drive.google.com/thumbnail?id=1KOB5aVi9PhJzweWb_bga_iV5HAXxN-97&sz=w2048","rawJson":{"item_name":"Ham and creamy sauce low carb tortilla wrap","rationale":"The estimation is based on two Mission Carb Balance soft taco tortillas (approx. 60 kcal, 2g fat, 15g carbs, 4g protein each), 4 oz (113g) of lean deli ham (approx. 125 kcal, 3.5g fat, 2g carbs, 21.5g protein), and 1 tablespoon of a generic creamy sauce, assuming 'bichon sauce' is a typo for a light creamy dressing like light mayonnaise or ranch (approx. 40 kcal, 4g fat, 1g carbs, 0.5g protein).","calories":285,"protein":30,"carbohydrates":{"total":33},"fat":{"total":11.5}}}}
+> {"entry":{"id":"ec693587-27f8-4172-8958-a7c0ff00b101","date":"2026-01-15","time":"11:51","mealType":"Lunch","description":"Ham and creamy sauce low carb tortilla wrap","rationale":"The estimation is based on two Mission Carb Balance soft taco tortillas (approx. 60 kcal, 2g fat, 15g carbs, 4g protein each), 4 oz (113g) of lean deli ham (approx. 125 kcal, 3.5g fat, 2g carbs, 21.5g protein), and 1 tablespoon of a generic creamy sauce, assuming 'bichon sauce' is a typo for a light creamy dressing like light mayonnaise or ranch (approx. 40 kcal, 4g fat, 1g carbs, 0.5g protein).","calories":285,"fat":11.5,"carbs":33,"protein":30,"imageDriveUrl":"https://drive.google.com/thumbnail?id=1cSPbOJAVil802a-wFpQwGG0dzQe5JBKx&sz=w2048","rawJson":{"item_name":"Ham and creamy sauce low carb tortilla wrap","rationale":"The estimation is based on two Mission Carb Balance soft taco tortillas (approx. 60 kcal, 2g fat, 15g carbs, 4g protein each), 4 oz (113g) of lean deli ham (approx. 125 kcal, 3.5g fat, 2g carbs, 21.5g protein), and 1 tablespoon of a generic creamy sauce, assuming 'bichon sauce' is a typo for a light creamy dressing like light mayonnaise or ranch (approx. 40 kcal, 4g fat, 1g carbs, 0.5g protein).","calories":285,"protein":30,"carbohydrates":{"total":33},"fat":{"total":11.5}}}}
+> {"entryId":"ec693587-27f8-4172-8958-a7c0ff00b101","changes":{"mealType":"Lunch","description":"Ham and creamy sauce low carb tortilla wrap","rationale":"The estimation is based on two Mission Carb Balance soft taco tortillas (approx. 60 kcal, 2g fat, 15g carbs, 4g protein each), 4 oz (113g) of lean deli ham (approx. 125 kcal, 3.5g fat, 2g carbs, 21.5g protein), and 1 tablespoon of Bitch'n sauce","calories":285,"protein":30,"carbs":33,"fat":11.5}}
+> {"imagesCount":1,"rawJson":{"is_label":false,"item_name":"Breakfast Plate with English Muffin and Potato & Egg Bake","rationale":"The meal consists of two main components: 1) An English muffin, split and topped with peanut butter and jam. We estimate 1 whole English muffin, 2 tablespoons of peanut butter, and 2 tablespoons of jam. 2) A large slice of what appears to be a potato and egg bake or frittata. This estimate accounts for eggs, shredded potatoes, and some added fat from cooking, potentially cheese. All estimates are based on visible portion sizes and standard Canadian nutritional values.","calories":750,"fat":{"total":37},"carbohydrates":{"total":85},"protein":28,"searchQuery":"English muffin with peanut butter and jam and potato egg bake"}}
+> {"entry":{"id":"86a73dbd-932f-4243-be77-2ab57054ddea","date":"2026-01-16","time":"07:19","mealType":"Breakfast","description":"Breakfast Plate with English Muffin and Potato & Egg Bake","rationale":"The meal consists of two main components: 1) An English muffin, split and topped with peanut butter and jam. We estimate 1 whole English muffin, 2 tablespoons of peanut butter, and 2 tablespoons of jam. 2) A large slice of what appears to be a potato and egg bake or frittata. This estimate accounts for eggs, shredded potatoes, and some added fat from cooking, potentially cheese. All estimates are based on visible portion sizes and standard Canadian nutritional values.","calories":750,"fat":37,"carbs":85,"protein":28,"imageDriveUrl":"https://drive.google.com/thumbnail?id=16_3FhsMXkniCi9ZpcqJn-57V3zzf3n2n&sz=w2048","rawJson":{"item_name":"Breakfast Plate with English Muffin and Potato & Egg Bake","rationale":"The meal consists of two main components: 1) An English muffin, split and topped with peanut butter and jam. We estimate 1 whole English muffin, 2 tablespoons of peanut butter, and 2 tablespoons of jam. 2) A large slice of what appears to be a potato and egg bake or frittata. This estimate accounts for eggs, shredded potatoes, and some added fat from cooking, potentially cheese. All estimates are based on visible portion sizes and standard Canadian nutritional values.","calories":750,"protein":28,"carbohydrates":{"total":85},"fat":{"total":37}}}}
+
+> At teh end of the edit action, as well as at the end of all the actions, I expect the corresponding entry in the state to reflect the edit. Does the test pass? If not, make it pass. The edit action is the 6th one in the list.
 
 ## Description
-This PR implements comprehensive error handling and UI feedback for the synchronization process. Previously, sync errors were silent or transient. Now, they persist and guide the user to a resolution.
+This PR fixes an issue where the `rationale` field was not correctly typed in the `LogEntry` interface, causing potential type safety issues, although the runtime reducer logic was working correctly. It also adds a reproduction unit test to ensure regression testing for the reducer's edit logic.
 
 ### Changes
-1.  **Lib Layer (`src/lib/sync-manager.ts`)**:
-    *   Added `syncError` store to track the last error message.
-    *   Updated `sync()` to catch exceptions (including 400/403) and populate `syncError`.
-    *   Ensured `hardResync()` clears the error state.
-
-2.  **UI Components (`src/lib/components/ui/NetworkStatus.svelte`)**:
-    *   Added subscription to `syncManager.syncError`.
-    *   Displays a **Red Error Icon** when an error is active, overriding other states.
-
-3.  **Pages (`src/routes/settings/network/+page.svelte`)**:
-    *   Added a "Problem Detected" section.
-    *   Displays the specific error message and troubleshooting advice.
-    *   Highlights the "Reset Cache & Resync" button with a `danger-glow` animation.
+1.  **Store (`src/lib/store.ts`)**:
+    *   Added `rationale?: string` to `LogEntry` interface.
+2.  **Auth (`src/lib/auth.ts`)**:
+    *   Added a safe access guard for `import.meta.env` to allow the module to be imported in the Node.js test environment without crashing.
+3.  **Tests (`tests/unit/store.test.ts`)**:
+    *   Added a new unit test that replays the provided action sequence and asserts that the `rationale` is correctly updated.
 
 ## Verification
-*   **Automated E2E**: Created `tests/e2e/099-sync-error.spec.ts` (temp) to simulate a 400 error and verify:
-    *   Red icon visibility.
-    *   Navigation to settings.
-    *   Error panel content.
-*   **Manual**: Verified locally via fault injection.
+*   **Automated Tests**: `npx tsx tests/unit/store.test.ts` passes.
+*   **Type Check**: `npm run check` passes.
 
 ## Artifacts
-*   [Implementation Plan](docs/implementation_plan_sync_ux.md)
-*   [Walkthrough](docs/walkthrough_sync_ux.md)
+*   [Implementation Plan](docs/implementation_plan_reducer_fix.md)
+*   [Walkthrough](docs/walkthrough_reducer_fix.md)
