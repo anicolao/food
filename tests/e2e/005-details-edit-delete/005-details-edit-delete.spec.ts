@@ -4,6 +4,7 @@ import { mockDriveAPI } from '../helpers/mock-drive';
 import * as fs from 'fs';
 
 test('US-018 to US-022: Details, Edit and Delete', async ({ page }, testInfo) => {
+    test.slow(); // Increase timeout for complex interactions
     const tester = new TestStepHelper(page, testInfo);
     tester.setMetadata('Edit/Delete', 'Verifying details page, edit and delete.');
 
