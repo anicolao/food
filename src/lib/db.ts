@@ -82,3 +82,30 @@ export async function addSyncedEvent(event: FoodEvent) {
         });
     }
 }
+
+export async function clearAllSyncedEvents() {
+    const db = await initDB();
+    const tx = db.transaction('events', 'readwrite');
+    // We only want to clear synced events? Or all events?
+    // "Force a complete resync (should delete local caches entirely)" usually means EVERYTHING.
+    // If we delete pending events, the user LOSES data if they were offline.
+    // BUT the requirement says "delete local caches entirely and fetch the entire spreadsheet".
+    // If I delete pending events that haven't synced, they are gone forever.
+    // Safer: Delete only SYNCED events.
+    // However, if the goal is "complete reset", maybe the user assumes spreadsheet has truth.
+    // Let's hold pending events if possible. 
+    // Actually, "delete local caches" implies cache of server data.
+    // I will delete ONLY items where syncStatus === 'synced'.
+
+    // Efficient way: iterate cursor
+    const index = tx.store.index('by-status');
+    // Use openCursor instead of openKeyCursor because 'delete' might not be supported on key cursors in some implementations
+    let cursor = await index.openCursor('synced');
+
+    while (cursor) {
+        await cursor.delete();
+        cursor = await cursor.continue();
+    }
+
+    await tx.done;
+}
