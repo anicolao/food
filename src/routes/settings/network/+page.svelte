@@ -5,6 +5,61 @@
     import { store, setConfig } from '$lib/store';
     import { getFileMetadata, renameFile, findDatabaseFiles } from '$lib/sheets';
     
+    // --- Versioning & SW Logic ---
+    const appVersion = `Food Tracker v${import.meta.env.VITE_APP_VERSION} (${new Date(import.meta.env.VITE_APP_BUILD_DATE).toLocaleDateString()} ${import.meta.env.VITE_APP_DIRTY_FLAG ? '⚠ ' : ''}${import.meta.env.VITE_APP_COMMIT_HASH})`;
+    
+    let updateReady = false;
+    let cacheSize = 'Unknown';
+    let dbSize = 'Unknown';
+
+    async function checkStorage() {
+        if (navigator.storage && navigator.storage.estimate) {
+            const { usage, quota } = await navigator.storage.estimate();
+            cacheSize = formatBytes(usage || 0);
+        }
+    }
+
+    function formatBytes(bytes: number, decimals = 2) {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const dm = decimals < 0 ? 0 : decimals;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+    }
+
+    function checkForUpdate() {
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.getRegistration().then(reg => {
+                if (reg && reg.waiting) {
+                    updateReady = true;
+                }
+            });
+             // Listen for messages from SW
+            navigator.serviceWorker.addEventListener('message', event => {
+                if (event.data && event.data.type === 'UPDATE_READY') {
+                    updateReady = true;
+                }
+            });
+        }
+    }
+
+    function applyUpdate() {
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.getRegistration().then(reg => {
+                if (reg && reg.waiting) {
+                    reg.waiting.postMessage({ type: 'SKIP_WAITING' });
+                    // Reload will happen automatically or we can force it
+                    // window.location.reload(); 
+                    // Better to wait for controller change?
+                }
+            });
+            navigator.serviceWorker.addEventListener('controllerchange', () => {
+                window.location.reload();
+            });
+        }
+    }
+    
     let isOnline = true;
     let pendingCount = 0;
     let isSyncing = false;
@@ -49,6 +104,8 @@
         
         interval = setInterval(checkStatus, 2000); 
         checkStatus();
+        checkStorage();
+        checkForUpdate();
     });
 
     onDestroy(() => {
@@ -138,9 +195,16 @@
         <h2>Connection</h2>
         <div class="status-row">
             <span class="label">Status</span>
-            <span class="value {isOnline ? 'online' : 'offline'}">
-                {isOnline ? 'Online' : 'Offline'}
-            </span>
+            <div class="status-value-group">
+                <span class="value {isOnline ? 'online' : 'offline'}">
+                    {isOnline ? 'Online' : 'Offline'}
+                </span>
+                {#if updateReady}
+                     <button class="update-badge" on:click={applyUpdate} title="Tap to update">
+                        ⬇ Update Ready
+                    </button>
+                {/if}
+            </div>
         </div>
         <div class="status-row">
             <span class="label">Sync Activity</span>
@@ -234,6 +298,20 @@
         <p class="help">Managed via Google Drive integration.</p>
     </section>
 
+
+    
+    <section class="card glass-panel">
+        <h2>Application Info</h2>
+        <div class="status-row">
+             <span class="label">Version</span>
+             <span class="value mono">{appVersion}</span>
+        </div>
+         <div class="status-row">
+             <span class="label">Storage Usage</span>
+             <span class="value">{cacheSize}</span>
+        </div>
+    </section>
+    
     <section class="actions">
          <button class="text-btn danger" on:click={handleHardResync} disabled={!isOnline || isSyncing}>
             Reset Cache & Resync
@@ -447,4 +525,34 @@
     
     .mt-4 { margin-top: 1rem; }
     .loading, .empty { padding: 1rem; text-align: center; color: #888; }
+    
+    .status-value-group {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .update-badge {
+        background: #2ecc71;
+        color: white;
+        border: none;
+        padding: 2px 8px;
+        border-radius: 12px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        cursor: pointer;
+        animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+        0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(46, 204, 113, 0.7); }
+        70% { transform: scale(1.05); box-shadow: 0 0 0 6px rgba(46, 204, 113, 0); }
+        100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(46, 204, 113, 0); }
+    }
+    
+    .mono {
+        font-family: monospace;
+        font-size: 0.8rem;
+        opacity: 0.8;
+    }
 </style>
