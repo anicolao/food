@@ -1,5 +1,6 @@
 import { test, expect } from '../fixtures';
 import { TestStepHelper } from '../helpers/test-step-helper';
+import { mockDriveAPI } from '../helpers/mock-drive';
 
 test('US-001: User signs in', async ({ page }, testInfo) => {
     const tester = new TestStepHelper(page, testInfo);
@@ -19,10 +20,8 @@ test('US-001: User signs in', async ({ page }, testInfo) => {
         };
     });
 
-    await page.route('**googleapis.com**', async route => {
-        // Minimal mock for auth flow which triggers sync
-        await route.fulfill({ json: { files: [{ id: 'mock-id' }] } });
-    });
+    // Generic Google Drive & Sheets Mocks
+    await mockDriveAPI(page);
 
     // Block real Google Identity script to prevent overwriting mocks
     await page.route('https://accounts.google.com/gsi/client', route => route.abort());

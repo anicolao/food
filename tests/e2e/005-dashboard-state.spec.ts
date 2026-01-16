@@ -1,5 +1,6 @@
 import { test, expect } from './fixtures';
 import { TestStepHelper } from './helpers/test-step-helper';
+import { mockDriveAPI } from './helpers/mock-drive';
 
 test('US-014: Dashboard State Persistence', async ({ page }, testInfo) => {
     test.slow(); // Increase timeout for CI/Load
@@ -33,31 +34,12 @@ test('US-014: Dashboard State Persistence', async ({ page }, testInfo) => {
     await page.route('https://accounts.google.com/gsi/client', route => route.abort());
 
     // Robust Google API Mocks
+    await mockDriveAPI(page);
     await page.route('**googleapis.com**', async route => {
         const url = route.request().url();
 
         if (url.includes('drive/v3/files')) {
-            if (url.includes('appProperties')) {
-                // Mock robust discovery search
-                // Return no files to force legacy path, OR return a mocked file to test robust path.
-                // Letting it return [] (empty) forces legacy migration path which is good to test.
-                await route.fulfill({ json: { files: [] } });
-            } else if (url.includes('FoodLog')) {
-                await route.fulfill({ json: { files: [{ id: 'mock-folder-id', name: 'FoodLog' }] } });
-            } else if (url.includes('TheFoodTrackerEventLog')) {
-                // Legacy search
-                await route.fulfill({ json: { files: [{ id: 'mock-sheet-id', name: 'TheFoodTrackerEventLog' }] } });
-            } else if (url.match(/files\/[^/]+$/)) {
-                // Handle single file metadata fetch (GET) or PATCH
-                if (route.request().method() === 'GET') {
-                    await route.fulfill({ json: { id: 'mock-sheet-id', name: 'TheFoodTrackerEventLog', mimeType: 'application/vnd.google-apps.spreadsheet' } });
-                } else {
-                    // PATCH etc
-                    await route.fulfill({ json: { id: 'mock-sheet-id' } });
-                }
-            } else {
-                await route.fulfill({ json: { id: 'mock-id' } });
-            }
+            await route.fallback();
         } else if (url.includes('sheets.googleapis.com')) {
             if (url.includes('values/Events')) {
                 const mockEntry = {

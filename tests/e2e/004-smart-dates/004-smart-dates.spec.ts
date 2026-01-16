@@ -1,5 +1,6 @@
 import { test, expect } from '../fixtures';
 import { TestStepHelper } from '../helpers/test-step-helper';
+import { mockDriveAPI } from '../helpers/mock-drive';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -52,6 +53,7 @@ test('US-013 to US-017: Smart Date Formatting', async ({ page }, testInfo) => {
     await page.route('https://accounts.google.com/gsi/client', route => route.abort());
 
     // Mock Drive/Photos/Sheets/Gemini
+    await mockDriveAPI(page);
     await page.route(/drive\.mock/, async route => {
         const buffer = fs.readFileSync('tests/e2e/fixtures/apple.png');
         await route.fulfill({ body: buffer, contentType: 'image/png' });
@@ -63,18 +65,12 @@ test('US-013 to US-017: Smart Date Formatting', async ({ page }, testInfo) => {
 
         // Drive Discovery Mocks (ensureDataStructures)
         if (url.includes('drive/v3/files')) {
-            if (url.includes('foodlog') || url.includes('FoodLog')) {
-                // Search for Folder
-                await route.fulfill({ json: { files: [{ id: 'mock-folder-id', name: 'FoodLog' }] } });
-            } else if (url.includes('TheFoodTrackerEventLog')) {
-                // Search for File
-                await route.fulfill({ json: { files: [{ id: 'mock-spreadsheet-id', name: 'TheFoodTrackerEventLog' }] } });
-            } else if (url.includes('uploadType=multipart')) {
+            if (url.includes('uploadType=multipart')) {
                 // Upload
                 await route.fulfill({ json: { id: 'file-123', webViewLink: 'https://drive.mock/img.jpg', thumbnailLink: 'https://drive.mock/thumb.jpg' } });
             } else {
                 // Creation Fallback
-                await route.fulfill({ json: { id: 'new-mock-id' } });
+                await route.fallback();
             }
         } else if (url.includes('photospicker.googleapis.com')) {
             if (url.includes('sessions') && !url.includes('mediaItems')) {
@@ -90,11 +86,7 @@ test('US-013 to US-017: Smart Date Formatting', async ({ page }, testInfo) => {
                 await route.fulfill({ json: { mediaItems: [{ id: 'item-1', mediaFile: { baseUrl: 'https://lh3.googleusercontent.com/picker-img', mimeType: 'image/jpeg', filename: 'picked.jpg' } }] } });
             }
         } else if (url.includes('sheets.googleapis.com')) {
-            if (url.includes('values/Events')) {
-                await route.fulfill({ json: { values: [] } });
-            } else {
-                await route.fulfill({ json: {} });
-            }
+            await route.fallback();
         } else if (url.includes('generativelanguage')) {
             await geminiGate;
             await route.fulfill({ json: { candidates: [{ content: { parts: [{ text: JSON.stringify({ is_label: false, item_name: 'Test Food', calories: 100, fat: { total: 0 }, carbohydrates: { total: 0 }, protein: 0 }) }] } }] } });

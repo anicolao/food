@@ -1,9 +1,12 @@
 import { test, expect } from '../fixtures';
 import { TestStepHelper } from '../helpers/test-step-helper';
+import { mockDriveAPI } from '../helpers/mock-drive';
 
 test('User configures macro settings', async ({ page }, testInfo) => {
     const tester = new TestStepHelper(page, testInfo);
     tester.setMetadata('Macro Settings', 'User adjusts daily calorie and macro goals with cascading logic.');
+
+    await mockDriveAPI(page);
 
     // 1. Initial Load
     await page.goto('/settings');

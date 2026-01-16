@@ -1,5 +1,6 @@
 import { test, expect } from '../fixtures';
 import { TestStepHelper } from '../helpers/test-step-helper';
+import { mockDriveAPI } from '../helpers/mock-drive';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -43,6 +44,7 @@ test('US-003 to US-010: User logs food flow', async ({ page }, testInfo) => {
     const events: any[] = [];
 
     // Mock Drive Images
+    await mockDriveAPI(page);
     await page.route(/drive\.mock/, async route => {
         const buffer = fs.readFileSync('tests/e2e/fixtures/apple.png');
         await route.fulfill({ body: buffer, contentType: 'image/png' });
@@ -61,18 +63,12 @@ test('US-003 to US-010: User logs food flow', async ({ page }, testInfo) => {
 
         // Drive Discovery Mocks (ensureDataStructures)
         if (url.includes('drive/v3/files')) {
-            if (url.includes('foodlog') || url.includes('FoodLog')) {
-                // Search for Folder
-                await route.fulfill({ json: { files: [{ id: 'mock-folder-id', name: 'FoodLog' }] } });
-            } else if (url.includes('TheFoodTrackerEventLog')) {
-                // Search for File
-                await route.fulfill({ json: { files: [{ id: 'mock-spreadsheet-id', name: 'TheFoodTrackerEventLog' }] } });
-            } else if (url.includes('uploadType=multipart')) {
+            if (url.includes('uploadType=multipart')) {
                 // Upload
                 await route.fulfill({ json: { id: 'file-123', webViewLink: 'https://drive.mock/img.jpg', thumbnailLink: 'https://drive.mock/thumb.jpg' } });
             } else {
-                // Creation Fallback (if search returned empty, but here we return found)
-                await route.fulfill({ json: { id: 'new-mock-id' } });
+                // Use robust discovery helper
+                await route.fallback();
             }
         } else if (url.includes('photospicker.googleapis.com')) {
             if (url.includes('sessions') && !url.includes('mediaItems')) {

@@ -1,5 +1,6 @@
 import { test, expect } from '../fixtures';
 import { TestStepHelper } from '../helpers/test-step-helper';
+import { mockDriveAPI } from '../helpers/mock-drive';
 import * as fs from 'fs';
 
 test('US-018 to US-022: Details, Edit and Delete', async ({ page }, testInfo) => {
@@ -26,6 +27,7 @@ test('US-018 to US-022: Details, Edit and Delete', async ({ page }, testInfo) =>
     await page.route('https://accounts.google.com/gsi/client', route => route.abort());
 
     // Basic Service Mock
+    await mockDriveAPI(page);
     await page.route(/drive\.mock/, async route => {
         const buffer = fs.readFileSync('tests/e2e/fixtures/apple.png');
         await route.fulfill({ body: buffer, contentType: 'image/png' });
@@ -38,12 +40,10 @@ test('US-018 to US-022: Details, Edit and Delete', async ({ page }, testInfo) =>
         const url = route.request().url();
 
         if (url.includes('drive/v3/files')) {
-            if (url.includes('foodlog') || url.includes('FoodLog')) {
-                await route.fulfill({ json: { files: [{ id: 'mock-folder-id', name: 'FoodLog' }] } });
-            } else if (url.includes('uploadType=multipart')) {
+            if (url.includes('uploadType=multipart')) {
                 await route.fulfill({ json: { id: 'file-123', webViewLink: 'https://drive.mock/img.jpg', thumbnailLink: 'https://drive.mock/thumb.jpg' } });
             } else {
-                await route.fulfill({ json: { id: 'new-mock-id' } });
+                await route.fallback();
             }
         } else if (url.includes('photospicker.googleapis.com')) {
             if (url.includes('sessions')) {
@@ -55,7 +55,7 @@ test('US-018 to US-022: Details, Edit and Delete', async ({ page }, testInfo) =>
             // Original Food Logic
             await route.fulfill({ json: { candidates: [{ content: { parts: [{ text: JSON.stringify({ is_label: false, item_name: 'Original Food', calories: 100, fat: { total: 10 }, carbohydrates: { total: 10 }, protein: 10 }) }] } }] } });
         } else if (url.includes('sheets')) {
-            await route.fulfill({ json: {} });
+            await route.fallback();
         } else {
             await route.continue();
         }
