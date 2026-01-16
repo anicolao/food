@@ -68,7 +68,13 @@
     // Handle history updates for direction calculation    // Handle history updates for direction calculation
     import { transitionSnapshots } from '$lib/transitions';
 
-    beforeNavigate(() => {
+    beforeNavigate((nav) => {
+        // Skip snapshotting if we are staying on the same page (e.g. query param change)
+        // This prevents the PageTransitionWrapper from swapping to a snapshot and destroying the component tree
+        if (nav.to && nav.to.url.pathname === nav.from?.url.pathname) {
+            return;
+        }
+
         // Snapshot the current page content before it updates
         const currentPath = $page.url.pathname;
         const wrapperId = 'ptw-' + currentPath.replace(/[^a-zA-Z0-9-]/g, '_');
