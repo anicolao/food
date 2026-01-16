@@ -1,53 +1,41 @@
-# Service Worker Implementation & Versioning
+# Sync Manager UX Improvements
 
 ## User Prompts & Context
 
-### Original Design Request
-HOURS: 2026-01-16T11:28:37-05:00
-> OK the offline work from teh recent design doc is completed. See OFFLINE_SUPPORT.md. But a major gap remains: though the database is now a write-through cache, the client itself is fetched over the network every time. 
-> 
-> Write a SERVICE_WORKER_DESIGN.md that will minimize all remaining network traffic. Include a mechanism to show the version of the code that is deployed inspired by this script from another project — don't implement it this way, but record the same style of version number. Ensure that the user can inspect this in the newly added network screen. Write the design doc only.
-> 
-> Sample version script:
-> export function getVersion() {
->   const caution = version_info.status.length > 0 ? "⚠" : "";
->   const date = version_info.status.length > 0 ? \`\${version_info.date} \` : "";
->   return \`Neptune's Pride Agent v\${version_info.version} (\${date}\${caution}\${version_info.hash})\`;
-> }`;
->   await $`echo export const version_info = ${JSON.stringify(version_info, null, 2)} > src/version.js`;
->   for (const line of getVersion.split("\n")) {
->     await $`echo ${line} >> src/version.js`;
->   }
->   await $`bunx biome format --write src/version.js`;
-> }
-> 
-> I suggest we use VITE_ build variables and just refer to this script for the way the string should look, that's a better fit for how we are deploying this project
-
-### Follow-up Clarification (Design)
-HOURS: 2026-01-16T11:40:31-05:00
-> This looks good except for some confusion about whether we want network first or cache first. We want cache first. Refresh the cache in the background. Make a new 'Update' icon to replace teh cloud is in sync icon, that lights up only after the cache is refreshed and the user can tap it to instantly switch. Add these clarifications to the design doc, and then follow WORKFLOW.md to make a PR for this design work.
-
-### Implementation Instruction
-HOURS: 2026-01-16T13:28:40-05:00
-> Please read and follow WORKFLOW.md rigidly to create the PR yourself.
+### Original Request
+> Sync UX Verification
+> The user's main objective is to verify the implemented Sync UX improvements by simulating a sync error and observing the UI's response. This includes:
+> 1. Injecting a simulated sync failure into sync-manager.ts.
+> 2. Verifying the red error icon appears in the NetworkStatus component.
+> 3. Confirming navigation to the /settings/network page upon clicking the error icon.
+> 4. Checking for the presence of the "Problem Detected" section, the error message, and the pulsing red "Reset Cache & Resync" button on the settings page.
+> 5. Reverting the simulated error and confirming the UI returns to its normal state.
 
 ## Description
-This PR implements the Service Worker design finalized in PR #43.
+This PR implements comprehensive error handling and UI feedback for the synchronization process. Previously, sync errors were silent or transient. Now, they persist and guide the user to a resolution.
 
 ### Changes
-1.  **Service Worker (`src/service-worker.ts`)**:
-    *   Implemented Cache-First strategy for assets (`build` + `files`).
-    *   Implemented Stale-While-Revalidate/Cache-First logic for navigation (HTML).
-    *   Added update handling via `SKIP_WAITING`.
+1.  **Lib Layer (`src/lib/sync-manager.ts`)**:
+    *   Added `syncError` store to track the last error message.
+    *   Updated `sync()` to catch exceptions (including 400/403) and populate `syncError`.
+    *   Ensured `hardResync()` clears the error state.
 
-2.  **Versioning (`vite.config.ts`)**:
-    *   Injected `VITE_APP_VERSION`, `VITE_APP_COMMIT_HASH`, `VITE_APP_BUILD_DATE`, `VITE_APP_DIRTY_FLAG`.
+2.  **UI Components (`src/lib/components/ui/NetworkStatus.svelte`)**:
+    *   Added subscription to `syncManager.syncError`.
+    *   Displays a **Red Error Icon** when an error is active, overriding other states.
 
-3.  **UI Updates (`src/routes/settings/network/+page.svelte`)**:
-    *   Added "Application Info" section with version and storage usage.
-    *   Added "Update Ready" badge to trigger SW updates.
+3.  **Pages (`src/routes/settings/network/+page.svelte`)**:
+    *   Added a "Problem Detected" section.
+    *   Displays the specific error message and troubleshooting advice.
+    *   Highlights the "Reset Cache & Resync" button with a `danger-glow` animation.
 
 ## Verification
-*   `npm run check` passes (Typescript).
-*   `npm run build` passes.
-*   E2E tests passed.
+*   **Automated E2E**: Created `tests/e2e/099-sync-error.spec.ts` (temp) to simulate a 400 error and verify:
+    *   Red icon visibility.
+    *   Navigation to settings.
+    *   Error panel content.
+*   **Manual**: Verified locally via fault injection.
+
+## Artifacts
+*   [Implementation Plan](docs/implementation_plan_sync_ux.md)
+*   [Walkthrough](docs/walkthrough_sync_ux.md)

@@ -8,12 +8,16 @@ import { get } from 'svelte/store';
 
 export const syncManager = {
     isSyncing: false,
+    syncError: null as string | null,
 
     async sync() {
         if (this.isSyncing) return;
         if (!navigator.onLine) return;
 
+
+
         this.isSyncing = true;
+        this.syncError = null; // Clear previous errors
         console.log('[SyncManager] Starting sync...');
 
         try {
@@ -29,15 +33,6 @@ export const syncManager = {
                 const { spreadsheetId } = state.config;
 
                 if (spreadsheetId) {
-                    // Iterate for now as our sheets.ts generic wrapper is single-row oriented? 
-                    // Wait, implementation plan said "Update sheets.ts to support batch".
-                    // Let's implement batching in sheets.ts next.
-                    // For this draft, I'll assume I can pass an array of arrays to a new `appendRows` or modified `appendRow`.
-                    // Let's stick to the current `appendRow` signature which takes `values: any[]`.
-                    // If I want to append multiple rows, I need to send `values: [[row1], [row2]]`.
-                    // The current `appendRow` wraps the input `values` in another array: `values: [values]`.
-                    // So it only supports one row. I WILL update sheets.ts.
-
                     // Prepare batch data
                     const rows = pendingEvents.map(e => [
                         e.eventId,
@@ -46,8 +41,6 @@ export const syncManager = {
                         JSON.stringify(e.payload)
                     ]);
 
-                    // We need a new function in sheets.ts or modify existing. I'll modify existing to support batch.
-                    // But for now, let's assume `appendRows` exists.
                     await appendRows(spreadsheetId, 'Events', rows);
 
                     // Mark synced
@@ -64,7 +57,7 @@ export const syncManager = {
             if (spreadsheetId) {
                 // Get last synced row index (default to 0 if no headers involved in tracking)
                 const lastSyncedRow = parseInt(localStorage.getItem('lastSyncedRow') || '0', 10);
-                const lastSyncedEventId = localStorage.getItem('lastSyncedEventId');
+                const lastSyncedEventId = localStorage.getItem('lastSyncedEventId') || '';
 
                 // If we have synced data (row > 0), we fetch overlapping to verify.
                 // If row is 0, we fetch from 1.
@@ -126,9 +119,6 @@ export const syncManager = {
                         }
 
                         // Update Pointer
-                        // lastSyncedRow is base (exclusive of overlap if verified).
-                        // If lastSyncedRow=0, fetched from 1. newRows.length entries. 0 + len = len.
-                        // If lastSyncedRow=1, fetched from 1. 1 overlap. newRows slice(1). 1 + len = new index.
                         const finalRowIndex = lastSyncedRow + newRows.length;
 
                         localStorage.setItem('lastSyncedRow', finalRowIndex.toString());
@@ -152,24 +142,38 @@ export const syncManager = {
 
         } catch (e: any) {
             console.error('[SyncManager] Sync failed:', e);
-            // Check for 400 Bad Request
-            let status = 0;
+
+            // Extract error message for UI
+            let errorMessage = e.message || 'Unknown error occurred.';
+
+            // Handle JSON Error Message from sheets.ts wrapper
             try {
                 const errObj = JSON.parse(e.message);
-                status = errObj.status;
+                if (errObj.message) errorMessage = errObj.message;
+                // Add Status Code Context
+                if (errObj.status) errorMessage = `${errObj.status}: ${errorMessage}`;
+
+                if (errObj.status === 400) {
+                    console.warn('[SyncManager] 400 Error on fetch. Pointer invalid. Resetting.');
+                    localStorage.setItem('lastSyncedRow', '0');
+                    localStorage.removeItem('lastSyncedEventId');
+                    // We successfully handled it by resetting, so maybe don't show user error?
+                    // Actually, let's show it so they know *why* it might re-sync next time or if it persists.
+                    // But if we reset, the next sync (poll) might succeed.
+                    // Let's set the error anyway for visibility.
+                }
+
+                // 403 / 401 usually mean Auth, which might need re-login.
+                if (errObj.status === 401 || errObj.status === 403) {
+                    errorMessage = "Authentication Failed. Please sign in again.";
+                }
+
             } catch (jsonErr) {
-                // Not JSON
+                // Not JSON, keep raw message
             }
 
-            if (status === 400) {
-                // We asked for a range (e.g. 2115:Z) and got 400.
-                // This MOST LIKELY means 2115 does not exist.
-                // So our pointer is invalid. Reset.
-                console.warn('[SyncManager] 400 Error on fetch. Pointer invalid. Resetting.');
-                localStorage.setItem('lastSyncedRow', '0');
-                localStorage.removeItem('lastSyncedEventId');
-                return;
-            }
+            this.syncError = errorMessage;
+
         } finally {
             this.isSyncing = false;
         }
@@ -177,6 +181,7 @@ export const syncManager = {
 
     async hardResync() {
         console.warn('[SyncManager] Hard Reset Initiated.');
+        this.syncError = null;
 
         // 1. Reset Pointer
         localStorage.setItem('lastSyncedRow', '0');

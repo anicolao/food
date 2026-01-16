@@ -46,9 +46,10 @@ This plan distills the findings from the comprehensive State of the Union review
 - **Location:** `src/lib/auth.ts`, `src/lib/google-photos.ts`, `src/routes/log/+page.svelte`
 - **Action:** Audit and remove all `console.log` statements. For necessary debug info, implement a conditional logger that checks for `import.meta.env.DEV`.
 
-### 5. Harden Type Definitions (Maintainability)
+### 5. Harden Type Definitions (Maintainability) [PARTIALLY FIXED]
 **Severity:** Low | **Effort:** Medium
 
 - **Issue:** Usage of `@ts-ignore` and `any` bypasses TypeScript safety, particularly around external libraries (`exifr`) and API responses (`Google Photos`). This hides potential runtime errors.
 - **Location:** `src/routes/log/+page.svelte`, `src/lib/google-photos.ts`
 - **Action:** Create proper TypeScript interfaces for the Google Photos API responses and correct the library usage types to eliminate `@ts-ignore`.
+- **Status:** **Partially Fixed**. `google-photos.ts` has been refactored with proper interfaces. `exifr` usage in `log/+page.svelte` still requires work.
