@@ -6,7 +6,6 @@
     import { getFileMetadata, renameFile, findDatabaseFiles } from '$lib/sheets';
     
     // --- Versioning & SW Logic ---
-    // --- Versioning & SW Logic ---
     const version = `v${import.meta.env.VITE_APP_VERSION}`;
     const buildInfo = `${new Date(import.meta.env.VITE_APP_BUILD_DATE).toLocaleDateString()} ${import.meta.env.VITE_APP_DIRTY_FLAG ? '⚠ ' : ''}(${import.meta.env.VITE_APP_COMMIT_HASH})`;
     
@@ -65,6 +64,7 @@
     let isOnline = true;
     let pendingCount = 0;
     let isSyncing = false;
+    let syncError: string | null = null;
     let interval: any;
     let pendingEvents: any[] = [];
     
@@ -81,6 +81,7 @@
     async function checkStatus() {
         isOnline = navigator.onLine;
         isSyncing = syncManager.isSyncing;
+        syncError = syncManager.syncError;
         pendingEvents = await getPendingEvents();
         pendingCount = pendingEvents.length;
         
@@ -192,6 +193,22 @@
     <header>
         <h1>Network & Sync</h1>
     </header>
+
+    {#if syncError}
+    <section class="card glass-panel error-panel">
+        <h2>⚠ Problem Detected</h2>
+        <div class="error-content">
+            <p class="error-msg">{syncError}</p>
+            <p class="suggestion">
+                We're having trouble syncing with Google Sheets. Check your internet connection. 
+                If this persists, the cache might be out of sync.
+            </p>
+            <button class="primary-btn danger-glow" on:click={handleHardResync}>
+                Reset Cache & Resync
+            </button>
+        </div>
+    </section>
+    {/if}
 
     <section class="card glass-panel">
         <h2>Connection</h2>
@@ -566,8 +583,46 @@
         align-items: flex-end;
     }
     
-    .small {
-        font-size: 0.75rem;
-        opacity: 0.7;
+    .error-panel {
+        border: 1px solid rgba(231, 76, 60, 0.4);
+        background: rgba(231, 76, 60, 0.1);
+    }
+
+    .error-panel h2 {
+        color: #e74c3c;
+    }
+
+    .error-content {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .error-msg {
+        font-family: monospace;
+        background: rgba(0,0,0,0.3);
+        padding: 0.5rem;
+        border-radius: 4px;
+        color: #ff9999;
+        font-size: 0.9rem;
+        word-break: break-all;
+    }
+
+    .suggestion {
+        font-size: 0.9rem;
+        color: #ccc;
+        line-height: 1.4;
+    }
+
+    .danger-glow {
+        background: #c0392b;
+        box-shadow: 0 0 10px rgba(231, 76, 60, 0.4);
+        animation: danger-pulse 2s infinite;
+    }
+
+    @keyframes danger-pulse {
+        0% { box-shadow: 0 0 5px rgba(231, 76, 60, 0.4); }
+        50% { box-shadow: 0 0 15px rgba(231, 76, 60, 0.7); }
+        100% { box-shadow: 0 0 5px rgba(231, 76, 60, 0.4); }
     }
 </style>

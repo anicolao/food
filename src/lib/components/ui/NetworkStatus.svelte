@@ -9,11 +9,13 @@
    let isOnline = true;
    let pendingCount = 0;
    let isSyncing = false;
+   let syncError: string | null = null;
    let interval: any;
 
    async function checkStatus() {
        isOnline = navigator.onLine;
        isSyncing = syncManager.isSyncing;
+       syncError = syncManager.syncError;
        const pending = await getPendingEvents();
        pendingCount = pending.length;
    }
@@ -44,13 +46,16 @@
     class="network-status" 
     class:offline={!isOnline} 
     on:click={handleClick}
-    aria-label="Network Status: {isOnline ? 'Online' : 'Offline'}, {pendingCount} pending items"
-    data-status={!isOnline ? 'offline' : (isSyncing ? 'syncing' : (pendingCount > 0 ? 'pending' : 'synced'))}
+    aria-label="Network Status: {syncError ? 'Error' : (isOnline ? 'Online' : 'Offline')}, {pendingCount} pending items"
+    data-status={!isOnline ? 'offline' : (syncError ? 'error' : (isSyncing ? 'syncing' : (pendingCount > 0 ? 'pending' : 'synced')))}
 >
     <div class="icon-wrapper">
         {#if !isOnline}
             <!-- Cloud Off -->
             <img src="{base}/images/icon-status-offline.png" alt="Offline" width="24" height="24" class="neon-icon" />
+        {:else if syncError}
+             <!-- Error -->
+             <img src="{base}/images/icon-status-error.png" alt="Sync Error" width="24" height="24" class="neon-icon error-glow" />
         {:else if isSyncing}
             <!-- Syncing (Layered for neon intensity) -->
             <div class="pulse-stack">
