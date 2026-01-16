@@ -172,11 +172,12 @@ export async function appendRows(spreadsheetId: string, sheetName: string, rows:
     return await response.json();
 }
 
-export async function fetchRows(spreadsheetId: string, sheetName: string): Promise<any[]> {
+export async function fetchRows(spreadsheetId: string, sheetName: string, startRow?: number): Promise<any[]> {
     const token = await ensureValidToken();
     if (!token) throw new Error('Not authenticated');
 
-    const url = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${sheetName}!A:Z`;
+    const range = startRow ? `${sheetName}!A${startRow}:Z` : `${sheetName}!A:Z`;
+    const url = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${range}`;
 
     const response = await fetch(url, {
         headers: { Authorization: `Bearer ${token}` }
