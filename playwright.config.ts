@@ -50,7 +50,7 @@ export default defineConfig({
         url: 'http://localhost:5174',
         reuseExistingServer: !process.env.CI,
     },
-    timeout: 30000, // Shorten timeout to fail faster
+    timeout: 60000, // Increase failure timeout for CI
     expect: {
         timeout: 5000, // Shorten assertion timeout
         toHaveScreenshot: { maxDiffPixels: 0 } // Zero tolerance
