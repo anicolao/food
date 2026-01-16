@@ -6,7 +6,9 @@
     import { getFileMetadata, renameFile, findDatabaseFiles } from '$lib/sheets';
     
     // --- Versioning & SW Logic ---
-    const appVersion = `Food Tracker v${import.meta.env.VITE_APP_VERSION} (${new Date(import.meta.env.VITE_APP_BUILD_DATE).toLocaleDateString()} ${import.meta.env.VITE_APP_DIRTY_FLAG ? '⚠ ' : ''}${import.meta.env.VITE_APP_COMMIT_HASH})`;
+    // --- Versioning & SW Logic ---
+    const version = `v${import.meta.env.VITE_APP_VERSION}`;
+    const buildInfo = `${new Date(import.meta.env.VITE_APP_BUILD_DATE).toLocaleDateString()} ${import.meta.env.VITE_APP_DIRTY_FLAG ? '⚠ ' : ''}(${import.meta.env.VITE_APP_COMMIT_HASH})`;
     
     let updateReady = false;
     let cacheSize = 'Unknown';
@@ -304,7 +306,10 @@
         <h2>Application Info</h2>
         <div class="status-row">
              <span class="label">Version</span>
-             <span class="value mono">{appVersion}</span>
+             <div class="version-info">
+                 <span class="value mono">{version}</span>
+                 <span class="value mono small">{buildInfo}</span>
+             </div>
         </div>
          <div class="status-row">
              <span class="label">Storage Usage</span>
@@ -552,7 +557,17 @@
     
     .mono {
         font-family: monospace;
-        font-size: 0.8rem;
-        opacity: 0.8;
+        font-size: 0.9rem;
+    }
+    
+    .version-info {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+    }
+    
+    .small {
+        font-size: 0.75rem;
+        opacity: 0.7;
     }
 </style>
