@@ -38,7 +38,18 @@ export class TestStepHelper {
         const paddedIndex = String(this.stepCount++).padStart(3, '0');
         const filename = `${paddedIndex}-${id}.png`;
 
-        // 3. Capture & Verify (Zero-Pixel Tolerance)
+        // 3. Stabilization: Wait for Network Sync (if present)
+        const networkStatus = this.page.locator('button[data-status]');
+        if (await networkStatus.count() > 0 && await networkStatus.isVisible()) {
+            // Wait for it to be 'synced' or 'offline' (if we are testing offline mode, we might expect offline)
+            // But usually we want stable 'synced'.
+            // If the test puts it in offline mode, it will say 'offline'.
+            // We just want to avoid 'pending' or 'syncing'.
+            await expect(networkStatus).not.toHaveAttribute('data-status', 'pending', { timeout: 30000 });
+            await expect(networkStatus).not.toHaveAttribute('data-status', 'syncing', { timeout: 30000 });
+        }
+
+        // 4. Capture & Verify (Zero-Pixel Tolerance)
         // This will check against the baseline in 'screenshots/{filename}'.
         // If the file doesn't exist, it will fail (unless --update-snapshots is used).
         await expect(this.page).toHaveScreenshot(filename.replace(/\.png$/, ''));
