@@ -167,4 +167,6 @@ test('013-detailed-nutrition: Log and Edit Detailed Nutrition', async ({ page })
             }
         }]
     });
+
+    await tester.generateDocs();
 });
