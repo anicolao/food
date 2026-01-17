@@ -1,20 +1,13 @@
-# Execute Cleanup Plan
+# Fix Camera Button and Voice Icons
 
-This PR addresses the final items in `CLEANUP_PLAN.md`:
-1.  **Console Cleanup**: Removed verbose logging from `sync-manager.ts`, `sheets.ts`, and `google-photos.ts`.
-2.  **Type Hardening**: 
-    - Added `GoogleDriveFile` interface to `sheets.ts`.
-    - Added `PickerMediaItemResponse` and `LibraryMediaItemResponse` interfaces to `google-photos.ts`.
-    - Created `src/types/exifr.d.ts` to type the `exifr` library.
-    - Removed `@ts-ignore` and added proper casting in `log/+page.svelte`.
-3.  **Error Visibility**: Verified that sync errors are surfaced to the Network Settings UI via `syncError` state.
+## Description
+This PR addresses two issues:
+1.  Converts the camera button back into a file chooser button using `capture="environment"` to trigger the native iOS camera interface, while retaining the existing icon. This simplifies the implementation by removing the custom camera UI overlay.
+2.  Replaces missing icons in the Voice Recorder dialog with inline SVGs for 'Stop & Analyze' and 'Analyze'.
 
-## User Prompt
+## Original User Prompts
+> In the screen with logging buttons, there are two problems.
+> (1) we removed the filechooser button. Let's convert the camera button into a file chooser button *without* changing hte icon and use the form of file chooser that will cause ios to put taking a photo first.
+> (2) in the voice dialog, the stop and analyze button refers to a non-existant icon, let's find a good one instead.
 
-Let's attempt to finish all items in CLEANUP_PLAN.md. 
-
-Review all console messages. For any the user should be aware of, put htem in the error view we built for the network settings screen to surface them. For those that are useless debugging, remove them. 
-
-Review all typescript shortcuts and clean up as many as possible.
-
-Review WORKFLOW.md and follow it rigidly to create a PR for this final set of cleanup steps. If hte plan is resolved, delete the file as part of this PR.
+> doesn't compile, did you npm run check?

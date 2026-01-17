@@ -17,8 +17,8 @@
   import VoiceRecorder from '$lib/components/ui/VoiceRecorder.svelte';
 
   let fileInput = $state<HTMLInputElement>();
-  let videoElement = $state<HTMLVideoElement>();
-  let stream: MediaStream | null = null;
+  let cameraInput = $state<HTMLInputElement>();
+
   
   type LogMode = 'IDLE' | 'CAMERA' | 'VOICE' | 'TEXT' | 'LIBRARY';
   let currentMode = $state<LogMode>('IDLE');
@@ -205,47 +205,7 @@
       }
   }
 
-  async function startCamera() {
-    currentMode = 'CAMERA';
-    try {
-        stream = await navigator.mediaDevices.getUserMedia({ 
-            video: { facingMode: 'environment' } 
-        });
-        setTimeout(() => {
-            if (videoElement) videoElement.srcObject = stream;
-        }, 100);
-    } catch (e) {
-        console.error('Camera failed', e);
-        toasts.error('Could not access camera');
-        currentMode = 'IDLE';
-    }
-  }
 
-  function stopCamera() {
-    if (stream) {
-        stream.getTracks().forEach(track => track.stop());
-        stream = null;
-    }
-    currentMode = 'IDLE';
-  }
-
-  function capturePhoto() {
-    if (!videoElement) return;
-    const canvas = document.createElement('canvas');
-    canvas.width = videoElement.videoWidth;
-    canvas.height = videoElement.videoHeight;
-    const ctx = canvas.getContext('2d');
-    ctx?.drawImage(videoElement, 0, 0);
-    
-    canvas.toBlob(blob => {
-        if (blob) {
-            const file = new File([blob], `capture-${Date.now()}.jpg`, { type: 'image/jpeg' });
-            addImage(file);
-        }
-    }, 'image/jpeg');
-
-    stopCamera();
-  }
 
   async function handleFileSelect(e: Event) {
     const target = e.target as HTMLInputElement;
@@ -532,7 +492,8 @@
   function handleModeSelect(mode: LogMode) {
       if (mode === 'IDLE') return;
       if (mode === 'CAMERA') {
-          startCamera();
+          // Trigger native camera capture
+          cameraInput?.click();
       } else if (mode === 'LIBRARY') {
           handleGooglePhotosPick();
       } else {
@@ -542,16 +503,7 @@
 </script>
 
 <div class="log-page">
-    {#if currentMode === 'CAMERA'}
-        <div class="camera-ui">
-             <video bind:this={videoElement} autoplay playsinline muted></video>
-             <div class="cam-controls">
-                 <button class="cam-btn capture" onclick={capturePhoto} aria-label="Capture photo"></button>
-                 <button class="cam-btn cancel" onclick={stopCamera}>Cancel</button>
-             </div>
-        </div>
-    {:else}
-        <!-- Pre-capture State / Unified Grid -->
+    <!-- Unified Grid -->
         <div class="start-ui">
             <h1>Log Food</h1>
             
@@ -571,13 +523,13 @@
                 />
             {/if}
             
-            <input type="file" accept="image/*" multiple bind:this={fileInput} onchange={handleFileSelect} hidden />
-        </div>
-    {/if}
+    <input type="file" accept="image/*" multiple bind:this={fileInput} onchange={handleFileSelect} hidden />
+    <input type="file" accept="image/*" capture="environment" bind:this={cameraInput} onchange={handleFileSelect} hidden />
+</div>
 
-    <LogSheet open={sheetOpen} onClose={handleCloseSheet}>
-         <div class="sheet-content">
-             <div class="preview-strip">
+<LogSheet open={sheetOpen} onClose={handleCloseSheet}>
+     <div class="sheet-content">
+         <div class="preview-strip">
                  {#each imagePreviews as preview}
                      <img 
                        src={preview} 
@@ -670,7 +622,7 @@
                               <textarea bind:value={userCorrection} placeholder="e.g. It was 2 eggs, not 3" rows="2" class="bg-input"></textarea>
                               <button class="primary-btn small" onclick={handleReanalyze} disabled={!userCorrection}>Retry</button>
                          </div>
-                      {/if}
+                          {/if}
 
                       <button class="save-btn-primary" onclick={handleSubmit} disabled={isSaving}>
                           {isSaving ? 'Saving...' : 'Save Entry'}
@@ -704,48 +656,7 @@
 
 
 
-    /* Camera UI */
-    .camera-ui {
-        position: fixed;
-        top: 0; 
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: black;
-        z-index: 50;
-    }
-    
-    video {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-    }
-    
-    .cam-controls {
-        position: absolute;
-        bottom: 50px;
-        width: 100%;
-        display: flex;
-        justify-content: center;
-        gap: 40px;
-        align-items: center;
-    }
-    
-    .cam-btn.capture {
-        width: 80px;
-        height: 80px;
-        border-radius: 50%;
-        border: 5px solid rgba(255,255,255,0.5);
-        background: white;
-    }
-    
-    .cam-btn.cancel {
-        background: rgba(0,0,0,0.5);
-        color: white;
-        border: 1px solid white;
-        padding: 10px 20px;
-        border-radius: 20px;
-    }
+
 
     /* Sheet Content */
     .sheet-content {
