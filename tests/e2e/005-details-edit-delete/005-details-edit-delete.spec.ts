@@ -103,7 +103,7 @@ test('US-018 to US-022: Details, Edit and Delete', async ({ page }, testInfo) =>
         description: 'Details page loaded',
         verifications: [
             { spec: 'Name field populated', check: async () => await expect(page.getByLabel('Item Name').first()).toHaveValue('Original Food') },
-            { spec: 'Cals field populated', check: async () => await expect(page.getByLabel('Cals').first()).toHaveValue('100') },
+            { spec: 'Cals field populated', check: async () => await expect(page.getByLabel('Calories').first()).toHaveValue('100') },
             { spec: 'Multiple images shown', check: async () => await expect(page.locator('.hero-image').first()).toBeVisible() },
             {
                 spec: 'Carousel scrolls on click',
@@ -129,7 +129,7 @@ test('US-018 to US-022: Details, Edit and Delete', async ({ page }, testInfo) =>
 
     // 4. Edit
     await page.getByLabel('Item Name').fill('Edited Food');
-    await page.getByLabel('Cals').fill('200');
+    await page.getByLabel('Calories').fill('200');
     // Save
     await page.getByText('Save Changes').click();
 

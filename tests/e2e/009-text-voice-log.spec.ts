@@ -176,7 +176,7 @@ test('US-009: User logs food via Text and Voice', async ({ page, context }, test
 
     // Wait for result
     await expect(page.getByLabel('Log Description')).toHaveValue('Apple');
-    await expect(page.getByLabel('Cals')).toHaveValue('95');
+    await expect(page.getByLabel('Calories')).toHaveValue('95');
 
     // Check if image preview is the mock placeholder (from searchFoodImage)
     await expect(page.locator('img.sheet-thumb')).toBeVisible();
@@ -212,7 +212,7 @@ test('US-009: User logs food via Text and Voice', async ({ page, context }, test
     resolveGemini(); // Actually uses the re-assigned resolveVoice
      
     await expect(page.getByLabel('Log Description')).toHaveValue('Grilled Cheese');
-    await expect(page.getByLabel('Cals')).toHaveValue('400');
+    await expect(page.getByLabel('Calories')).toHaveValue('400');
     */
 
     tester.generateDocs();
