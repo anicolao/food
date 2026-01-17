@@ -1,5 +1,6 @@
 <script lang="ts">
   import { slide } from 'svelte/transition';
+  import NutrientInput from './NutrientInput.svelte';
 
   interface Props {
       metrics: {
@@ -33,194 +34,270 @@
   if (!metrics.details) {
       metrics.details = {};
   }
+
+  function updateDetail(macro: 'carbs' | 'fat' | null, field: keyof NonNullable<typeof metrics.details>, newVal: number, oldVal?: number) {
+      if (readOnly) return;
+      const safeOld = oldVal || 0;
+      const safeNew = newVal || 0;
+      const delta = safeNew - safeOld;
+
+      metrics.details![field] = newVal;
+
+      if (macro && delta !== 0) {
+          metrics[macro] = Math.max(0, (metrics[macro] || 0) + delta);
+      }
+  }
+
+  // Direct handlers for macros (no delta logic needed, just bind)
+  function updateMacro(macro: 'calories' | 'protein' | 'carbs' | 'fat', val: number) {
+      if (readOnly) return;
+      metrics[macro] = val;
+  }
 </script>
 
 <div class="nutrition-form">
-  <!-- Core Macros -->
-  <div class="macros-row">
-      <div class="macro-field">
-          <label>Cals
-            <input type="number" bind:value={metrics.calories} class="bg-input highlight-cal" readonly={readOnly} />
-          </label>
+  <!-- Top Level: Calories & Protein -->
+  <div class="top-row">
+      <div class="primary-macro">
+        <NutrientInput 
+            label="Calories" 
+            unit="" 
+            value={metrics.calories} 
+            onupdate={(v) => updateMacro('calories', v)}
+            class="highlight-large"
+            readonly={readOnly}
+        />
       </div>
-      <div class="macro-field">
-          <label>Prot
-            <input type="number" bind:value={metrics.protein} class="bg-input" readonly={readOnly} />
-          </label>
-      </div>
-      <div class="macro-field">
-          <label>Carb
-            <input type="number" bind:value={metrics.carbs} class="bg-input" readonly={readOnly} />
-          </label>
-      </div>
-      <div class="macro-field">
-          <label>Fat
-            <input type="number" bind:value={metrics.fat} class="bg-input" readonly={readOnly} />
-          </label>
+      <div class="primary-macro">
+         <NutrientInput 
+            label="Protein" 
+            value={metrics.protein} 
+            onupdate={(v) => updateMacro('protein', v)}
+            class="highlight-large"
+            readonly={readOnly}
+         />
       </div>
   </div>
 
-  <!-- Toggle for Detailed View -->
+  <div class="divider"></div>
+
+  <!-- Carbs Section -->
+  <div class="group-section">
+      <div class="group-header">
+          <span class="group-title">Carbohydrates</span>
+          <NutrientInput 
+            value={metrics.carbs} 
+            onupdate={(v) => updateMacro('carbs', v)}
+            class="total-input"
+            readonly={readOnly}
+            aria-label="Carbohydrates"
+          />
+      </div>
+      
+      {#if showDetails}
+        <div class="sub-grid">
+            <NutrientInput 
+                label="Fiber" 
+                value={metrics.details?.fiber} 
+                onupdate={(v, old) => updateDetail('carbs', 'fiber', v, old)}
+                readonly={readOnly}
+            />
+            <NutrientInput 
+                label="Sugar" 
+                value={metrics.details?.sugar} 
+                onupdate={(v, old) => updateDetail('carbs', 'sugar', v, old)}
+                readonly={readOnly}
+            />
+            <NutrientInput 
+                label="Added Sugar" 
+                value={metrics.details?.addedSugar} 
+                onupdate={(v, old) => updateDetail('carbs', 'addedSugar', v, old)}
+                readonly={readOnly}
+            />
+        </div>
+      {/if}
+  </div>
+
+  <!-- Fat Section -->
+  <div class="group-section">
+      <div class="group-header">
+          <span class="group-title">Fats</span>
+          <NutrientInput 
+            value={metrics.fat} 
+            onupdate={(v) => updateMacro('fat', v)}
+            class="total-input"
+            readonly={readOnly}
+            aria-label="Fats"
+          />
+      </div>
+      
+      {#if showDetails}
+        <div class="sub-grid">
+            <NutrientInput 
+                label="Saturated" 
+                value={metrics.details?.saturatedFat} 
+                onupdate={(v, old) => updateDetail('fat', 'saturatedFat', v, old)}
+                readonly={readOnly}
+            />
+            <NutrientInput 
+                label="Trans" 
+                value={metrics.details?.transFat} 
+                onupdate={(v, old) => updateDetail('fat', 'transFat', v, old)}
+                readonly={readOnly}
+            />
+            <NutrientInput 
+                label="Cholesterol" 
+                unit="mg"
+                value={metrics.details?.cholesterol} 
+                onupdate={(v, old) => updateDetail(null, 'cholesterol', v, old)}
+                readonly={readOnly}
+            />
+        </div>
+      {/if}
+  </div>
+
   <button class="details-toggle" onclick={() => showDetails = !showDetails}>
-      {showDetails ? 'Hide Details' : 'Show Details (Vitamins, Minerals, Sub-macros)'}
+      {showDetails ? 'Hide Detailed Inputs' : 'Show Detailed Inputs'}
   </button>
 
-  {#if showDetails && metrics.details}
-      <div class="details-grid" transition:slide>
-          
-          <!-- Fats Breakdown -->
-          <div class="section-title">Fats</div>
-          <div class="detail-row">
-              <label>Saturated (g)
-                  <input type="number" bind:value={metrics.details.saturatedFat} class="bg-input small" readonly={readOnly} placeholder="--" />
-              </label>
-              <label>Trans (g)
-                  <input type="number" bind:value={metrics.details.transFat} class="bg-input small" readonly={readOnly} placeholder="--" />
-              </label>
-              <label>Cholesterol (mg)
-                  <input type="number" bind:value={metrics.details.cholesterol} class="bg-input small" readonly={readOnly} placeholder="--" />
-              </label>
+  {#if showDetails}
+      <div class="other-section">
+          <div class="section-label">Micros & Other</div>
+          <div class="sub-grid">
+             <NutrientInput 
+                label="Sodium" 
+                unit="mg"
+                value={metrics.details?.sodium} 
+                onupdate={(v, old) => updateDetail(null, 'sodium', v, old)}
+                readonly={readOnly}
+            />
+            <NutrientInput 
+                label="Potassium" 
+                unit="mg"
+                value={metrics.details?.potassium} 
+                onupdate={(v, old) => updateDetail(null, 'potassium', v, old)}
+                readonly={readOnly}
+            />
+             <NutrientInput 
+                label="Calcium" 
+                unit="mg"
+                value={metrics.details?.calcium} 
+                onupdate={(v, old) => updateDetail(null, 'calcium', v, old)}
+                readonly={readOnly}
+            />
+             <NutrientInput 
+                label="Iron" 
+                unit="mg"
+                value={metrics.details?.iron} 
+                onupdate={(v, old) => updateDetail(null, 'iron', v, old)}
+                readonly={readOnly}
+            />
+            <NutrientInput 
+                label="Caffeine" 
+                unit="mg"
+                value={metrics.details?.caffeine} 
+                onupdate={(v, old) => updateDetail(null, 'caffeine', v, old)}
+                readonly={readOnly}
+            />
+             <NutrientInput 
+                label="Alcohol" 
+                value={metrics.details?.alcohol} 
+                onupdate={(v, old) => updateDetail(null, 'alcohol', v, old)}
+                readonly={readOnly}
+            />
           </div>
-
-          <!-- Carbs Breakdown -->
-          <div class="section-title">Carbohydrates</div>
-          <div class="detail-row">
-              <label>Fiber (g)
-                  <input type="number" bind:value={metrics.details.fiber} class="bg-input small" readonly={readOnly} placeholder="--" />
-              </label>
-              <label>Sugar (g)
-                  <input type="number" bind:value={metrics.details.sugar} class="bg-input small" readonly={readOnly} placeholder="--" />
-              </label>
-              <label>Added Sugar (g)
-                  <input type="number" bind:value={metrics.details.addedSugar} class="bg-input small" readonly={readOnly} placeholder="--" />
-              </label>
-          </div>
-
-          <!-- Micros & Electrolytes -->
-          <div class="section-title">Micros</div>
-          <div class="detail-row">
-              <label>Sodium (mg)
-                  <input type="number" bind:value={metrics.details.sodium} class="bg-input small" readonly={readOnly} placeholder="--" />
-              </label>
-              <label>Potassium (mg)
-                  <input type="number" bind:value={metrics.details.potassium} class="bg-input small" readonly={readOnly} placeholder="--" />
-              </label>
-          </div>
-          <div class="detail-row">
-              <label>Calcium (mg)
-                  <input type="number" bind:value={metrics.details.calcium} class="bg-input small" readonly={readOnly} placeholder="--" />
-              </label>
-              <label>Iron (mg)
-                  <input type="number" bind:value={metrics.details.iron} class="bg-input small" readonly={readOnly} placeholder="--" />
-              </label>
-          </div>
-
-          <!-- Other -->
-          <div class="section-title">Other</div>
-          <div class="detail-row">
-              <label>Caffeine (mg)
-                  <input type="number" bind:value={metrics.details.caffeine} class="bg-input small" readonly={readOnly} placeholder="--" />
-              </label>
-              <label>Alcohol (g)
-                  <input type="number" bind:value={metrics.details.alcohol} class="bg-input small" readonly={readOnly} placeholder="--" />
-              </label>
-          </div>
-
       </div>
   {/if}
+
 </div>
 
 <style>
   .nutrition-form {
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 16px;
+      padding: 10px;
+      background: rgba(0,0,0,0.1);
+      border-radius: 16px;
   }
 
-  .macros-row {
+  .top-row {
       display: flex;
+      justify-content: space-around;
+      gap: 20px;
+      padding-bottom: 5px;
+  }
+
+  .divider {
+      height: 1px;
+      background: rgba(255,255,255,0.1);
+      width: 100%;
+  }
+
+  .group-section {
+      display: flex;
+      flex-direction: column;
       gap: 10px;
   }
-  
-  .macro-field {
-      flex: 1;
+
+  .group-header {
       display: flex;
-      flex-direction: column;
-      gap: 4px;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 5px;
   }
 
-  label {
-      font-size: 0.75rem;
-      color: var(--text-secondary);
+  .group-title {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text-secondary, #aaa);
       text-transform: uppercase;
       letter-spacing: 0.05em;
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-  }
-  
-  .bg-input {
-      background: rgba(255,255,255,0.05);
-      border: 1px solid rgba(255,255,255,0.1);
-      color: white;
-      padding: 12px;
-      border-radius: var(--radius-m);
-      font-size: 1rem;
-      text-align: center;
-      width: 100%;
-      box-sizing: border-box;
   }
 
-  .bg-input:focus {
-      border-color: var(--color-primary);
-      background: rgba(255,255,255,0.1);
-      outline: none;
-  }
-  
-  .highlight-cal {
-      color: var(--text-accent);
-      font-weight: bold;
-      border-color: var(--text-accent);
+  .sub-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+      gap: 10px 15px;
+      padding: 10px;
+      background: rgba(255,255,255,0.03);
+      border-radius: 12px;
   }
 
   .details-toggle {
       background: none;
       border: none;
-      color: var(--color-primary);
+      color: var(--color-primary, #4caf50);
       font-size: 0.85rem;
       cursor: pointer;
-      text-align: left;
-      padding: 4px 0;
-      opacity: 0.8;
+      align-self: center;
+      padding: 8px;
+      opacity: 0.9;
   }
 
-  .details-grid {
-      background: rgba(0,0,0,0.2);
-      border-radius: var(--radius-m);
-      padding: 12px;
+  .other-section {
       display: flex;
       flex-direction: column;
-      gap: 12px;
-      border: 1px solid rgba(255,255,255,0.05);
+      gap: 8px;
   }
 
-  .section-title {
+  .section-label {
       font-size: 0.8rem;
       font-weight: 600;
-      color: var(--text-secondary);
-      margin-top: 4px;
-      border-bottom: 1px solid rgba(255,255,255,0.1);
-      padding-bottom: 4px;
+      color: rgba(255,255,255,0.5);
+      padding-left: 5px;
   }
 
-  .detail-row {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
-      gap: 10px;
+  /* Specific overrides via global or deep selectors if Component didn't expose class */
+  :global(.highlight-large .gram-input) {
+      font-size: 1.2rem !important;
+      width: 5ch !important;
+      font-weight: bold;
+      color: var(--text-accent, #fff) !important;
   }
-
-  .small {
-      padding: 8px;
-      font-size: 0.9rem;
+  
+  :global(.total-input .gram-input) {
+      font-weight: bold;
+      background: rgba(255,255,255,0.15) !important;
   }
 </style>

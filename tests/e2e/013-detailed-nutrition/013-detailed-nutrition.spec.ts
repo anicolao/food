@@ -112,15 +112,15 @@ test('013-detailed-nutrition: Log and Edit Detailed Nutrition', async ({ page })
             },
             {
                 spec: 'Calories match',
-                check: async () => expect(page.locator('.highlight-cal')).toHaveValue('350')
+                check: async () => expect(page.getByLabel('Calories')).toHaveValue('350')
             },
             {
                 spec: 'Detailed fields visible after toggle',
                 check: async () => {
-                    await page.getByRole('button', { name: /Show Details/ }).click();
-                    await expect(page.locator('label:has-text("Saturated") input')).toHaveValue('5');
-                    await expect(page.locator('label:has-text("Sodium") input')).toHaveValue('450');
-                    await expect(page.locator('label:has-text("Fiber") input')).toHaveValue('8');
+                    await page.getByRole('button', { name: /Show Detailed/ }).click();
+                    await expect(page.getByLabel('Saturated')).toHaveValue('5');
+                    await expect(page.getByLabel('Sodium')).toHaveValue('450');
+                    await expect(page.getByLabel('Fiber')).toHaveValue('8');
                 }
             }
         ]
@@ -153,19 +153,27 @@ test('013-detailed-nutrition: Log and Edit Detailed Nutrition', async ({ page })
         verifications: [{
             spec: 'Details align with mocked data',
             check: async () => {
-                await page.getByRole('button', { name: /Show Details/ }).click();
-                await expect(page.locator('label:has-text("Saturated") input')).toHaveValue('5');
-                await expect(page.locator('label:has-text("Sodium") input')).toHaveValue('450');
+                await page.getByRole('button', { name: /Show Detailed/ }).click();
+                await expect(page.getByLabel('Saturated')).toHaveValue('5');
+                await expect(page.getByLabel('Sodium')).toHaveValue('450');
             }
         }]
     });
 
     await tester.step('edit_detail', {
-        description: 'Action: Edit Detail',
+        description: 'Action: Edit Detail (Logic Check)',
         verifications: [{
-            spec: 'Edit saves correctly',
+            spec: 'Edit Fiber updates Total Carbs',
             check: async () => {
-                await page.locator('label:has-text("Caffeine") input').fill('50');
+                // Initial: Fiber 8, Carbs 30
+                // Change Fiber to 18 (+10)
+                await page.getByLabel('Fiber').fill('18');
+                // Expect Carbs to become 40
+                await expect(page.getByLabel('Carbohydrates')).toHaveValue('40'); // 30 + 10
+
+                // Also edit Caffeine for persistence check
+                await page.getByLabel('Caffeine').fill('50');
+
                 await page.getByRole('button', { name: 'Save Changes' }).click();
             }
         }]
@@ -173,14 +181,23 @@ test('013-detailed-nutrition: Log and Edit Detailed Nutrition', async ({ page })
 
     await tester.step('verify_edit', {
         description: 'Verification: Verify Edit Persisted',
-        verifications: [{
-            spec: 'Caffeine value is now 50',
-            check: async () => {
-                await page.getByText('Detailed Salad').click();
-                await page.getByRole('button', { name: /Show Details/ }).click();
-                await expect(page.locator('label:has-text("Caffeine") input')).toHaveValue('50');
+        verifications: [
+            {
+                spec: 'Caffeine value is now 50',
+                check: async () => {
+                    await page.getByText('Detailed Salad').click();
+                    await page.getByRole('button', { name: /Show Detailed/ }).click();
+                    await expect(page.getByLabel('Caffeine')).toHaveValue('50');
+                }
+            },
+            {
+                spec: 'Fiber is 18 and Carbs is 40',
+                check: async () => {
+                    await expect(page.getByLabel('Fiber')).toHaveValue('18');
+                    await expect(page.getByLabel('Carbohydrates')).toHaveValue('40');
+                }
             }
-        }]
+        ]
     });
 
     await tester.generateDocs();

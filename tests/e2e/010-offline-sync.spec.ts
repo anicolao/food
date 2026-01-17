@@ -103,7 +103,7 @@ test.describe('Offline Support & Sync', () => {
 
         // 5. Fill Manual Details
         await page.getByLabel('Log Description').fill('Offline Banana');
-        await page.getByLabel('Cals').fill('100');
+        await page.getByLabel('Calories').fill('100');
 
         // Click "Save Entry"
         await page.getByRole('button', { name: 'Save Entry' }).click();

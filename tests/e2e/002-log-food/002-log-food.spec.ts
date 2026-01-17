@@ -183,7 +183,7 @@ test('US-003 to US-010: User logs food flow', async ({ page }, testInfo) => {
     await tester.step('analysis', {
         description: 'AI Analysis Received',
         verifications: [
-            { spec: 'Calories populated', check: async () => await expect(page.getByLabel('Cals')).toHaveValue('95') }
+            { spec: 'Calories populated', check: async () => await expect(page.getByLabel('Calories')).toHaveValue('95') }
         ]
     });
 
@@ -195,12 +195,12 @@ test('US-003 to US-010: User logs food flow', async ({ page }, testInfo) => {
     await expect(page.getByLabel('Meal')).toHaveValue('Lunch');
 
     // Edit to 100
-    await page.getByLabel('Cals').fill('100');
+    await page.getByLabel('Calories').fill('100');
 
     await tester.step('edited', {
         description: 'User corrects analysis',
         verifications: [
-            { spec: 'Calories updated to 100', check: async () => await expect(page.getByLabel('Cals')).toHaveValue('100') },
+            { spec: 'Calories updated to 100', check: async () => await expect(page.getByLabel('Calories')).toHaveValue('100') },
             { spec: 'Meal type is Lunch', check: async () => await expect(page.getByLabel('Meal')).toHaveValue('Lunch') }
         ]
     });
