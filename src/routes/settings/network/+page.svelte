@@ -178,7 +178,7 @@
                 isRenaming = true;
                 await renameFile(spreadsheetId, newName);
                 sheetName = newName;
-                console.log('Spreadsheet renamed successfully.');
+
             } catch (e) {
                 console.error('Rename failed', e);
                 console.error('Failed to rename spreadsheet.');

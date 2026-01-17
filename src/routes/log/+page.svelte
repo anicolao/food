@@ -2,13 +2,12 @@
   import { onMount } from 'svelte';
   import { analyzeFood, type NutritionEstimate } from '$lib/gemini';
   import { searchFoodImage } from '$lib/image-search';
-  import { uploadImage } from '$lib/sheets';
-  import { dispatchEvent, store } from '$lib/store';
+  import { uploadImage, type GoogleDriveFile } from '$lib/sheets';
+  import { dispatchEvent, store, type RootState } from '$lib/store';
   import { signIn } from '$lib/auth';
   import { toasts } from '$lib/toast';
   import { goto } from '$app/navigation';
   import { base } from '$app/paths';
-  // @ts-ignore
   import exifr from 'exifr'; 
   import { createPickerSession, pollPickerSession, listSessionMediaItems } from '$lib/google-photos';
   
@@ -23,7 +22,6 @@
   
   type LogMode = 'IDLE' | 'CAMERA' | 'VOICE' | 'TEXT' | 'LIBRARY';
   let currentMode = $state<LogMode>('IDLE');
-  $effect(() => { console.log('MODE CHANGED:', currentMode); });
   
   // let showPhotosSelector = $state(false); // Unused, logic handled by picker
 
@@ -263,7 +261,6 @@
   async function addImage(file: File, triggerAnalysis: boolean = true, skipExif: boolean = false) {
       if (!skipExif) {
           try {
-               // @ts-ignore
                const exifData = await exifr.parse(file);
                if (exifData && (exifData.DateTimeOriginal || exifData.CreateDate)) {
                const date = exifData.DateTimeOriginal || exifData.CreateDate;
@@ -440,8 +437,7 @@
     if ((imagePreviews.length === 0 && !itemName) || isSaving) return;
     isSaving = true;
     try {
-        const state = store.getState();
-        // @ts-ignore
+        const state = store.getState() as RootState;
         const folderId = state.config?.folderId || undefined;
         
         let driveUrls = '';
@@ -457,13 +453,13 @@
                     uploadImage(file, `FoodLog-${Date.now()}-${file.name}`, folderId)
                 );
 
-                // @ts-ignore
                 const driveFiles = await Promise.race([
                     Promise.all(uploadPromises),
                     timeoutProm
-                ]);
+                ]) as GoogleDriveFile[];
 
-                driveUrls = driveFiles.map((f: any) => {
+
+                driveUrls = driveFiles.map(f => {
                     if (f.thumbnailLink) return f.thumbnailLink;
                     if (f.id) return `https://drive.google.com/thumbnail?id=${f.id}&sz=w2048`;
                     return f.webViewLink;
