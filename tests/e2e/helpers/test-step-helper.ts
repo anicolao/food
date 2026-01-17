@@ -36,7 +36,7 @@ export class TestStepHelper {
 
         // 2. Generate Name
         const paddedIndex = String(this.stepCount++).padStart(3, '0');
-        const filename = `${paddedIndex}-${id}.png`;
+        const filename = `${paddedIndex}-${id.replace(/_/g, '-')}.png`;
 
         // 3. Stabilization: Wait for Network Sync (if present)
         const networkStatus = this.page.locator('button[data-status]');
