@@ -1,5 +1,5 @@
 import { configureStore, createSlice, type PayloadAction, type Middleware } from '@reduxjs/toolkit';
-import { appendRow } from './sheets';
+
 import { syncMiddleware } from './redux-sync-middleware';
 
 // --- Event Types ---
