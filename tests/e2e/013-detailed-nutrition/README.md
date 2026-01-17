@@ -1,0 +1,76 @@
+# Test: 013-detailed-nutrition: Log and Edit Detailed Nutrition
+
+## Setup: Mock Drive and Gemini
+
+![Setup: Mock Drive and Gemini](./screenshots/000-setup_mock.png)
+
+**Verifications:**
+- [x] Drive and Gemini APIs mocked
+
+---
+
+## Action: Navigate to Log and Enter Text
+
+![Action: Navigate to Log and Enter Text](./screenshots/001-navigate_and_log.png)
+
+**Verifications:**
+- [x] Log page reachable and analysis returns details
+
+---
+
+## Verification: Check Unified Form with Details
+
+![Verification: Check Unified Form with Details](./screenshots/002-verify_form.png)
+
+**Verifications:**
+- [x] Item name populated
+- [x] Calories match
+- [x] Detailed fields visible after toggle
+
+---
+
+## Action: Save Entry
+
+![Action: Save Entry](./screenshots/003-save_entry.png)
+
+**Verifications:**
+- [x] Save redirects to home
+
+---
+
+## Action: Open Entry in Detail View
+
+![Action: Open Entry in Detail View](./screenshots/004-open_detail.png)
+
+**Verifications:**
+- [x] Entry opens
+
+---
+
+## Verification: Check Details Persisted
+
+![Verification: Check Details Persisted](./screenshots/005-verify_persistence.png)
+
+**Verifications:**
+- [x] Details align with mocked data
+
+---
+
+## Action: Edit Detail
+
+![Action: Edit Detail](./screenshots/006-edit_detail.png)
+
+**Verifications:**
+- [x] Edit saves correctly
+
+---
+
+## Verification: Verify Edit Persisted
+
+![Verification: Verify Edit Persisted](./screenshots/007-verify_edit.png)
+
+**Verifications:**
+- [x] Caffeine value is now 50
+
+---
+
