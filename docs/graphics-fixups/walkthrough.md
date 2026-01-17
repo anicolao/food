@@ -34,3 +34,4 @@ render_diffs(file:///Users/anicolao/projects/antigravity/food/flake.nix)
 ## Verification Results
 - **Files Verified**: verified existence and sizing of generated Android icons in `static/`.
 - **Method**: Manual copy by user + `nix develop -c magick` for resizing to ensure proper PNG format.
+- **CI Adjustments**: Increased E2E screenshot tolerance to 200 pixels to account for cross-platform rendering differences.
