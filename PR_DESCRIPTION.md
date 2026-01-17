@@ -1,42 +1,16 @@
-# Graphics Improvements: Neon/Glassmorphic Icons
+# Fix: Timestamp Anomaly and Double-Write Bug
 
-## User Request
-
-> We need to use nano-banana to do some graphics fixups.
+## User Prompt (Verbatim)
+> The user observed a situation where committing an entry made with the text tool resulted in three rows being added to the sheet, each with a different GUID... This suggested a retry logic or multiple dispatches.
 >
-> The application icon should be more in the glassmorphic neon on black style, and be optimized to look good both on Android and iOS.
->
-> The sync failure icon needs to be more like the other sync status icons, a neon glow against a pure black field.
->
-> The pending status and offline status need to be regenerated without words (currently they have words). Don't tell it to remove the words, just remake them without words.
->
-> The sync icon needs to have only one neon line in the outline instead of the double line. You can probably get a good result just by regenerating.
-> 
-> What I'd do is provide the good sync icon "icon-status-synced" as the example to follow and ask for the other ones to regeneraete them; and then amke the applicaiton icon in with a similar prompt but make sure it knows the app icon goes on both android and iOS homescreens. I'd prefer if the app icon didn't have a white field in teh background.
-
-### User Comments / Feedback
-
-> use nix if you need to install software for image processing
-
-> I interrupted you because you seemed stuck copying the files (!?). Let's try again but you can skip the 'synced' one because I like the existing icon fine and don't like the new one
-
-> OK I interrupted you because the commands weren't working for you,and I copied the images by hand. But the sips command you are trying to use makes JPG not PNG, so I think you probabkyl want to edit flake.nix and install magick or similar to do the resize job with nix develop -c
-
-> OK I quit and restarted, because CLI tools didn't seem to be working for you. HOpefully this fixes it, continue
-
-> OK let's follow WALKTHROUGH.md [sic] and make a PR of the icon changes that are now in teh right place as open files in the repo. You'll have to regenerate e2e screenshots, since the icons are new
+> The user observed another peculiar situation where a `log/entryConfirmed` event had an `EventID` (`ec693587-27f8-4172-8958-a7c0ff00b101`) that *matched* the `EntryID` within its payload, and the event's timestamp (`2026-01-15T19:51:00.000Z`) seemed "way off base" compared to the `entry.time` (`11:51`). This suggests a non-standard event creation or modification process.
 
 ## Changes
-
-- **App Icon**: Updated to a neon healthy-food symbol on pure black. Resized for Android (192x192, 512x512) and iOS.
-- **Sync Status Icons**: 
-    - `icon-status-error`: Neon red exclamation/cloud.
-    - `icon-status-pending`: Neon yellow hourglass (no text).
-    - `icon-status-offline`: Neon grey disconnected cloud (no text).
-    - `icon-status-synced`: Retained original (user preference).
-- **Configuration**: Added `imagemagick` to `flake.nix` for CLI image processing.
-- **E2E**: Updated screenshots to reflect new icons.
+- **Root Cause Analysis**: Identified that the "EventID=EntryID" anomaly was caused by legacy code in `src/routes/log/+page.svelte` (since removed) that manually appended rows using local data.
+- **Double-Write Fix**: Discovered and fixed a bug in `src/routes/entry/+page.svelte` where `entryUpdated` and `entryDeleted` events were being written twice: once via Redux dispatch (correct) and once via manual `appendRow` (duplicate).
+- **Cleanup**: Removed the manual `appendRow` logic from `src/routes/entry/+page.svelte` and removed unused imports in `store.ts` and `log/+page.svelte`.
+- **Audit**: Verified that `appendRow` is now exclusively used in `sheets.ts` and `sync-manager.ts`.
 
 ## Verification
-- Verified icon placement and dimensions.
-- E2E tests passed with updated snapshots.
+- See [Walkthrough](./docs/walkthrough_timestamp_anomaly.md) for detailed investigation and verification steps.
+- **Manual Test**: Editing or deleting an entry now produces exactly one event row in the backend sheet.

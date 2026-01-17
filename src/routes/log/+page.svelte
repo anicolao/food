@@ -2,7 +2,7 @@
   import { onMount } from 'svelte';
   import { analyzeFood, type NutritionEstimate } from '$lib/gemini';
   import { searchFoodImage } from '$lib/image-search';
-  import { uploadImage, appendRow } from '$lib/sheets';
+  import { uploadImage } from '$lib/sheets';
   import { dispatchEvent, store } from '$lib/store';
   import { signIn } from '$lib/auth';
   import { toasts } from '$lib/toast';
@@ -63,6 +63,7 @@
 
   let showCorrectionInput = $state(false);
   let userCorrection = $state('');
+  let isSaving = $state(false);
   
   // Sheet State
   // We consider the sheet 'open' (preview mode) if we have images, pending text data with "AI Found" image, OR if we are analyzing
@@ -436,7 +437,8 @@
 
   async function handleSubmit() {
     // We allow saving if we have images OR if we have populated data (itemName)
-    if (imagePreviews.length === 0 && !itemName) return;
+    if ((imagePreviews.length === 0 && !itemName) || isSaving) return;
+    isSaving = true;
     try {
         const state = store.getState();
         // @ts-ignore
@@ -507,6 +509,7 @@
         console.error('Failed to save', e);
         // Should we navigate anyway? Or show error?
         // If critical save error, stay here.
+        isSaving = false;
     }
   }
 
@@ -673,7 +676,9 @@
                          </div>
                       {/if}
 
-                      <button class="save-btn-primary" onclick={handleSubmit}>Save Entry</button>
+                      <button class="save-btn-primary" onclick={handleSubmit} disabled={isSaving}>
+                          {isSaving ? 'Saving...' : 'Save Entry'}
+                      </button>
                  </div>
              {/if}
          </div>

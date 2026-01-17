@@ -4,7 +4,7 @@
   import { goto } from '$app/navigation';
   import { base } from '$app/paths';
   import { onMount, tick } from 'svelte';
-  import { appendRow } from '$lib/sheets';
+
   import { formatLogDate } from '$lib/formatDate';
   import { resolveDriveImage } from '$lib/images';
 
@@ -72,19 +72,7 @@
 
      store.dispatch(dispatchEvent('log/entryUpdated', { entryId: id, changes }));
      
-     try {
-        const state = store.getState();
-        // @ts-ignore
-        const spreadsheetId = state.config?.spreadsheetId;
-        if (spreadsheetId) {
-             await appendRow(spreadsheetId, 'Events', [
-                crypto.randomUUID(),
-                new Date().toISOString(),
-                'log/entryUpdated',
-                JSON.stringify({ entryId: id, changes })
-            ]);
-        }
-     } catch(e) { console.error('Sheet sync failed', e); }
+
 
      goto(`${base}/`);
   }
@@ -95,19 +83,7 @@
       
       store.dispatch(dispatchEvent('log/entryDeleted', { entryId: id }));
 
-      try {
-        const state = store.getState();
-        // @ts-ignore
-        const spreadsheetId = state.config?.spreadsheetId;
-        if (spreadsheetId) {
-             await appendRow(spreadsheetId, 'Events', [
-                crypto.randomUUID(),
-                new Date().toISOString(),
-                'log/entryDeleted',
-                JSON.stringify({ entryId: id })
-            ]);
-        }
-     } catch(e) { console.error('Sheet sync failed', e); }
+
 
       goto(`${base}/`);
   }
