@@ -1,33 +1,35 @@
-# Fix Transition Logic for Static/Base-Path Deployments
+# Implementation Plan - Fix Missing Edit Bug
 
-The current screen transition logic relies on exact path matching (e.g., `path === '/settings'`). This fails when the application is deployed to a subdirectory (like GitHub Pages `user.github.io/repo/`), where paths include a base prefix (e.g., `/repo/settings`).
+The user reports that edits to an item are not persisted when re-opening the item, despite a successful unit test. This suggests a regression in the E2E flow, possibly related to component state initialization or store reactivity.
 
 ## User Review Required
 
-> [!NOTE]
-> This change strictly affects the `getTransitionDirection` logic to make it robust against base paths. It should likely fix the reported issue where "some" transitions work (the ones using `.includes`) but others don't (strict equality).
+> [!IMPORTANT]
+> I will creating a new E2E test `tests/e2e/011-edit-bug-repro.spec.ts` to strictly reproduce this scenario (Create -> Edit -> Save -> Verify List -> **Re-open Details** -> Verify Edit).
 
 ## Proposed Changes
 
-### `src/lib`
+### Tests
+#### [NEW] [tests/e2e/011-edit-repro.spec.ts](file:///Users/anicolao/projects/antigravity/food/tests/e2e/011-edit-repro.spec.ts)
+- Create a new test based on `005-details-edit-delete.spec.ts`.
+- Focus on the "Edit" flow.
+- Add a critical verification step:
+    1. Log food.
+    2. Edit food (Change name to "Updated Food").
+    3. Save.
+    4. Click "Updated Food" in list.
+    5. **Assert** that the "Item Name" input field contains "Updated Food".
 
-#### [MODIFY] [transitions.ts](file:///Users/anicolao/projects/antigravity/food/src/lib/transitions.ts)
-- Import `base` from `$app/paths`.
-- Create a helper `normalizePath(path: string)`:
-    - If `base` is set and `path` starts with `base`, remove it.
-    - Ensure the result always starts with `/`.
-    - Handle trailing slashes consistently.
-- Update `getTransitionDirection` to use `normalizePath` for both `from` and `to` URLs.
+### Application Code
+#### [MODIFY] [src/routes/entry/+page.svelte](file:///Users/anicolao/projects/antigravity/food/src/routes/entry/+page.svelte)
+- **Refactor to Svelte 5 Runes**: Replace `let form` with `let form = $state(...)` to ensure robust reactivity.
+- **Remove Manual Sync**: The component currently manually calls `appendRow` AND dispatches to store (which triggers middleware sync). This causes duplicate events and race conditions. Removed the manual `appendRow` and rely entirely on the Redux middleware.
+- **Improved ID Handling**: Use `$derived` for `id` to ensure proper reactivity if the component is reused.
 
 ## Verification Plan
 
 ### Automated Tests
-- Create a new unit test file `src/lib/transitions.test.ts` to verify `getTransitionDirection`.
-- Test cases:
-    - **No Base Path**: `from: /`, `to: /settings` -> `right`.
-    - **With Base Path**: `from: /food/`, `to: /food/settings` -> `right` (mocking `$app/paths` might be tricky in Vitest depending on setup, but we can structure the function to accept `base` as an optional argument or mock the module).
-    - **Cross-check**: Ensure existing "includes" logic still works.
+- Run the reproduction test `tests/e2e/011-edit-repro.spec.ts` (which now includes persistence check).
+- **Update**: Test failing on List View update. Debugging reactivity race between store update and Home page mount. Added logs to diagnose.
+- Run `tests/e2e/005-details-edit-delete` to ensure no regression.
 
-### Manual Verification
-- Since we can't easily run the production build locally with the exact GitHub Pages setup without building and serving, the unit test is the primary verification.
-- We can ostensibly run `PUBLIC_BASE_PATH=/food npm run dev` to see if it breaks dev (it shouldn't, but `base` might not apply in dev mode the same way unless configured).

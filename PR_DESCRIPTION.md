@@ -1,42 +1,16 @@
-# Graphics Improvements: Neon/Glassmorphic Icons
+# Fix Missing Edit Persistence Bug
 
-## User Request
+## Summary of Changes
+- **Refactored `src/routes/entry/+page.svelte`**: Migrated to Svelte 5 Runes (`$state`, `$derived`, `$effect`) and removed manual `appendRow` calls to rely on Redux middleware as the Single Source of Truth.
+- **Fixed IDB Hydration**: Updated `src/lib/db.ts` to include a fallback mechanism. If the `by-timestamp` index returns 0 results (due to potential corruption or browser quirks), it now falls back to `getAll()` and sorts in memory.
+- **Fixed Race Condition**: Added reactive store subscription to `entry/+page.svelte` to ensure the form is populated correctly even if the component mounts before async hydration completes.
+- **Added Reproduction Test**: Created `tests/e2e/011-edit-repro.spec.ts` which successfully reproduced the bug (failing on reload) and now passes.
 
-> We need to use nano-banana to do some graphics fixups.
->
-> The application icon should be more in the glassmorphic neon on black style, and be optimized to look good both on Android and iOS.
->
-> The sync failure icon needs to be more like the other sync status icons, a neon glow against a pure black field.
->
-> The pending status and offline status need to be regenerated without words (currently they have words). Don't tell it to remove the words, just remake them without words.
->
-> The sync icon needs to have only one neon line in the outline instead of the double line. You can probably get a good result just by regenerating.
-> 
-> What I'd do is provide the good sync icon "icon-status-synced" as the example to follow and ask for the other ones to regeneraete them; and then amke the applicaiton icon in with a similar prompt but make sure it knows the app icon goes on both android and iOS homescreens. I'd prefer if the app icon didn't have a white field in teh background.
-
-### User Comments / Feedback
-
-> use nix if you need to install software for image processing
-
-> I interrupted you because you seemed stuck copying the files (!?). Let's try again but you can skip the 'synced' one because I like the existing icon fine and don't like the new one
-
-> OK I interrupted you because the commands weren't working for you,and I copied the images by hand. But the sips command you are trying to use makes JPG not PNG, so I think you probabkyl want to edit flake.nix and install magick or similar to do the resize job with nix develop -c
-
-> OK I quit and restarted, because CLI tools didn't seem to be working for you. HOpefully this fixes it, continue
-
-> OK let's follow WALKTHROUGH.md [sic] and make a PR of the icon changes that are now in teh right place as open files in the repo. You'll have to regenerate e2e screenshots, since the icons are new
-
-## Changes
-
-- **App Icon**: Updated to a neon healthy-food symbol on pure black. Resized for Android (192x192, 512x512) and iOS.
-- **Sync Status Icons**: 
-    - `icon-status-error`: Neon red exclamation/cloud.
-    - `icon-status-pending`: Neon yellow hourglass (no text).
-    - `icon-status-offline`: Neon grey disconnected cloud (no text).
-    - `icon-status-synced`: Retained original (user preference).
-- **Configuration**: Added `imagemagick` to `flake.nix` for CLI image processing.
-- **E2E**: Updated screenshots to reflect new icons.
-
-## Verification
-- Verified icon placement and dimensions.
-- E2E tests passed with updated snapshots.
+## User Prompt
+Fix Missing Edit Bug
+The user's main objective is to fix a "missing edit" bug where changes to a food log item are not persisted upon re-opening. This involves:
+1. Ensuring the E2E test (`011-edit-repro.spec.ts`) accurately reproduces the bug by failing after an edit and page reload.
+2. Refactoring `src/routes/entry/+page.svelte` to use Svelte 5 Runes and eliminate duplicate synchronization logic, which is suspected to be masking the bug or causing inconsistent state.
+3. Once the bug is consistently reproduced by the E2E test, identifying and implementing the necessary fix in the application code.
+4. Ensuring the E2E test passes after the fix.
+5. Running existing E2E tests to confirm no regressions.

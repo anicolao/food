@@ -4,14 +4,15 @@
   import { goto } from '$app/navigation';
   import { base } from '$app/paths';
   import { onMount, tick } from 'svelte';
-  import { appendRow } from '$lib/sheets';
+  // Removed manual appendRow import to prevent duplicate sync
   import { formatLogDate } from '$lib/formatDate';
   import { resolveDriveImage } from '$lib/images';
 
-  const id = $page.url.searchParams.get('id');
+  // Svelte 5: Use derived for reactive ID from store
+  let id = $derived($page.url.searchParams.get('id'));
   
-  let entry: any = null;
-  let form: any = {
+
+  let form = $state({
       mealType: 'Snack',
       description: '',
       rationale: '',
@@ -19,42 +20,63 @@
       protein: 0,
       carbs: 0,
       fat: 0
-  };
+  });
   
-  let imageUrls: string[] = [];
-  let entryDateTimeStr = '';
-  // @ts-ignore
-  let galleryContainer: HTMLElement;
+  let imageUrls = $state<string[]>([]);
+  let entryDateTimeStr = $state('');
+  
+  // Svelte 5: Element binding
+  let galleryContainer = $state<HTMLElement>();
 
-  onMount(async () => {
-      if (!id) {
+  // Reactive Store State
+  let allLogs = $state(store.getState().projections.log);
+
+  onMount(() => {
+      // Subscribe to store updates (e.g. from hydration)
+      const unsub = store.subscribe(() => {
+          allLogs = store.getState().projections.log;
+      });
+      return unsub;
+  });
+
+  // Derived Entry
+  let entry = $derived(allLogs.find((e: any) => e.id === id));
+
+  // Sync Form when Entry becomes available
+  $effect(() => {
+      // If no ID, redirect
+      if (!id && typeof window !== 'undefined') {
           goto(`${base}/`);
           return;
       }
-      await tick();
-      const state = store.getState();
-      entry = state.projections.log.find(e => e.id === id);
-      
-      if (!entry) {
-          goto(`${base}/`);
-          return;
-      }
 
-      form = {
-          mealType: entry.mealType,
-          description: entry.description,
-          rationale: entry.rationale || '',
-          calories: entry.calories,
-          protein: entry.protein,
-          carbs: entry.carbs,
-          fat: entry.fat
-      };
-      
-      if (entry.imageDriveUrl) {
-          imageUrls = entry.imageDriveUrl.split(',').map((u: string) => u.trim());
+      if (entry) {
+            // Found entry: populate form if needed
+            // We use a simple check: if description matches form, assume in sync or user edit?
+            // Actually, we want to load it ONCE.
+            // But if hydration happens later, we want to load it THEN.
+            // To differentiate "User typed" vs "Empty", check if form is pristine?
+            // Or just check if form.description is empty.
+            if (!form.description) {
+                form = {
+                    mealType: entry.mealType,
+                    description: entry.description,
+                    rationale: entry.rationale || '',
+                    calories: entry.calories,
+                    protein: entry.protein,
+                    carbs: entry.carbs,
+                    fat: entry.fat
+                };
+                if (entry.imageDriveUrl) {
+                    imageUrls = entry.imageDriveUrl.split(',').map((u: string) => u.trim());
+                } else {
+                    imageUrls = [];
+                }
+                entryDateTimeStr = formatLogDate(entry.date + 'T' + entry.time);
+            }
+      } else {
+            // Waiting for entry...
       }
-      
-      entryDateTimeStr = formatLogDate(entry.date + 'T' + entry.time);
   });
 
   async function handleSave() {
@@ -70,21 +92,14 @@
          fat: Number(form.fat)
      };
 
-     store.dispatch(dispatchEvent('log/entryUpdated', { entryId: id, changes }));
+     // Dispatch Event -> Middleware handles persistence and Sync
+     // This is the SINGLE SOURCE OF TRUTH flow.
+     await store.dispatch(dispatchEvent('log/entryUpdated', { entryId: id, changes }));
      
-     try {
-        const state = store.getState();
-        // @ts-ignore
-        const spreadsheetId = state.config?.spreadsheetId;
-        if (spreadsheetId) {
-             await appendRow(spreadsheetId, 'Events', [
-                crypto.randomUUID(),
-                new Date().toISOString(),
-                'log/entryUpdated',
-                JSON.stringify({ entryId: id, changes })
-            ]);
-        }
-     } catch(e) { console.error('Sheet sync failed', e); }
+     // REMOVED: Manual appendRow block. 
+     // The middleware intercepts 'log/entryUpdated', saves to IDB ('pending'), and triggers SyncManager.
+     // SyncManager then pushes to Sheets.
+     // This prevents the race condition where we manually pushed to Sheet but didn't update IDB correctly or vice versa.
 
      goto(`${base}/`);
   }
@@ -95,20 +110,8 @@
       
       store.dispatch(dispatchEvent('log/entryDeleted', { entryId: id }));
 
-      try {
-        const state = store.getState();
-        // @ts-ignore
-        const spreadsheetId = state.config?.spreadsheetId;
-        if (spreadsheetId) {
-             await appendRow(spreadsheetId, 'Events', [
-                crypto.randomUUID(),
-                new Date().toISOString(),
-                'log/entryDeleted',
-                JSON.stringify({ entryId: id })
-            ]);
-        }
-     } catch(e) { console.error('Sheet sync failed', e); }
-
+      // REMOVED: Manual appendRow block.
+      
       goto(`${base}/`);
   }
   

@@ -66,7 +66,20 @@ export async function markEventsSynced(eventIds: string[]) {
 
 export async function getAllEvents() {
     const db = await initDB();
-    return db.getAllFromIndex('events', 'by-timestamp');
+    try {
+        const events = await db.getAllFromIndex('events', 'by-timestamp');
+        if (events.length === 0) {
+            // Fallback: try getAll() and sort, in case index is broken or empty but store isn't
+            const all = await db.getAll('events');
+            console.log(`[DB] Index returned 0, fallback getAll returned ${all.length}`);
+            return all.sort((a, b) => a.timestamp.localeCompare(b.timestamp));
+        }
+        return events;
+    } catch (e) {
+        console.warn('[DB] Index fetch failed, falling back to getAll', e);
+        const all = await db.getAll('events');
+        return all.sort((a, b) => a.timestamp.localeCompare(b.timestamp));
+    }
 }
 
 export async function addSyncedEvent(event: FoodEvent) {
