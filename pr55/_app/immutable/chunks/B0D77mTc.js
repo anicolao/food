@@ -1,0 +1,1 @@
+import{l as c,h as _,m as o,E as d,n as E,H as T,s as b,o as p,B as y,p as f}from"./DBml_rUM.js";function v(n,i,h=!1){_&&o();var r=new y(n),l=h?d:0;function t(a,s){if(_){const u=E(n)===T;if(a===u){var e=b();p(e),r.anchor=e,f(!1),r.ensure(a,s),f(!0);return}}r.ensure(a,s)}c(()=>{var a=!1;i((s,e=!0)=>{a=!0,t(e,s)}),a||t(!1,null)},l)}export{v as i};
