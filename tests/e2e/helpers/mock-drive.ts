@@ -71,8 +71,23 @@ export async function mockDriveAPI(page: Page) {
             return;
         }
 
-        // 5. Creation
-        if (method === 'POST') {
+        // 5. Upload (Multipart or regular)
+        if (url.includes('/upload/drive/v3/files')) {
+            await route.fulfill({
+                status: 200,
+                json: {
+                    id: 'mock-uploaded-file-id',
+                    name: 'Uploaded File',
+                    // Use a local internal image so it definitely loads in screenshots
+                    thumbnailLink: 'http://localhost:5174/images/icon-status-synced.png',
+                    webViewLink: 'http://localhost:5174/images/icon-status-synced.png'
+                }
+            });
+            return;
+        }
+
+        // 6. Generic Creation (POST to files)
+        if (method === 'POST' && url.includes('/files')) {
             await route.fulfill({ json: { id: 'mock-sheet-id', name: 'New Database' } });
             return;
         }
