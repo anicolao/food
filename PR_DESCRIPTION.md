@@ -1,16 +1,14 @@
-# Fix: Timestamp Anomaly and Double-Write Bug
+# Fix: Macro Bubble Glow Clipping
 
 ## User Prompt (Verbatim)
-> The user observed a situation where committing an entry made with the text tool resulted in three rows being added to the sheet, each with a different GUID... This suggested a retry logic or multiple dispatches.
->
-> The user observed another peculiar situation where a `log/entryConfirmed` event had an `EventID` (`ec693587-27f8-4172-8958-a7c0ff00b101`) that *matched* the `EntryID` within its payload, and the event's timestamp (`2026-01-15T19:51:00.000Z`) seemed "way off base" compared to the `entry.time` (`11:51`). This suggests a non-standard event creation or modification process.
+> THe macro bubble rings are clipped by their bounding boxes as shown in the screenshot - the glow is cut off on all four sides. Fix it and regenerate e2e screenshots as necessary.
 
 ## Changes
-- **Root Cause Analysis**: Identified that the "EventID=EntryID" anomaly was caused by legacy code in `src/routes/log/+page.svelte` (since removed) that manually appended rows using local data.
-- **Double-Write Fix**: Discovered and fixed a bug in `src/routes/entry/+page.svelte` where `entryUpdated` and `entryDeleted` events were being written twice: once via Redux dispatch (correct) and once via manual `appendRow` (duplicate).
-- **Cleanup**: Removed the manual `appendRow` logic from `src/routes/entry/+page.svelte` and removed unused imports in `store.ts` and `log/+page.svelte`.
-- **Audit**: Verified that `appendRow` is now exclusively used in `sheets.ts` and `sync-manager.ts`.
+- **CSS/SVG Adjustment**: Expanded the `filter` region in `MacroBubble.svelte` to prevent clipping of the glow effect.
+    - Updated `filterUnits` attributes `x`, `y`, `width`, `height` to calculated values based on `size` (e.g., `width={size*2}`).
+- **E2E Updates**: Regenerated E2E snapshots to reflect the visual changes (unclipped glow).
 
 ## Verification
-- See [Walkthrough](./docs/walkthrough_timestamp_anomaly.md) for detailed investigation and verification steps.
-- **Manual Test**: Editing or deleting an entry now produces exactly one event row in the backend sheet.
+- See [Walkthrough](./docs/walkthrough_macro_bubble_clipping.md) for details.
+- **E2E Tests**: Ran `tests/e2e/005-dashboard-state.spec.ts`, `tests/e2e/003-stats/003-stats.spec.ts`, and `tests/e2e/002-log-food/002-log-food.spec.ts` with `--update-snapshots`.
+

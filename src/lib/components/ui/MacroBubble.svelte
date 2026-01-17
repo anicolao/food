@@ -76,7 +76,7 @@
     <div class="ring-wrapper" style="width: {size}px; height: {size}px;">
         <svg width={size} height={size} viewBox="0 0 {size} {size}" class="ring-svg">
             <defs>
-                 <filter id="glow-{label}" filterUnits="userSpaceOnUse" x="0" y="0" width={size} height={size}>
+                 <filter id="glow-{label}" filterUnits="userSpaceOnUse" x={-size/2} y={-size/2} width={size*2} height={size*2}>
                    <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
                    <feMerge>
                        <feMergeNode in="coloredBlur"/>
