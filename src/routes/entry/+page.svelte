@@ -23,6 +23,7 @@
   
   let imageUrls: string[] = [];
   let entryDateTimeStr = '';
+  let backUrl = `${base}/`;
   // @ts-ignore
   let galleryContainer: HTMLElement;
 
@@ -38,6 +39,10 @@
       if (!entry) {
           goto(`${base}/`);
           return;
+      }
+
+      if (entry.date) {
+          backUrl = `${base}/?date=${entry.date}`;
       }
 
       form = {
@@ -73,8 +78,8 @@
      store.dispatch(dispatchEvent('log/entryUpdated', { entryId: id, changes }));
      
 
-
-     goto(`${base}/`);
+     
+     goto(backUrl);
   }
 
   async function handleDelete() {
@@ -85,7 +90,7 @@
 
 
 
-      goto(`${base}/`);
+      goto(backUrl);
   }
   
   function handleGalleryClick(e: MouseEvent) {
@@ -106,7 +111,7 @@
 
 <div class="page-container">
   <div class="nav-header">
-      <a href="{base}/" class="text-link">&larr; Back</a>
+      <a href="{backUrl}" class="text-link">&larr; Back</a>
       <h2 class="page-title">{entryDateTimeStr}</h2>
       <button class="delete-link" onclick={handleDelete}>Delete</button>
   </div>
