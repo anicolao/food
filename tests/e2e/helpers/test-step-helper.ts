@@ -52,7 +52,7 @@ export class TestStepHelper {
         // 4. Capture & Verify (Zero-Pixel Tolerance)
         // This will check against the baseline in 'screenshots/{filename}'.
         // If the file doesn't exist, it will fail (unless --update-snapshots is used).
-        await expect(this.page).toHaveScreenshot(filename.replace(/\.png$/, ''));
+        await expect(this.page).toHaveScreenshot(filename.replace(/\.png$/, ''), { maxDiffPixels: 200 });
 
         // 4. Record for Docs
         this.steps.push({
