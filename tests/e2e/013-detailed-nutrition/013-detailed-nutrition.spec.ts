@@ -82,6 +82,8 @@ test('013-detailed-nutrition: Log and Edit Detailed Nutrition', async ({ page })
                 await page.getByRole('button', { name: 'Text' }).click();
                 await page.getByRole('textbox').fill('Big salad with everything');
                 await page.getByRole('button', { name: 'Analyze' }).click();
+                // Wait for analysis to complete before snapshot
+                await expect(page.getByLabel('Log Description')).toHaveValue('Detailed Salad');
             }
         }]
     });
