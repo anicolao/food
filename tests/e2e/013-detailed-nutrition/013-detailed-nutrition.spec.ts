@@ -1,0 +1,168 @@
+import { test, expect } from '@playwright/test';
+import { mockDriveAPI } from '../helpers/mock-drive';
+import { TestStepHelper } from '../helpers/test-step-helper';
+
+test('013-detailed-nutrition: Log and Edit Detailed Nutrition', async ({ page }) => {
+    const tester = new TestStepHelper(page, test.info());
+
+
+    // Mock Auth
+    await page.addInitScript(() => {
+        (window as any).google = {
+            accounts: {
+                oauth2: {
+                    initTokenClient: (c: any) => ({ requestAccessToken: () => c.callback({ access_token: 'mock' }) }),
+                    revoke: (token: string, cb: any) => cb()
+                }
+            }
+        };
+    });
+    // Block real Google Identity script
+    await page.route('https://accounts.google.com/gsi/client', route => route.abort());
+
+    // Mock Clock for stable date
+    await page.clock.install({ time: new Date('2024-03-15T16:00:00Z') });
+
+    await tester.step('setup_mock', {
+        description: 'Setup: Mock Drive and Gemini',
+        verifications: [{
+            spec: 'Drive and Gemini APIs mocked',
+            check: async () => {
+                await mockDriveAPI(page);
+
+                // Mock Gemini Analysis Response with details
+                await page.route('**/v1beta/models/gemini-2.5-flash:generateContent*', async route => {
+                    const json = {
+                        candidates: [{
+                            content: {
+                                parts: [{
+                                    text: JSON.stringify({
+                                        is_label: true,
+                                        item_name: "Detailed Salad",
+                                        rationale: "Rich in nutrients",
+                                        calories: 350,
+                                        protein: 15,
+                                        fat: { total: 20 },
+                                        carbohydrates: { total: 30 },
+                                        details: {
+                                            saturatedFat: 5,
+                                            transFat: 0,
+                                            cholesterol: 10,
+                                            sodium: 450,
+                                            fiber: 8,
+                                            sugar: 12,
+                                            addedSugar: 2,
+                                            caffeine: 0
+                                        },
+                                        searchQuery: "healthy salad"
+                                    })
+                                }]
+                            }
+                        }]
+                    };
+                    await route.fulfill({ json });
+                });
+            }
+        }]
+    });
+
+    await tester.step('navigate_and_log', {
+        description: 'Action: Navigate to Log and Enter Text',
+        verifications: [{
+            spec: 'Log page reachable and analysis returns details',
+            check: async () => {
+                await page.goto('/');
+                // Allow polling to initialize tokenClient
+                await page.waitForFunction(() => (window as any)._authReady);
+                await page.getByText('Sign In with Google').click();
+                await expect(page.locator('.feed-header h2').first()).toHaveText('Today'); // Wait for home
+
+                await page.goto('/log');
+                await page.waitForLoadState('domcontentloaded');
+                await page.getByRole('button', { name: 'Text' }).click();
+                await page.getByRole('textbox').fill('Big salad with everything');
+                await page.getByRole('button', { name: 'Analyze' }).click();
+            }
+        }]
+    });
+
+    await tester.step('verify_form', {
+        description: 'Verification: Check Unified Form with Details',
+        verifications: [
+            {
+                spec: 'Item name populated',
+                check: async () => await expect(page.getByLabel('Log Description')).toHaveValue('Detailed Salad')
+            },
+            {
+                spec: 'Calories match',
+                check: async () => expect(page.locator('.highlight-cal')).toHaveValue('350')
+            },
+            {
+                spec: 'Detailed fields visible after toggle',
+                check: async () => {
+                    await page.getByRole('button', { name: /Show Details/ }).click();
+                    await expect(page.locator('label:has-text("Saturated") input')).toHaveValue('5');
+                    await expect(page.locator('label:has-text("Sodium") input')).toHaveValue('450');
+                    await expect(page.locator('label:has-text("Fiber") input')).toHaveValue('8');
+                }
+            }
+        ]
+    });
+
+    await tester.step('save_entry', {
+        description: 'Action: Save Entry',
+        verifications: [{
+            spec: 'Save redirects to home',
+            check: async () => {
+                await page.getByRole('button', { name: 'Save Entry' }).click();
+                await expect(page).toHaveURL(/\/$/);
+            }
+        }]
+    });
+
+    await tester.step('open_detail', {
+        description: 'Action: Open Entry in Detail View',
+        verifications: [{
+            spec: 'Entry opens',
+            check: async () => {
+                await page.getByText('Detailed Salad').click();
+                await page.waitForTimeout(500);
+            }
+        }]
+    });
+
+    await tester.step('verify_persistence', {
+        description: 'Verification: Check Details Persisted',
+        verifications: [{
+            spec: 'Details align with mocked data',
+            check: async () => {
+                await page.getByRole('button', { name: /Show Details/ }).click();
+                await expect(page.locator('label:has-text("Saturated") input')).toHaveValue('5');
+                await expect(page.locator('label:has-text("Sodium") input')).toHaveValue('450');
+            }
+        }]
+    });
+
+    await tester.step('edit_detail', {
+        description: 'Action: Edit Detail',
+        verifications: [{
+            spec: 'Edit saves correctly',
+            check: async () => {
+                await page.locator('label:has-text("Caffeine") input').fill('50');
+                await page.getByRole('button', { name: 'Save Changes' }).click();
+            }
+        }]
+    });
+
+    await tester.step('verify_edit', {
+        description: 'Verification: Verify Edit Persisted',
+        verifications: [{
+            spec: 'Caffeine value is now 50',
+            check: async () => {
+                await page.getByText('Detailed Salad').click();
+                await page.getByRole('button', { name: /Show Details/ }).click();
+                await expect(page.locator('label:has-text("Caffeine") input')).toHaveValue('50');
+            }
+        }]
+    });
+});

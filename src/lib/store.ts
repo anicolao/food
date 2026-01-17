@@ -11,6 +11,28 @@ export interface FoodEvent {
 }
 
 // --- Initial State (Projections) ---
+export interface DetailedNutrients {
+  // Lipids
+  saturatedFat?: number; // g
+  transFat?: number;     // g
+  cholesterol?: number;  // mg
+
+  // Electrolytes / Minerals
+  sodium?: number;       // mg
+  potassium?: number;    // mg
+  calcium?: number;      // mg 
+  iron?: number;         // mg
+
+  // Carbohydrate Breakdown
+  fiber?: number;        // g
+  sugar?: number;        // g
+  addedSugar?: number;   // g 
+
+  // Other
+  caffeine?: number;     // mg
+  alcohol?: number;      // g 
+}
+
 export interface LogEntry {
   id: string;
   date: string;
@@ -24,6 +46,7 @@ export interface LogEntry {
   imageDriveUrl?: string; // URL in Google Drive
   rawJson?: any; // Full Gemini response
   rationale?: string; // Explainer text for the estimation
+  details?: DetailedNutrients;
 }
 
 interface DailyStats {

@@ -9,25 +9,58 @@ export interface NutritionEstimate {
     carbohydrates: { total: number };
     protein: number;
     searchQuery?: string; // For text/voice inputs
-    // ... expand as needed
+
+    // Detailed Nutrients
+    details?: {
+        saturatedFat?: number;
+        transFat?: number;
+        cholesterol?: number;
+        sodium?: number;
+        potassium?: number;
+        calcium?: number;
+        iron?: number;
+        fiber?: number;
+        sugar?: number;
+        addedSugar?: number;
+        caffeine?: number;
+        alcohol?: number;
+    };
 }
 
 const SYSTEM_PROMPT = `
 You are an expert dietician. Analyze the provided input (image or text description).
 1. If multiple images are provided, treat them as different angles or components of a **single meal/entry**. Aggregate the nutrition facts into one total estimate.
 2. If it is a **Nutrition Facts label**, extract the data exactly as shown.
-3. If it is a **food item/meal**, estimate the nutrition facts based on visible portion sizes and standard values using Canadian standards.
+3. If it is a **food item/meal**, estimate the nutrition facts based on visible portion sizes and **standard Canadian nutrient values**.
 4. If the input is **text only**, estimate based on standard portions for the described items.
 5. **ALWAYS** provide a "searchQuery" field: a short, descriptive string to search for an image of this food (e.g., "Starbucks Grande Latte with oat milk" or "Grilled Salmon with Asparagus").
-6. Return the data **exclusively** in the following JSON format (a SINGLE object, not a list):
+6. **CRITICAL**: Return the data **exclusively** in the following JSON format. Ensure all numerical values are numbers, not strings. Null values are acceptable if the data is genuinely unknown, but **estimate them** if possible for standard foods.
+
+Structure:
 {
   "is_label": boolean,
   "item_name": "string",
-  "rationale": "string",
+  "rationale": "string",  // Briefly explain the estimates
   "calories": number,
   "fat": { "total": number },
   "carbohydrates": { "total": number },
   "protein": number,
+  
+  "details": {
+      "saturatedFat": number | null, // g
+      "transFat": number | null,     // g
+      "cholesterol": number | null,  // mg
+      "sodium": number | null,       // mg
+      "potassium": number | null,    // mg
+      "calcium": number | null,      // mg (Estimate mg, convert from %DV if needed: 1100mg base)
+      "iron": number | null,         // mg (Estimate mg, convert from %DV if needed: 14mg base)
+      "fiber": number | null,        // g
+      "sugar": number | null,        // g
+      "addedSugar": number | null,   // g
+      "caffeine": number | null,     // mg
+      "alcohol": number | null       // g
+  },
+
   "searchQuery": "string"
 }
 `;

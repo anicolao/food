@@ -6,7 +6,7 @@
 
 **Verifications:**
 - [x] Name field populated
-- [x] Calories field populated
+- [x] Cals field populated
 - [x] Multiple images shown
 - [x] Carousel scrolls on click
 
