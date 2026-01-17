@@ -62,6 +62,21 @@ test('013-detailed-nutrition: Log and Edit Detailed Nutrition', async ({ page })
                     };
                     await route.fulfill({ json });
                 });
+
+                // Mock Wikimedia Search to return a valid local image
+                await page.route('**commons.wikimedia.org/w/api.php*', async route => {
+                    await route.fulfill({
+                        json: {
+                            query: {
+                                pages: {
+                                    '12345': {
+                                        imageinfo: [{ url: 'http://localhost:5174/images/icon-status-synced.png' }]
+                                    }
+                                }
+                            }
+                        }
+                    });
+                });
             }
         }]
     });
