@@ -51,7 +51,7 @@ test('US-014: Dashboard State Persistence', async ({ page }, testInfo) => {
                     calories: 500,
                     protein: 20,
                     fat: 10,
-                    carbohydrates: { total: 50 },
+                    carbs: 50,
                     rawJson: {}
                 };
                 await route.fulfill({
