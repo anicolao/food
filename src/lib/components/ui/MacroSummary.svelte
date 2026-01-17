@@ -6,9 +6,9 @@
 </script>
 
 <div class="macro-summary {size}">
-    <span class="macro p">{Math.round(protein || 0)}p</span>
-    <span class="macro c">{Math.round(carbs || 0)}c</span>
-    <span class="macro f">{Math.round(fat || 0)}f</span>
+    <span class="macro p">{Math.round(protein)}p</span>
+    <span class="macro c">{Math.round(carbs)}c</span>
+    <span class="macro f">{Math.round(fat)}f</span>
 </div>
 
 <style>
