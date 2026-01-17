@@ -106,17 +106,26 @@ const applyEventToState = (state: any, event: FoodEvent) => {
         return;
       }
 
-      state.log.push(entry);
+      // Sanitize entry to ensure strictly valid LogEntry
+      const sanitizedEntry: LogEntry = {
+        ...entry,
+        calories: Number(entry.calories || 0),
+        protein: Number(entry.protein || 0),
+        fat: Number(entry.fat || 0),
+        carbs: Number(entry.carbs || 0)
+      };
+
+      state.log.push(sanitizedEntry);
 
       // Update Stats
       if (!state.stats[entry.date]) {
         state.stats[entry.date] = { date: entry.date, totalCalories: 0, totalProtein: 0, totalFat: 0, totalCarbs: 0 };
       }
       const stat = state.stats[entry.date];
-      stat.totalCalories += Number(entry.calories || 0);
-      stat.totalProtein += Number(entry.protein || 0);
-      stat.totalFat += Number(entry.fat || 0);
-      stat.totalCarbs += Number(entry.carbs || 0);
+      stat.totalCalories += sanitizedEntry.calories;
+      stat.totalProtein += sanitizedEntry.protein;
+      stat.totalFat += sanitizedEntry.fat;
+      stat.totalCarbs += sanitizedEntry.carbs;
       break;
     }
 
@@ -135,8 +144,15 @@ const applyEventToState = (state: any, event: FoodEvent) => {
           stat.totalCarbs -= Number(oldEntry.carbs || 0);
         }
 
-        // 2. Update Entry
-        const newEntry = { ...oldEntry, ...changes };
+        // 2. Update Entry (Sanitize new values)
+        const rawNewEntry = { ...oldEntry, ...changes };
+        const newEntry: LogEntry = {
+          ...rawNewEntry,
+          calories: Number(rawNewEntry.calories || 0),
+          protein: Number(rawNewEntry.protein || 0),
+          fat: Number(rawNewEntry.fat || 0),
+          carbs: Number(rawNewEntry.carbs || 0)
+        };
         state.log[index] = newEntry;
 
         // 3. Increment new stats
