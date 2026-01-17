@@ -7,23 +7,25 @@
 
   import { formatLogDate } from '$lib/formatDate';
   import { resolveDriveImage } from '$lib/images';
+  import NutritionForm from '$lib/components/ui/NutritionForm.svelte';
 
   const id = $page.url.searchParams.get('id');
   
-  let entry: any = null;
-  let form: any = {
+  let entry = $state<any>(null);
+  let form = $state<any>({
       mealType: 'Snack',
       description: '',
       rationale: '',
       calories: 0,
       protein: 0,
       carbs: 0,
-      fat: 0
-  };
+      fat: 0,
+      details: {}
+  });
   
-  let imageUrls: string[] = [];
-  let entryDateTimeStr = '';
-  let backUrl = `${base}/`;
+  let imageUrls = $state<string[]>([]);
+  let entryDateTimeStr = $state('');
+  let backUrl = $state(`${base}/`);
   // @ts-ignore
   let galleryContainer: HTMLElement;
 
@@ -34,7 +36,9 @@
       }
       await tick();
       const state = store.getState();
-      entry = state.projections.log.find(e => e.id === id);
+      // Deep clone to ensure we have a mutable object (Redux state is frozen)
+      const rawEntry = state.projections.log.find(e => e.id === id);
+      entry = rawEntry ? JSON.parse(JSON.stringify(rawEntry)) : null;
       
       if (!entry) {
           goto(`${base}/`);
@@ -45,16 +49,17 @@
           backUrl = `${base}/?date=${entry.date}`;
       }
 
-      form = {
+      Object.assign(form, {
           mealType: entry.mealType,
           description: entry.description,
           rationale: entry.rationale || '',
           calories: entry.calories,
           protein: entry.protein,
           carbs: entry.carbs,
-          fat: entry.fat
-      };
-      
+          fat: entry.fat,
+          details: entry.details || {}
+      });
+
       if (entry.imageDriveUrl) {
           imageUrls = entry.imageDriveUrl.split(',').map((u: string) => u.trim());
       }
@@ -65,19 +70,18 @@
   async function handleSave() {
      if (!entry || !id) return;
 
+
      const changes = {
          mealType: form.mealType,
          description: form.description,
          rationale: form.rationale,
          calories: Number(form.calories),
          protein: Number(form.protein),
-         carbs: Number(form.carbs),
-         fat: Number(form.fat)
+         fat: Number(form.fat),
+         details: JSON.parse(JSON.stringify(form.details || {}))
      };
 
-     store.dispatch(dispatchEvent('log/entryUpdated', { entryId: id, changes }));
-     
-
+     store.dispatch(dispatchEvent('log/entryUpdated', { entryId: id, changes: JSON.parse(JSON.stringify(changes)) }));
      
      goto(backUrl);
   }
@@ -87,8 +91,6 @@
       if (!id) return;
       
       store.dispatch(dispatchEvent('log/entryDeleted', { entryId: id }));
-
-
 
       goto(backUrl);
   }
@@ -151,26 +153,7 @@
       </div>
 
       <div class="macros-grid">
-        <div class="field">
-            <label>Calories
-                <input type="number" class="bg-input highlight-cal" bind:value={form.calories} />
-            </label>
-        </div>
-        <div class="field">
-            <label>Protein (g)
-                <input type="number" class="bg-input" bind:value={form.protein} />
-            </label>
-        </div>
-        <div class="field">
-            <label>Carbs (g)
-                <input type="number" class="bg-input" bind:value={form.carbs} />
-            </label>
-        </div>
-        <div class="field">
-            <label>Fat (g)
-                <input type="number" class="bg-input" bind:value={form.fat} />
-            </label>
-        </div>
+         <NutritionForm bind:metrics={form} />
       </div>
 
       <div class="field">
@@ -292,11 +275,6 @@
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 10px;
-  }
-  
-  .highlight-cal {
-      color: var(--text-accent);
-      font-weight: bold;
   }
   
   .save-btn {

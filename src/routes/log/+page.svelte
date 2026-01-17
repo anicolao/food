@@ -15,6 +15,7 @@
   import InputGrid from '$lib/components/ui/InputGrid.svelte';
   import TextInputModal from '$lib/components/ui/TextInputModal.svelte';
   import VoiceRecorder from '$lib/components/ui/VoiceRecorder.svelte';
+  import NutritionForm from '$lib/components/ui/NutritionForm.svelte';
 
   let fileInput = $state<HTMLInputElement>();
   let cameraInput = $state<HTMLInputElement>();
@@ -33,10 +34,13 @@
   // Flat State for inputs to avoid reactivity issues with Svelte 5 nested objects
   let itemName = $state('');
   let rationale = $state('');
-  let calories = $state(0);
-  let fat = $state(0);
-  let carbs = $state(0);
-  let protein = $state(0);
+  let nutrition = $state({
+    calories: 0,
+    fat: 0,
+    carbs: 0,
+    protein: 0,
+    details: {} as any
+  });
   
   let mealType: 'Breakfast' | 'Lunch' | 'Dinner' | 'Snack' = $state('Snack');
   // Init with local date YYYY-MM-DD
@@ -296,10 +300,11 @@
       
       itemName = result.item_name || '';
       rationale = result.rationale || '';
-      calories = result.calories || 0;
-      protein = result.protein || 0;
-      carbs = result.carbohydrates?.total || 0;
-      fat = result.fat?.total || 0;
+      nutrition.calories = result.calories || 0;
+      nutrition.protein = result.protein || 0;
+      nutrition.carbs = result.carbohydrates?.total || 0;
+      nutrition.fat = result.fat?.total || 0;
+      nutrition.details = result.details || {};
       
       if (correction) {
           showCorrectionInput = false;
@@ -320,6 +325,7 @@
 
   async function handleTextAnalyze(text: string) {
       currentMode = 'IDLE'; // Close modal
+      sheetOpen = true; // Open the log sheet to show progress/results
       
       analyzing = true;
       try {
@@ -375,10 +381,11 @@
   function applyAnalysisResult(result: NutritionEstimate) {
       itemName = result.item_name || '';
       rationale = result.rationale || '';
-      calories = result.calories || 0;
-      protein = result.protein || 0;
-      carbs = result.carbohydrates?.total || 0;
-      fat = result.fat?.total || 0;
+      nutrition.calories = result.calories || 0;
+      nutrition.protein = result.protein || 0;
+      nutrition.carbs = result.carbohydrates?.total || 0;
+      nutrition.fat = result.fat?.total || 0;
+      nutrition.details = result.details || {};
       
       store.dispatch(dispatchEvent('log/aiEstimateReceived', { 
          imagesCount: imageFiles.length, 
@@ -435,10 +442,12 @@
         const form = {
             item_name: itemName,
             rationale,
-            calories,
-            protein,
-            carbohydrates: { total: carbs },
-            fat: { total: fat }
+
+            calories: nutrition.calories,
+            protein: nutrition.protein,
+            carbohydrates: { total: nutrition.carbs },
+            fat: { total: nutrition.fat },
+            details: nutrition.details
         };
 
         const entry = {
@@ -448,15 +457,16 @@
             mealType,
             description: itemName,
             rationale, 
-            calories,
-            fat,
-            carbs,
-            protein,
+            calories: nutrition.calories,
+            fat: nutrition.fat,
+            carbs: nutrition.carbs,
+            protein: nutrition.protein,
             imageDriveUrl: driveUrls || (imagePreviews.length > 0 && imagePreviews[0].startsWith('http') ? imagePreviews[0] : ''), 
-            rawJson: JSON.parse(JSON.stringify(form))
+            rawJson: JSON.parse(JSON.stringify(form)),
+            details: JSON.parse(JSON.stringify(nutrition.details))
         };
         
-        store.dispatch(dispatchEvent('log/entryConfirmed', { entry }));
+        store.dispatch(dispatchEvent('log/entryConfirmed', { entry: JSON.parse(JSON.stringify(entry)) }));
 
         // Old direct append removed. Using middleware.
 
@@ -480,10 +490,11 @@
       imagePreviews = [];
       itemName = '';
       rationale = '';
-      calories = 0;
-      protein = 0;
-      carbs = 0;
-      fat = 0;
+      nutrition.calories = 0;
+      nutrition.protein = 0;
+      nutrition.carbs = 0;
+      nutrition.fat = 0;
+      nutrition.details = {};
       showCorrectionInput = false;
       userCorrection = '';
       currentMode = 'IDLE';
@@ -587,28 +598,7 @@
                           </label>
                       </div>
                       
-                      <div class="macros-row">
-                          <div class="macro-field">
-                              <label>Cals
-                                <input type="number" bind:value={calories} class="bg-input highlight-cal" />
-                              </label>
-                          </div>
-                          <div class="macro-field">
-                              <label>Prot
-                                <input type="number" bind:value={protein} class="bg-input" />
-                              </label>
-                          </div>
-                          <div class="macro-field">
-                              <label>Carb
-                                <input type="number" bind:value={carbs} class="bg-input" />
-                              </label>
-                          </div>
-                          <div class="macro-field">
-                              <label>Fat
-                                <input type="number" bind:value={fat} class="bg-input" />
-                              </label>
-                          </div>
-                      </div>
+                      <NutritionForm bind:metrics={nutrition} />
 
                       <div class="rationale-box">
                           <p class="rationale-text">{rationale}</p>
@@ -770,27 +760,7 @@
         font-weight: 600;
     }
     
-    .macros-row {
-        display: flex;
-        gap: 10px;
-    }
-    
-    .macro-field {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        gap: 4px;
-    }
-    
-    .macro-field input {
-        text-align: center;
-        padding: 10px 4px;
-    }
-    
-    .highlight-cal {
-        color: var(--text-accent);
-        font-weight: bold;
-    }
+
     
     .rationale-box {
         background: rgba(255,255,255,0.03);
