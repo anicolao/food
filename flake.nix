@@ -19,6 +19,7 @@
             nodePackages.typescript
             nodePackages.svelte-language-server
             playwright-driver.browsers
+            imagemagick
           ];
 
           shellHook = ''
