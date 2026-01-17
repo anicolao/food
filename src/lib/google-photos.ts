@@ -18,11 +18,32 @@ export interface MediaItem {
     creationTime?: string;
 }
 
+interface PickerMediaItemResponse {
+    id: string;
+    mediaFile?: {
+        baseUrl?: string;
+        mimeType?: string;
+        filename?: string;
+        mediaMetadata?: {
+            creationTime?: string;
+        };
+    };
+}
+
+interface LibraryMediaItemResponse {
+    id: string;
+    baseUrl?: string;
+    mimeType?: string;
+    filename?: string;
+    mediaMetadata?: {
+        creationTime?: string;
+    };
+}
+
 export async function createPickerSession(): Promise<PickerSession> {
     const token = await ensureValidToken();
     if (!token) throw new Error("Not authenticated");
 
-    console.log('[GooglePhotos] Creating session...');
     const response = await fetch(
         `https://photospicker.googleapis.com/v1/sessions`,
         {
@@ -42,7 +63,6 @@ export async function createPickerSession(): Promise<PickerSession> {
     }
 
     const data = await response.json();
-    console.log('[GooglePhotos] Session created:', data);
     return data;
 }
 
@@ -59,11 +79,11 @@ export async function pollPickerSession(sessionId: string): Promise<PickerSessio
     );
 
     if (!response.ok) {
+        // Keep error logs for failures
         console.error('[GooglePhotos] Poll failed:', response.status);
         throw new Error(`Failed to poll session: ${response.statusText}`);
     }
     const data = await response.json();
-    // console.log('[GooglePhotos] Poll status:', data); // Verbose
     return data;
 }
 
@@ -87,7 +107,7 @@ export async function listSessionMediaItems(sessionId: string): Promise<MediaIte
     if (!data.mediaItems) return [];
 
     // Map to simplified structure
-    return data.mediaItems.map((item: any) => ({
+    return data.mediaItems.map((item: PickerMediaItemResponse) => ({
         id: item.id,
         baseUrl: item.mediaFile?.baseUrl || "",
         mimeType: item.mediaFile?.mimeType || "",
@@ -120,14 +140,11 @@ export async function listLibraryItems(pageToken?: string): Promise<{ items: Med
     }
 
     const data = await response.json();
-    const items = (data.mediaItems || []).map((item: any) => ({
+    const items = (data.mediaItems || []).map((item: LibraryMediaItemResponse) => ({
         id: item.id,
-        baseUrl: item.baseUrl, // Library API returns it at root level (unlike Picker API wrapped in meidaFile usually, or did I misread Picker API?)
-        // Actually Library API format: { id, baseUrl, mimeType, filename, mediaMetadata }
-        // Let's verify structure quickly.
-        // Yes, Library API has baseUrl at top level.
-        mimeType: item.mimeType,
-        filename: item.filename,
+        baseUrl: item.baseUrl || "",
+        mimeType: item.mimeType || "",
+        filename: item.filename || "",
         creationTime: item.mediaMetadata?.creationTime,
     }));
 

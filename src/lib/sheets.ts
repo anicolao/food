@@ -3,6 +3,15 @@ import { ensureValidToken } from './auth';
 // --- Sheets API ---
 // --- Sheets API ---
 
+// --- Sheets API ---
+
+export interface GoogleDriveFile {
+    id: string;
+    name: string;
+    webViewLink: string;
+    thumbnailLink?: string;
+}
+
 // Helper: Search or create folder
 async function findOrCreateFolder(name: string): Promise<string> {
     const token = await ensureValidToken();
@@ -145,9 +154,9 @@ async function createDatabaseFile(name: string, parentId: string) {
 
 // Modified Discovery Logic
 export async function ensureDataStructures() {
-    console.log('Ensuring data structures...');
+
     const folderId = await findOrCreateFolder('FoodLog');
-    console.log('Folder ID:', folderId);
+
 
     // Step 1: Search by Tag (The new, robust way)
     const dbFiles = await findDatabaseFiles(folderId);
@@ -156,11 +165,11 @@ export async function ensureDataStructures() {
 
     if (dbFiles.length > 0) {
         // Found tagged files! Use the most recently modified one.
-        console.log(`Found ${dbFiles.length} database files. Using most recent: ${dbFiles[0].name}`);
+
         spreadsheetId = dbFiles[0].id;
     } else {
         // Step 2: Fallback - Search by Legacy Name (The old way)
-        console.log('No tagged files found. Searching for legacy file...');
+
 
         // Use existing (but modified) search logic inline here or call a helper
         const legacyName = 'TheFoodTrackerEventLog';
@@ -173,17 +182,17 @@ export async function ensureDataStructures() {
 
         if (searchData.files && searchData.files.length > 0) {
             // Found legacy file! Migration time.
-            console.log('Found legacy file. Migrating (adding metadata)...');
+
             spreadsheetId = searchData.files[0].id;
             await tagDatabaseFile(spreadsheetId);
         } else {
             // Step 3: Create New (Clean Slate)
-            console.log('No existing file found. Creating new database...');
+
             spreadsheetId = await createDatabaseFile('TheFoodTrackerEventLog', folderId);
         }
     }
 
-    console.log('Spreadsheet ID:', spreadsheetId);
+
 
     // Ensure "Events" tab exists (default is Sheet1)
     await ensureSheetExists(spreadsheetId, 'Events');
@@ -209,7 +218,7 @@ async function ensureSheetExists(spreadsheetId: string, title: string) {
         }
 
         // 3. Create if missing
-        console.log(`Creating sheet '${title}'...`);
+
         const updateRes = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}:batchUpdate`, {
             method: 'POST',
             headers: {
@@ -302,7 +311,7 @@ export async function fetchRows(spreadsheetId: string, sheetName: string, startR
 
 // --- Drive API ---
 
-export async function uploadImage(file: Blob, filename: string, folderId?: string) {
+export async function uploadImage(file: Blob, filename: string, folderId?: string): Promise<GoogleDriveFile> {
     const token = await ensureValidToken();
     if (!token) throw new Error('Not authenticated');
 

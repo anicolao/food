@@ -18,13 +18,13 @@ export const syncManager = {
 
         this.isSyncing = true;
         this.syncError = null; // Clear previous errors
-        console.log('[SyncManager] Starting sync...');
+
 
         try {
             // 1. Outbound Sync
             const pendingEvents = await getPendingEvents();
             if (pendingEvents.length > 0) {
-                console.log(`[SyncManager] Found ${pendingEvents.length} pending events.`);
+
 
                 // Sort by timestamp to preserve order
                 pendingEvents.sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
@@ -45,7 +45,7 @@ export const syncManager = {
 
                     // Mark synced
                     await markEventsSynced(pendingEvents.map(e => e.eventId));
-                    console.log('[SyncManager] Outbound sync complete.');
+
                 }
             }
 
@@ -63,7 +63,7 @@ export const syncManager = {
                 // If row is 0, we fetch from 1.
                 const startRow = lastSyncedRow > 0 ? lastSyncedRow : 1;
 
-                console.log(`[SyncManager] Fetching from row ${startRow}...`);
+
                 const rows = await fetchRows(spreadsheetId, 'Events', startRow);
 
                 if (rows && rows.length > 0) {
@@ -87,7 +87,7 @@ export const syncManager = {
                     }
 
                     if (newRows.length > 0) {
-                        console.log(`[SyncManager] Received ${newRows.length} new rows.`);
+
                         let lastEventIdProcessed = lastSyncedEventId;
 
                         for (const row of newRows) {
@@ -125,9 +125,9 @@ export const syncManager = {
                         if (lastEventIdProcessed) {
                             localStorage.setItem('lastSyncedEventId', lastEventIdProcessed);
                         }
-                        console.log(`[SyncManager] Updated lastSyncedRow to ${finalRowIndex}`);
+
                     } else {
-                        console.log('[SyncManager] Verified up to date.');
+
                     }
                 } else {
                     // If we asked for startRow and got [], it means it's empty or truncated.
