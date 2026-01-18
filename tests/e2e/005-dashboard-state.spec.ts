@@ -92,12 +92,12 @@ test('US-014: Dashboard State Persistence', async ({ page }, testInfo) => {
     // Wait for sync to populate data to avoid screenshot mismatch (empty vs populated)
     await expect(page.locator('.activity-card').first()).toBeVisible();
     // Wait for network to settle to Synced to avoid icon animation frame diffs
-    await expect(page.locator('img[alt="Synced"]')).toBeVisible();
+    await expect(page.locator('[data-status="synced"]')).toBeVisible();
 
     await tester.step('initial-load', {
         description: 'Dashboard loads today',
         verifications: [
-            { spec: 'Title is Today', check: async () => await expect(page.locator('.feed-header h2')).toHaveText('Today') },
+            { spec: 'Title is Today', check: async () => await expect(page.locator('.feed-header h2').first()).toHaveText('Today') },
             // URL should NOT have date param by default
             { spec: 'URL has no date param', check: async () => expect(page.url()).not.toContain('date=') },
             // "Log New" removed
@@ -106,7 +106,11 @@ test('US-014: Dashboard State Persistence', async ({ page }, testInfo) => {
     });
 
     // 2. Navigate Next/Prev
-    await page.locator('button[aria-label="Previous Day"]').click();
+    const prevBtn = page.locator('button[aria-label="Previous Day"]');
+    await expect(prevBtn).toBeVisible();
+    await prevBtn.click();
+    await expect(page.locator('.feed-header h2').first()).toHaveText('Yesterday'); // Explicit wait
+    await expect(page.locator('[data-status="synced"]')).toBeVisible();
 
     await tester.step('prev-day', {
         description: 'Navigate to Yesterday',
@@ -118,7 +122,8 @@ test('US-014: Dashboard State Persistence', async ({ page }, testInfo) => {
     // 3. Deep Link Reload
     await page.reload();
     // Wait for hydration/render before screenshotting
-    await expect(page.locator('.feed-header h2')).toBeVisible();
+    await expect(page.locator('.feed-header h2').first()).toBeVisible();
+    await expect(page.locator('[data-status="synced"]')).toBeVisible();
     await tester.step('reload', {
         description: 'Reload preserves date',
         verifications: [
@@ -128,6 +133,9 @@ test('US-014: Dashboard State Persistence', async ({ page }, testInfo) => {
 
     // 4. Navigate Forward
     await page.locator('button[aria-label="Next Day"]').click();
+    await expect(page.locator('.feed-header h2').first()).toHaveText('Today');
+    await expect(page.locator('[data-status="synced"]')).toBeVisible();
+
     await tester.step('next-day', {
         description: 'Return to Today',
         verifications: [
@@ -153,6 +161,7 @@ test('US-014: Dashboard State Persistence', async ({ page }, testInfo) => {
 
     await page.reload();
     await expect(page.locator('.activity-card')).toBeVisible(); // Ensure content rerendered
+    await expect(page.locator('[data-status="synced"]')).toBeVisible();
     await tester.step('reload-collapse', {
         description: 'Reload preserves collapse state',
         verifications: [
