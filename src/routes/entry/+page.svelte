@@ -272,8 +272,8 @@
   }
   
   .macros-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
+      display: flex;
+      flex-direction: column;
       gap: 10px;
   }
   

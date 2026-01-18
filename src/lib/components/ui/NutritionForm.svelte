@@ -76,7 +76,7 @@
       <NutrientInput 
           layout="horizontal"
           label="Calories" 
-          unit="" 
+          unit="kcals" 
           value={metrics.calories} 
           onupdate={(v) => updateMacro('calories', v)}
           readonly={readOnly}
