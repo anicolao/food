@@ -118,4 +118,54 @@ export async function mockDriveAPI(page: Page) {
         // Catch-all for other sheets calls
         await route.fulfill({ json: {} });
     });
+
+    // 3. Mock Photos Picker API
+    await page.route('**photospicker.googleapis.com**', async route => {
+        const url = route.request().url();
+        const method = route.request().method();
+
+        if (url.includes('sessions')) {
+            if (!url.includes('mediaItems')) {
+                // Session Management
+                if (method === 'POST') {
+                    // Create Session
+                    await route.fulfill({ json: { id: 'sess-1', pickerUri: 'http://mock-picker.com' } });
+                } else {
+                    // Poll Session (GET)
+                    // Default to 'mediaItemsSet: true' to prevent hanging, or false?
+                    // 004 sets it to true. 002 sets it to false.
+                    // Default to false (polling) to mimic real behavior, but tests might timeout?
+                    // Let's check 005.
+                    await route.fulfill({ json: { mediaItemsSet: false } });
+                }
+                return;
+            }
+        }
+
+        if (url.includes('mediaItems')) {
+            // List Items
+            await route.fulfill({
+                json: {
+                    mediaItems: [{
+                        id: 'item-1',
+                        mediaFile: {
+                            baseUrl: 'https://lh3.googleusercontent.com/picker-img',
+                            mimeType: 'image/jpeg',
+                            filename: 'picked.jpg'
+                        }
+                    }]
+                }
+            });
+            return;
+        }
+
+        await route.fulfill({ json: {} });
+    });
+
+    // 4. Mock Google User Content (Images)
+    await page.route('**lh3.googleusercontent.com**', async route => {
+        // Return a placeholder image
+        const buffer = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKwftQAAAABJRU5ErkJggg==', 'base64');
+        await route.fulfill({ body: buffer, contentType: 'image/png' });
+    });
 }
