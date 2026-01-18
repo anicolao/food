@@ -6,15 +6,6 @@ on:
   pull_request:
     branches: [main, develop]
   workflow_dispatch:
-    inputs:
-      update_snapshots:
-        description: 'Update Snapshots'
-        required: false
-        type: boolean
-        default: false
-
-permissions:
-  contents: write
 
 jobs:
   e2e-tests:
@@ -26,7 +17,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.head_ref || github.ref_name }} 
+          # ref: ${{ github.head_ref || github.ref_name }} 
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -42,12 +33,7 @@ jobs:
 
       - name: Run Playwright tests
         id: playwright
-        run: |
-          if [ "${{ github.event.inputs.update_snapshots }}" == "true" ]; then
-            npm run test:e2e -- --update-snapshots
-          else
-            npm run test:e2e
-          fi
+        run: npm run test:e2e
         env:
           CI: true
           # Provide dummy values for build/runtime to succeed
@@ -58,14 +44,6 @@ jobs:
           VITE_GOOGLE_PHOTOS_CLIENT_ID: "dummy"
           COMMIT_HASH: ${{ github.event.pull_request.head.sha || github.sha }}
 
-      - name: Commit and Push Snapshots
-        if: ${{ github.event.inputs.update_snapshots == 'true' }}
-        run: |
-          git config --global user.name 'github-actions[bot]'
-          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-          git add tests/e2e/**/screenshots/*.png
-          git commit -m "chore(e2e): update snapshots from CI" || echo "No changes to commit"
-          git push
 
       - name: Upload Playwright report
         uses: actions/upload-artifact@v4
