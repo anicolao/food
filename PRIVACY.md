@@ -20,7 +20,7 @@ We utilize the `drive.file` permission scope, which provides a "Strictly Sandbox
 ### Photos and Camera
 We use the system's native Photo Picker (`photospicker.mediaitems.readonly`).
 * **User-Initiated Only:** The application does not have general access to your camera roll. It can only process the specific images you explicitly tap to select for analysis.
-* **No Background Scanning:** We do not scan your library in the background.
+* **No Background Scanning:** We **cannot** scan or access your library in the background.
 
 ## 2. Artificial Intelligence & Semantic Memory
 
