@@ -11,8 +11,17 @@ test('US-023: Auth Persistence', async ({ page }, testInfo) => {
     const T0 = new Date('2024-03-15T16:00:00Z');
     await page.clock.install({ time: T0 });
 
+    // Block real GSI aggressively
+    await page.route('**/gsi/client', route => route.abort());
+
     // Mock Google Script
-    await page.addInitScript(() => {
+    await page.addInitScript(async () => {
+        if (navigator.serviceWorker) {
+            const registrations = await navigator.serviceWorker.getRegistrations();
+            for (const registration of registrations) {
+                await registration.unregister();
+            }
+        }
         (window as any).google = {
             accounts: {
                 oauth2: {
@@ -35,6 +44,7 @@ test('US-023: Auth Persistence', async ({ page }, testInfo) => {
     await page.goto('/');
     // Allow polling to initialize tokenClient
     await page.waitForFunction(() => (window as any)._authReady);
+    await page.waitForTimeout(1000);
     await page.getByText('Sign In with Google').click();
     await expect(page.locator('.mobile-nav a').filter({ hasText: 'Settings' }).first()).toBeVisible();
 

@@ -107,13 +107,17 @@ export function initializeAuth(onSuccess: (token: string) => void) {
 
 function initClient(onSuccess: (token: string) => void) {
     const g = (window as any).google;
-    tokenClient = g.accounts.oauth2.initTokenClient({
-        client_id: GOOGLE_CLIENT_ID,
-        scope: SCOPES,
-        callback: (response: any) => {
-            handleTokenResponse(response, onSuccess);
-        },
-    });
+    try {
+        tokenClient = g.accounts.oauth2.initTokenClient({
+            client_id: GOOGLE_CLIENT_ID,
+            scope: SCOPES,
+            callback: (response: any) => {
+                handleTokenResponse(response, onSuccess);
+            },
+        });
+    } catch (e) {
+        console.error('[Auth] initTokenClient failed', e);
+    }
     // Signal tests that client is initialized
     (window as any)._authReady = true;
     authState.update(s => ({ ...s, ready: true }));
