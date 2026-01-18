@@ -4,7 +4,6 @@ import { writable } from 'svelte/store';
 export const GOOGLE_CLIENT_ID = (import.meta.env && import.meta.env.VITE_GOOGLE_OAUTH_ID) || undefined;
 export const SCOPES = [
     'https://www.googleapis.com/auth/drive.file',
-    'https://www.googleapis.com/auth/spreadsheets',
     'https://www.googleapis.com/auth/photospicker.mediaitems.readonly',
     'https://www.googleapis.com/auth/generative-language.retriever'
 ].join(' ');
