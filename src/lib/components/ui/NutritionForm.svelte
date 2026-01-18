@@ -35,20 +35,34 @@
       metrics.details = {};
   }
 
-  function updateDetail(macro: 'carbs' | 'fat' | null, field: keyof NonNullable<typeof metrics.details>, newVal: number, oldVal?: number) {
+  function updateDetail(macro: 'carbs' | 'fat' | null, field: keyof NonNullable<typeof metrics.details>, newVal: number) {
       if (readOnly) return;
-      const safeOld = oldVal || 0;
-      const safeNew = newVal || 0;
-      const delta = safeNew - safeOld;
-
+      
       metrics.details![field] = newVal;
 
-      if (macro && delta !== 0) {
-          metrics[macro] = Math.max(0, (metrics[macro] || 0) + delta);
+      if (!macro) return;
+
+      // Logic: The Total is a "Floor" for the sum of its components.
+      // If Sum(Components) > Total, bump Total.
+      // Otherwise, leave Total alone (it implies "Other" components exist).
+
+      let sumComponents = 0;
+      if (macro === 'carbs') {
+         // Sum Fiber + Sugar
+         const d = metrics.details || {};
+         sumComponents = (d.fiber || 0) + (d.sugar || 0);
+      } else if (macro === 'fat') {
+         // Sum Saturated + Trans
+         const d = metrics.details || {};
+         sumComponents = (d.saturatedFat || 0) + (d.transFat || 0); 
+      }
+
+      if (sumComponents > metrics[macro]) {
+          metrics[macro] = sumComponents;
       }
   }
 
-  // Direct handlers for macros (no delta logic needed, just bind)
+  // Direct handlers for macros
   function updateMacro(macro: 'calories' | 'protein' | 'carbs' | 'fat', val: number) {
       if (readOnly) return;
       metrics[macro] = val;
@@ -95,24 +109,28 @@
       </div>
       
       {#if showDetails}
-        <div class="sub-grid">
+        <div class="detail-list">
             <NutrientInput 
+                layout="horizontal"
                 label="Fiber" 
                 value={metrics.details?.fiber} 
-                onupdate={(v, old) => updateDetail('carbs', 'fiber', v, old)}
+                onupdate={(v) => updateDetail('carbs', 'fiber', v)}
                 readonly={readOnly}
             />
             <NutrientInput 
+                layout="horizontal"
                 label="Sugar" 
                 value={metrics.details?.sugar} 
-                onupdate={(v, old) => updateDetail('carbs', 'sugar', v, old)}
+                onupdate={(v) => updateDetail('carbs', 'sugar', v)}
                 readonly={readOnly}
             />
             <NutrientInput 
+                layout="horizontal"
                 label="Added Sugar" 
                 value={metrics.details?.addedSugar} 
-                onupdate={(v, old) => updateDetail('carbs', 'addedSugar', v, old)}
+                onupdate={(v) => updateDetail('carbs', 'addedSugar', v)}
                 readonly={readOnly}
+                class="indented" 
             />
         </div>
       {/if}
@@ -132,24 +150,27 @@
       </div>
       
       {#if showDetails}
-        <div class="sub-grid">
+        <div class="detail-list">
             <NutrientInput 
+                layout="horizontal"
                 label="Saturated" 
                 value={metrics.details?.saturatedFat} 
-                onupdate={(v, old) => updateDetail('fat', 'saturatedFat', v, old)}
+                onupdate={(v) => updateDetail('fat', 'saturatedFat', v)}
                 readonly={readOnly}
             />
             <NutrientInput 
+                layout="horizontal"
                 label="Trans" 
                 value={metrics.details?.transFat} 
-                onupdate={(v, old) => updateDetail('fat', 'transFat', v, old)}
+                onupdate={(v) => updateDetail('fat', 'transFat', v)}
                 readonly={readOnly}
             />
             <NutrientInput 
+                layout="horizontal"
                 label="Cholesterol" 
                 unit="mg"
                 value={metrics.details?.cholesterol} 
-                onupdate={(v, old) => updateDetail(null, 'cholesterol', v, old)}
+                onupdate={(v) => updateDetail(null, 'cholesterol', v)}
                 readonly={readOnly}
             />
         </div>
@@ -163,46 +184,52 @@
   {#if showDetails}
       <div class="other-section">
           <div class="section-label">Micros & Other</div>
-          <div class="sub-grid">
+          <div class="detail-list">
              <NutrientInput 
+                layout="horizontal"
                 label="Sodium" 
                 unit="mg"
                 value={metrics.details?.sodium} 
-                onupdate={(v, old) => updateDetail(null, 'sodium', v, old)}
+                onupdate={(v) => updateDetail(null, 'sodium', v)}
                 readonly={readOnly}
             />
             <NutrientInput 
+                layout="horizontal"
                 label="Potassium" 
                 unit="mg"
                 value={metrics.details?.potassium} 
-                onupdate={(v, old) => updateDetail(null, 'potassium', v, old)}
+                onupdate={(v) => updateDetail(null, 'potassium', v)}
                 readonly={readOnly}
             />
              <NutrientInput 
+                layout="horizontal"
                 label="Calcium" 
                 unit="mg"
                 value={metrics.details?.calcium} 
-                onupdate={(v, old) => updateDetail(null, 'calcium', v, old)}
+                onupdate={(v) => updateDetail(null, 'calcium', v)}
                 readonly={readOnly}
             />
              <NutrientInput 
+                layout="horizontal"
                 label="Iron" 
                 unit="mg"
                 value={metrics.details?.iron} 
-                onupdate={(v, old) => updateDetail(null, 'iron', v, old)}
+                onupdate={(v) => updateDetail(null, 'iron', v)}
                 readonly={readOnly}
             />
             <NutrientInput 
+                layout="horizontal"
                 label="Caffeine" 
                 unit="mg"
                 value={metrics.details?.caffeine} 
-                onupdate={(v, old) => updateDetail(null, 'caffeine', v, old)}
+                onupdate={(v) => updateDetail(null, 'caffeine', v)}
                 readonly={readOnly}
             />
              <NutrientInput 
+                layout="horizontal"
                 label="Alcohol" 
                 value={metrics.details?.alcohol} 
-                onupdate={(v, old) => updateDetail(null, 'alcohol', v, old)}
+                onupdate={(v) => updateDetail(null, 'alcohol', v)}
                 readonly={readOnly}
             />
           </div>
@@ -217,7 +244,9 @@
       flex-direction: column;
       gap: 16px;
       padding: 10px;
-      background: rgba(0,0,0,0.1);
+      padding-bottom: 20px;
+      /* background: rgba(0,0,0,0.1); remove background to blend better or keep? User didn't complain about bg.*/
+      background: rgba(0,0,0,0.2);
       border-radius: 16px;
   }
 
@@ -237,7 +266,7 @@
   .group-section {
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 5px;
   }
 
   .group-header {
@@ -255,11 +284,11 @@
       letter-spacing: 0.05em;
   }
 
-  .sub-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
-      gap: 10px 15px;
-      padding: 10px;
+  .detail-list {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      padding: 5px 10px;
       background: rgba(255,255,255,0.03);
       border-radius: 12px;
   }
@@ -287,13 +316,20 @@
       color: rgba(255,255,255,0.5);
       padding-left: 5px;
   }
+  
+  /* Indent Added Sugar visually */
+  :global(.indented) {
+      margin-left: 15px; 
+      width: calc(100% - 15px) !important;
+  }
 
   /* Specific overrides via global or deep selectors if Component didn't expose class */
   :global(.highlight-large .gram-input) {
-      font-size: 1.2rem !important;
+      font-size: 1.4rem !important;
       width: 5ch !important;
       font-weight: bold;
       color: var(--text-accent, #fff) !important;
+      padding: 8px !important;
   }
   
   :global(.total-input .gram-input) {

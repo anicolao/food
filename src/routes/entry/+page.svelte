@@ -70,13 +70,13 @@
   async function handleSave() {
      if (!entry || !id) return;
 
-
      const changes = {
          mealType: form.mealType,
          description: form.description,
          rationale: form.rationale,
          calories: Number(form.calories),
          protein: Number(form.protein),
+         carbs: Number(form.carbs),
          fat: Number(form.fat),
          details: JSON.parse(JSON.stringify(form.details || {}))
      };
