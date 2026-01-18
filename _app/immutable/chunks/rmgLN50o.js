@@ -1,0 +1,1 @@
+import{k as c,l as _,m as o,E as d,n as E,H as T,s as b,o as p,B as y,p as f}from"./BUY20i_v.js";function k(n,i,l=!1){_&&o();var r=new y(n),u=l?d:0;function t(a,s){if(_){const h=E(n)===T;if(a===h){var e=b();p(e),r.anchor=e,f(!1),r.ensure(a,s),f(!0);return}}r.ensure(a,s)}c(()=>{var a=!1;i((s,e=!0)=>{a=!0,t(e,s)}),a||t(!1,null)},u)}export{k as i};
