@@ -154,7 +154,8 @@ test('013-detailed-nutrition: Log and Edit Detailed Nutrition', async ({ page })
             spec: 'Entry opens',
             check: async () => {
                 await page.getByText('Detailed Salad').click();
-                await page.waitForTimeout(500);
+                await expect(page.locator('.feed-header h2')).toBeVisible();
+                await page.waitForTimeout(500); // Animations
             }
         }]
     });
