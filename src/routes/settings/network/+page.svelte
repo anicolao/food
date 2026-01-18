@@ -340,6 +340,14 @@
         </button>
         <p class="help">Use this if your data is out of sync with Google Sheets.</p>
     </section>
+    <section class="card glass-panel text-center">
+        <h2>Open Source & Privacy</h2>
+        <p class="mb-4 text-sm text-secondary">
+            Food Sheets is an open-source project designed with a "Privacy First" architecture. 
+            We do not sell your data or store it on our servers.
+        </p>
+        <a href="/privacy" class="text-accent hover:underline">Read Privacy Policy</a>
+    </section>
 </div>
 
 <style>
@@ -625,4 +633,12 @@
         50% { box-shadow: 0 0 15px rgba(231, 76, 60, 0.7); }
         100% { box-shadow: 0 0 5px rgba(231, 76, 60, 0.4); }
     }
+
+    .text-center { text-align: center; }
+    .mb-4 { margin-bottom: 1rem; }
+    .text-sm { font-size: 0.85rem; }
+    .text-secondary { color: var(--text-secondary, #a0a0a0); }
+    .text-accent { color: var(--text-accent, #ff9966); text-decoration: none; }
+    .hover\:underline:hover { text-decoration: underline; }
+
 </style>
