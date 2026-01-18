@@ -7,8 +7,17 @@ test('013-detailed-nutrition: Log and Edit Detailed Nutrition', async ({ page })
     page.on('console', msg => console.log(msg.text()));
 
 
+    // Block real GSI aggressively
+    await page.route('**/gsi/client', route => route.abort());
+
     // Mock Auth
-    await page.addInitScript(() => {
+    await page.addInitScript(async () => {
+        if (navigator.serviceWorker) {
+            const registrations = await navigator.serviceWorker.getRegistrations();
+            for (const registration of registrations) {
+                await registration.unregister();
+            }
+        }
         (window as any).google = {
             accounts: {
                 oauth2: {

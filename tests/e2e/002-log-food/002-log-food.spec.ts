@@ -20,7 +20,17 @@ test('US-003 to US-010: User logs food flow', async ({ page }, testInfo) => {
     // Use UTC to ensure it maps to 12:00 PM EDT (UTC-4) in the browser
     // 12:00 PM EDT = 16:00 PM UTC
     await page.clock.install({ time: new Date('2024-03-15T16:00:00Z') });
-    await page.addInitScript(() => {
+    // Block real GSI aggressively
+    await page.route('**/gsi/client', route => route.abort());
+
+    await page.addInitScript(async () => {
+        // Unregister any polluting Service Workers from localhost
+        if (navigator.serviceWorker) {
+            const registrations = await navigator.serviceWorker.getRegistrations();
+            for (const registration of registrations) {
+                await registration.unregister();
+            }
+        }
         (window as any).google = {
             accounts: {
                 oauth2: {
@@ -91,7 +101,11 @@ test('US-003 to US-010: User logs food flow', async ({ page }, testInfo) => {
     await page.goto('/');
     // Allow polling to initialize tokenClient
     await page.waitForFunction(() => (window as any)._authReady);
-    await page.getByText('Sign In with Google').click();
+    // Explicit wait for hydration/interactivity
+    await page.waitForTimeout(1000);
+    const signInBtn = page.getByText('Sign In with Google');
+    await expect(signInBtn).toBeVisible();
+    await signInBtn.click();
 
     // Wait for Dashboard to stabilize (Auth confirmed)
     await expect(page.locator('.feed-header h2').first()).toHaveText('Today');

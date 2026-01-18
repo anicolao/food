@@ -28,6 +28,29 @@ test('US-013 to US-017: Smart Date Formatting', async ({ page }, testInfo) => {
     page.on('console', msg => console.log(`BROWSER LOG: ${msg.text()}`));
     page.on('pageerror', err => console.log(`BROWSER ERR: ${err}`));
 
+    // Block real GSI aggressively
+    await page.route('**/gsi/client', route => route.abort());
+
+    // Mock Auth & Unregister SW
+    // 12:00 PM EDT = 16:00 PM UTC
+    await page.clock.install({ time: new Date('2024-03-15T16:00:00Z') });
+    await page.addInitScript(async () => {
+        if (navigator.serviceWorker) {
+            const registrations = await navigator.serviceWorker.getRegistrations();
+            for (const registration of registrations) {
+                await registration.unregister();
+            }
+        }
+        (window as any).google = {
+            accounts: {
+                oauth2: {
+                    initTokenClient: (c: any) => ({ requestAccessToken: () => c.callback({ access_token: 'mock' }) }),
+                    revoke: (token: string, cb: any) => cb()
+                }
+            }
+        };
+    });
+
     // Mock Drive/Photos/Sheets (via helper)
     await mockDriveAPI(page);
 
@@ -47,6 +70,7 @@ test('US-013 to US-017: Smart Date Formatting', async ({ page }, testInfo) => {
     await page.goto('/');
     // Allow polling to initialize tokenClient
     await page.waitForFunction(() => (window as any)._authReady);
+    await page.waitForTimeout(1000);
     await page.getByText('Sign In with Google').click();
 
     // Helper to log an item with specific date
