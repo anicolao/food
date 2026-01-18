@@ -115,6 +115,12 @@ export async function mockDriveAPI(page: Page) {
             return;
         }
 
+        // Get Spreadsheet (Metadata)
+        if (url.match(/spreadsheets\/[^/]+$/)) {
+            await route.fulfill({ json: { sheets: [{ properties: { title: 'Events' } }] } });
+            return;
+        }
+
         // Catch-all for other sheets calls
         await route.fulfill({ json: {} });
     });
