@@ -1,17 +1,15 @@
-# Fix Flaky E2E Tests
+# Fix OAuth Scopes
 
-## User Prompt
-The e2e tests are a little flaky on the cloud sync icon still. There was a recent commit meant to address this, but I've seen it again in production on 013-detailed-nutrition/013-detailed-nutrition.spec.ts:5 where the cloud icon showed syncing instead of sync. 
+## Description
+This PR reduces the OAuth scopes requested by the application. Specifically, it removes `https://www.googleapis.com/auth/spreadsheets` (full access to all sheets) and relies on `https://www.googleapis.com/auth/drive.file` (access only to files created/opened by the app).
 
-I also saw an oddball flake on 002-log-food/002-log-food.spec.ts:7 where the + icon was missing from the nutrition facts detail on a food log. 
-
-Let's add checks to these tests to ensure cloud sync state is right and the icon is loaded before taking the corresponding screenshots.
-
-## Changes
-- **013-detailed-nutrition.spec.ts**: Added explicit wait for `[data-status="synced"]` after saving entry to prevent race condition with screenshots.
-- **002-log-food.spec.ts**: Added explicit wait for `.icon-toggle` visibility after analysis to ensure nutrition form is fully loaded.
+## Rationale
+The application was requesting overreaching permissions ("read *all* my google sheets"), causing user concern. The app's architecture manages its own specific files (`FoodLog` folder and `TheFoodTrackerEventLog`), so `drive.file` is sufficient and follows the principle of least privilege.
 
 ## Verification
-Ran local tests:
-- `tests/e2e/013-detailed-nutrition/013-detailed-nutrition.spec.ts`: Passed
-- `tests/e2e/002-log-food/002-log-food.spec.ts`: Passed
+Manual verification was performed to confirm:
+1.  The Google Consent Screen now requests narrower permissions.
+2.  The application can still read/write to the food log.
+
+## User Prompt & Context
+> Our OAuth scopes seem overreaching on sheets for some reason. When I sign in Google tells me the app can "read *all* my google sheets". What scope is triggering that? Do we need it? If not, let's stop asking for it.
