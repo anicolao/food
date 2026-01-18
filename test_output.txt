@@ -1,0 +1,93 @@
+
+Running 1 test using 1 worker
+
+[1A[2K[1/1] [chromium] › tests/e2e/002-log-food/002-log-food.spec.ts:7:1 › US-003 to US-010: User logs food flow
+[1A[2K[chromium] › tests/e2e/002-log-food/002-log-food.spec.ts:7:1 › US-003 to US-010: User logs food flow
+BROWSER LOG: Failed to load resource: net::ERR_FAILED
+
+[1A[2KBROWSER LOG: Service Worker registration blocked by Playwright
+
+[1A[2KBROWSER LOG: [vite] connecting...
+
+[1A[2KBROWSER LOG: [vite] connected.
+
+[1A[2KBROWSER LOG: [Layout] Hydrating from DB...
+
+[1A[2KBROWSER LOG: [Layout] Found 0 events in DB.
+
+[1A[2KBROWSER LOG: [Layout] Hydration complete.
+
+[1A[2KBROWSER LOG: [Auth] Google Identity Services found
+
+[1A[2KBROWSER LOG: [Auth] initClient calling initTokenClient
+
+[1A[2KBROWSER LOG: [Auth] initTokenClient source: c => {
+            console.log('MOCK initTokenClient called');
+            return {
+              requestAccessToken: () => {
+                console.log('MOCK requestAccessToken called');
+                c.callback({
+                  access_token: 'mock'
+                });
+              }
+            };
+          }
+
+[1A[2KBROWSER LOG: MOCK initTokenClient called
+
+[1A[2KBROWSER LOG: [Auth] tokenClient initialized
+
+[1A[2KBROWSER LOG: MOCK requestAccessToken called
+
+[1A[2KBROWSER LOG: [Auth] Callback received
+
+[1A[2KBROWSER LOG: [Auth] Initialized in Layout
+
+[1A[2KBROWSER LOG: Failed to load resource: net::ERR_FAILED
+
+[1A[2KBROWSER LOG: Service Worker registration blocked by Playwright
+
+[1A[2KBROWSER LOG: [vite] connecting...
+
+[1A[2KBROWSER LOG: [vite] connected.
+
+[1A[2KBROWSER LOG: [Auth] Initialized in Layout
+
+[1A[2KBROWSER LOG: [Layout] Hydrating from DB...
+
+[1A[2KBROWSER LOG: Pre-fetching Google Photos Picker session...
+
+[1A[2KBROWSER LOG: [Layout] Found 0 events in DB.
+
+[1A[2KBROWSER LOG: [Layout] Hydration complete.
+
+[1A[2KBROWSER LOG: [Auth] Google Identity Services found
+
+[1A[2KBROWSER LOG: [Auth] initClient calling initTokenClient
+
+[1A[2KBROWSER LOG: [Auth] initTokenClient source: c => {
+            console.log('MOCK initTokenClient called');
+            return {
+              requestAccessToken: () => {
+                console.log('MOCK requestAccessToken called');
+                c.callback({
+                  access_token: 'mock'
+                });
+              }
+            };
+          }
+
+[1A[2KBROWSER LOG: MOCK initTokenClient called
+
+[1A[2KBROWSER LOG: [Auth] tokenClient initialized
+
+[1A[2KBROWSER LOG: [SyncManager] Sync Mismatch! Expected 431d69e2-739d-416f-92c9-4af84b989d91, got eef6113e-27d5-4b9c-952e-ee22372f3361. Resetting sync pointer.
+
+[1A[2K/Users/anicolao/projects/antigravity/food/tests/e2e/002-log-food/screenshots/004-saved.png is re-generated, writing actual.
+
+[1A[2K  1 passed (8.9s)
+
+To open last HTML report run:
+[36m[39m
+[36m  npx playwright show-report[39m
+[36m[39m

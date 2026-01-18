@@ -1,0 +1,884 @@
+Playwright E2E Tests	Set up job	﻿2026-01-18T02:54:47.8119390Z Current runner version: '2.331.0'
+Playwright E2E Tests	Set up job	2026-01-18T02:54:47.8167950Z ##[group]Runner Image Provisioner
+Playwright E2E Tests	Set up job	2026-01-18T02:54:47.8168660Z Hosted Compute Agent
+Playwright E2E Tests	Set up job	2026-01-18T02:54:47.8169090Z Version: 20260115.477
+Playwright E2E Tests	Set up job	2026-01-18T02:54:47.8169580Z Commit: 4b342d620503cbe250a3154040964899ea7c9b00
+Playwright E2E Tests	Set up job	2026-01-18T02:54:47.8170030Z Build Date: 2026-01-15T22:32:41Z
+Playwright E2E Tests	Set up job	2026-01-18T02:54:47.8170970Z Worker ID: {a0ead329-75cf-49f8-8b54-4554e3cc2d85}
+Playwright E2E Tests	Set up job	2026-01-18T02:54:47.8172770Z Azure Region: westus
+Playwright E2E Tests	Set up job	2026-01-18T02:54:47.8174560Z ##[endgroup]
+Playwright E2E Tests	Set up job	2026-01-18T02:54:47.8177010Z ##[group]Operating System
+Playwright E2E Tests	Set up job	2026-01-18T02:54:47.8177360Z macOS
+Playwright E2E Tests	Set up job	2026-01-18T02:54:47.8177780Z 15.7.3
+Playwright E2E Tests	Set up job	2026-01-18T02:54:47.8181490Z 24G419
+Playwright E2E Tests	Set up job	2026-01-18T02:54:47.8182940Z ##[endgroup]
+Playwright E2E Tests	Set up job	2026-01-18T02:54:47.8183330Z ##[group]Runner Image
+Playwright E2E Tests	Set up job	2026-01-18T02:54:47.8183670Z Image: macos-15-arm64
+Playwright E2E Tests	Set up job	2026-01-18T02:54:47.8184860Z Version: 20260112.0107.1
+Playwright E2E Tests	Set up job	2026-01-18T02:54:47.8187060Z Included Software: https://github.com/actions/runner-images/blob/macos-15-arm64/20260112.0107/images/macos/macos-15-arm64-Readme.md
+Playwright E2E Tests	Set up job	2026-01-18T02:54:47.8188380Z Image Release: https://github.com/actions/runner-images/releases/tag/macos-15-arm64%2F20260112.0107
+Playwright E2E Tests	Set up job	2026-01-18T02:54:47.8189040Z ##[endgroup]
+Playwright E2E Tests	Set up job	2026-01-18T02:54:47.8222820Z ##[group]GITHUB_TOKEN Permissions
+Playwright E2E Tests	Set up job	2026-01-18T02:54:47.8224560Z Contents: read
+Playwright E2E Tests	Set up job	2026-01-18T02:54:47.8225010Z Metadata: read
+Playwright E2E Tests	Set up job	2026-01-18T02:54:47.8225340Z Packages: read
+Playwright E2E Tests	Set up job	2026-01-18T02:54:47.8225710Z ##[endgroup]
+Playwright E2E Tests	Set up job	2026-01-18T02:54:47.8227820Z Secret source: Actions
+Playwright E2E Tests	Set up job	2026-01-18T02:54:47.8228700Z Prepare workflow directory
+Playwright E2E Tests	Set up job	2026-01-18T02:54:47.8495190Z Prepare all required actions
+Playwright E2E Tests	Set up job	2026-01-18T02:54:47.8521420Z Getting action download info
+Playwright E2E Tests	Set up job	2026-01-18T02:54:48.0388390Z Download action repository 'actions/checkout@v4' (SHA:34e114876b0b11c390a56381ad16ebd13914f8d5)
+Playwright E2E Tests	Set up job	2026-01-18T02:54:48.5085320Z Download action repository 'actions/setup-node@v4' (SHA:49933ea5288caeca8642d1e84afbd3f7d6820020)
+Playwright E2E Tests	Set up job	2026-01-18T02:54:48.7293680Z Download action repository 'actions/upload-artifact@v4' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+Playwright E2E Tests	Set up job	2026-01-18T02:54:48.9370590Z Complete job name: Playwright E2E Tests
+Playwright E2E Tests	Checkout repository	﻿2026-01-18T02:54:48.9763730Z ##[group]Run actions/checkout@v4
+Playwright E2E Tests	Checkout repository	2026-01-18T02:54:48.9764310Z with:
+Playwright E2E Tests	Checkout repository	2026-01-18T02:54:48.9764600Z   repository: anicolao/food
+Playwright E2E Tests	Checkout repository	2026-01-18T02:54:48.9765120Z   token: ***
+Playwright E2E Tests	Checkout repository	2026-01-18T02:54:48.9765390Z   ssh-strict: true
+Playwright E2E Tests	Checkout repository	2026-01-18T02:54:48.9765660Z   ssh-user: git
+Playwright E2E Tests	Checkout repository	2026-01-18T02:54:48.9765950Z   persist-credentials: true
+Playwright E2E Tests	Checkout repository	2026-01-18T02:54:48.9766260Z   clean: true
+Playwright E2E Tests	Checkout repository	2026-01-18T02:54:48.9766540Z   sparse-checkout-cone-mode: true
+Playwright E2E Tests	Checkout repository	2026-01-18T02:54:48.9766900Z   fetch-depth: 1
+Playwright E2E Tests	Checkout repository	2026-01-18T02:54:48.9767180Z   fetch-tags: false
+Playwright E2E Tests	Checkout repository	2026-01-18T02:54:48.9767460Z   show-progress: true
+Playwright E2E Tests	Checkout repository	2026-01-18T02:54:48.9767740Z   lfs: false
+Playwright E2E Tests	Checkout repository	2026-01-18T02:54:48.9768000Z   submodules: false
+Playwright E2E Tests	Checkout repository	2026-01-18T02:54:48.9768290Z   set-safe-directory: true
+Playwright E2E Tests	Checkout repository	2026-01-18T02:54:48.9768720Z ##[endgroup]
+Playwright E2E Tests	Checkout repository	2026-01-18T02:54:49.3297760Z Syncing repository: anicolao/food
+Playwright E2E Tests	Checkout repository	2026-01-18T02:54:49.3300430Z ##[group]Getting Git version info
+Playwright E2E Tests	Checkout repository	2026-01-18T02:54:49.3300920Z Working directory is '/Users/runner/work/food/food'
+Playwright E2E Tests	Checkout repository	2026-01-18T02:54:49.3301670Z [command]/opt/homebrew/bin/git version
+Playwright E2E Tests	Checkout repository	2026-01-18T02:54:49.3884460Z git version 2.52.0
+Playwright E2E Tests	Checkout repository	2026-01-18T02:54:49.3918050Z ##[endgroup]
+Playwright E2E Tests	Checkout repository	2026-01-18T02:54:49.3931320Z Copying '/Users/runner/.gitconfig' to '/Users/runner/work/_temp/60e7cb4e-b369-4578-b757-52f680b25c29/.gitconfig'
+Playwright E2E Tests	Checkout repository	2026-01-18T02:54:49.3932440Z Temporarily overriding HOME='/Users/runner/work/_temp/60e7cb4e-b369-4578-b757-52f680b25c29' before making global git config changes
+Playwright E2E Tests	Checkout repository	2026-01-18T02:54:49.3933400Z Adding repository directory to the temporary git global config as a safe directory
+Playwright E2E Tests	Checkout repository	2026-01-18T02:54:49.3935080Z [command]/opt/homebrew/bin/git config --global --add safe.directory /Users/runner/work/food/food
+Playwright E2E Tests	Checkout repository	2026-01-18T02:54:49.4068760Z Deleting the contents of '/Users/runner/work/food/food'
+Playwright E2E Tests	Checkout repository	2026-01-18T02:54:49.4070560Z ##[group]Initializing the repository
+Playwright E2E Tests	Checkout repository	2026-01-18T02:54:49.4074670Z [command]/opt/homebrew/bin/git init /Users/runner/work/food/food
+Playwright E2E Tests	Checkout repository	2026-01-18T02:54:49.4325040Z hint: Using 'master' as the name for the initial branch. This default branch name
+Playwright E2E Tests	Checkout repository	2026-01-18T02:54:49.4328190Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+Playwright E2E Tests	Checkout repository	2026-01-18T02:54:49.4328850Z hint: to use in all of your new repositories, which will suppress this warning,
+Playwright E2E Tests	Checkout repository	2026-01-18T02:54:49.4329350Z hint: call:
+Playwright E2E Tests	Checkout repository	2026-01-18T02:54:49.4329620Z hint:
+Playwright E2E Tests	Checkout repository	2026-01-18T02:54:49.4329960Z hint: 	git config --global init.defaultBranch <name>
+Playwright E2E Tests	Checkout repository	2026-01-18T02:54:49.4330350Z hint:
+Playwright E2E Tests	Checkout repository	2026-01-18T02:54:49.4330810Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+Playwright E2E Tests	Checkout repository	2026-01-18T02:54:49.4331410Z hint: 'development'. The just-created branch can be renamed via this command:
+Playwright E2E Tests	Checkout repository	2026-01-18T02:54:49.4331890Z hint:
+Playwright E2E Tests	Checkout repository	2026-01-18T02:54:49.4332150Z hint: 	git branch -m <name>
+Playwright E2E Tests	Checkout repository	2026-01-18T02:54:49.4332450Z hint:
+Playwright E2E Tests	Checkout repository	2026-01-18T02:54:49.4332860Z hint: Disable this message with "git config set advice.defaultBranchName false"
+Playwright E2E Tests	Checkout repository	2026-01-18T02:54:49.4333890Z Initialized empty Git repository in /Users/runner/work/food/food/.git/
+Playwright E2E Tests	Checkout repository	2026-01-18T02:54:49.4338910Z [command]/opt/homebrew/bin/git remote add origin https://github.com/anicolao/food
+Playwright E2E Tests	Checkout repository	2026-01-18T02:54:49.4443120Z ##[endgroup]
+Playwright E2E Tests	Checkout repository	2026-01-18T02:54:49.4443710Z ##[group]Disabling automatic garbage collection
+Playwright E2E Tests	Checkout repository	2026-01-18T02:54:49.4445470Z [command]/opt/homebrew/bin/git config --local gc.auto 0
+Playwright E2E Tests	Checkout repository	2026-01-18T02:54:49.4587970Z ##[endgroup]
+Playwright E2E Tests	Checkout repository	2026-01-18T02:54:49.4588700Z ##[group]Setting up auth
+Playwright E2E Tests	Checkout repository	2026-01-18T02:54:49.4591580Z [command]/opt/homebrew/bin/git config --local --name-only --get-regexp core\.sshCommand
+Playwright E2E Tests	Checkout repository	2026-01-18T02:54:49.4687060Z [command]/opt/homebrew/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+Playwright E2E Tests	Checkout repository	2026-01-18T02:54:49.6239710Z [command]/opt/homebrew/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+Playwright E2E Tests	Checkout repository	2026-01-18T02:54:49.6335000Z [command]/opt/homebrew/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+Playwright E2E Tests	Checkout repository	2026-01-18T02:54:49.7215760Z [command]/opt/homebrew/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+Playwright E2E Tests	Checkout repository	2026-01-18T02:54:49.7275040Z [command]/opt/homebrew/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+Playwright E2E Tests	Checkout repository	2026-01-18T02:54:49.8179720Z [command]/opt/homebrew/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+Playwright E2E Tests	Checkout repository	2026-01-18T02:54:49.8252840Z ##[endgroup]
+Playwright E2E Tests	Checkout repository	2026-01-18T02:54:49.8253590Z ##[group]Fetching the repository
+Playwright E2E Tests	Checkout repository	2026-01-18T02:54:49.8259800Z [command]/opt/homebrew/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +528060aa7a26629fa76f4d0b3422bf52e57f36f1:refs/remotes/pull/55/merge
+Playwright E2E Tests	Checkout repository	2026-01-18T02:54:51.3844660Z From https://github.com/anicolao/food
+Playwright E2E Tests	Checkout repository	2026-01-18T02:54:51.3845640Z  * [new ref]         528060aa7a26629fa76f4d0b3422bf52e57f36f1 -> pull/55/merge
+Playwright E2E Tests	Checkout repository	2026-01-18T02:54:51.3947890Z ##[endgroup]
+Playwright E2E Tests	Checkout repository	2026-01-18T02:54:51.3948710Z ##[group]Determining the checkout info
+Playwright E2E Tests	Checkout repository	2026-01-18T02:54:51.3949620Z ##[endgroup]
+Playwright E2E Tests	Checkout repository	2026-01-18T02:54:51.3951100Z [command]/opt/homebrew/bin/git sparse-checkout disable
+Playwright E2E Tests	Checkout repository	2026-01-18T02:54:51.4029320Z [command]/opt/homebrew/bin/git config --local --unset-all extensions.worktreeConfig
+Playwright E2E Tests	Checkout repository	2026-01-18T02:54:51.4098630Z ##[group]Checking out the ref
+Playwright E2E Tests	Checkout repository	2026-01-18T02:54:51.4100410Z [command]/opt/homebrew/bin/git checkout --progress --force refs/remotes/pull/55/merge
+Playwright E2E Tests	Checkout repository	2026-01-18T02:54:51.5232530Z HEAD is now at 528060a Merge 38d5cf7debc42a936c41975a9423e854b4856fa8 into c830993b37a0d394dee3f5b720aac002f6eaea68
+Playwright E2E Tests	Checkout repository	2026-01-18T02:54:51.5246750Z ##[endgroup]
+Playwright E2E Tests	Checkout repository	2026-01-18T02:54:51.5345350Z [command]/opt/homebrew/bin/git log -1 --format=%H
+Playwright E2E Tests	Checkout repository	2026-01-18T02:54:51.5419860Z 528060aa7a26629fa76f4d0b3422bf52e57f36f1
+Playwright E2E Tests	Setup Node.js	﻿2026-01-18T02:54:51.5701610Z ##[group]Run actions/setup-node@v4
+Playwright E2E Tests	Setup Node.js	2026-01-18T02:54:51.5702560Z with:
+Playwright E2E Tests	Setup Node.js	2026-01-18T02:54:51.5703220Z   node-version: 20
+Playwright E2E Tests	Setup Node.js	2026-01-18T02:54:51.5704140Z   cache: npm
+Playwright E2E Tests	Setup Node.js	2026-01-18T02:54:51.5704740Z   always-auth: false
+Playwright E2E Tests	Setup Node.js	2026-01-18T02:54:51.5705390Z   check-latest: false
+Playwright E2E Tests	Setup Node.js	2026-01-18T02:54:51.5706290Z   token: ***
+Playwright E2E Tests	Setup Node.js	2026-01-18T02:54:51.5706870Z ##[endgroup]
+Playwright E2E Tests	Setup Node.js	2026-01-18T02:54:51.7065600Z Found in cache @ /Users/runner/hostedtoolcache/node/20.19.6/arm64
+Playwright E2E Tests	Setup Node.js	2026-01-18T02:54:51.7069100Z ##[group]Environment details
+Playwright E2E Tests	Setup Node.js	2026-01-18T02:54:52.6421740Z node: v20.19.6
+Playwright E2E Tests	Setup Node.js	2026-01-18T02:54:52.6523940Z npm: 10.8.2
+Playwright E2E Tests	Setup Node.js	2026-01-18T02:54:52.6625320Z yarn: 1.22.22
+Playwright E2E Tests	Setup Node.js	2026-01-18T02:54:52.6727200Z ##[endgroup]
+Playwright E2E Tests	Setup Node.js	2026-01-18T02:54:52.6899080Z [command]/Users/runner/hostedtoolcache/node/20.19.6/arm64/bin/npm config get cache
+Playwright E2E Tests	Setup Node.js	2026-01-18T02:54:52.8756740Z /Users/runner/.npm
+Playwright E2E Tests	Setup Node.js	2026-01-18T02:54:53.0516730Z Cache hit for: node-cache-macOS-arm64-npm-b25bee4dc38dd0feb681cdf81a20e65ba5bbe807f748f6ac19b6948f85d714fd
+Playwright E2E Tests	Setup Node.js	2026-01-18T02:54:53.3991790Z Received 20368981 of 20368981 (100.0%), 63.7 MBs/sec
+Playwright E2E Tests	Setup Node.js	2026-01-18T02:54:53.4091210Z Cache Size: ~19 MB (20368981 B)
+Playwright E2E Tests	Setup Node.js	2026-01-18T02:54:53.4193400Z [command]/opt/homebrew/bin/gtar -xf /Users/runner/work/_temp/900c8b7e-6460-48e0-9a9d-c1c6f8ab0b7a/cache.tzst -P -C /Users/runner/work/food/food --delay-directory-restore --use-compress-program unzstd
+Playwright E2E Tests	Setup Node.js	2026-01-18T02:54:53.6025950Z Cache restored successfully
+Playwright E2E Tests	Setup Node.js	2026-01-18T02:54:53.6127750Z Cache restored from key: node-cache-macOS-arm64-npm-b25bee4dc38dd0feb681cdf81a20e65ba5bbe807f748f6ac19b6948f85d714fd
+Playwright E2E Tests	Install dependencies	﻿2026-01-18T02:54:53.6407080Z ##[group]Run npm ci
+Playwright E2E Tests	Install dependencies	2026-01-18T02:54:53.6407520Z [36;1mnpm ci[0m
+Playwright E2E Tests	Install dependencies	2026-01-18T02:54:53.6513220Z shell: /bin/bash -e {0}
+Playwright E2E Tests	Install dependencies	2026-01-18T02:54:53.6513490Z ##[endgroup]
+Playwright E2E Tests	Install dependencies	2026-01-18T02:54:56.2985070Z 
+Playwright E2E Tests	Install dependencies	2026-01-18T02:54:56.3004510Z > temp-app@0.0.1 prepare
+Playwright E2E Tests	Install dependencies	2026-01-18T02:54:56.3022720Z > svelte-kit sync || echo '' && husky install
+Playwright E2E Tests	Install dependencies	2026-01-18T02:54:56.3046540Z 
+Playwright E2E Tests	Install dependencies	2026-01-18T02:54:57.7262440Z husky - Git hooks installed
+Playwright E2E Tests	Install dependencies	2026-01-18T02:54:57.7367190Z 
+Playwright E2E Tests	Install dependencies	2026-01-18T02:54:57.7469230Z added 71 packages, and audited 72 packages in 4s
+Playwright E2E Tests	Install dependencies	2026-01-18T02:54:57.7537540Z 
+Playwright E2E Tests	Install dependencies	2026-01-18T02:54:57.7660450Z 10 packages are looking for funding
+Playwright E2E Tests	Install dependencies	2026-01-18T02:54:57.7762520Z   run `npm fund` for details
+Playwright E2E Tests	Install dependencies	2026-01-18T02:54:57.7863710Z 
+Playwright E2E Tests	Install dependencies	2026-01-18T02:54:57.7966410Z 4 vulnerabilities (1 low, 1 moderate, 2 high)
+Playwright E2E Tests	Install dependencies	2026-01-18T02:54:57.8068430Z 
+Playwright E2E Tests	Install dependencies	2026-01-18T02:54:57.8170160Z To address all issues, run:
+Playwright E2E Tests	Install dependencies	2026-01-18T02:54:57.8271630Z   npm audit fix
+Playwright E2E Tests	Install dependencies	2026-01-18T02:54:57.8372880Z 
+Playwright E2E Tests	Install dependencies	2026-01-18T02:54:57.8474160Z Run `npm audit` for details.
+Playwright E2E Tests	Install Playwright browsers	﻿2026-01-18T02:54:57.8552750Z ##[group]Run npx playwright install --with-deps chromium
+Playwright E2E Tests	Install Playwright browsers	2026-01-18T02:54:57.8553270Z [36;1mnpx playwright install --with-deps chromium[0m
+Playwright E2E Tests	Install Playwright browsers	2026-01-18T02:54:57.8658410Z shell: /bin/bash -e {0}
+Playwright E2E Tests	Install Playwright browsers	2026-01-18T02:54:57.8658870Z ##[endgroup]
+Playwright E2E Tests	Install Playwright browsers	2026-01-18T02:54:58.9090820Z Downloading Chromium 143.0.7499.4 (playwright build v1200) from https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1200/chromium-mac-arm64.zip
+Playwright E2E Tests	Install Playwright browsers	2026-01-18T02:54:59.0716790Z |                                                                                |   0% of 159.6 MiB
+Playwright E2E Tests	Install Playwright browsers	2026-01-18T02:54:59.1926890Z |■■■■■■■■                                                                        |  10% of 159.6 MiB
+Playwright E2E Tests	Install Playwright browsers	2026-01-18T02:54:59.2630530Z |■■■■■■■■■■■■■■■■                                                                |  20% of 159.6 MiB
+Playwright E2E Tests	Install Playwright browsers	2026-01-18T02:54:59.3678310Z |■■■■■■■■■■■■■■■■■■■■■■■■                                                        |  30% of 159.6 MiB
+Playwright E2E Tests	Install Playwright browsers	2026-01-18T02:54:59.4789720Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                                |  40% of 159.6 MiB
+Playwright E2E Tests	Install Playwright browsers	2026-01-18T02:54:59.6520410Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                        |  50% of 159.6 MiB
+Playwright E2E Tests	Install Playwright browsers	2026-01-18T02:54:59.8119300Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                |  60% of 159.6 MiB
+Playwright E2E Tests	Install Playwright browsers	2026-01-18T02:54:59.9047510Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                        |  70% of 159.6 MiB
+Playwright E2E Tests	Install Playwright browsers	2026-01-18T02:55:00.0738600Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                |  80% of 159.6 MiB
+Playwright E2E Tests	Install Playwright browsers	2026-01-18T02:55:00.2149740Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■        |  90% of 159.6 MiB
+Playwright E2E Tests	Install Playwright browsers	2026-01-18T02:55:00.4002080Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■| 100% of 159.6 MiB
+Playwright E2E Tests	Install Playwright browsers	2026-01-18T02:55:03.7125200Z Chromium 143.0.7499.4 (playwright build v1200) downloaded to /Users/runner/Library/Caches/ms-playwright/chromium-1200
+Playwright E2E Tests	Install Playwright browsers	2026-01-18T02:55:03.7230610Z Downloading FFMPEG playwright build v1011 from https://cdn.playwright.dev/dbazure/download/playwright/builds/ffmpeg/1011/ffmpeg-mac-arm64.zip
+Playwright E2E Tests	Install Playwright browsers	2026-01-18T02:55:03.8888220Z |                                                                                |   0% of 1 MiB
+Playwright E2E Tests	Install Playwright browsers	2026-01-18T02:55:03.8996540Z |■■■■■■■■                                                                        |  10% of 1 MiB
+Playwright E2E Tests	Install Playwright browsers	2026-01-18T02:55:03.9098830Z |■■■■■■■■■■■■■■■■                                                                |  20% of 1 MiB
+Playwright E2E Tests	Install Playwright browsers	2026-01-18T02:55:03.9199730Z |■■■■■■■■■■■■■■■■■■■■■■■■                                                        |  31% of 1 MiB
+Playwright E2E Tests	Install Playwright browsers	2026-01-18T02:55:03.9300080Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                                |  40% of 1 MiB
+Playwright E2E Tests	Install Playwright browsers	2026-01-18T02:55:03.9403080Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                        |  50% of 1 MiB
+Playwright E2E Tests	Install Playwright browsers	2026-01-18T02:55:03.9504350Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                |  61% of 1 MiB
+Playwright E2E Tests	Install Playwright browsers	2026-01-18T02:55:03.9604820Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                        |  70% of 1 MiB
+Playwright E2E Tests	Install Playwright browsers	2026-01-18T02:55:03.9705340Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                |  80% of 1 MiB
+Playwright E2E Tests	Install Playwright browsers	2026-01-18T02:55:03.9806810Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■        |  91% of 1 MiB
+Playwright E2E Tests	Install Playwright browsers	2026-01-18T02:55:03.9907990Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■| 100% of 1 MiB
+Playwright E2E Tests	Install Playwright browsers	2026-01-18T02:55:04.0008110Z FFMPEG playwright build v1011 downloaded to /Users/runner/Library/Caches/ms-playwright/ffmpeg-1011
+Playwright E2E Tests	Install Playwright browsers	2026-01-18T02:55:04.0109610Z Downloading Chromium Headless Shell 143.0.7499.4 (playwright build v1200) from https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1200/chromium-headless-shell-mac-arm64.zip
+Playwright E2E Tests	Install Playwright browsers	2026-01-18T02:55:04.1019450Z |                                                                                |   0% of 89.7 MiB
+Playwright E2E Tests	Install Playwright browsers	2026-01-18T02:55:04.1833800Z |■■■■■■■■                                                                        |  10% of 89.7 MiB
+Playwright E2E Tests	Install Playwright browsers	2026-01-18T02:55:04.2556290Z |■■■■■■■■■■■■■■■■                                                                |  20% of 89.7 MiB
+Playwright E2E Tests	Install Playwright browsers	2026-01-18T02:55:04.3162090Z |■■■■■■■■■■■■■■■■■■■■■■■■                                                        |  30% of 89.7 MiB
+Playwright E2E Tests	Install Playwright browsers	2026-01-18T02:55:04.4009470Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                                |  40% of 89.7 MiB
+Playwright E2E Tests	Install Playwright browsers	2026-01-18T02:55:04.4617700Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                        |  50% of 89.7 MiB
+Playwright E2E Tests	Install Playwright browsers	2026-01-18T02:55:04.5165190Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                |  60% of 89.7 MiB
+Playwright E2E Tests	Install Playwright browsers	2026-01-18T02:55:04.5567670Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                        |  70% of 89.7 MiB
+Playwright E2E Tests	Install Playwright browsers	2026-01-18T02:55:04.6388910Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                |  80% of 89.7 MiB
+Playwright E2E Tests	Install Playwright browsers	2026-01-18T02:55:04.6897620Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■        |  90% of 89.7 MiB
+Playwright E2E Tests	Install Playwright browsers	2026-01-18T02:55:04.7652260Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■| 100% of 89.7 MiB
+Playwright E2E Tests	Install Playwright browsers	2026-01-18T02:55:05.9822750Z Chromium Headless Shell 143.0.7499.4 (playwright build v1200) downloaded to /Users/runner/Library/Caches/ms-playwright/chromium_headless_shell-1200
+Playwright E2E Tests	Run Playwright tests	﻿2026-01-18T02:55:06.0123760Z ##[group]Run npm run test:e2e
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:06.0124070Z [36;1mnpm run test:e2e[0m
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:06.0278790Z shell: /bin/bash -e {0}
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:06.0279210Z env:
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:06.0279450Z   CI: true
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:06.0279680Z   VITE_GOOGLE_API_KEY: dummy
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:06.0279990Z   VITE_GOOGLE_CLIENT_ID: dummy
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:06.0280240Z   VITE_GOOGLE_DRIVE_CLIENT_ID: dummy
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:06.0280540Z   VITE_GOOGLE_DRIVE_FOLDER_ID: dummy
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:06.0280920Z   VITE_GOOGLE_PHOTOS_CLIENT_ID: dummy
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:06.0281170Z   COMMIT_HASH: 38d5cf7debc42a936c41975a9423e854b4856fa8
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:06.0281480Z ##[endgroup]
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:06.2476990Z 
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:06.2578020Z > temp-app@0.0.1 test:e2e
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:06.2679130Z > playwright test --workers=8
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:06.2779890Z 
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:11.3986670Z 
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:11.4107930Z Running 13 tests using 8 workers
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:26.4177630Z REQUEST: http://localhost:5174/
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:26.5304540Z REQUEST: http://localhost:5174/
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:26.5801730Z BROWSER LOG: Failed to load resource: net::ERR_FAILED
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:26.5844140Z BROWSER LOG: Service Worker registration blocked by Playwright
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:26.8160210Z BROWSER LOG: Failed to load resource: net::ERR_FAILED
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:26.8550560Z BROWSER LOG: Service Worker registration blocked by Playwright
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:26.9365510Z PAGE CONTENT: <!DOCTYPE html><html lang="en"><head>
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:26.9468340Z 	<meta charset="utf-8">
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:26.9571150Z 	<meta name="viewport" content="width=device-width, initial-scale=1">
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:26.9673290Z 	<script src="https://accounts.google.com/gsi/client" async="" defer=""></script>
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:26.9773070Z 	<link rel="manifest" href="./manifest.webmanifest">
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:26.9887840Z 	<meta name="apple-mobile-web-app-capable" content="yes">
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:26.9997330Z 	<meta name="mobile-web-app-capable" content="yes">
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:27.0099150Z 	<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:27.0233990Z 	<meta name="apple-mobile-web-app-title" content="Food Fixups">
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:27.0348840Z 	<link rel="apple-touch-icon" href="./apple-touch-icon.png">
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:27.0523500Z 	
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:27.0630080Z </head>
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:27.0732030Z 
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:27.0836390Z <body data-sveltekit-preload-data="hover">
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:27.0974310Z 	<div style="display: contents">
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:27.1060340Z 			<script>
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:27.1139160Z 				{
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:27.1242500Z 					__sveltekit_dev = {
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:27.1360700Z 						base: new URL(".", location).pathname.slice(0, -1),
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:27.1463280Z 						env: {}
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:27.1552880Z 					};
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:27.1664490Z 
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:27.1765930Z 					const element = document.currentScript.parentElement;
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:27.1911420Z 
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:27.2013610Z 					Promise.all([
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:27.2116270Z 						import("/node_modules/@sveltejs/kit/src/runtime/client/entry.js"),
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:27.2334250Z 						import("/@fs/Users/runner/work/food/food/.svelte-kit/generated/client/app.js")
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:27.2443980Z 					]).then(([kit, app]) => {
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:27.2553540Z 						kit.start(app, element);
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:27.2657830Z 					});
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:27.2779100Z 
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:27.2868880Z 					if ('serviceWorker' in navigator) {
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:27.2973420Z 						addEventListener('load', function () {
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:27.3069130Z 							navigator.serviceWorker.register('./service-worker.js', { type: 'module' });
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:27.3171890Z 						});
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:27.3274780Z 					}
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:27.3428240Z 				}
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:27.3493640Z 			</script>
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:27.3701430Z 		</div>
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:27.3828280Z 
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:27.3929290Z 
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:27.4033290Z </body></html>
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:27.4135440Z REQUEST: http://localhost:5174/node_modules/@sveltejs/kit/src/runtime/client/entry.js
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:27.4407720Z REQUEST: http://localhost:5174/@fs/Users/runner/work/food/food/.svelte-kit/generated/client/app.js
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:27.4590120Z BROWSER LOG: Failed to load resource: net::ERR_FAILED
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:27.4719190Z BROWSER LOG: Service Worker registration blocked by Playwright
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:27.4831700Z REQUEST: http://localhost:5174/node_modules/@sveltejs/kit/src/runtime/client/entry.js
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:27.4960740Z REQUEST: http://localhost:5174/@fs/Users/runner/work/food/food/.svelte-kit/generated/client/app.js
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:27.5103030Z BROWSER LOG: Failed to load resource: net::ERR_FAILED
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:27.5104680Z BROWSER LOG: Service Worker registration blocked by Playwright
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:27.5295290Z REQUEST: http://localhost:5174/node_modules/@sveltejs/kit/src/runtime/client/client.js?v=fc165103
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:27.5439410Z BROWSER: Failed to load resource: net::ERR_FAILED
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:27.5553990Z BROWSER: Service Worker registration blocked by Playwright
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:27.6013720Z PAGE CONTENT: <!DOCTYPE html><html lang="en"><head>
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:27.6080300Z 	<meta charset="utf-8">
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:27.6137450Z 	<meta name="viewport" content="width=device-width, initial-scale=1">
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:27.6241940Z 	<script src="https://accounts.google.com/gsi/client" async="" defer=""></script>
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:27.6359660Z 	<link rel="manifest" href="./manifest.webmanifest">
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:27.6770250Z 	<meta name="apple-mobile-web-app-capable" content="yes">
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:27.6878260Z 	<meta name="mobile-web-app-capable" content="yes">
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:27.6989840Z 	<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:27.7260310Z 	<meta name="apple-mobile-web-app-title" content="Food Fixups">
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:27.7371070Z 	<link rel="apple-touch-icon" href="./apple-touch-icon.png">
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:27.7514720Z 	
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:27.7714770Z </head>
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:27.8099760Z 
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:27.8281100Z <body data-sveltekit-preload-data="hover">
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:27.8476210Z 	<div style="display: contents">
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:27.8589290Z 			<script>
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:27.8703350Z 				{
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:27.8812260Z 					__sveltekit_dev = {
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:27.8963720Z 						base: new URL(".", location).pathname.slice(0, -1),
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:27.9066620Z 						env: {}
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:27.9168800Z 					};
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:27.9283900Z 
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:27.9391040Z 					const element = document.currentScript.parentElement;
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:27.9495960Z 
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:27.9632380Z 					Promise.all([
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:27.9734080Z 						import("/node_modules/@sveltejs/kit/src/runtime/client/entry.js"),
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:27.9767170Z 						import("/@fs/Users/runner/work/food/food/.svelte-kit/generated/client/app.js")
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:27.9927550Z 					]).then(([kit, app]) => {
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:28.0034170Z 						kit.start(app, element);
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:28.0137480Z 					});
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:28.0238430Z 
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:28.0351640Z 					if ('serviceWorker' in navigator) {
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:28.0483760Z 						addEventListener('load', function () {
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:28.0589960Z 							navigator.serviceWorker.register('./service-worker.js', { type: 'module' });
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:28.0695440Z 						});
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:28.0805930Z 					}
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:28.0909580Z 				}
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:28.1059550Z 			</script>
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:28.1162600Z 		</div>
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:28.1283760Z 
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:28.1390770Z 
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:28.1570450Z </body></html>
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:28.1670840Z REQUEST: http://localhost:5174/node_modules/@sveltejs/kit/src/runtime/client/client.js?v=fc165103
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:28.1781740Z REQUEST: http://localhost:5174/@vite/client
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:28.1946930Z REQUEST: http://localhost:5174/node_modules/.vite/deps/esm-env.js?v=50c684b8
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:28.2062530Z REQUEST: http://localhost:5174/node_modules/.vite/deps/svelte.js?v=c41179f0
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:28.2175760Z REQUEST: http://localhost:5174/node_modules/@sveltejs/kit/src/exports/internal/index.js?v=fc165103
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:28.2296040Z REQUEST: http://localhost:5174/node_modules/@sveltejs/kit/src/utils/url.js?v=fc165103
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:28.2433740Z REQUEST: http://localhost:5174/node_modules/@sveltejs/kit/src/runtime/client/fetcher.js?v=fc165103
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:28.2576960Z REQUEST: http://localhost:5174/node_modules/@sveltejs/kit/src/runtime/client/parse.js?v=fc165103
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:28.2688300Z REQUEST: http://localhost:5174/node_modules/@sveltejs/kit/src/runtime/client/session-storage.js?v=fc165103
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:28.3046570Z REQUEST: http://localhost:5174/node_modules/@sveltejs/kit/src/runtime/client/utils.js?v=fc165103
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:28.3158830Z REQUEST: http://localhost:5174/node_modules/@sveltejs/kit/src/runtime/app/paths/index.js?v=fc165103
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:28.3266960Z REQUEST: http://localhost:5174/node_modules/.vite/deps/devalue.js?v=c3f357d9
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:28.3430700Z REQUEST: http://localhost:5174/node_modules/@sveltejs/kit/src/runtime/client/constants.js?v=fc165103
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:28.3575530Z REQUEST: http://localhost:5174/node_modules/@sveltejs/kit/src/utils/exports.js?v=fc165103
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:28.3701350Z REQUEST: http://localhost:5174/node_modules/@sveltejs/kit/src/utils/array.js?v=fc165103
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:28.3805990Z REQUEST: http://localhost:5174/node_modules/@sveltejs/kit/src/runtime/shared.js?v=fc165103
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:28.3910520Z REQUEST: http://localhost:5174/node_modules/@sveltejs/kit/src/utils/error.js?v=fc165103
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:28.4013610Z REQUEST: http://localhost:5174/node_modules/.vite/deps/svelte_store.js?v=c41179f0
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:28.4123560Z REQUEST: http://localhost:5174/node_modules/@sveltejs/kit/src/runtime/client/state.svelte.js?v=fc165103
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:28.4242330Z REQUEST: http://localhost:5174/node_modules/@sveltejs/kit/src/runtime/pathname.js?v=fc165103
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:28.4367770Z REQUEST: http://localhost:5174/node_modules/@sveltejs/kit/src/runtime/telemetry/noop.js?v=fc165103
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:28.4477200Z REQUEST: http://localhost:5174/node_modules/@sveltejs/kit/src/runtime/utils.js?v=fc165103
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:28.4746260Z REQUEST: http://localhost:5174/@vite/client
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:28.4864120Z REQUEST: http://localhost:5174/node_modules/.vite/deps/esm-env.js?v=50c684b8
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:28.5015370Z REQUEST: http://localhost:5174/node_modules/.vite/deps/svelte.js?v=c41179f0
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:28.5124470Z REQUEST: http://localhost:5174/node_modules/@sveltejs/kit/src/exports/internal/index.js?v=fc165103
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:28.5263630Z REQUEST: http://localhost:5174/node_modules/@sveltejs/kit/src/utils/url.js?v=fc165103
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:28.5408860Z REQUEST: http://localhost:5174/node_modules/@sveltejs/kit/src/runtime/client/fetcher.js?v=fc165103
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:28.5595060Z REQUEST: http://localhost:5174/node_modules/@sveltejs/kit/src/runtime/client/parse.js?v=fc165103
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:28.5727830Z REQUEST: http://localhost:5174/node_modules/@sveltejs/kit/src/runtime/client/session-storage.js?v=fc165103
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:28.5837190Z REQUEST: http://localhost:5174/node_modules/@sveltejs/kit/src/runtime/client/utils.js?v=fc165103
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:28.5939430Z REQUEST: http://localhost:5174/node_modules/@sveltejs/kit/src/runtime/app/paths/index.js?v=fc165103
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:28.6051200Z REQUEST: http://localhost:5174/node_modules/.vite/deps/devalue.js?v=c3f357d9
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:28.6160610Z REQUEST: http://localhost:5174/node_modules/@sveltejs/kit/src/runtime/client/constants.js?v=fc165103
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:28.6279770Z REQUEST: http://localhost:5174/node_modules/@sveltejs/kit/src/utils/exports.js?v=fc165103
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:28.6433390Z REQUEST: http://localhost:5174/node_modules/@sveltejs/kit/src/utils/array.js?v=fc165103
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:28.6546870Z REQUEST: http://localhost:5174/node_modules/@sveltejs/kit/src/runtime/shared.js?v=fc165103
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:28.6659530Z REQUEST: http://localhost:5174/.svelte-kit/generated/client/matchers.js
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:28.6763910Z REQUEST: http://localhost:5174/.svelte-kit/generated/root.js
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:28.6776700Z REQUEST: http://localhost:5174/node_modules/@sveltejs/kit/src/utils/error.js?v=fc165103
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:28.7010630Z REQUEST: http://localhost:5174/node_modules/.vite/deps/svelte_store.js?v=c41179f0
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:28.7130390Z REQUEST: http://localhost:5174/node_modules/@sveltejs/kit/src/runtime/client/state.svelte.js?v=fc165103
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:28.7235590Z REQUEST: http://localhost:5174/node_modules/@sveltejs/kit/src/runtime/pathname.js?v=fc165103
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:28.7348910Z REQUEST: http://localhost:5174/node_modules/@sveltejs/kit/src/runtime/telemetry/noop.js?v=fc165103
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:28.7453850Z REQUEST: http://localhost:5174/node_modules/@sveltejs/kit/src/runtime/utils.js?v=fc165103
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:28.7558340Z REQUEST: http://localhost:5174/node_modules/@sveltejs/kit/src/utils/hash.js?v=fc165103
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:28.7661490Z REQUEST: http://localhost:5174/.svelte-kit/generated/client/matchers.js
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:28.7780090Z REQUEST: http://localhost:5174/.svelte-kit/generated/root.js
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:28.7882130Z REQUEST: http://localhost:5174/node_modules/vite/dist/client/env.mjs
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:28.7986140Z REQUEST: http://localhost:5174/node_modules/vite/dist/client/env.mjs
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:28.8089760Z REQUEST: http://localhost:5174/node_modules/@sveltejs/kit/src/utils/routing.js?v=fc165103
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:28.8193330Z REQUEST: http://localhost:5174/node_modules/@sveltejs/kit/src/utils/hash.js?v=fc165103
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:28.8300550Z REQUEST: http://localhost:5174/@id/__x00__virtual:__sveltekit/environment
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:28.8407450Z REQUEST: http://localhost:5174/node_modules/@sveltejs/kit/src/utils/routing.js?v=fc165103
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:28.8507530Z REQUEST: http://localhost:5174/node_modules/@sveltejs/kit/src/runtime/app/paths/client.js?v=fc165103
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:28.8614730Z REQUEST: http://localhost:5174/@id/__x00__virtual:__sveltekit/environment
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:28.8732900Z REQUEST: http://localhost:5174/node_modules/.vite/deps/chunk-DGUM43GV.js?v=fc165103
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:28.8841250Z REQUEST: http://localhost:5174/node_modules/@sveltejs/kit/src/runtime/app/paths/client.js?v=fc165103
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:28.8944480Z REQUEST: http://localhost:5174/node_modules/.vite/deps/chunk-DGUM43GV.js?v=fc165103
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:29.0147830Z REQUEST: http://localhost:5174/node_modules/.vite/deps/chunk-5QCNSHAL.js?v=fc165103
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:29.0315520Z REQUEST: http://localhost:5174/node_modules/.vite/deps/chunk-U7P2NEEE.js?v=fc165103
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:29.0398930Z REQUEST: http://localhost:5174/node_modules/.vite/deps/chunk-KRSOCH2Y.js?v=fc165103
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:29.0521760Z REQUEST: http://localhost:5174/node_modules/.vite/deps/chunk-YTF3ZZG2.js?v=fc165103
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:29.0627180Z REQUEST: http://localhost:5174/node_modules/.vite/deps/chunk-XWATFG4W.js?v=fc165103
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:29.0745460Z REQUEST: http://localhost:5174/node_modules/.vite/deps/chunk-HNWPC2PS.js?v=fc165103
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:29.0863570Z REQUEST: http://localhost:5174/node_modules/.vite/deps/chunk-OHYQYV5R.js?v=fc165103
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:29.0992590Z REQUEST: http://localhost:5174/node_modules/.vite/deps/svelte_internal_client.js?v=c41179f0
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:29.1104410Z REQUEST: http://localhost:5174/node_modules/.vite/deps/chunk-5QCNSHAL.js?v=fc165103
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:29.1375810Z REQUEST: http://localhost:5174/node_modules/.vite/deps/chunk-U7P2NEEE.js?v=fc165103
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:29.1483400Z REQUEST: http://localhost:5174/node_modules/.vite/deps/chunk-KRSOCH2Y.js?v=fc165103
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:29.1590700Z REQUEST: http://localhost:5174/node_modules/.vite/deps/chunk-YTF3ZZG2.js?v=fc165103
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:29.1693510Z REQUEST: http://localhost:5174/node_modules/.vite/deps/chunk-XWATFG4W.js?v=fc165103
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:29.1799880Z REQUEST: http://localhost:5174/node_modules/.vite/deps/chunk-HNWPC2PS.js?v=fc165103
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:29.1921360Z REQUEST: http://localhost:5174/node_modules/.vite/deps/chunk-OHYQYV5R.js?v=fc165103
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:29.2031700Z REQUEST: http://localhost:5174/node_modules/.vite/deps/svelte_internal_client.js?v=c41179f0
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:29.4005410Z REQUEST: http://localhost:5174/node_modules/.vite/deps/svelte_legacy.js?v=c41179f0
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:29.4122650Z REQUEST: http://localhost:5174/.svelte-kit/generated/root.svelte
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:29.4942890Z REQUEST: http://localhost:5174/node_modules/.vite/deps/svelte_legacy.js?v=c41179f0
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:29.5044180Z REQUEST: http://localhost:5174/.svelte-kit/generated/root.svelte
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:29.5844610Z REQUEST: http://localhost:5174/node_modules/@sveltejs/kit/src/runtime/app/paths/internal/client.js?v=fc165103
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:29.6055120Z BROWSER LOG: [vite] connecting...
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:29.6213580Z REQUEST: http://localhost:5174/node_modules/@sveltejs/kit/src/runtime/app/paths/internal/client.js?v=fc165103
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:29.9889950Z REQUEST: http://localhost:5174/node_modules/.vite/deps/svelte_internal_disclose-version.js?v=c41179f0
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:29.9991780Z REQUEST: http://localhost:5174/node_modules/@sveltejs/kit/src/runtime/app/environment/index.js?v=fc165103
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:30.0092000Z REQUEST: http://localhost:5174/node_modules/.vite/deps/svelte_internal_disclose-version.js?v=c41179f0
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:30.0194340Z REQUEST: http://localhost:5174/node_modules/@sveltejs/kit/src/runtime/app/environment/index.js?v=fc165103
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:30.0298990Z REQUEST: http://localhost:5174/node_modules/@sveltejs/kit/src/exports/internal/remote-functions.js?v=fc165103
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:30.0397050Z REQUEST: http://localhost:5174/node_modules/@sveltejs/kit/src/exports/internal/remote-functions.js?v=fc165103
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:30.2002770Z BROWSER LOG: [vite] connected.
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:30.2669670Z BROWSER LOG: [vite] connecting...
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:30.2771140Z BROWSER: [vite] connecting...
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:30.2873940Z BROWSER LOG: [vite] connecting...
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:30.2976050Z BROWSER LOG: [vite] connecting...
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:30.3356680Z REQUEST: http://localhost:5174/.svelte-kit/generated/client/nodes/0.js
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:30.3472250Z REQUEST: http://localhost:5174/.svelte-kit/generated/client/nodes/1.js
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:30.3576150Z REQUEST: http://localhost:5174/.svelte-kit/generated/client/nodes/2.js
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:30.3786000Z REQUEST: http://localhost:5174/.svelte-kit/generated/client/nodes/0.js
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:30.3889900Z REQUEST: http://localhost:5174/.svelte-kit/generated/client/nodes/1.js
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:30.4000740Z REQUEST: http://localhost:5174/.svelte-kit/generated/client/nodes/2.js
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:30.5889800Z REQUEST: http://localhost:5174/src/routes/+layout.ts
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:30.6016710Z REQUEST: http://localhost:5174/src/routes/+layout.svelte
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:30.6121280Z REQUEST: http://localhost:5174/src/routes/+layout.ts
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:30.6238940Z REQUEST: http://localhost:5174/src/routes/+layout.svelte
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:30.6348790Z REQUEST: http://localhost:5174/node_modules/@sveltejs/kit/src/runtime/components/svelte-5/error.svelte?v=fc165103
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:30.6458580Z REQUEST: http://localhost:5174/src/routes/+page.svelte
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:30.6568260Z REQUEST: http://localhost:5174/node_modules/@sveltejs/kit/src/runtime/components/svelte-5/error.svelte?v=fc165103
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:30.6671630Z REQUEST: http://localhost:5174/src/routes/+page.svelte
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:30.7776980Z REQUEST: http://localhost:5174/node_modules/.vite/deps/svelte_internal_flags_legacy.js?v=c41179f0
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:30.7924030Z REQUEST: http://localhost:5174/node_modules/@sveltejs/kit/src/runtime/app/state/index.js?v=fc165103
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:30.8275980Z REQUEST: http://localhost:5174/node_modules/.vite/deps/svelte_internal_flags_legacy.js?v=c41179f0
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:30.8385560Z REQUEST: http://localhost:5174/node_modules/@sveltejs/kit/src/runtime/app/state/index.js?v=fc165103
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:30.8732340Z REQUEST: http://localhost:5174/src/lib/auth.ts
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:30.8784910Z BROWSER LOG: [vite] connected.
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:30.8932650Z REQUEST: http://localhost:5174/src/lib/store.ts
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:30.9024480Z REQUEST: http://localhost:5174/src/lib/sync-manager.ts
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:30.9133830Z REQUEST: http://localhost:5174/node_modules/@sveltejs/kit/src/runtime/app/navigation.js?v=fc165103
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:30.9267990Z REQUEST: http://localhost:5174/node_modules/@sveltejs/kit/src/runtime/app/stores.js?v=fc165103
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:30.9385550Z REQUEST: http://localhost:5174/node_modules/.vite/deps/svelte_transition.js?v=c41179f0
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:30.9489900Z REQUEST: http://localhost:5174/node_modules/.vite/deps/svelte_easing.js?v=c41179f0
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:30.9596540Z REQUEST: http://localhost:5174/src/lib/assets/favicon.svg?import
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:30.9714650Z REQUEST: http://localhost:5174/src/app.css
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:30.9818220Z REQUEST: http://localhost:5174/src/lib/components/ui/MobileNav.svelte
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:30.9926460Z REQUEST: http://localhost:5174/src/lib/images.ts
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:31.0033870Z REQUEST: http://localhost:5174/src/lib/components/ui/DesktopSidebar.svelte
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:31.0148550Z REQUEST: http://localhost:5174/src/lib/components/ui/ToastContainer.svelte
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:31.0260000Z REQUEST: http://localhost:5174/src/lib/activity-grouping.ts
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:31.0378720Z REQUEST: http://localhost:5174/src/lib/components/ui/StatsRing.svelte
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:31.0588410Z REQUEST: http://localhost:5174/src/lib/components/ui/PageTransitionWrapper.svelte
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:31.0702520Z REQUEST: http://localhost:5174/node_modules/@sveltejs/kit/src/runtime/app/stores.js?v=fc165103
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:31.0811050Z REQUEST: http://localhost:5174/src/lib/transitions.ts
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:31.0962320Z REQUEST: http://localhost:5174/src/lib/components/ui/MacroBubble.svelte
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:31.1077490Z REQUEST: http://localhost:5174/src/lib/components/ui/ActivityCard.svelte
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:31.1252670Z REQUEST: http://localhost:5174/src/lib/auth.ts
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:31.1366300Z REQUEST: http://localhost:5174/src/lib/components/ui/NetworkStatus.svelte
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:31.1477400Z REQUEST: http://localhost:5174/node_modules/@sveltejs/kit/src/runtime/app/navigation.js?v=fc165103
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:31.1584410Z REQUEST: http://localhost:5174/src/routes/+page.svelte?svelte&type=style&lang.css
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:31.1688540Z REQUEST: http://localhost:5174/src/lib/db.ts
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:31.1808810Z REQUEST: http://localhost:5174/src/lib/sync-manager.ts
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:31.1924820Z REQUEST: http://localhost:5174/src/lib/store.ts
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:31.2034940Z REQUEST: http://localhost:5174/src/lib/assets/favicon.svg?import
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:31.2144210Z REQUEST: http://localhost:5174/src/lib/sheets.ts
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:31.2248760Z REQUEST: http://localhost:5174/src/routes/+layout.svelte?svelte&type=style&lang.css
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:31.2355130Z REQUEST: http://localhost:5174/src/app.css
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:31.2461850Z REQUEST: http://localhost:5174/src/lib/components/ui/MobileNav.svelte
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:31.2588030Z REQUEST: http://localhost:5174/src/lib/components/ui/DesktopSidebar.svelte
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:31.2696850Z BROWSER: [vite] connected.
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:31.2837520Z REQUEST: http://localhost:5174/src/lib/components/ui/ToastContainer.svelte
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:31.2942630Z REQUEST: http://localhost:5174/node_modules/.vite/deps/svelte_transition.js?v=c41179f0
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:31.3081200Z REQUEST: http://localhost:5174/src/lib/components/ui/PageTransitionWrapper.svelte
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:31.3194690Z REQUEST: http://localhost:5174/node_modules/.vite/deps/svelte_easing.js?v=c41179f0
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:31.3300640Z REQUEST: http://localhost:5174/src/lib/transitions.ts
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:31.3409690Z REQUEST: http://localhost:5174/src/lib/images.ts
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:31.3523750Z REQUEST: http://localhost:5174/src/lib/db.ts
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:31.3627960Z REQUEST: http://localhost:5174/src/lib/sheets.ts
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:31.3760100Z REQUEST: http://localhost:5174/src/lib/activity-grouping.ts
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:31.3894200Z REQUEST: http://localhost:5174/src/routes/+layout.svelte?svelte&type=style&lang.css
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:31.4023690Z REQUEST: http://localhost:5174/src/lib/components/ui/StatsRing.svelte
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:31.4127450Z REQUEST: http://localhost:5174/node_modules/@sveltejs/kit/src/runtime/app/state/client.js?v=fc165103
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:31.4237440Z REQUEST: http://localhost:5174/src/lib/components/ui/MacroBubble.svelte
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:31.4339490Z REQUEST: http://localhost:5174/src/lib/components/ui/ActivityCard.svelte
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:31.4449440Z REQUEST: http://localhost:5174/node_modules/@sveltejs/kit/src/runtime/app/state/server.js?v=fc165103
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:31.4556430Z REQUEST: http://localhost:5174/src/lib/components/ui/NetworkStatus.svelte
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:31.4674540Z REQUEST: http://localhost:5174/src/routes/+page.svelte?svelte&type=style&lang.css
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:31.4785430Z REQUEST: http://localhost:5174/node_modules/@sveltejs/kit/src/runtime/app/state/client.js?v=fc165103
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:31.4905160Z REQUEST: http://localhost:5174/node_modules/@sveltejs/kit/src/runtime/app/state/server.js?v=fc165103
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:31.5025700Z BROWSER LOG: [vite] connected.
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:31.5139090Z REQUEST: http://localhost:5174/node_modules/.vite/deps/chunk-YERFD2CZ.js?v=fc165103
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:31.5245060Z BROWSER LOG: [vite] connected.
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:31.5992790Z REQUEST: http://localhost:5174/src/lib/components/ui/NavItem.svelte
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:31.6020320Z REQUEST: http://localhost:5174/src/lib/components/ui/DesktopSidebar.svelte?svelte&type=style&lang.css
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:31.6736540Z REQUEST: http://localhost:5174/src/lib/toast.ts
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:31.6741280Z REQUEST: http://localhost:5174/node_modules/.vite/deps/svelte_animate.js?v=c41179f0
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:31.7439750Z REQUEST: http://localhost:5174/src/lib/components/ui/ToastContainer.svelte?svelte&type=style&lang.css
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:31.7549830Z REQUEST: http://localhost:5174/src/lib/components/ui/MobileNav.svelte?svelte&type=style&lang.css
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:31.8200180Z REQUEST: http://localhost:5174/src/lib/components/ui/StatsRing.svelte?svelte&type=style&lang.css
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:31.8462100Z REQUEST: http://localhost:5174/node_modules/.vite/deps/svelte_motion.js?v=c41179f0
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:31.8579240Z REQUEST: http://localhost:5174/src/lib/components/ui/MacroBubble.svelte?svelte&type=style&lang.css
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:31.8964730Z REQUEST: http://localhost:5174/src/lib/components/ui/NetworkStatus.svelte?svelte&type=style&lang.css
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:31.9671940Z REQUEST: http://localhost:5174/src/lib/components/ui/MacroSummary.svelte
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:31.9776980Z REQUEST: http://localhost:5174/src/lib/components/ui/ActivityCard.svelte?svelte&type=style&lang.css
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:32.0279580Z REQUEST: http://localhost:5174/node_modules/.vite/deps/@reduxjs_toolkit.js?v=135a7c33
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:32.0389680Z REQUEST: http://localhost:5174/src/lib/redux-sync-middleware.ts
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:32.0607080Z REQUEST: http://localhost:5174/node_modules/.vite/deps/@reduxjs_toolkit.js?v=135a7c33
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:32.0759640Z REQUEST: http://localhost:5174/src/lib/redux-sync-middleware.ts
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:32.1619550Z REQUEST: http://localhost:5174/src/lib/toast.ts
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:32.1725270Z REQUEST: http://localhost:5174/node_modules/.vite/deps/svelte_animate.js?v=c41179f0
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:32.1826640Z REQUEST: http://localhost:5174/src/lib/components/ui/ToastContainer.svelte?svelte&type=style&lang.css
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:32.1936040Z REQUEST: http://localhost:5174/src/lib/components/ui/NavItem.svelte
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:32.2044420Z REQUEST: http://localhost:5174/src/lib/components/ui/MobileNav.svelte?svelte&type=style&lang.css
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:32.2177280Z REQUEST: http://localhost:5174/src/lib/components/ui/DesktopSidebar.svelte?svelte&type=style&lang.css
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:32.2288730Z REQUEST: http://localhost:5174/node_modules/.vite/deps/chunk-YERFD2CZ.js?v=fc165103
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:32.2729530Z REQUEST: http://localhost:5174/src/lib/components/ui/StatsRing.svelte?svelte&type=style&lang.css
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:32.3246220Z REQUEST: http://localhost:5174/node_modules/.vite/deps/svelte_motion.js?v=c41179f0
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:32.3352740Z REQUEST: http://localhost:5174/src/lib/components/ui/MacroBubble.svelte?svelte&type=style&lang.css
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:32.3874360Z REQUEST: http://localhost:5174/src/lib/components/ui/NetworkStatus.svelte?svelte&type=style&lang.css
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:32.4016590Z REQUEST: http://localhost:5174/src/lib/components/ui/MacroSummary.svelte
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:32.4142220Z REQUEST: http://localhost:5174/src/lib/components/ui/ActivityCard.svelte?svelte&type=style&lang.css
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:32.4143180Z REQUEST: http://localhost:5174/node_modules/.vite/deps/idb.js?v=28a8a4c6
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:32.4253160Z REQUEST: http://localhost:5174/node_modules/.vite/deps/idb.js?v=28a8a4c6
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:32.4686740Z REQUEST: http://localhost:5174/node_modules/.vite/deps/chunk-V2HSNMC5.js?v=fc165103
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:32.4812520Z REQUEST: http://localhost:5174/node_modules/.vite/deps/chunk-GI65FXFZ.js?v=fc165103
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:32.4923460Z REQUEST: http://localhost:5174/node_modules/.vite/deps/chunk-7RQDXF5S.js?v=fc165103
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:32.6048960Z REQUEST: http://localhost:5174/src/lib/components/ui/NavItem.svelte?svelte&type=style&lang.css
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:32.7389920Z REQUEST: http://localhost:5174/src/lib/components/ui/MacroSummary.svelte?svelte&type=style&lang.css
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:32.7390950Z REQUEST: http://localhost:5174/src/lib/components/ui/NavItem.svelte?svelte&type=style&lang.css
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:32.8446960Z BROWSER LOG: [Layout] Hydrating from DB...
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:32.8714870Z REQUEST: http://localhost:5174/node_modules/.vite/deps/chunk-V2HSNMC5.js?v=fc165103
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:32.8946150Z REQUEST: http://localhost:5174/node_modules/.vite/deps/chunk-GI65FXFZ.js?v=fc165103
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:32.9052510Z REQUEST: http://localhost:5174/node_modules/.vite/deps/chunk-7RQDXF5S.js?v=fc165103
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:32.9160620Z REQUEST: http://localhost:5174/src/lib/components/ui/MacroSummary.svelte?svelte&type=style&lang.css
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:32.9278310Z BROWSER LOG: [Layout] Hydrating from DB...
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:33.0248890Z BROWSER LOG: [Layout] Hydrating from DB...
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:33.0350780Z BROWSER: [Layout] Hydrating from DB...
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:33.0462300Z BROWSER LOG: [Layout] Hydrating from DB...
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:33.1461820Z BROWSER LOG: [Auth] Google Identity Services found
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:33.2165070Z BROWSER LOG: [Layout] Found 0 events in DB.
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:33.2272950Z BROWSER LOG: [Layout] Hydration complete.
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:33.2820680Z BROWSER LOG: [Auth] Google Identity Services found
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:33.3168870Z BROWSER: [Auth] Google Identity Services found
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:33.3311370Z BROWSER: [Layout] Found 0 events in DB.
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:33.3418730Z BROWSER: [Layout] Hydration complete.
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:33.3970410Z BROWSER LOG: [Auth] Google Identity Services found
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:33.4482700Z BROWSER LOG: [Auth] Google Identity Services found
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:33.4611670Z BROWSER LOG: [Layout] Found 0 events in DB.
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:33.4721360Z BROWSER LOG: [Layout] Hydration complete.
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:33.5018330Z BROWSER LOG: [Layout] Found 0 events in DB.
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:33.5201610Z BROWSER LOG: [Layout] Found 0 events in DB.
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:33.5317860Z BROWSER LOG: [Layout] Hydration complete.
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:33.5652100Z BROWSER LOG: ImmutableStateInvariantMiddleware took 41ms, which is more than the warning threshold of 32ms. 
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:33.5758970Z If your state or actions are very large, you may want to disable the middleware as it might cause too much of a slowdown in development mode. See https://redux-toolkit.js.org/api/getDefaultMiddleware for instructions.
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:33.5865810Z It is disabled in production builds, so you don't need to worry about that.
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:33.5968360Z BROWSER LOG: [Layout] Hydration complete.
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:33.7792730Z BROWSER LOG: [Auth] Initialized in Layout
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:33.8294310Z BROWSER: [Auth] Initialized in Layout
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:34.0133610Z BROWSER LOG: [Auth] Initialized in Layout
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:34.0260110Z BROWSER LOG: [Auth] Initialized in Layout
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:34.3701490Z MOCKING: https://www.googleapis.com/drive/v3/files?q=mimeType%3D%27application%2Fvnd.google-apps.folder%27%20and%20name%3D%27FoodLog%27%20and%20trashed%3Dfalse
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:34.3814700Z REQUEST: http://localhost:5174/images/icon-status-synced.png
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:34.3923790Z MOCKING: https://www.googleapis.com/drive/v3/files?q=mimeType%3D%27application%2Fvnd.google-apps.folder%27%20and%20name%3D%27FoodLog%27%20and%20trashed%3Dfalse
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:34.4027090Z REQUEST: http://localhost:5174/images/icon-status-synced.png
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:34.4835560Z REQUEST: http://localhost:5174/images/icon-protein.png
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:34.4875510Z REQUEST: http://localhost:5174/images/icon-carbs.png
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:34.4977620Z REQUEST: http://localhost:5174/images/icon-protein.png
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:34.5207510Z REQUEST: http://localhost:5174/images/icon-fat.png
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:34.5315260Z REQUEST: http://localhost:5174/images/icon-carbs.png
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:34.5418420Z REQUEST: http://localhost:5174/images/icon-fat.png
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:34.5525870Z REQUEST: http://localhost:5174/images/icon-status-syncing.png
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:34.5627690Z MOCKING: https://www.googleapis.com/drive/v3/files?q=appProperties%20has%20%7B%20key%3D%27type%27%20and%20value%3D%27food_tracker_db%27%20%7D%20and%20trashed%3Dfalse%20and%20%27mock-folder-id%27%20in%20parents&orderBy=modifiedTime%20desc&fields=files(id,name,modifiedTime,createdTime)
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:34.6286280Z REQUEST: http://localhost:5174/images/icon-status-syncing.png
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:34.8041620Z MOCKING: https://www.googleapis.com/drive/v3/files?q=appProperties%20has%20%7B%20key%3D%27type%27%20and%20value%3D%27food_tracker_db%27%20%7D%20and%20trashed%3Dfalse%20and%20%27mock-folder-id%27%20in%20parents&orderBy=modifiedTime%20desc&fields=files(id,name,modifiedTime,createdTime)
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:34.9116230Z BROWSER LOG: Failed to parse payload for event HeaderID SyntaxError: Unexpected token 'P', "Payload" is not valid JSON
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:34.9215490Z     at JSON.parse (<anonymous>)
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:34.9318130Z     at Object.sync (http://localhost:5174/src/lib/sync-manager.ts:60:34)
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:34.9697480Z MOCKING: https://sheets.googleapis.com/v4/spreadsheets/mock-sheet-id
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:35.2388970Z BROWSER LOG: [Auth] Initialized in Layout
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:35.2856030Z MOCKING: https://sheets.googleapis.com/v4/spreadsheets/mock-sheet-id:batchUpdate
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:35.4309000Z MOCKING: https://sheets.googleapis.com/v4/spreadsheets/mock-sheet-id
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:35.4925130Z MOCKING: https://sheets.googleapis.com/v4/spreadsheets/mock-sheet-id/values/Events!A1:Z
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:35.6906390Z MOCKING: https://sheets.googleapis.com/v4/spreadsheets/mock-sheet-id:batchUpdate
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:36.0114930Z REQUEST: http://localhost:5174/images/icon-status-synced.png
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:36.0554960Z MOCKING: https://sheets.googleapis.com/v4/spreadsheets/mock-sheet-id/values/Events!A1:Z
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:36.0867700Z REQUEST: http://localhost:5174/log
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:36.1445480Z REQUEST: http://localhost:5174/.svelte-kit/generated/client/nodes/4.js
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:36.5043910Z REQUEST: http://localhost:5174/node_modules/@sveltejs/kit/src/runtime/client/entry.js
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:36.5145850Z REQUEST: http://localhost:5174/@fs/Users/runner/work/food/food/.svelte-kit/generated/client/app.js
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:36.5250300Z BROWSER LOG: Failed to load resource: net::ERR_FAILED
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:36.5352900Z BROWSER LOG: Service Worker registration blocked by Playwright
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:36.7902700Z REQUEST: http://localhost:5174/node_modules/@sveltejs/kit/src/runtime/client/client.js?v=fc165103
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:36.8150900Z REQUEST: http://localhost:5174/src/routes/log/+page.svelte
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:36.8440630Z REQUEST: http://localhost:5174/.svelte-kit/generated/client/matchers.js
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:36.8846560Z REQUEST: http://localhost:5174/.svelte-kit/generated/root.js
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:37.0968480Z REQUEST: http://localhost:5174/@vite/client
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:37.0981400Z REQUEST: http://localhost:5174/node_modules/.vite/deps/esm-env.js?v=50c684b8
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:37.1085100Z REQUEST: http://localhost:5174/node_modules/.vite/deps/svelte.js?v=c41179f0
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:37.1197440Z REQUEST: http://localhost:5174/node_modules/@sveltejs/kit/src/exports/internal/index.js?v=fc165103
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:37.2079480Z REQUEST: http://localhost:5174/node_modules/@sveltejs/kit/src/utils/url.js?v=fc165103
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:37.2185880Z REQUEST: http://localhost:5174/node_modules/@sveltejs/kit/src/runtime/client/fetcher.js?v=fc165103
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:37.2907200Z REQUEST: http://localhost:5174/node_modules/@sveltejs/kit/src/runtime/client/parse.js?v=fc165103
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:37.3136320Z REQUEST: http://localhost:5174/node_modules/@sveltejs/kit/src/runtime/client/session-storage.js?v=fc165103
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:37.3457780Z REQUEST: http://localhost:5174/node_modules/@sveltejs/kit/src/runtime/client/utils.js?v=fc165103
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:37.3767970Z REQUEST: http://localhost:5174/node_modules/@sveltejs/kit/src/runtime/app/paths/index.js?v=fc165103
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:37.4121350Z REQUEST: http://localhost:5174/node_modules/.vite/deps/devalue.js?v=c3f357d9
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:37.4224520Z REQUEST: http://localhost:5174/node_modules/@sveltejs/kit/src/runtime/client/constants.js?v=fc165103
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:37.4398590Z REQUEST: http://localhost:5174/node_modules/@sveltejs/kit/src/utils/exports.js?v=fc165103
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:37.4545210Z REQUEST: http://localhost:5174/node_modules/@sveltejs/kit/src/utils/array.js?v=fc165103
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:37.4934270Z REQUEST: http://localhost:5174/node_modules/@sveltejs/kit/src/runtime/shared.js?v=fc165103
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:37.5475770Z REQUEST: http://localhost:5174/node_modules/@sveltejs/kit/src/utils/error.js?v=fc165103
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:37.5587340Z REQUEST: http://localhost:5174/node_modules/.vite/deps/svelte_store.js?v=c41179f0
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:37.5999350Z REQUEST: http://localhost:5174/node_modules/@sveltejs/kit/src/runtime/client/state.svelte.js?v=fc165103
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:37.6106900Z REQUEST: http://localhost:5174/node_modules/@sveltejs/kit/src/runtime/pathname.js?v=fc165103
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:37.6178320Z REQUEST: http://localhost:5174/node_modules/@sveltejs/kit/src/runtime/telemetry/noop.js?v=fc165103
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:37.7219600Z REQUEST: http://localhost:5174/node_modules/@sveltejs/kit/src/runtime/utils.js?v=fc165103
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:37.7821450Z REQUEST: http://localhost:5174/node_modules/.vite/deps/svelte_legacy.js?v=c41179f0
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:37.7924400Z REQUEST: http://localhost:5174/.svelte-kit/generated/root.svelte
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:37.8023760Z REQUEST: http://localhost:5174/node_modules/vite/dist/client/env.mjs
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:39.0059750Z ·REQUEST: http://localhost:5174/node_modules/.vite/deps/chunk-HNWPC2PS.js?v=fc165103
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:39.0366320Z REQUEST: http://localhost:5174/node_modules/.vite/deps/chunk-DGUM43GV.js?v=fc165103
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:39.0468640Z REQUEST: http://localhost:5174/node_modules/.vite/deps/chunk-5QCNSHAL.js?v=fc165103
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:39.0579860Z REQUEST: http://localhost:5174/node_modules/.vite/deps/chunk-U7P2NEEE.js?v=fc165103
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:39.0747950Z REQUEST: http://localhost:5174/node_modules/.vite/deps/chunk-KRSOCH2Y.js?v=fc165103
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:39.0852420Z REQUEST: http://localhost:5174/node_modules/.vite/deps/chunk-YTF3ZZG2.js?v=fc165103
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:39.0962240Z REQUEST: http://localhost:5174/node_modules/.vite/deps/chunk-XWATFG4W.js?v=fc165103
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:39.2357960Z REQUEST: http://localhost:5174/node_modules/.vite/deps/chunk-OHYQYV5R.js?v=fc165103
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:39.2598720Z REQUEST: http://localhost:5174/node_modules/@sveltejs/kit/src/exports/internal/remote-functions.js?v=fc165103
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:39.4223880Z REQUEST: http://localhost:5174/@id/__x00__virtual:__sveltekit/environment
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:39.5400560Z REQUEST: http://localhost:5174/node_modules/@sveltejs/kit/src/runtime/app/paths/client.js?v=fc165103
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:39.6234670Z REQUEST: http://localhost:5174/node_modules/@sveltejs/kit/src/utils/hash.js?v=fc165103
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:39.8050240Z REQUEST: http://localhost:5174/node_modules/.vite/deps/svelte_internal_client.js?v=c41179f0
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:40.5694090Z REQUEST: http://localhost:5174/node_modules/.vite/deps/svelte_internal_disclose-version.js?v=c41179f0
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:40.5798160Z REQUEST: http://localhost:5174/node_modules/@sveltejs/kit/src/runtime/app/environment/index.js?v=fc165103
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:40.5900180Z REQUEST: http://localhost:5174/node_modules/@sveltejs/kit/src/utils/routing.js?v=fc165103
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:40.6002560Z REQUEST: http://localhost:5174/src/lib/gemini.ts
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:40.6249880Z REQUEST: http://localhost:5174/node_modules/@sveltejs/kit/src/runtime/app/paths/internal/client.js?v=fc165103
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:40.6412960Z REQUEST: http://localhost:5174/src/lib/image-search.ts
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:40.6540480Z REQUEST: http://localhost:5174/node_modules/.vite/deps/exifr.js?v=6ed4088f
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:40.6646960Z REQUEST: http://localhost:5174/src/lib/google-photos.ts
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:40.6747320Z REQUEST: http://localhost:5174/src/lib/components/ui/LogSheet.svelte
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:40.8016790Z REQUEST: http://localhost:5174/src/lib/components/ui/InputGrid.svelte
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:40.8118630Z REQUEST: http://localhost:5174/src/lib/components/ui/TextInputModal.svelte
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:40.8236510Z REQUEST: http://localhost:5174/src/lib/components/ui/VoiceRecorder.svelte
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:40.9288610Z REQUEST: http://localhost:5174/src/lib/components/ui/NutritionForm.svelte
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:40.9613480Z REQUEST: http://localhost:5174/src/routes/log/+page.svelte?svelte&type=style&lang.css
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:41.0669460Z BROWSER LOG: [vite] connecting...
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:41.1085290Z REQUEST: http://localhost:5174/src/lib/components/ui/TextInputModal.svelte?svelte&type=style&lang.css
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:41.1195690Z REQUEST: http://localhost:5174/.svelte-kit/generated/client/nodes/0.js
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:41.1304450Z REQUEST: http://localhost:5174/.svelte-kit/generated/client/nodes/1.js
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:41.1439640Z REQUEST: http://localhost:5174/.svelte-kit/generated/client/nodes/4.js
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:41.1784690Z REQUEST: http://localhost:5174/src/lib/components/ui/LogSheet.svelte?svelte&type=style&lang.css
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:41.2326930Z REQUEST: http://localhost:5174/src/lib/components/ui/VoiceRecorder.svelte?svelte&type=style&lang.css
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:41.3429690Z REQUEST: http://localhost:5174/src/routes/+layout.ts
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:41.3537070Z REQUEST: http://localhost:5174/src/routes/+layout.svelte
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:41.3654090Z REQUEST: http://localhost:5174/node_modules/@sveltejs/kit/src/runtime/components/svelte-5/error.svelte?v=fc165103
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:41.3979340Z REQUEST: http://localhost:5174/src/routes/log/+page.svelte
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:41.4924340Z REQUEST: http://localhost:5174/src/lib/assets/favicon.svg?import
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:41.5230880Z REQUEST: http://localhost:5174/src/app.css
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:41.5335120Z REQUEST: http://localhost:5174/src/lib/components/ui/MobileNav.svelte
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:41.6289790Z REQUEST: http://localhost:5174/src/lib/components/ui/DesktopSidebar.svelte
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:41.6627260Z BROWSER: Failed to load resource: net::ERR_FAILED
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:41.6736000Z BROWSER: Service Worker registration blocked by Playwright
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:41.6843480Z REQUEST: http://localhost:5174/src/lib/components/ui/ToastContainer.svelte
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:41.6948920Z REQUEST: http://localhost:5174/src/lib/components/ui/PageTransitionWrapper.svelte
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:41.7825100Z REQUEST: http://localhost:5174/node_modules/@sveltejs/kit/src/runtime/app/stores.js?v=fc165103
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:41.8700250Z REQUEST: http://localhost:5174/src/lib/transitions.ts
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:41.8802930Z REQUEST: http://localhost:5174/src/lib/auth.ts
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:41.9290840Z REQUEST: http://localhost:5174/node_modules/@sveltejs/kit/src/runtime/app/navigation.js?v=fc165103
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:41.9397750Z REQUEST: http://localhost:5174/src/lib/db.ts
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:41.9504420Z REQUEST: http://localhost:5174/src/lib/sync-manager.ts
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:42.0796400Z REQUEST: http://localhost:5174/src/lib/store.ts
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:42.0903380Z REQUEST: http://localhost:5174/src/lib/sheets.ts
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:42.1009380Z REQUEST: http://localhost:5174/src/routes/+layout.svelte?svelte&type=style&lang.css
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:42.1130180Z REQUEST: http://localhost:5174/node_modules/.vite/deps/svelte_internal_flags_legacy.js?v=c41179f0
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:42.1233230Z REQUEST: http://localhost:5174/node_modules/@sveltejs/kit/src/runtime/app/state/index.js?v=fc165103
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:42.1302480Z REQUEST: http://localhost:5174/src/lib/gemini.ts
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:42.2392410Z REQUEST: http://localhost:5174/src/lib/image-search.ts
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:42.2441540Z REQUEST: http://localhost:5174/src/lib/toast.ts
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:42.2563590Z REQUEST: http://localhost:5174/node_modules/.vite/deps/exifr.js?v=6ed4088f
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:42.3983980Z BROWSER LOG: [vite] connected.
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:42.9346610Z ··BROWSER: [vite] connecting...
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:43.3297870Z BROWSER: [vite] connected.
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:43.3803580Z BROWSER: [Auth] Initialized in Layout
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:43.3913320Z BROWSER: [Layout] Hydrating from DB...
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:43.4257400Z BROWSER: [Layout] Found 1 events in DB.
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:43.4368750Z BROWSER: [Layout] Hydration complete.
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:43.6251750Z BROWSER: [Auth] Google Identity Services found
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:44.8930260Z MOCKING: https://www.googleapis.com/drive/v3/files?q=mimeType%3D%27application%2Fvnd.google-apps.folder%27%20and%20name%3D%27FoodLog%27%20and%20trashed%3Dfalse
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:44.9686780Z MOCKING: https://www.googleapis.com/drive/v3/files?q=appProperties%20has%20%7B%20key%3D%27type%27%20and%20value%3D%27food_tracker_db%27%20%7D%20and%20trashed%3Dfalse%20and%20%27mock-folder-id%27%20in%20parents&orderBy=modifiedTime%20desc&fields=files(id,name,modifiedTime,createdTime)
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:45.0739930Z MOCKING: https://sheets.googleapis.com/v4/spreadsheets/mock-sheet-id
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:45.5486250Z MOCKING: https://www.googleapis.com/drive/v3/files?q=mimeType%3D%27application%2Fvnd.google-apps.folder%27%20and%20name%3D%27FoodLog%27%20and%20trashed%3Dfalse
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:45.5706550Z MOCKING: https://photospicker.googleapis.com/v1/sessions
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:45.5809770Z MOCKING: https://www.googleapis.com/drive/v3/files?q=appProperties%20has%20%7B%20key%3D%27type%27%20and%20value%3D%27food_tracker_db%27%20%7D%20and%20trashed%3Dfalse%20and%20%27mock-folder-id%27%20in%20parents&orderBy=modifiedTime%20desc&fields=files(id,name,modifiedTime,createdTime)
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:45.5926000Z MOCKING: https://sheets.googleapis.com/v4/spreadsheets/mock-sheet-id
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:45.6116530Z MOCKING: https://sheets.googleapis.com/v4/spreadsheets/mock-sheet-id:batchUpdate
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:45.6423050Z MOCKING: https://sheets.googleapis.com/v4/spreadsheets/mock-sheet-id/values/Events!A1:Z
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:46.3542660Z MOCKING: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:46.3713170Z MOCKING: https://sheets.googleapis.com/v4/spreadsheets/mock-sheet-id/values/Events!A1:append?valueInputOption=USER_ENTERED
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:46.3816900Z MOCKING: https://sheets.googleapis.com/v4/spreadsheets/mock-sheet-id/values/Events!A1:Z
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:48.1391880Z BROWSER: Failed to load resource: net::ERR_FAILED
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:48.1540930Z BROWSER: Service Worker registration blocked by Playwright
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:48.4253110Z BROWSER: [vite] connecting...
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:48.4354270Z BROWSER: [vite] connected.
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:48.6047730Z BROWSER: [Auth] Initialized in Layout
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:48.6151010Z BROWSER: [Layout] Hydrating from DB...
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:48.6257150Z BROWSER: [Layout] Found 1 events in DB.
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:48.6387170Z BROWSER: [Layout] Hydration complete.
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:48.6488100Z MOCKING: https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,name,webViewLink,thumbnailLink
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:48.7481470Z ·°BROWSER: [Auth] Google Identity Services found
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:54.6920580Z ··F·FFFFailed to load resource: net::ERR_FAILED
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:54.7018580Z Service Worker registration blocked by Playwright
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:54.8753970Z [vite] connecting...
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:54.8858240Z [vite] connected.
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:55.0618570Z [Layout] Hydrating from DB...
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:55.1020530Z [Layout] Found 0 events in DB.
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:55.1121840Z [Layout] Hydration complete.
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:55.1735750Z [Auth] Google Identity Services found
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:55.2703260Z [Auth] Initialized in Layout
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:55.4595500Z Failed to load resource: net::ERR_FAILED
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:55.4696990Z Service Worker registration blocked by Playwright
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:55.6119540Z [vite] connecting...
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:55.6222290Z [vite] connected.
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:55.7460210Z [Auth] Initialized in Layout
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:55.7561500Z [Layout] Hydrating from DB...
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:55.7666350Z Pre-fetching Google Photos Picker session...
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:55.7765150Z [Layout] Found 0 events in DB.
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:55.7887730Z [Layout] Hydration complete.
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:55.8332640Z Failed to load resource: the server responded with a status of 401 ()
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:55.8439030Z [GooglePhotos] Session creation failed: 401 {
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:55.8546420Z   "error": {
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:55.8666240Z     "code": 401,
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:55.8768650Z     "message": "Request had invalid authentication credentials. Expected OAuth 2 access token, login cookie or other valid authentication credential. See https://developers.google.com/identity/sign-in/web/devconsole-project.",
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:55.8884030Z     "status": "UNAUTHENTICATED"
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:55.9021490Z   }
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:55.9148170Z }
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:55.9249280Z 
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:55.9351850Z Failed to pre-fetch picker session Error: Failed to create picker session:  - {
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:55.9352370Z   "error": {
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:55.9453660Z     "code": 401,
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:55.9557220Z     "message": "Request had invalid authentication credentials. Expected OAuth 2 access token, login cookie or other valid authentication credential. See https://developers.google.com/identity/sign-in/web/devconsole-project.",
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:55.9658010Z     "status": "UNAUTHENTICATED"
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:55.9761720Z   }
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:55.9863180Z }
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:55.9964030Z 
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:56.0065210Z     at createPickerSession (http://localhost:5174/src/lib/google-photos.ts:19:11)
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:56.0168590Z     at async Module.track_reactivity_loss (http://localhost:5174/node_modules/.vite/deps/chunk-YTF3ZZG2.js?v=fc165103:1495:15)
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:56.0259530Z     at async initPickerSession (http://localhost:5174/src/routes/log/+page.svelte:184:21)
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:56.0363070Z [Auth] Google Identity Services found
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:56.0465090Z Autofocus processing was blocked because a document already has a focused element.
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:56.1557360Z [ImageSearch] Searching Wikimedia for: "healthy salad"
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:55:56.1791850Z [ImageSearch] Found: http://localhost:5174/images/icon-status-synced.png
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:56:04.8578550Z ·
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:56:04.8682650Z 
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:56:04.8754690Z   1) [chromium] › tests/e2e/002-log-food/002-log-food.spec.ts:7:1 › US-003 to US-010: User logs food flow 
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:56:04.8755990Z 
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:56:04.8756540Z     Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m([22m[2m)[22m failed
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:56:04.8762570Z 
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:56:04.8764420Z     Locator: getByText('Camera').first()
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:56:04.8765870Z     Expected: visible
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:56:04.8766400Z     Timeout: 5000ms
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:56:04.8768070Z     Error: element(s) not found
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:56:04.8768650Z 
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:56:04.8769130Z     Call log:
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:56:04.8770620Z     [2m  - Expect "toBeVisible" with timeout 5000ms[22m
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:56:04.8771900Z     [2m  - waiting for getByText('Camera').first()[22m
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:56:04.8772640Z 
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:56:04.8772660Z 
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:56:04.8772990Z       156 |         description: 'User on log page',
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:56:04.8773850Z       157 |         verifications: [
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:56:04.8775270Z     > 158 |             { spec: 'Camera button visible', check: async () => await expect(page.getByText('Camera').first()).toBeVisible() },
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:56:04.8779370Z           |                                                                                                                ^
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:56:04.8781050Z       159 |             { spec: 'Upload button visible', check: async () => await expect(page.getByText('Library').first()).toBeVisible() },
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:56:04.8783060Z       160 |             { spec: 'Voice button visible', check: async () => await expect(page.getByText('Voice').first()).toBeVisible() },
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:56:04.8785090Z       161 |             { spec: 'Text button visible', check: async () => await expect(page.getByText('Text').first()).toBeVisible() }
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:56:04.8786960Z         at Object.check (/Users/runner/work/food/food/tests/e2e/002-log-food/002-log-food.spec.ts:158:112)
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:56:04.8788760Z         at TestStepHelper.step (/Users/runner/work/food/food/tests/e2e/helpers/test-step-helper.ts:34:21)
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:56:04.8790310Z         at /Users/runner/work/food/food/tests/e2e/002-log-food/002-log-food.spec.ts:155:18
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:56:04.8791110Z 
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:56:04.8794350Z   2) [chromium] › tests/e2e/004-smart-dates/004-smart-dates.spec.ts:7:1 › US-013 to US-017: Smart Date Formatting 
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:56:04.8795750Z 
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:56:04.8796960Z     Error: [2mexpect([22m[31mpage[39m[2m).[22mtoHaveURL[2m([22m[32mexpected[39m[2m)[22m failed
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:56:04.8797860Z 
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:56:04.8798220Z     Expected pattern: [32m/\/log/[39m
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:56:04.8799280Z     Received string:  [31m"http://localhost:5174/"[39m
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:56:04.8800020Z     Timeout: 5000ms
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:56:04.8800360Z 
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:56:04.8800600Z     Call log:
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:56:04.8801360Z     [2m  - Expect "toHaveURL" with timeout 5000ms[22m
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:56:04.8802420Z     [2m    9 × unexpected value "http://localhost:5174/"[22m
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:56:04.8803020Z 
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:56:04.8803040Z 
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:56:04.8803660Z       105 |     async function logItem(date: string, time: string, name: string) {
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:56:04.8805400Z       106 |         await page.getByLabel('Log new food entry').first().click();
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:56:04.8808420Z     > 107 |         await expect(page).toHaveURL(/\/log/);
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:56:04.8809230Z           |                            ^
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:56:04.8810200Z       108 |         await expect(page.getByText('Camera').first()).toBeVisible();
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:56:04.8811890Z       109 |         const fileInput = page.locator('input[type="file"]:not([capture])');
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:56:04.8813220Z       110 |         await fileInput.setInputFiles('tests/e2e/fixtures/apple.png');
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:56:04.8814910Z         at logItem (/Users/runner/work/food/food/tests/e2e/004-smart-dates/004-smart-dates.spec.ts:107:28)
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:56:04.8816640Z         at /Users/runner/work/food/food/tests/e2e/004-smart-dates/004-smart-dates.spec.ts:131:5
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:56:04.8817540Z 
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:56:04.8818680Z     Error Context: test-results/004-smart-dates-004-smart--a22c6-S-017-Smart-Date-Formatting-chromium/error-context.md
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:56:04.8820840Z 
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:56:04.8825190Z   3) [chromium] › tests/e2e/005-details-edit-delete/005-details-edit-delete.spec.ts:6:1 › US-018 to US-022: Details, Edit and Delete 
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:56:04.8826320Z 
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:56:04.8826960Z     Error: [2mexpect([22m[31mpage[39m[2m).[22mtoHaveURL[2m([22m[32mexpected[39m[2m)[22m failed
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:56:04.8827570Z 
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:56:04.8827830Z     Expected pattern: [32m/\/log/[39m
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:56:04.8828860Z     Received string:  [31m"http://localhost:5174/"[39m
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:56:04.8829620Z     Timeout: 5000ms
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:56:04.8829730Z 
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:56:04.8829860Z     Call log:
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:56:04.8830230Z     [2m  - Expect "toHaveURL" with timeout 5000ms[22m
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:56:04.8830790Z     [2m    9 × unexpected value "http://localhost:5174/"[22m
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:56:04.8831070Z 
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:56:04.8831080Z 
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:56:04.8831170Z       70 |     // 1. Create Entry
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:56:04.8833010Z       71 |     await page.getByLabel('Log new food entry').first().click();
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:56:04.8833450Z     > 72 |     await expect(page).toHaveURL(/\/log/);
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:56:04.8833830Z          |                        ^
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:56:04.8834360Z       73 |     await expect(page.getByText('Camera').first()).toBeVisible();
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:56:04.8834920Z       74 |     await page.locator('input[type="file"]:not([capture])').first().setInputFiles([
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:56:04.8835460Z       75 |         'tests/e2e/fixtures/apple.png',
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:56:04.8836050Z         at /Users/runner/work/food/food/tests/e2e/005-details-edit-delete/005-details-edit-delete.spec.ts:72:24
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:56:04.8847830Z 
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:56:04.8848410Z     Error Context: test-results/005-details-edit-delete-00-080c6-022-Details-Edit-and-Delete-chromium/error-context.md
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:56:04.8848820Z 
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:56:04.8849400Z   4) [chromium] › tests/e2e/006-auth-persistence/006-auth-persistence.spec.ts:5:1 › US-023: Auth Persistence 
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:56:04.8849850Z 
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:56:04.8850150Z     Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m([22m[2m)[22m failed
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:56:04.8850510Z 
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:56:04.8850930Z     Locator: locator('.mobile-nav a').filter({ hasText: 'Settings' }).first()
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:56:04.8851390Z     Expected: visible
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:56:04.8851610Z     Timeout: 5000ms
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:56:04.8851860Z     Error: element(s) not found
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:56:04.8852050Z 
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:56:04.8852160Z     Call log:
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:56:04.8852530Z     [2m  - Expect "toBeVisible" with timeout 5000ms[22m
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:56:04.8853190Z     [2m  - waiting for locator('.mobile-nav a').filter({ hasText: 'Settings' }).first()[22m
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:56:04.8853540Z 
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:56:04.8853550Z 
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:56:04.8853730Z       63 |                 check: async () => {
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:56:04.8854220Z       64 |                     await page.reload();
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:56:04.8855980Z     > 65 |                     await expect(page.locator('.mobile-nav a').filter({ hasText: 'Settings' }).first()).toBeVisible();
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:56:04.8856650Z          |                                                                                                         ^
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:56:04.8858050Z       66 |                     // Should NOT see "Sign In" button
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:56:04.8858900Z       67 |                     await expect(page.getByText('Sign In with Google')).not.toBeVisible();
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:56:04.8859290Z       68 |                 }
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:56:04.8860170Z         at Object.check (/Users/runner/work/food/food/tests/e2e/006-auth-persistence/006-auth-persistence.spec.ts:65:105)
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:56:04.8861050Z         at TestStepHelper.step (/Users/runner/work/food/food/tests/e2e/helpers/test-step-helper.ts:34:13)
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:56:04.8863930Z         at /Users/runner/work/food/food/tests/e2e/006-auth-persistence/006-auth-persistence.spec.ts:51:5
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:56:04.8865960Z 
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:56:04.8868110Z   4 failed
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:56:04.8869670Z     [chromium] › tests/e2e/002-log-food/002-log-food.spec.ts:7:1 › US-003 to US-010: User logs food flow 
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:56:04.8872620Z     [chromium] › tests/e2e/004-smart-dates/004-smart-dates.spec.ts:7:1 › US-013 to US-017: Smart Date Formatting 
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:56:04.8876350Z     [chromium] › tests/e2e/005-details-edit-delete/005-details-edit-delete.spec.ts:6:1 › US-018 to US-022: Details, Edit and Delete 
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:56:04.8877850Z     [chromium] › tests/e2e/006-auth-persistence/006-auth-persistence.spec.ts:5:1 › US-023: Auth Persistence 
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:56:04.8878870Z   1 skipped
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:56:04.8879720Z   8 passed (57.8s)
+Playwright E2E Tests	Run Playwright tests	2026-01-18T02:56:05.0758660Z ##[error]Process completed with exit code 1.
+Playwright E2E Tests	Upload Playwright report	﻿2026-01-18T02:56:05.1521060Z ##[group]Run actions/upload-artifact@v4
+Playwright E2E Tests	Upload Playwright report	2026-01-18T02:56:05.1521410Z with:
+Playwright E2E Tests	Upload Playwright report	2026-01-18T02:56:05.1521660Z   name: playwright-report
+Playwright E2E Tests	Upload Playwright report	2026-01-18T02:56:05.1521890Z   path: playwright-report/
+Playwright E2E Tests	Upload Playwright report	2026-01-18T02:56:05.1522740Z   retention-days: 30
+Playwright E2E Tests	Upload Playwright report	2026-01-18T02:56:05.1523000Z   if-no-files-found: warn
+Playwright E2E Tests	Upload Playwright report	2026-01-18T02:56:05.1574230Z   compression-level: 6
+Playwright E2E Tests	Upload Playwright report	2026-01-18T02:56:05.1575860Z   overwrite: false
+Playwright E2E Tests	Upload Playwright report	2026-01-18T02:56:05.1576550Z   include-hidden-files: false
+Playwright E2E Tests	Upload Playwright report	2026-01-18T02:56:05.1577110Z ##[endgroup]
+Playwright E2E Tests	Upload Playwright report	2026-01-18T02:56:06.1767980Z With the provided path, there will be 2 files uploaded
+Playwright E2E Tests	Upload Playwright report	2026-01-18T02:56:06.1879540Z Artifact name is valid!
+Playwright E2E Tests	Upload Playwright report	2026-01-18T02:56:06.2000020Z Root directory input is valid!
+Playwright E2E Tests	Upload Playwright report	2026-01-18T02:56:06.3285320Z Beginning upload of artifact content to blob storage
+Playwright E2E Tests	Upload Playwright report	2026-01-18T02:56:06.4094150Z Uploaded bytes 260993
+Playwright E2E Tests	Upload Playwright report	2026-01-18T02:56:06.4297580Z Finished uploading artifact content to blob storage!
+Playwright E2E Tests	Upload Playwright report	2026-01-18T02:56:06.4399980Z SHA256 digest of uploaded artifact zip is 8c1471d6121374825f136a431a1ee66ee6263f7a55c7a9fe0339beee4ce0040d
+Playwright E2E Tests	Upload Playwright report	2026-01-18T02:56:06.4501680Z Finalizing artifact upload
+Playwright E2E Tests	Upload Playwright report	2026-01-18T02:56:06.5420660Z Artifact playwright-report.zip successfully finalized. Artifact ID 5166704599
+Playwright E2E Tests	Upload Playwright report	2026-01-18T02:56:06.5522680Z Artifact playwright-report has been successfully uploaded! Final size is 260993 bytes. Artifact ID is 5166704599
+Playwright E2E Tests	Upload Playwright report	2026-01-18T02:56:06.5624070Z Artifact download URL: https://github.com/anicolao/food/actions/runs/21104914098/artifacts/5166704599
+Playwright E2E Tests	Post Checkout repository	﻿2026-01-18T02:56:06.5850470Z Post job cleanup.
+Playwright E2E Tests	Post Checkout repository	2026-01-18T02:56:06.8171400Z [command]/opt/homebrew/bin/git version
+Playwright E2E Tests	Post Checkout repository	2026-01-18T02:56:06.8459540Z git version 2.52.0
+Playwright E2E Tests	Post Checkout repository	2026-01-18T02:56:06.8488700Z Copying '/Users/runner/.gitconfig' to '/Users/runner/work/_temp/d94f9cb8-cdbd-4c47-978d-72842c525a0f/.gitconfig'
+Playwright E2E Tests	Post Checkout repository	2026-01-18T02:56:06.8497460Z Temporarily overriding HOME='/Users/runner/work/_temp/d94f9cb8-cdbd-4c47-978d-72842c525a0f' before making global git config changes
+Playwright E2E Tests	Post Checkout repository	2026-01-18T02:56:06.8498900Z Adding repository directory to the temporary git global config as a safe directory
+Playwright E2E Tests	Post Checkout repository	2026-01-18T02:56:06.8501150Z [command]/opt/homebrew/bin/git config --global --add safe.directory /Users/runner/work/food/food
+Playwright E2E Tests	Post Checkout repository	2026-01-18T02:56:06.8713580Z [command]/opt/homebrew/bin/git config --local --name-only --get-regexp core\.sshCommand
+Playwright E2E Tests	Post Checkout repository	2026-01-18T02:56:06.8835200Z [command]/opt/homebrew/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+Playwright E2E Tests	Post Checkout repository	2026-01-18T02:56:07.1006780Z [command]/opt/homebrew/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+Playwright E2E Tests	Post Checkout repository	2026-01-18T02:56:07.1080150Z http.https://github.com/.extraheader
+Playwright E2E Tests	Post Checkout repository	2026-01-18T02:56:07.1117580Z [command]/opt/homebrew/bin/git config --local --unset-all http.https://github.com/.extraheader
+Playwright E2E Tests	Post Checkout repository	2026-01-18T02:56:07.1260700Z [command]/opt/homebrew/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+Playwright E2E Tests	Post Checkout repository	2026-01-18T02:56:07.3423250Z [command]/opt/homebrew/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+Playwright E2E Tests	Post Checkout repository	2026-01-18T02:56:07.3727320Z [command]/opt/homebrew/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+Playwright E2E Tests	Complete job	﻿2026-01-18T02:56:07.6115960Z Cleaning up orphan processes

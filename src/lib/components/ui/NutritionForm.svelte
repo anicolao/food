@@ -1,5 +1,6 @@
 <script lang="ts">
   import { slide } from 'svelte/transition';
+  import { base } from '$app/paths';
   import NutrientInput from './NutrientInput.svelte';
 
   interface Props {
@@ -64,7 +65,7 @@
       <div class="divider-row">
           <div class="divider"></div>
           <button class="icon-toggle" onclick={() => showDetails = !showDetails}>
-             <img src="/images/icon-toggle-{showDetails ? 'collapse' : 'expand'}.png" alt="Toggle Details" width="24" height="24" />
+             <img src="{base}/images/icon-toggle-{showDetails ? 'collapse' : 'expand'}.png" alt="Toggle Details" width="24" height="24" />
           </button>
       </div>
   </div>
