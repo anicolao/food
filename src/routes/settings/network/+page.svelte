@@ -366,6 +366,17 @@
     </div>
   </section>
 
+  <section class="card glass-panel">
+    <h2>Open Source & Privacy First</h2>
+    <p class="mb-4 text-sm text-secondary">
+      We do not share or store your data: it is on your device and in your
+      Google account only.
+    </p>
+    <a href="/privacy" class="text-accent hover:underline"
+      >Read Privacy Policy</a
+    >
+  </section>
+
   <section class="actions">
     <button
       class="text-btn danger"
@@ -375,17 +386,6 @@
       Reset Cache & Resync
     </button>
     <p class="help">Use this if your data is out of sync with Google Sheets.</p>
-  </section>
-  <section class="card glass-panel text-center">
-    <h2>Open Source & Privacy</h2>
-    <p class="mb-4 text-sm text-secondary">
-      Food Sheets is an open-source project designed with a "Privacy First"
-      architecture. We do not share or store your data: it is on your device and
-      in your Google account only.
-    </p>
-    <a href="/privacy" class="text-accent hover:underline"
-      >Read Privacy Policy</a
-    >
   </section>
 </div>
 
