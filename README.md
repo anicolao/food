@@ -9,7 +9,7 @@ A food logging application that uses AI to estimate nutrition facts from photos.
 - 📸 **Photo-based Logging**: Capture or select food photos to log meals
 - 🤖 **AI Nutrition Estimation**: Automatic nutrition facts estimation using Gemini Flash
 - 📊 **Google Sheets Backend**: Your data stored in your own Google Sheets (event sourcing pattern)
-- 🔒 **Privacy First**: All data stays in your Google account
+- 🔒 **Privacy First**: All data stays in your Google account. [Read our Privacy Policy](PRIVACY.md) or [view it online](https://anicolao.github.io/food/privacy).
 - 📱 **Mobile Friendly**: Progressive web app with native iOS wrapper
 
 ## Technology Stack

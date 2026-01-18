@@ -1,19 +1,3 @@
-# Privacy Policy Implementation
-
-This PR implements the Privacy Policy for Food Sheets, ensuring compliance and transparency for users.
-
-## Changes
-- **New Page**: Added `/privacy` route with the full privacy policy.
-- **Documentation**: Added `PRIVACY.md` to the repository root.
-- **Readme**: linked the privacy policy in `README.md`.
-- **Docs**: Added implementation plan and walkthrough to `docs/privacy/`.
-
-## User Request
-Preparing for launch, I had Gemini create a privacy policy. We need to serve this from somewhere, I suggest from /food/privacy, and include it int he top level of the repo and link it from the README.md.
-
-Also, we need to somehow connect this to our OAuth setup. You may need to provide me with instructions for that.
-
-Here is the proposed policy:
 # Privacy Policy for Food Sheets
 
 **Last Updated:** January 18, 2026
