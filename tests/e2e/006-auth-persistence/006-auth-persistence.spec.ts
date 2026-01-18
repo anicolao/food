@@ -31,16 +31,6 @@ test('US-023: Auth Persistence', async ({ page }, testInfo) => {
 
     // Mock Services (Minimal)
     await mockDriveAPI(page);
-    await page.route('**googleapis.com**', async route => {
-        const url = route.request().url();
-        if (url.includes('drive/v3/files')) {
-            await route.fallback();
-        } else if (url.includes('sheets')) {
-            await route.fallback();
-        } else {
-            await route.fulfill({ json: {} });
-        }
-    });
 
     await page.goto('/');
     // Allow polling to initialize tokenClient

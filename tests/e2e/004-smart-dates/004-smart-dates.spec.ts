@@ -28,71 +28,20 @@ test('US-013 to US-017: Smart Date Formatting', async ({ page }, testInfo) => {
     page.on('console', msg => console.log(`BROWSER LOG: ${msg.text()}`));
     page.on('pageerror', err => console.log(`BROWSER ERR: ${err}`));
 
-    // Debug requests
-    await page.route('**', async route => {
-        console.log('REQUEST:', route.request().url());
-        await route.continue();
-    });
-
-    // Mock Services (Copied from 002-log-food)
-    // Fixed Time: Friday, March 15, 2024 at 12:00:00 EDT (16:00 UTC)
-    await page.clock.install({ time: new Date('2024-03-15T16:00:00Z') });
-
-    await page.addInitScript(() => {
-        (window as any).google = {
-            accounts: {
-                oauth2: {
-                    initTokenClient: (c: any) => ({ requestAccessToken: () => c.callback({ access_token: 'mock' }) }),
-                    revoke: (token: string, cb: any) => cb()
-                }
-            }
-        };
-    });
-
-    // Block real GSI
-    await page.route('https://accounts.google.com/gsi/client', route => route.abort());
-
-    // Mock Drive/Photos/Sheets/Gemini
+    // Mock Drive/Photos/Sheets (via helper)
     await mockDriveAPI(page);
+
+    // Specific Mock for Gemini (not in helper)
+    await page.route('**generativelanguage.googleapis.com**', async route => {
+        await geminiGate;
+        await route.fulfill({ json: { candidates: [{ content: { parts: [{ text: JSON.stringify({ is_label: false, item_name: 'Test Food', calories: 100, fat: { total: 0 }, carbohydrates: { total: 0 }, protein: 0 }) }] } }] } });
+    });
+
+    // Mock Drive Image Download explicitly if needed (mockDriveAPI handles lh3...)
+    // 004 uses local fixture upload.
     await page.route(/drive\.mock/, async route => {
         const buffer = fs.readFileSync('tests/e2e/fixtures/apple.png');
         await route.fulfill({ body: buffer, contentType: 'image/png' });
-    });
-
-    await page.route('**googleapis.com**', async route => {
-        const url = route.request().url();
-        console.log('MOCKING:', url);
-
-        // Drive Discovery Mocks (ensureDataStructures)
-        if (url.includes('drive/v3/files')) {
-            if (url.includes('uploadType=multipart')) {
-                // Upload
-                await route.fulfill({ json: { id: 'file-123', webViewLink: 'https://drive.mock/img.jpg', thumbnailLink: 'https://drive.mock/thumb.jpg' } });
-            } else {
-                // Creation Fallback
-                await route.fallback();
-            }
-        } else if (url.includes('photospicker.googleapis.com')) {
-            if (url.includes('sessions') && !url.includes('mediaItems')) {
-                if (route.request().method() === 'POST') {
-                    // Create Session
-                    await route.fulfill({ json: { id: 'sess-1', pickerUri: 'http://mock-picker.com' } });
-                } else {
-                    // Poll Session
-                    await route.fulfill({ json: { mediaItemsSet: true } });
-                }
-            } else if (url.includes('mediaItems')) {
-                // List Items
-                await route.fulfill({ json: { mediaItems: [{ id: 'item-1', mediaFile: { baseUrl: 'https://lh3.googleusercontent.com/picker-img', mimeType: 'image/jpeg', filename: 'picked.jpg' } }] } });
-            }
-        } else if (url.includes('sheets.googleapis.com')) {
-            await route.fallback();
-        } else if (url.includes('generativelanguage')) {
-            await geminiGate;
-            await route.fulfill({ json: { candidates: [{ content: { parts: [{ text: JSON.stringify({ is_label: false, item_name: 'Test Food', calories: 100, fat: { total: 0 }, carbohydrates: { total: 0 }, protein: 0 }) }] } }] } });
-        } else {
-            await route.continue();
-        }
     });
 
     await page.goto('/');

@@ -37,29 +37,12 @@ test('US-018 to US-022: Details, Edit and Delete', async ({ page }, testInfo) =>
     // FORCE Fixture File Timestamp to match Mocked Clock
     const mockDate = new Date('2024-03-15T16:00:00Z');
     fs.utimesSync('tests/e2e/fixtures/apple.png', mockDate, mockDate);
-    await page.route('**googleapis.com**', async route => {
-        const url = route.request().url();
 
-        if (url.includes('drive/v3/files')) {
-            if (url.includes('uploadType=multipart')) {
-                await route.fulfill({ json: { id: 'file-123', webViewLink: 'https://drive.mock/img.jpg', thumbnailLink: 'https://drive.mock/thumb.jpg' } });
-            } else {
-                await route.fallback();
-            }
-        } else if (url.includes('photospicker.googleapis.com')) {
-            if (url.includes('sessions')) {
-                if (route.request().method() === 'POST') await route.fulfill({ json: { id: 'sess-1', pickerUri: 'http://mock-picker.com' } });
-                else await route.fulfill({ json: { mediaItemsSet: true } });
-            }
-        } else if (url.includes('generativelanguage')) {
-            await geminiPromise;
-            // Original Food Logic
-            await route.fulfill({ json: { candidates: [{ content: { parts: [{ text: JSON.stringify({ is_label: false, item_name: 'Original Food', calories: 100, fat: { total: 10 }, carbohydrates: { total: 10 }, protein: 10 }) }] } }] } });
-        } else if (url.includes('sheets')) {
-            await route.fallback();
-        } else {
-            await route.continue();
-        }
+    // Mock Gemini
+    await page.route('**generativelanguage.googleapis.com**', async route => {
+        await geminiPromise;
+        // Original Food Logic
+        await route.fulfill({ json: { candidates: [{ content: { parts: [{ text: JSON.stringify({ is_label: false, item_name: 'Original Food', calories: 100, fat: { total: 10 }, carbohydrates: { total: 10 }, protein: 10 }) }] } }] } });
     });
 
     await page.goto('/');

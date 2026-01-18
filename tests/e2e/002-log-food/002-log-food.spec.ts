@@ -31,15 +31,6 @@ test('US-003 to US-010: User logs food flow', async ({ page }, testInfo) => {
         };
     });
 
-    // Debug requests
-    await page.route('**', async route => {
-        console.log('REQUEST:', route.request().url());
-        await route.continue();
-    });
-
-    // Block real Google Identity script to prevent overwriting mocks
-    await page.route('https://accounts.google.com/gsi/client', route => route.abort());
-
     // Stateful Mock for Sheets
     const events: any[] = [];
 
@@ -51,84 +42,50 @@ test('US-003 to US-010: User logs food flow', async ({ page }, testInfo) => {
     });
 
     // FORCE Fixture File Timestamp to match Mocked Clock (UTC-4 logic handled by browser, but fs uses system time)
-    // We want fs.utimesSync to match the UTC time so that when the browser reads it (and converts to local), it sees the right time?
-    // Actually, File.lastModified is an integer timestamp (ms since epoch).
-    // So if we set it to '2024-03-15T16:00:00Z' (12:00 EDT), the browser in NY will see 12:00 EDT.
     const mockDate = new Date('2024-03-15T16:00:00Z');
     fs.utimesSync('tests/e2e/fixtures/apple.png', mockDate, mockDate);
 
-    await page.route('**googleapis.com**', async route => {
+    // Mock Sheets for Event Capture
+    await page.route('**sheets.googleapis.com**', async route => {
         const url = route.request().url();
-        console.log('MOCKING:', url);
-
-        // Drive Discovery Mocks (ensureDataStructures)
-        if (url.includes('drive/v3/files')) {
-            if (url.includes('uploadType=multipart')) {
-                // Upload
-                await route.fulfill({ json: { id: 'file-123', webViewLink: 'https://drive.mock/img.jpg', thumbnailLink: 'https://drive.mock/thumb.jpg' } });
-            } else {
-                // Use robust discovery helper
-                await route.fallback();
+        if (url.includes('append')) {
+            // Capture append
+            const postData = route.request().postDataJSON();
+            if (postData && postData.values && postData.values[0]) {
+                events.push(postData.values[0]);
             }
-        } else if (url.includes('photospicker.googleapis.com')) {
-            if (url.includes('sessions') && !url.includes('mediaItems')) {
-                if (route.request().method() === 'POST') {
-                    // Create Session
-                    await route.fulfill({ json: { id: 'sess-1', pickerUri: 'http://mock-picker.com' } });
-                } else {
-                    // Poll Session
-                    // Default to NOT SET to avoid auto-picker running in tests
-                    await route.fulfill({ json: { mediaItemsSet: false } });
-                }
-            } else if (url.includes('mediaItems')) {
-                // List Items with googleusercontent style URL
-                await route.fulfill({ json: { mediaItems: [{ id: 'item-1', mediaFile: { baseUrl: 'https://lh3.googleusercontent.com/picker-img', mimeType: 'image/jpeg', filename: 'picked.jpg' } }] } });
-            }
-        } else if (url.includes('lh3.googleusercontent.com')) {
-            // Mock image download (ignoring query params like =w2048)
-            const buffer = fs.readFileSync('tests/e2e/fixtures/apple.png');
-            await route.fulfill({ body: buffer, contentType: 'image/png' });
-        } else if (url.includes('picker.jpg')) {
-            const buffer = fs.readFileSync('tests/e2e/fixtures/apple.png');
-            await route.fulfill({ body: buffer, contentType: 'image/png' });
-        } else if (url.includes('sheets.googleapis.com')) {
-            if (url.includes('append')) {
-                // Capture append
-                const postData = route.request().postDataJSON();
-                if (postData && postData.values && postData.values[0]) {
-                    events.push(postData.values[0]);
-                }
-                await route.fulfill({ json: { updates: { updatedRange: 'A1' } } });
-            } else if (url.includes('values/Events')) {
-                // Return events
-                await route.fulfill({ json: { values: events } });
-            } else {
-                await route.fulfill({ json: {} });
-            }
-        } else if (url.includes('generativelanguage')) {
-            // Wait for test to signal readiness (Analyzing UI visible)
-            await geminiPromise;
-            await route.fulfill({
-                json: {
-                    candidates: [{
-                        content: {
-                            parts: [{
-                                text: JSON.stringify({
-                                    is_label: true,
-                                    item_name: 'Mock Apple',
-                                    calories: 95,
-                                    fat: { total: 0 },
-                                    carbohydrates: { total: 25 },
-                                    protein: 0
-                                })
-                            }]
-                        }
-                    }]
-                }
-            });
+            await route.fulfill({ json: { updates: { updatedRange: 'A1' } } });
+        } else if (url.includes('values/Events')) {
+            // Return events
+            await route.fulfill({ json: { values: events } });
         } else {
-            await route.continue();
+            // Fallback to mockDriveAPI or default
+            await route.fallback();
         }
+    });
+
+    // Mock Gemini
+    await page.route('**generativelanguage.googleapis.com**', async route => {
+        // Wait for test to signal readiness (Analyzing UI visible)
+        await geminiPromise;
+        await route.fulfill({
+            json: {
+                candidates: [{
+                    content: {
+                        parts: [{
+                            text: JSON.stringify({
+                                is_label: true,
+                                item_name: 'Mock Apple',
+                                calories: 95,
+                                fat: { total: 0 },
+                                carbohydrates: { total: 25 },
+                                protein: 0
+                            })
+                        }]
+                    }
+                }]
+            }
+        });
     });
 
     await page.goto('/');
