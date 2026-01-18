@@ -62,6 +62,6 @@ This automatically:
 
 ## 4. Playwright Configuration
 
--   **Browsers**: Tests run in bundled Chromium by default.
+-   **Browsers**: Tests run in Chromium by default.
 -   **Flags**: We use flags like `--disable-gpu`, `--font-render-hinting=none` to ensure consistent rendering.
 -   **Timeouts**: Avoid `waitForTimeout`. Use `waitForSelector`, `expect().toBeVisible()`, etc.
