@@ -1,0 +1,1 @@
+import{l as c,m as i,t as o,k as u,B as f}from"./BUY20i_v.js";function y(a,n,e){c&&i();var t=new f(a),s=!o();u(()=>{var r=n();s&&r!==null&&typeof r=="object"&&(r={}),t.ensure(r,e)})}function k(a){return a}function b(a){const n=a-1;return n*n*n+1}export{b as c,y as k,k as l};
