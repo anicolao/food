@@ -1,0 +1,552 @@
+Playwright E2E Tests	Set up job	﻿2026-01-18T03:26:41.5949630Z Current runner version: '2.331.0'
+Playwright E2E Tests	Set up job	2026-01-18T03:26:41.5975920Z ##[group]Runner Image Provisioner
+Playwright E2E Tests	Set up job	2026-01-18T03:26:41.5976580Z Hosted Compute Agent
+Playwright E2E Tests	Set up job	2026-01-18T03:26:41.5977060Z Version: 20260115.477
+Playwright E2E Tests	Set up job	2026-01-18T03:26:41.5977520Z Commit: 4b342d620503cbe250a3154040964899ea7c9b00
+Playwright E2E Tests	Set up job	2026-01-18T03:26:41.5978000Z Build Date: 2026-01-15T22:32:41Z
+Playwright E2E Tests	Set up job	2026-01-18T03:26:41.5981910Z Worker ID: {168b916c-4555-485b-ac11-8c555389b66e}
+Playwright E2E Tests	Set up job	2026-01-18T03:26:41.5982410Z Azure Region: westus
+Playwright E2E Tests	Set up job	2026-01-18T03:26:41.5982760Z ##[endgroup]
+Playwright E2E Tests	Set up job	2026-01-18T03:26:41.5983790Z ##[group]Operating System
+Playwright E2E Tests	Set up job	2026-01-18T03:26:41.5984160Z macOS
+Playwright E2E Tests	Set up job	2026-01-18T03:26:41.5984580Z 15.7.3
+Playwright E2E Tests	Set up job	2026-01-18T03:26:41.5984860Z 24G419
+Playwright E2E Tests	Set up job	2026-01-18T03:26:41.5985130Z ##[endgroup]
+Playwright E2E Tests	Set up job	2026-01-18T03:26:41.5985440Z ##[group]Runner Image
+Playwright E2E Tests	Set up job	2026-01-18T03:26:41.5985760Z Image: macos-15-arm64
+Playwright E2E Tests	Set up job	2026-01-18T03:26:41.5986080Z Version: 20260112.0107.1
+Playwright E2E Tests	Set up job	2026-01-18T03:26:41.5986750Z Included Software: https://github.com/actions/runner-images/blob/macos-15-arm64/20260112.0107/images/macos/macos-15-arm64-Readme.md
+Playwright E2E Tests	Set up job	2026-01-18T03:26:41.5987810Z Image Release: https://github.com/actions/runner-images/releases/tag/macos-15-arm64%2F20260112.0107
+Playwright E2E Tests	Set up job	2026-01-18T03:26:41.5988410Z ##[endgroup]
+Playwright E2E Tests	Set up job	2026-01-18T03:26:41.5989090Z ##[group]GITHUB_TOKEN Permissions
+Playwright E2E Tests	Set up job	2026-01-18T03:26:41.5990340Z Contents: read
+Playwright E2E Tests	Set up job	2026-01-18T03:26:41.5990720Z Metadata: read
+Playwright E2E Tests	Set up job	2026-01-18T03:26:41.5991040Z Packages: read
+Playwright E2E Tests	Set up job	2026-01-18T03:26:41.5991340Z ##[endgroup]
+Playwright E2E Tests	Set up job	2026-01-18T03:26:41.5992710Z Secret source: Actions
+Playwright E2E Tests	Set up job	2026-01-18T03:26:41.5993210Z Prepare workflow directory
+Playwright E2E Tests	Set up job	2026-01-18T03:26:41.6307530Z Prepare all required actions
+Playwright E2E Tests	Set up job	2026-01-18T03:26:41.6377570Z Getting action download info
+Playwright E2E Tests	Set up job	2026-01-18T03:26:41.9529600Z Download action repository 'actions/checkout@v4' (SHA:34e114876b0b11c390a56381ad16ebd13914f8d5)
+Playwright E2E Tests	Set up job	2026-01-18T03:26:42.2323620Z Download action repository 'actions/setup-node@v4' (SHA:49933ea5288caeca8642d1e84afbd3f7d6820020)
+Playwright E2E Tests	Set up job	2026-01-18T03:26:42.3468960Z Download action repository 'actions/upload-artifact@v4' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+Playwright E2E Tests	Set up job	2026-01-18T03:26:42.5716510Z Complete job name: Playwright E2E Tests
+Playwright E2E Tests	Checkout repository	﻿2026-01-18T03:26:42.6572380Z ##[group]Run actions/checkout@v4
+Playwright E2E Tests	Checkout repository	2026-01-18T03:26:42.6573030Z with:
+Playwright E2E Tests	Checkout repository	2026-01-18T03:26:42.6573350Z   repository: anicolao/food
+Playwright E2E Tests	Checkout repository	2026-01-18T03:26:42.6574000Z   token: ***
+Playwright E2E Tests	Checkout repository	2026-01-18T03:26:42.6574290Z   ssh-strict: true
+Playwright E2E Tests	Checkout repository	2026-01-18T03:26:42.6574590Z   ssh-user: git
+Playwright E2E Tests	Checkout repository	2026-01-18T03:26:42.6574890Z   persist-credentials: true
+Playwright E2E Tests	Checkout repository	2026-01-18T03:26:42.6575230Z   clean: true
+Playwright E2E Tests	Checkout repository	2026-01-18T03:26:42.6575540Z   sparse-checkout-cone-mode: true
+Playwright E2E Tests	Checkout repository	2026-01-18T03:26:42.6575900Z   fetch-depth: 1
+Playwright E2E Tests	Checkout repository	2026-01-18T03:26:42.6576190Z   fetch-tags: false
+Playwright E2E Tests	Checkout repository	2026-01-18T03:26:42.6576510Z   show-progress: true
+Playwright E2E Tests	Checkout repository	2026-01-18T03:26:42.6576810Z   lfs: false
+Playwright E2E Tests	Checkout repository	2026-01-18T03:26:42.6577090Z   submodules: false
+Playwright E2E Tests	Checkout repository	2026-01-18T03:26:42.6577410Z   set-safe-directory: true
+Playwright E2E Tests	Checkout repository	2026-01-18T03:26:42.6577970Z ##[endgroup]
+Playwright E2E Tests	Checkout repository	2026-01-18T03:26:43.0013250Z Syncing repository: anicolao/food
+Playwright E2E Tests	Checkout repository	2026-01-18T03:26:43.0014980Z ##[group]Getting Git version info
+Playwright E2E Tests	Checkout repository	2026-01-18T03:26:43.0015510Z Working directory is '/Users/runner/work/food/food'
+Playwright E2E Tests	Checkout repository	2026-01-18T03:26:43.0016360Z [command]/opt/homebrew/bin/git version
+Playwright E2E Tests	Checkout repository	2026-01-18T03:26:43.0407020Z git version 2.52.0
+Playwright E2E Tests	Checkout repository	2026-01-18T03:26:43.0455320Z ##[endgroup]
+Playwright E2E Tests	Checkout repository	2026-01-18T03:26:43.0462560Z Copying '/Users/runner/.gitconfig' to '/Users/runner/work/_temp/3dadb512-33cc-4289-9230-4530bd1b9074/.gitconfig'
+Playwright E2E Tests	Checkout repository	2026-01-18T03:26:43.0479990Z Temporarily overriding HOME='/Users/runner/work/_temp/3dadb512-33cc-4289-9230-4530bd1b9074' before making global git config changes
+Playwright E2E Tests	Checkout repository	2026-01-18T03:26:43.0482670Z Adding repository directory to the temporary git global config as a safe directory
+Playwright E2E Tests	Checkout repository	2026-01-18T03:26:43.0542940Z [command]/opt/homebrew/bin/git config --global --add safe.directory /Users/runner/work/food/food
+Playwright E2E Tests	Checkout repository	2026-01-18T03:26:43.0588630Z Deleting the contents of '/Users/runner/work/food/food'
+Playwright E2E Tests	Checkout repository	2026-01-18T03:26:43.0591810Z ##[group]Initializing the repository
+Playwright E2E Tests	Checkout repository	2026-01-18T03:26:43.0598440Z [command]/opt/homebrew/bin/git init /Users/runner/work/food/food
+Playwright E2E Tests	Checkout repository	2026-01-18T03:26:43.0773360Z hint: Using 'master' as the name for the initial branch. This default branch name
+Playwright E2E Tests	Checkout repository	2026-01-18T03:26:43.0775080Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+Playwright E2E Tests	Checkout repository	2026-01-18T03:26:43.0775810Z hint: to use in all of your new repositories, which will suppress this warning,
+Playwright E2E Tests	Checkout repository	2026-01-18T03:26:43.0776330Z hint: call:
+Playwright E2E Tests	Checkout repository	2026-01-18T03:26:43.0776630Z hint:
+Playwright E2E Tests	Checkout repository	2026-01-18T03:26:43.0776990Z hint: 	git config --global init.defaultBranch <name>
+Playwright E2E Tests	Checkout repository	2026-01-18T03:26:43.0777390Z hint:
+Playwright E2E Tests	Checkout repository	2026-01-18T03:26:43.0777780Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+Playwright E2E Tests	Checkout repository	2026-01-18T03:26:43.0778410Z hint: 'development'. The just-created branch can be renamed via this command:
+Playwright E2E Tests	Checkout repository	2026-01-18T03:26:43.0778910Z hint:
+Playwright E2E Tests	Checkout repository	2026-01-18T03:26:43.0779180Z hint: 	git branch -m <name>
+Playwright E2E Tests	Checkout repository	2026-01-18T03:26:43.0779490Z hint:
+Playwright E2E Tests	Checkout repository	2026-01-18T03:26:43.0779900Z hint: Disable this message with "git config set advice.defaultBranchName false"
+Playwright E2E Tests	Checkout repository	2026-01-18T03:26:43.0780650Z Initialized empty Git repository in /Users/runner/work/food/food/.git/
+Playwright E2E Tests	Checkout repository	2026-01-18T03:26:43.0783010Z [command]/opt/homebrew/bin/git remote add origin https://github.com/anicolao/food
+Playwright E2E Tests	Checkout repository	2026-01-18T03:26:43.0861270Z ##[endgroup]
+Playwright E2E Tests	Checkout repository	2026-01-18T03:26:43.0861890Z ##[group]Disabling automatic garbage collection
+Playwright E2E Tests	Checkout repository	2026-01-18T03:26:43.0871530Z [command]/opt/homebrew/bin/git config --local gc.auto 0
+Playwright E2E Tests	Checkout repository	2026-01-18T03:26:43.0938820Z ##[endgroup]
+Playwright E2E Tests	Checkout repository	2026-01-18T03:26:43.0939410Z ##[group]Setting up auth
+Playwright E2E Tests	Checkout repository	2026-01-18T03:26:43.0943420Z [command]/opt/homebrew/bin/git config --local --name-only --get-regexp core\.sshCommand
+Playwright E2E Tests	Checkout repository	2026-01-18T03:26:43.1024880Z [command]/opt/homebrew/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+Playwright E2E Tests	Checkout repository	2026-01-18T03:26:43.2282840Z [command]/opt/homebrew/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+Playwright E2E Tests	Checkout repository	2026-01-18T03:26:43.2384080Z [command]/opt/homebrew/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+Playwright E2E Tests	Checkout repository	2026-01-18T03:26:43.3254780Z [command]/opt/homebrew/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+Playwright E2E Tests	Checkout repository	2026-01-18T03:26:43.3326420Z [command]/opt/homebrew/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+Playwright E2E Tests	Checkout repository	2026-01-18T03:26:43.4349420Z [command]/opt/homebrew/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+Playwright E2E Tests	Checkout repository	2026-01-18T03:26:43.4434050Z ##[endgroup]
+Playwright E2E Tests	Checkout repository	2026-01-18T03:26:43.4438520Z ##[group]Fetching the repository
+Playwright E2E Tests	Checkout repository	2026-01-18T03:26:43.4440620Z [command]/opt/homebrew/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +8c1b11817ef709a09dff5157e956ec4c8086d41b:refs/remotes/pull/55/merge
+Playwright E2E Tests	Checkout repository	2026-01-18T03:26:44.7283030Z From https://github.com/anicolao/food
+Playwright E2E Tests	Checkout repository	2026-01-18T03:26:44.7286470Z  * [new ref]         8c1b11817ef709a09dff5157e956ec4c8086d41b -> pull/55/merge
+Playwright E2E Tests	Checkout repository	2026-01-18T03:26:44.7527810Z ##[endgroup]
+Playwright E2E Tests	Checkout repository	2026-01-18T03:26:44.7574310Z ##[group]Determining the checkout info
+Playwright E2E Tests	Checkout repository	2026-01-18T03:26:44.7584330Z ##[endgroup]
+Playwright E2E Tests	Checkout repository	2026-01-18T03:26:44.7586100Z [command]/opt/homebrew/bin/git sparse-checkout disable
+Playwright E2E Tests	Checkout repository	2026-01-18T03:26:44.7590170Z [command]/opt/homebrew/bin/git config --local --unset-all extensions.worktreeConfig
+Playwright E2E Tests	Checkout repository	2026-01-18T03:26:44.7649940Z ##[group]Checking out the ref
+Playwright E2E Tests	Checkout repository	2026-01-18T03:26:44.7654080Z [command]/opt/homebrew/bin/git checkout --progress --force refs/remotes/pull/55/merge
+Playwright E2E Tests	Checkout repository	2026-01-18T03:26:44.8656520Z HEAD is now at 8c1b118 Merge aa692f9c35aaaa7fe3c5c6bd271347b0b5a78444 into c830993b37a0d394dee3f5b720aac002f6eaea68
+Playwright E2E Tests	Checkout repository	2026-01-18T03:26:44.8688640Z ##[endgroup]
+Playwright E2E Tests	Checkout repository	2026-01-18T03:26:44.8793160Z [command]/opt/homebrew/bin/git log -1 --format=%H
+Playwright E2E Tests	Checkout repository	2026-01-18T03:26:44.8872200Z 8c1b11817ef709a09dff5157e956ec4c8086d41b
+Playwright E2E Tests	Setup Node.js	﻿2026-01-18T03:26:44.9193110Z ##[group]Run actions/setup-node@v4
+Playwright E2E Tests	Setup Node.js	2026-01-18T03:26:44.9193980Z with:
+Playwright E2E Tests	Setup Node.js	2026-01-18T03:26:44.9194570Z   node-version: 20
+Playwright E2E Tests	Setup Node.js	2026-01-18T03:26:44.9195670Z   cache: npm
+Playwright E2E Tests	Setup Node.js	2026-01-18T03:26:44.9196290Z   always-auth: false
+Playwright E2E Tests	Setup Node.js	2026-01-18T03:26:44.9196920Z   check-latest: false
+Playwright E2E Tests	Setup Node.js	2026-01-18T03:26:44.9197860Z   token: ***
+Playwright E2E Tests	Setup Node.js	2026-01-18T03:26:44.9198450Z ##[endgroup]
+Playwright E2E Tests	Setup Node.js	2026-01-18T03:26:45.0938120Z Found in cache @ /Users/runner/hostedtoolcache/node/20.19.6/arm64
+Playwright E2E Tests	Setup Node.js	2026-01-18T03:26:45.0946830Z ##[group]Environment details
+Playwright E2E Tests	Setup Node.js	2026-01-18T03:26:45.7302790Z node: v20.19.6
+Playwright E2E Tests	Setup Node.js	2026-01-18T03:26:45.7303680Z npm: 10.8.2
+Playwright E2E Tests	Setup Node.js	2026-01-18T03:26:45.7304170Z yarn: 1.22.22
+Playwright E2E Tests	Setup Node.js	2026-01-18T03:26:45.7364050Z ##[endgroup]
+Playwright E2E Tests	Setup Node.js	2026-01-18T03:26:45.7393100Z [command]/Users/runner/hostedtoolcache/node/20.19.6/arm64/bin/npm config get cache
+Playwright E2E Tests	Setup Node.js	2026-01-18T03:26:45.9683290Z /Users/runner/.npm
+Playwright E2E Tests	Setup Node.js	2026-01-18T03:26:46.1838180Z Cache hit for: node-cache-macOS-arm64-npm-b25bee4dc38dd0feb681cdf81a20e65ba5bbe807f748f6ac19b6948f85d714fd
+Playwright E2E Tests	Setup Node.js	2026-01-18T03:26:47.0860120Z Received 20368981 of 20368981 (100.0%), 32.8 MBs/sec
+Playwright E2E Tests	Setup Node.js	2026-01-18T03:26:47.0872250Z Cache Size: ~19 MB (20368981 B)
+Playwright E2E Tests	Setup Node.js	2026-01-18T03:26:47.0902310Z [command]/opt/homebrew/bin/gtar -xf /Users/runner/work/_temp/635bc16b-496b-4e9a-a5a9-12f78c9958d5/cache.tzst -P -C /Users/runner/work/food/food --delay-directory-restore --use-compress-program unzstd
+Playwright E2E Tests	Setup Node.js	2026-01-18T03:26:47.2047350Z Cache restored successfully
+Playwright E2E Tests	Setup Node.js	2026-01-18T03:26:47.2059810Z Cache restored from key: node-cache-macOS-arm64-npm-b25bee4dc38dd0feb681cdf81a20e65ba5bbe807f748f6ac19b6948f85d714fd
+Playwright E2E Tests	Install dependencies	﻿2026-01-18T03:26:47.2196290Z ##[group]Run npm ci
+Playwright E2E Tests	Install dependencies	2026-01-18T03:26:47.2196770Z [36;1mnpm ci[0m
+Playwright E2E Tests	Install dependencies	2026-01-18T03:26:47.2262090Z shell: /bin/bash -e {0}
+Playwright E2E Tests	Install dependencies	2026-01-18T03:26:47.2262440Z ##[endgroup]
+Playwright E2E Tests	Install dependencies	2026-01-18T03:26:49.4113800Z 
+Playwright E2E Tests	Install dependencies	2026-01-18T03:26:49.4157440Z > temp-app@0.0.1 prepare
+Playwright E2E Tests	Install dependencies	2026-01-18T03:26:49.4158200Z > svelte-kit sync || echo '' && husky install
+Playwright E2E Tests	Install dependencies	2026-01-18T03:26:49.4159250Z 
+Playwright E2E Tests	Install dependencies	2026-01-18T03:26:50.3812150Z husky - Git hooks installed
+Playwright E2E Tests	Install dependencies	2026-01-18T03:26:50.3885740Z 
+Playwright E2E Tests	Install dependencies	2026-01-18T03:26:50.3887460Z added 71 packages, and audited 72 packages in 3s
+Playwright E2E Tests	Install dependencies	2026-01-18T03:26:50.3897680Z 
+Playwright E2E Tests	Install dependencies	2026-01-18T03:26:50.3899300Z 10 packages are looking for funding
+Playwright E2E Tests	Install dependencies	2026-01-18T03:26:50.3899980Z   run `npm fund` for details
+Playwright E2E Tests	Install dependencies	2026-01-18T03:26:50.4062010Z 
+Playwright E2E Tests	Install dependencies	2026-01-18T03:26:50.4064170Z 4 vulnerabilities (1 low, 1 moderate, 2 high)
+Playwright E2E Tests	Install dependencies	2026-01-18T03:26:50.4064530Z 
+Playwright E2E Tests	Install dependencies	2026-01-18T03:26:50.4072670Z To address all issues, run:
+Playwright E2E Tests	Install dependencies	2026-01-18T03:26:50.4107090Z   npm audit fix
+Playwright E2E Tests	Install dependencies	2026-01-18T03:26:50.4110510Z 
+Playwright E2E Tests	Install dependencies	2026-01-18T03:26:50.4113450Z Run `npm audit` for details.
+Playwright E2E Tests	Install Playwright browsers	﻿2026-01-18T03:26:50.4203520Z ##[group]Run npx playwright install --with-deps chromium
+Playwright E2E Tests	Install Playwright browsers	2026-01-18T03:26:50.4204140Z [36;1mnpx playwright install --with-deps chromium[0m
+Playwright E2E Tests	Install Playwright browsers	2026-01-18T03:26:50.4244270Z shell: /bin/bash -e {0}
+Playwright E2E Tests	Install Playwright browsers	2026-01-18T03:26:50.4244620Z ##[endgroup]
+Playwright E2E Tests	Install Playwright browsers	2026-01-18T03:26:51.2933570Z Downloading Chromium 143.0.7499.4 (playwright build v1200) from https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1200/chromium-mac-arm64.zip
+Playwright E2E Tests	Install Playwright browsers	2026-01-18T03:26:51.6233440Z |                                                                                |   0% of 159.6 MiB
+Playwright E2E Tests	Install Playwright browsers	2026-01-18T03:26:52.1754840Z |■■■■■■■■                                                                        |  10% of 159.6 MiB
+Playwright E2E Tests	Install Playwright browsers	2026-01-18T03:26:52.3772670Z |■■■■■■■■■■■■■■■■                                                                |  20% of 159.6 MiB
+Playwright E2E Tests	Install Playwright browsers	2026-01-18T03:26:52.5676550Z |■■■■■■■■■■■■■■■■■■■■■■■■                                                        |  30% of 159.6 MiB
+Playwright E2E Tests	Install Playwright browsers	2026-01-18T03:26:52.7712740Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                                |  40% of 159.6 MiB
+Playwright E2E Tests	Install Playwright browsers	2026-01-18T03:26:52.9544460Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                        |  50% of 159.6 MiB
+Playwright E2E Tests	Install Playwright browsers	2026-01-18T03:26:53.1431800Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                |  60% of 159.6 MiB
+Playwright E2E Tests	Install Playwright browsers	2026-01-18T03:26:53.3285790Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                        |  70% of 159.6 MiB
+Playwright E2E Tests	Install Playwright browsers	2026-01-18T03:26:53.5166970Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                |  80% of 159.6 MiB
+Playwright E2E Tests	Install Playwright browsers	2026-01-18T03:26:53.7138150Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■        |  90% of 159.6 MiB
+Playwright E2E Tests	Install Playwright browsers	2026-01-18T03:26:53.8942700Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■| 100% of 159.6 MiB
+Playwright E2E Tests	Install Playwright browsers	2026-01-18T03:26:56.9400930Z Chromium 143.0.7499.4 (playwright build v1200) downloaded to /Users/runner/Library/Caches/ms-playwright/chromium-1200
+Playwright E2E Tests	Install Playwright browsers	2026-01-18T03:26:56.9402920Z Downloading FFMPEG playwright build v1011 from https://cdn.playwright.dev/dbazure/download/playwright/builds/ffmpeg/1011/ffmpeg-mac-arm64.zip
+Playwright E2E Tests	Install Playwright browsers	2026-01-18T03:26:57.2745870Z |                                                                                |   1% of 1 MiB
+Playwright E2E Tests	Install Playwright browsers	2026-01-18T03:26:57.3305900Z |■■■■■■■■                                                                        |  10% of 1 MiB
+Playwright E2E Tests	Install Playwright browsers	2026-01-18T03:26:57.3673880Z |■■■■■■■■■■■■■■■■                                                                |  21% of 1 MiB
+Playwright E2E Tests	Install Playwright browsers	2026-01-18T03:26:57.3918650Z |■■■■■■■■■■■■■■■■■■■■■■■■                                                        |  30% of 1 MiB
+Playwright E2E Tests	Install Playwright browsers	2026-01-18T03:26:57.4195490Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                                |  40% of 1 MiB
+Playwright E2E Tests	Install Playwright browsers	2026-01-18T03:26:57.4297630Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                        |  51% of 1 MiB
+Playwright E2E Tests	Install Playwright browsers	2026-01-18T03:26:57.4398510Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                |  60% of 1 MiB
+Playwright E2E Tests	Install Playwright browsers	2026-01-18T03:26:57.4500150Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                        |  71% of 1 MiB
+Playwright E2E Tests	Install Playwright browsers	2026-01-18T03:26:57.4563120Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                |  80% of 1 MiB
+Playwright E2E Tests	Install Playwright browsers	2026-01-18T03:26:57.4704620Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■        |  90% of 1 MiB
+Playwright E2E Tests	Install Playwright browsers	2026-01-18T03:26:57.4751440Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■| 100% of 1 MiB
+Playwright E2E Tests	Install Playwright browsers	2026-01-18T03:26:57.5050790Z FFMPEG playwright build v1011 downloaded to /Users/runner/Library/Caches/ms-playwright/ffmpeg-1011
+Playwright E2E Tests	Install Playwright browsers	2026-01-18T03:26:57.5054370Z Downloading Chromium Headless Shell 143.0.7499.4 (playwright build v1200) from https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1200/chromium-headless-shell-mac-arm64.zip
+Playwright E2E Tests	Install Playwright browsers	2026-01-18T03:26:57.8183520Z |                                                                                |   0% of 89.7 MiB
+Playwright E2E Tests	Install Playwright browsers	2026-01-18T03:26:58.2475890Z |■■■■■■■■                                                                        |  10% of 89.7 MiB
+Playwright E2E Tests	Install Playwright browsers	2026-01-18T03:26:58.3622160Z |■■■■■■■■■■■■■■■■                                                                |  20% of 89.7 MiB
+Playwright E2E Tests	Install Playwright browsers	2026-01-18T03:26:58.4730720Z |■■■■■■■■■■■■■■■■■■■■■■■■                                                        |  30% of 89.7 MiB
+Playwright E2E Tests	Install Playwright browsers	2026-01-18T03:26:58.5816110Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                                |  40% of 89.7 MiB
+Playwright E2E Tests	Install Playwright browsers	2026-01-18T03:26:58.6881110Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                        |  50% of 89.7 MiB
+Playwright E2E Tests	Install Playwright browsers	2026-01-18T03:26:58.8053410Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                |  60% of 89.7 MiB
+Playwright E2E Tests	Install Playwright browsers	2026-01-18T03:26:58.9282010Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                        |  70% of 89.7 MiB
+Playwright E2E Tests	Install Playwright browsers	2026-01-18T03:26:59.0351820Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                |  80% of 89.7 MiB
+Playwright E2E Tests	Install Playwright browsers	2026-01-18T03:26:59.1440440Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■        |  90% of 89.7 MiB
+Playwright E2E Tests	Install Playwright browsers	2026-01-18T03:26:59.2522440Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■| 100% of 89.7 MiB
+Playwright E2E Tests	Install Playwright browsers	2026-01-18T03:27:01.1801430Z Chromium Headless Shell 143.0.7499.4 (playwright build v1200) downloaded to /Users/runner/Library/Caches/ms-playwright/chromium_headless_shell-1200
+Playwright E2E Tests	Run Playwright tests	﻿2026-01-18T03:27:01.2180280Z ##[group]Run npm run test:e2e
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:01.2181060Z [36;1mnpm run test:e2e[0m
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:01.2280410Z shell: /bin/bash -e {0}
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:01.2280770Z env:
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:01.2280990Z   CI: true
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:01.2281140Z   VITE_GOOGLE_API_KEY: dummy
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:01.2281460Z   VITE_GOOGLE_CLIENT_ID: dummy
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:01.2281640Z   VITE_GOOGLE_DRIVE_CLIENT_ID: dummy
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:01.2281910Z   VITE_GOOGLE_DRIVE_FOLDER_ID: dummy
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:01.2282280Z   VITE_GOOGLE_PHOTOS_CLIENT_ID: dummy
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:01.2282580Z   COMMIT_HASH: aa692f9c35aaaa7fe3c5c6bd271347b0b5a78444
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:01.2282880Z ##[endgroup]
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:01.4758070Z 
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:06.6328720Z > temp-app@0.0.1 test:e2e
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:06.6329290Z > playwright test --workers=8
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:06.6329520Z 
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:06.6329530Z 
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:06.6331500Z Running 13 tests using 8 workers
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:19.1780790Z BROWSER: Failed to load resource: net::ERR_FAILED
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:19.1865430Z BROWSER: Service Worker registration blocked by Playwright
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:19.2201480Z PAGE CONTENT: <!DOCTYPE html><html lang="en"><head>
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:19.2234840Z 	<meta charset="utf-8">
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:19.2344290Z 	<meta name="viewport" content="width=device-width, initial-scale=1">
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:19.2445240Z 	<script src="https://accounts.google.com/gsi/client" async="" defer=""></script>
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:19.2548240Z 	<link rel="manifest" href="./manifest.webmanifest">
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:19.2608210Z 	<meta name="apple-mobile-web-app-capable" content="yes">
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:19.2716950Z 	<meta name="mobile-web-app-capable" content="yes">
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:19.2809560Z 	<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:19.2912040Z 	<meta name="apple-mobile-web-app-title" content="Food Fixups">
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:19.3015370Z 	<link rel="apple-touch-icon" href="./apple-touch-icon.png">
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:19.3135860Z 	
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:19.3238530Z </head>
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:19.3340850Z 
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:19.3445980Z <body data-sveltekit-preload-data="hover">
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:19.3547190Z 	<div style="display: contents">
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:19.3675430Z 			<script>
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:19.3783300Z 				{
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:19.3898890Z 					__sveltekit_dev = {
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:19.4003140Z 						base: new URL(".", location).pathname.slice(0, -1),
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:19.4153010Z 						env: {}
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:19.4179580Z 					};
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:19.4371390Z 
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:19.4474100Z 					const element = document.currentScript.parentElement;
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:19.4720800Z 
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:19.4823910Z 					Promise.all([
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:19.4874960Z 						import("/node_modules/@sveltejs/kit/src/runtime/client/entry.js"),
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:19.4926550Z 						import("/@fs/Users/runner/work/food/food/.svelte-kit/generated/client/app.js")
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:19.5037700Z 					]).then(([kit, app]) => {
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:19.5140110Z 						kit.start(app, element);
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:19.5242110Z 					});
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:19.5343640Z 
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:19.5446950Z 					if ('serviceWorker' in navigator) {
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:19.5595370Z 						addEventListener('load', function () {
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:19.5677560Z 							navigator.serviceWorker.register('./service-worker.js', { type: 'module' });
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:19.5786920Z 						});
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:19.5890380Z 					}
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:19.5994080Z 				}
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:19.6065120Z 			</script>
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:19.6169060Z 		</div>
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:19.6270490Z 
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:19.6374160Z 
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:19.6476730Z </body></html>
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:19.6579950Z BROWSER LOG: Failed to load resource: net::ERR_FAILED
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:19.6692840Z BROWSER LOG: Service Worker registration blocked by Playwright
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:19.6795620Z BROWSER LOG: Failed to load resource: net::ERR_FAILED
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:19.6900760Z BROWSER LOG: Service Worker registration blocked by Playwright
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:19.7005630Z BROWSER LOG: Failed to load resource: net::ERR_FAILED
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:19.7112740Z BROWSER LOG: Service Worker registration blocked by Playwright
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:19.7216070Z BROWSER LOG: Failed to load resource: net::ERR_FAILED
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:19.7356990Z BROWSER LOG: Service Worker registration blocked by Playwright
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:19.7498300Z PAGE CONTENT: <!DOCTYPE html><html lang="en"><head>
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:19.7601860Z 	<meta charset="utf-8">
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:19.7711260Z 	<meta name="viewport" content="width=device-width, initial-scale=1">
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:19.7810970Z 	<script src="https://accounts.google.com/gsi/client" async="" defer=""></script>
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:19.7916220Z 	<link rel="manifest" href="./manifest.webmanifest">
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:19.8041680Z 	<meta name="apple-mobile-web-app-capable" content="yes">
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:19.8149120Z 	<meta name="mobile-web-app-capable" content="yes">
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:19.8275660Z 	<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:19.8420810Z 	<meta name="apple-mobile-web-app-title" content="Food Fixups">
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:19.8523940Z 	<link rel="apple-touch-icon" href="./apple-touch-icon.png">
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:19.8631850Z 	
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:19.8770140Z </head>
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:19.8771670Z 
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:19.8990400Z <body data-sveltekit-preload-data="hover">
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:19.9104230Z 	<div style="display: contents">
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:19.9206130Z 			<script>
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:19.9316000Z 				{
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:19.9450760Z 					__sveltekit_dev = {
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:19.9560160Z 						base: new URL(".", location).pathname.slice(0, -1),
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:19.9676420Z 						env: {}
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:19.9812080Z 					};
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:19.9890970Z 
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:20.0067350Z 					const element = document.currentScript.parentElement;
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:20.0215900Z 
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:20.0319110Z 					Promise.all([
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:20.0431460Z 						import("/node_modules/@sveltejs/kit/src/runtime/client/entry.js"),
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:20.0549750Z 						import("/@fs/Users/runner/work/food/food/.svelte-kit/generated/client/app.js")
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:20.0651950Z 					]).then(([kit, app]) => {
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:20.0788970Z 						kit.start(app, element);
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:20.0900100Z 					});
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:20.1001340Z 
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:20.1102980Z 					if ('serviceWorker' in navigator) {
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:20.1218470Z 						addEventListener('load', function () {
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:20.1342650Z 							navigator.serviceWorker.register('./service-worker.js', { type: 'module' });
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:20.2404700Z 						});
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:20.2506410Z 					}
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:20.2609340Z 				}
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:20.2708990Z 			</script>
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:20.2812590Z 		</div>
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:20.2914410Z 
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:20.3015850Z 
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:20.3128100Z </body></html>
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:20.8282730Z BROWSER LOG: [vite] connecting...
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:20.9117720Z BROWSER: [vite] connecting...
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:20.9323710Z BROWSER LOG: [vite] connecting...
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:21.0039270Z BROWSER LOG: [vite] connecting...
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:21.0257640Z BROWSER LOG: [vite] connecting...
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:21.1598050Z BROWSER LOG: [vite] connected.
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:21.1700250Z BROWSER: [vite] connected.
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:21.3716390Z BROWSER LOG: [vite] connected.
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:21.3818600Z BROWSER LOG: [vite] connected.
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:21.3920110Z BROWSER LOG: [vite] connected.
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:22.9481590Z BROWSER: [Layout] Hydrating from DB...
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:22.9583580Z BROWSER LOG: [Layout] Hydrating from DB...
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:22.9688000Z BROWSER LOG: [Layout] Hydrating from DB...
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:22.9789460Z BROWSER LOG: [Layout] Hydrating from DB...
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:22.9925690Z BROWSER LOG: [Layout] Hydrating from DB...
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:23.1194470Z BROWSER LOG: [Auth] Google Identity Services found
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:23.1302810Z BROWSER LOG: [Auth] Google Identity Services found
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:23.1438260Z BROWSER LOG: [Auth] Google Identity Services found
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:23.2352960Z BROWSER LOG: [Layout] Found 0 events in DB.
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:23.2458030Z BROWSER LOG: [Layout] Hydration complete.
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:23.2560750Z BROWSER: [Auth] Google Identity Services found
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:23.2662230Z BROWSER: [Layout] Found 0 events in DB.
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:23.2762650Z BROWSER LOG: [Auth] Google Identity Services found
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:23.2865050Z BROWSER: [Layout] Hydration complete.
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:23.2977610Z BROWSER LOG: [Layout] Found 0 events in DB.
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:23.3079280Z BROWSER LOG: [Layout] Found 0 events in DB.
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:23.3213020Z BROWSER LOG: [Layout] Hydration complete.
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:23.3295550Z BROWSER LOG: [Layout] Hydration complete.
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:23.3425060Z BROWSER LOG: [Layout] Found 0 events in DB.
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:23.3500310Z BROWSER LOG: [Layout] Hydration complete.
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:23.5118320Z BROWSER: [Auth] Initialized in Layout
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:23.5603460Z BROWSER LOG: [Auth] Initialized in Layout
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:24.0028570Z BROWSER LOG: Failed to parse payload for event HeaderID SyntaxError: Unexpected token 'P', "Payload" is not valid JSON
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:24.0130400Z     at JSON.parse (<anonymous>)
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:24.0232040Z     at Object.sync (http://localhost:5174/src/lib/sync-manager.ts:60:34)
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:24.2395420Z BROWSER LOG: [Auth] Initialized in Layout
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:24.4065610Z BROWSER LOG: [Auth] Initialized in Layout
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:24.8265980Z BROWSER LOG: [Auth] Initialized in Layout
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:25.5025960Z BROWSER LOG: [SyncManager] Sync failed: TypeError: Failed to fetch
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:25.5128650Z     at window.fetch (http://localhost:5174/node_modules/@sveltejs/kit/src/runtime/client/fetcher.js?v=dd101ed2:66:10)
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:25.5230430Z     at fetchRows (http://localhost:5174/src/lib/sheets.ts:207:26)
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:25.5330650Z     at async Object.sync (http://localhost:5174/src/lib/sync-manager.ts:36:22)
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:25.6034930Z BROWSER LOG: Failed to load resource: net::ERR_FAILED
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:25.6136340Z BROWSER LOG: Service Worker registration blocked by Playwright
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:27.2550860Z BROWSER LOG: [vite] connecting...
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:27.7730040Z BROWSER LOG: [vite] connected.
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:28.8992050Z ··BROWSER: Failed to load resource: net::ERR_FAILED
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:28.9084590Z BROWSER: Service Worker registration blocked by Playwright
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:29.5210790Z ·BROWSER LOG: Pre-fetching Google Photos Picker session...
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:29.5516290Z BROWSER LOG: [Auth] Initialized in Layout
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:29.5621600Z BROWSER LOG: [Layout] Hydrating from DB...
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:29.6559600Z BROWSER LOG: Pre-fetching Google Photos Picker session...
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:29.6762470Z BROWSER LOG: [Auth] Google Identity Services found
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:29.6865440Z BROWSER LOG: [Layout] Found 0 events in DB.
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:29.7054850Z BROWSER LOG: [Layout] Hydration complete.
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:30.2449700Z BROWSER: [vite] connecting...
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:31.2451320Z BROWSER: [vite] connected.
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:31.3810070Z BROWSER: [Auth] Initialized in Layout
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:31.3878820Z BROWSER: [Layout] Hydrating from DB...
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:31.4685360Z BROWSER: [Layout] Found 1 events in DB.
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:31.4997990Z BROWSER: [Layout] Hydration complete.
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:31.5099250Z BROWSER: [Auth] Google Identity Services found
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:32.1256730Z BROWSER LOG: Pre-fetching Google Photos Picker session...
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:34.1453730Z BROWSER LOG: Pre-fetching Google Photos Picker session...
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:35.7637160Z MOCKING: https://www.googleapis.com/drive/v3/files?q=mimeType%3D%27application%2Fvnd.google-apps.folder%27%20and%20name%3D%27FoodLog%27%20and%20trashed%3Dfalse
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:35.8437700Z MOCKING: https://www.googleapis.com/drive/v3/files?q=appProperties%20has%20%7B%20key%3D%27type%27%20and%20value%3D%27food_tracker_db%27%20%7D%20and%20trashed%3Dfalse%20and%20%27mock-folder-id%27%20in%20parents&orderBy=modifiedTime%20desc&fields=files(id,name,modifiedTime,createdTime)
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:35.8646350Z MOCKING: https://sheets.googleapis.com/v4/spreadsheets/mock-sheet-id
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:37.8573690Z BROWSER: Failed to load resource: net::ERR_FAILED
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:37.8675440Z BROWSER: Service Worker registration blocked by Playwright
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:37.9771030Z MOCKING: https://www.googleapis.com/drive/v3/files?q=mimeType%3D%27application%2Fvnd.google-apps.folder%27%20and%20name%3D%27FoodLog%27%20and%20trashed%3Dfalse
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:38.0806270Z MOCKING: https://photospicker.googleapis.com/v1/sessions
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:38.0910080Z MOCKING: https://www.googleapis.com/drive/v3/files?q=appProperties%20has%20%7B%20key%3D%27type%27%20and%20value%3D%27food_tracker_db%27%20%7D%20and%20trashed%3Dfalse%20and%20%27mock-folder-id%27%20in%20parents&orderBy=modifiedTime%20desc&fields=files(id,name,modifiedTime,createdTime)
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:38.1284080Z MOCKING: https://sheets.googleapis.com/v4/spreadsheets/mock-sheet-id
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:38.1903190Z MOCKING: https://sheets.googleapis.com/v4/spreadsheets/mock-sheet-id:batchUpdate
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:38.2003750Z MOCKING: https://sheets.googleapis.com/v4/spreadsheets/mock-sheet-id/values/Events!A1:Z
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:38.4643090Z BROWSER: [vite] connecting...
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:38.5049290Z BROWSER: [vite] connected.
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:38.7989310Z MOCKING: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:38.8301540Z MOCKING: https://sheets.googleapis.com/v4/spreadsheets/mock-sheet-id/values/Events!A1:append?valueInputOption=USER_ENTERED
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:38.8404030Z MOCKING: https://sheets.googleapis.com/v4/spreadsheets/mock-sheet-id/values/Events!A1:Z
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:39.0030820Z BROWSER: [Auth] Initialized in Layout
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:39.0132300Z BROWSER: [Layout] Hydrating from DB...
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:39.1146330Z BROWSER: [Auth] Google Identity Services found
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:39.1248770Z BROWSER: [Layout] Found 1 events in DB.
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:39.1350480Z BROWSER: [Layout] Hydration complete.
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:40.7156100Z ·°·MOCKING: https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,name,webViewLink,thumbnailLink
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:45.6235790Z ·····FFailed to load resource: net::ERR_FAILED
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:45.6380650Z Service Worker registration blocked by Playwright
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:45.7645280Z [vite] connecting...
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:45.7853520Z [vite] connected.
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:45.9179570Z [Layout] Hydrating from DB...
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:45.9423240Z [Layout] Found 0 events in DB.
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:45.9525420Z [Layout] Hydration complete.
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:46.0103500Z [Auth] Google Identity Services found
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:46.0824000Z [Auth] Initialized in Layout
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:46.2139110Z Error ensuring sheet exists TypeError: Failed to fetch
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:46.2240610Z     at window.fetch (http://localhost:5174/node_modules/@sveltejs/kit/src/runtime/client/fetcher.js?v=dd101ed2:66:10)
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:46.2342280Z     at ensureSheetExists (http://localhost:5174/src/lib/sheets.ts:139:27)
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:46.2444720Z     at async ensureDataStructures (http://localhost:5174/src/lib/sheets.ts:132:3)
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:46.2547800Z     at async Module.track_reactivity_loss (http://localhost:5174/node_modules/.vite/deps/chunk-YTF3ZZG2.js?v=dd101ed2:1495:15)
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:46.2651370Z     at async http://localhost:5174/src/routes/+layout.svelte:54:42
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:46.2750200Z Failed to load resource: net::ERR_FAILED
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:46.2851800Z Service Worker registration blocked by Playwright
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:46.4159980Z [vite] connecting...
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:46.4261410Z [vite] connected.
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:46.5706810Z [Auth] Initialized in Layout
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:46.5807270Z [Layout] Hydrating from DB...
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:46.6008820Z Pre-fetching Google Photos Picker session...
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:46.6110150Z [Layout] Found 0 events in DB.
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:46.6210860Z [Layout] Hydration complete.
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:46.6829030Z Autofocus processing was blocked because a document already has a focused element.
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:46.6937450Z [Auth] Google Identity Services found
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:46.8353540Z [ImageSearch] Searching Wikimedia for: "healthy salad"
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:27:46.8580370Z [ImageSearch] Found: http://localhost:5174/images/icon-status-synced.png
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:29:43.8848590Z F
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:29:43.8872880Z 
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:29:43.8947310Z   1) [chromium] › tests/e2e/002-log-food/002-log-food.spec.ts:7:1 › US-003 to US-010: User logs food flow 
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:29:43.8949380Z 
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:29:43.8950760Z     Error: [2mexpect([22m[31mpage[39m[2m).[22mtoHaveScreenshot[2m([22m[32mexpected[39m[2m)[22m failed
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:29:43.8951850Z 
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:29:43.8952310Z       61 pixels (ratio 0.01 of all image pixels) are different.
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:29:43.8953110Z 
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:29:43.8953560Z       Snapshot: 002-analysis
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:29:43.8954050Z 
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:29:43.8954200Z     Call log:
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:29:43.8955890Z     [2m  - Expect "toHaveScreenshot(002-analysis)" with timeout 5000ms[22m
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:29:43.8956620Z     [2m    - verifying given screenshot expectation[22m
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:29:43.8957080Z     [2m  - taking page screenshot[22m
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:29:43.8957910Z     [2m    - disabled all CSS animations[22m
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:29:43.8958630Z     [2m  - waiting for fonts to load...[22m
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:29:43.8959160Z     [2m  - fonts loaded[22m
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:29:43.8959610Z     [2m  - 61 pixels (ratio 0.01 of all image pixels) are different.[22m
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:29:43.8960120Z     [2m  - waiting 100ms before taking screenshot[22m
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:29:43.8960560Z     [2m  - taking page screenshot[22m
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:29:43.8960970Z     [2m    - disabled all CSS animations[22m
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:29:43.8961550Z     [2m  - waiting for fonts to load...[22m
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:29:43.8961900Z     [2m  - fonts loaded[22m
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:29:43.8962300Z     [2m  - captured a stable screenshot[22m
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:29:43.8962930Z     [2m  - 61 pixels (ratio 0.01 of all image pixels) are different.[22m
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:29:43.8963150Z 
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:29:43.8963170Z 
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:29:43.8963350Z        at helpers/test-step-helper.ts:55
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:29:43.8963570Z 
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:29:43.8963960Z       53 |         // This will check against the baseline in 'screenshots/{filename}'.
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:29:43.8965900Z       54 |         // If the file doesn't exist, it will fail (unless --update-snapshots is used).
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:29:43.8967600Z     > 55 |         await expect(this.page).toHaveScreenshot(filename.replace(/\.png$/, ''));
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:29:43.8968390Z          |                                 ^
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:29:43.8968720Z       56 |
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:29:43.8969130Z       57 |         // 4. Record for Docs
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:29:43.8969460Z       58 |         this.steps.push({
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:29:43.8970060Z         at TestStepHelper.step (/Users/runner/work/food/food/tests/e2e/helpers/test-step-helper.ts:55:33)
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:29:43.8970820Z         at /Users/runner/work/food/food/tests/e2e/002-log-food/002-log-food.spec.ts:154:5
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:29:43.8971100Z 
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:29:43.8971770Z     attachment #1: 002-analysis (image/png) ────────────────────────────────────────────────────────
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:29:43.8972440Z     Expected: tests/e2e/002-log-food/screenshots/002-analysis.png
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:29:43.8973550Z     Received: test-results/002-log-food-002-log-food--1b166--US-010-User-logs-food-flow-chromium/002-analysis-actual
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:29:43.8974480Z     Diff:     test-results/002-log-food-002-log-food--1b166--US-010-User-logs-food-flow-chromium/002-analysis-diff
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:29:43.8975310Z     ────────────────────────────────────────────────────────────────────────────────────────────────
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:29:43.8975620Z 
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:29:43.8975990Z     Error Context: test-results/002-log-food-002-log-food--1b166--US-010-User-logs-food-flow-chromium/error-context.md
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:29:43.8976480Z 
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:29:43.8977120Z   2) [chromium] › tests/e2e/013-detailed-nutrition/013-detailed-nutrition.spec.ts:5:1 › 013-detailed-nutrition: Log and Edit Detailed Nutrition 
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:29:43.9010850Z 
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:29:43.9012430Z     Error: [2mexpect([22m[31mpage[39m[2m).[22mtoHaveScreenshot[2m([22m[32mexpected[39m[2m)[22m failed
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:29:43.9013620Z 
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:29:43.9014260Z       119 pixels (ratio 0.01 of all image pixels) are different.
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:29:43.9014820Z 
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:29:43.9015370Z       Snapshot: 006-edit-detail
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:29:43.9016050Z 
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:29:43.9016240Z     Call log:
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:29:43.9018220Z     [2m  - Expect "toHaveScreenshot(006-edit-detail)" with timeout 5000ms[22m
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:29:43.9019700Z     [2m    - verifying given screenshot expectation[22m
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:29:43.9021200Z     [2m  - taking page screenshot[22m
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:29:43.9022050Z     [2m    - disabled all CSS animations[22m
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:29:43.9022510Z     [2m  - waiting for fonts to load...[22m
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:29:43.9022980Z     [2m  - fonts loaded[22m
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:29:43.9023400Z     [2m  - 119 pixels (ratio 0.01 of all image pixels) are different.[22m
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:29:43.9024180Z     [2m  - waiting 100ms before taking screenshot[22m
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:29:43.9024590Z     [2m  - taking page screenshot[22m
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:29:43.9025100Z     [2m    - disabled all CSS animations[22m
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:29:43.9025450Z     [2m  - waiting for fonts to load...[22m
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:29:43.9025930Z     [2m  - fonts loaded[22m
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:29:43.9026280Z     [2m  - captured a stable screenshot[22m
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:29:43.9026710Z     [2m  - 119 pixels (ratio 0.01 of all image pixels) are different.[22m
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:29:43.9027100Z 
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:29:43.9027110Z 
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:29:43.9027340Z        at helpers/test-step-helper.ts:55
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:29:43.9027570Z 
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:29:43.9027780Z       53 |         // This will check against the baseline in 'screenshots/{filename}'.
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:29:43.9028830Z       54 |         // If the file doesn't exist, it will fail (unless --update-snapshots is used).
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:29:43.9029460Z     > 55 |         await expect(this.page).toHaveScreenshot(filename.replace(/\.png$/, ''));
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:29:43.9029980Z          |                                 ^
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:29:43.9030230Z       56 |
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:29:43.9031110Z       57 |         // 4. Record for Docs
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:29:43.9031700Z       58 |         this.steps.push({
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:29:43.9032270Z         at TestStepHelper.step (/Users/runner/work/food/food/tests/e2e/helpers/test-step-helper.ts:55:33)
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:29:43.9032980Z         at /Users/runner/work/food/food/tests/e2e/013-detailed-nutrition/013-detailed-nutrition.spec.ts:174:5
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:29:43.9033500Z 
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:29:43.9034290Z     attachment #1: 006-edit-detail (image/png) ─────────────────────────────────────────────────────
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:29:43.9036230Z     Expected: tests/e2e/013-detailed-nutrition/screenshots/006-edit-detail.png
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:29:43.9037160Z     Received: test-results/013-detailed-nutrition-013-8c444-and-Edit-Detailed-Nutrition-chromium/006-edit-detail-actual
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:29:43.9038170Z     Diff:     test-results/013-detailed-nutrition-013-8c444-and-Edit-Detailed-Nutrition-chromium/006-edit-detail-diff
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:29:43.9039030Z     ────────────────────────────────────────────────────────────────────────────────────────────────
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:29:43.9039290Z 
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:29:43.9039910Z     Error Context: test-results/013-detailed-nutrition-013-8c444-and-Edit-Detailed-Nutrition-chromium/error-context.md
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:29:43.9040470Z 
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:29:43.9040630Z   2 failed
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:29:43.9041340Z     [chromium] › tests/e2e/002-log-food/002-log-food.spec.ts:7:1 › US-003 to US-010: User logs food flow 
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:29:43.9042280Z     [chromium] › tests/e2e/013-detailed-nutrition/013-detailed-nutrition.spec.ts:5:1 › 013-detailed-nutrition: Log and Edit Detailed Nutrition 
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:29:43.9043070Z   1 skipped
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:29:43.9043330Z   10 passed (2.7m)
+Playwright E2E Tests	Run Playwright tests	2026-01-18T03:29:44.0473810Z ##[error]Process completed with exit code 1.
+Playwright E2E Tests	Upload Playwright report	﻿2026-01-18T03:29:44.0732480Z ##[group]Run actions/upload-artifact@v4
+Playwright E2E Tests	Upload Playwright report	2026-01-18T03:29:44.0733000Z with:
+Playwright E2E Tests	Upload Playwright report	2026-01-18T03:29:44.0733230Z   name: playwright-report
+Playwright E2E Tests	Upload Playwright report	2026-01-18T03:29:44.0733470Z   path: playwright-report/
+Playwright E2E Tests	Upload Playwright report	2026-01-18T03:29:44.0733770Z   retention-days: 30
+Playwright E2E Tests	Upload Playwright report	2026-01-18T03:29:44.0733990Z   if-no-files-found: warn
+Playwright E2E Tests	Upload Playwright report	2026-01-18T03:29:44.0734260Z   compression-level: 6
+Playwright E2E Tests	Upload Playwright report	2026-01-18T03:29:44.0734710Z   overwrite: false
+Playwright E2E Tests	Upload Playwright report	2026-01-18T03:29:44.0734930Z   include-hidden-files: false
+Playwright E2E Tests	Upload Playwright report	2026-01-18T03:29:44.0735320Z ##[endgroup]
+Playwright E2E Tests	Upload Playwright report	2026-01-18T03:29:44.7022920Z With the provided path, there will be 9 files uploaded
+Playwright E2E Tests	Upload Playwright report	2026-01-18T03:29:44.7023580Z Artifact name is valid!
+Playwright E2E Tests	Upload Playwright report	2026-01-18T03:29:44.7023870Z Root directory input is valid!
+Playwright E2E Tests	Upload Playwright report	2026-01-18T03:29:44.9206930Z Beginning upload of artifact content to blob storage
+Playwright E2E Tests	Upload Playwright report	2026-01-18T03:29:45.3115910Z Uploaded bytes 540779
+Playwright E2E Tests	Upload Playwright report	2026-01-18T03:29:45.3520750Z Finished uploading artifact content to blob storage!
+Playwright E2E Tests	Upload Playwright report	2026-01-18T03:29:45.3622940Z SHA256 digest of uploaded artifact zip is bc5c0b87bc59c52ea223275e99abf520efe4fec719d90bec7aa9b43472b05d55
+Playwright E2E Tests	Upload Playwright report	2026-01-18T03:29:45.3726240Z Finalizing artifact upload
+Playwright E2E Tests	Upload Playwright report	2026-01-18T03:29:45.4954460Z Artifact playwright-report.zip successfully finalized. Artifact ID 5166814109
+Playwright E2E Tests	Upload Playwright report	2026-01-18T03:29:45.5054810Z Artifact playwright-report has been successfully uploaded! Final size is 540779 bytes. Artifact ID is 5166814109
+Playwright E2E Tests	Upload Playwright report	2026-01-18T03:29:45.5157840Z Artifact download URL: https://github.com/anicolao/food/actions/runs/21105283939/artifacts/5166814109
+Playwright E2E Tests	Post Checkout repository	﻿2026-01-18T03:29:45.5346990Z Post job cleanup.
+Playwright E2E Tests	Post Checkout repository	2026-01-18T03:29:45.6902890Z [command]/opt/homebrew/bin/git version
+Playwright E2E Tests	Post Checkout repository	2026-01-18T03:29:45.7207100Z git version 2.52.0
+Playwright E2E Tests	Post Checkout repository	2026-01-18T03:29:45.7234420Z Copying '/Users/runner/.gitconfig' to '/Users/runner/work/_temp/34b31ad5-f97e-4930-80b6-e1f95ea85d25/.gitconfig'
+Playwright E2E Tests	Post Checkout repository	2026-01-18T03:29:45.7303610Z Temporarily overriding HOME='/Users/runner/work/_temp/34b31ad5-f97e-4930-80b6-e1f95ea85d25' before making global git config changes
+Playwright E2E Tests	Post Checkout repository	2026-01-18T03:29:45.7306960Z Adding repository directory to the temporary git global config as a safe directory
+Playwright E2E Tests	Post Checkout repository	2026-01-18T03:29:45.7309480Z [command]/opt/homebrew/bin/git config --global --add safe.directory /Users/runner/work/food/food
+Playwright E2E Tests	Post Checkout repository	2026-01-18T03:29:45.7440000Z [command]/opt/homebrew/bin/git config --local --name-only --get-regexp core\.sshCommand
+Playwright E2E Tests	Post Checkout repository	2026-01-18T03:29:45.7526750Z [command]/opt/homebrew/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+Playwright E2E Tests	Post Checkout repository	2026-01-18T03:29:45.9804860Z [command]/opt/homebrew/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+Playwright E2E Tests	Post Checkout repository	2026-01-18T03:29:45.9879270Z http.https://github.com/.extraheader
+Playwright E2E Tests	Post Checkout repository	2026-01-18T03:29:45.9909170Z [command]/opt/homebrew/bin/git config --local --unset-all http.https://github.com/.extraheader
+Playwright E2E Tests	Post Checkout repository	2026-01-18T03:29:46.0021370Z [command]/opt/homebrew/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+Playwright E2E Tests	Post Checkout repository	2026-01-18T03:29:46.2088120Z [command]/opt/homebrew/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+Playwright E2E Tests	Post Checkout repository	2026-01-18T03:29:46.2395270Z [command]/opt/homebrew/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+Playwright E2E Tests	Complete job	﻿2026-01-18T03:29:46.3916440Z Cleaning up orphan processes

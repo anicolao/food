@@ -1,5 +1,7 @@
 
 import type { Page } from '@playwright/test';
+import * as fs from 'fs';
+import * as path from 'path';
 
 /**
  * Mocks the Google Drive & Sheets API to support robust metadata discovery and generic operations.
@@ -16,6 +18,12 @@ import type { Page } from '@playwright/test';
  * - values/Events (Append / Get) - Returns empty by default
  */
 export async function mockDriveAPI(page: Page) {
+    // 0. Serve Local Fixtures (Apple)
+    await page.route('**/mock-images/apple.png', async route => {
+        const buffer = fs.readFileSync(path.resolve(process.cwd(), 'tests/e2e/fixtures/apple.png'));
+        await route.fulfill({ body: buffer, contentType: 'image/png' });
+    });
+
     // 1. Mock Drive API
     await page.route('**/drive/v3/**', async route => {
         const url = route.request().url();
@@ -78,9 +86,9 @@ export async function mockDriveAPI(page: Page) {
                 json: {
                     id: 'mock-uploaded-file-id',
                     name: 'Uploaded File',
-                    // Use a local internal image so it definitely loads in screenshots
-                    thumbnailLink: 'http://localhost:5174/images/icon-status-synced.png',
-                    webViewLink: 'http://localhost:5174/images/icon-status-synced.png'
+                    // Use generic mock apple so it looks real
+                    thumbnailLink: 'http://localhost:5174/mock-images/apple.png',
+                    webViewLink: 'http://localhost:5174/mock-images/apple.png'
                 }
             });
             return;
