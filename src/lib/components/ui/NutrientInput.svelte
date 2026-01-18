@@ -8,6 +8,7 @@
       class?: string;
       readonly?: boolean;
       onupdate?: (val: number, oldVal?: number) => void;
+      layout?: 'vertical' | 'horizontal';
       [key: string]: any;
   }
 
@@ -20,6 +21,7 @@
       class: className = '',
       readonly = false,
       onupdate,
+      layout = 'vertical',
       ...rest
   }: Props = $props();
 
@@ -39,9 +41,13 @@
   }
 </script>
 
-<label class={`nutrient-input-wrapper ${className}`}>
+<label class={`nutrient-input-wrapper ${layout} ${className}`}>
   {#if label}
     <span class="input-label">{label}</span>
+  {/if}
+  {#if layout === 'horizontal'}
+     <!-- Flex spacer for horizontal layout -->
+     <div class="spacer"></div>
   {/if}
   <div class="input-container">
       <input 
@@ -63,9 +69,27 @@
 <style>
   .nutrient-input-wrapper {
       display: flex;
-      flex-direction: column;
       gap: 4px;
-      align-items: center; /* Center align for columns */
+      align-items: center;
+  }
+
+  .nutrient-input-wrapper.vertical {
+      flex-direction: column;
+  }
+  
+  .nutrient-input-wrapper.horizontal {
+      flex-direction: row;
+      justify-content: space-between;
+      width: 100%;
+      padding: 4px 0;
+  }
+
+  .spacer {
+      flex-grow: 1;
+      border-bottom: 1px dotted rgba(255,255,255,0.1);
+      margin: 0 8px;
+      align-self: flex-end;
+      margin-bottom: 5px;
   }
 
   .input-label {
@@ -73,6 +97,7 @@
       color: rgba(255,255,255,0.6);
       text-transform: uppercase;
       letter-spacing: 0.05em;
+      white-space: nowrap;
   }
 
   .input-container {

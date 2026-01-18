@@ -4,6 +4,7 @@ import { TestStepHelper } from '../helpers/test-step-helper';
 
 test('013-detailed-nutrition: Log and Edit Detailed Nutrition', async ({ page }) => {
     const tester = new TestStepHelper(page, test.info());
+    page.on('console', msg => console.log(msg.text()));
 
 
     // Mock Auth
@@ -165,11 +166,17 @@ test('013-detailed-nutrition: Log and Edit Detailed Nutrition', async ({ page })
         verifications: [{
             spec: 'Edit Fiber updates Total Carbs',
             check: async () => {
-                // Initial: Fiber 8, Carbs 30
-                // Change Fiber to 18 (+10)
+                // Initial: Fiber 8, Sugar 12, Carbs 30. Sum = 20.
+
+                // 1. Change Fiber to 18. Sum = 18 + 12 = 30.
+                // 30 <= 30 (Current Total). Total should NOT change.
                 await page.getByLabel('Fiber').fill('18');
-                // Expect Carbs to become 40
-                await expect(page.getByLabel('Carbohydrates')).toHaveValue('40'); // 30 + 10
+                await expect(page.getByLabel('Carbohydrates')).toHaveValue('30');
+
+                // 2. Change Fiber to 40. Sum = 40 + 12 = 52.
+                // 52 > 30. Total should bumped to 52.
+                await page.getByLabel('Fiber').fill('40');
+                await expect(page.getByLabel('Carbohydrates')).toHaveValue('52');
 
                 // Also edit Caffeine for persistence check
                 await page.getByLabel('Caffeine').fill('50');
@@ -191,10 +198,10 @@ test('013-detailed-nutrition: Log and Edit Detailed Nutrition', async ({ page })
                 }
             },
             {
-                spec: 'Fiber is 18 and Carbs is 40',
+                spec: 'Fiber is 40 and Carbs is 52',
                 check: async () => {
-                    await expect(page.getByLabel('Fiber')).toHaveValue('18');
-                    await expect(page.getByLabel('Carbohydrates')).toHaveValue('40');
+                    await expect(page.getByLabel('Fiber')).toHaveValue('40');
+                    await expect(page.getByLabel('Carbohydrates')).toHaveValue('52');
                 }
             }
         ]

@@ -56,12 +56,12 @@
 
 ---
 
-## Action: Edit Detail
+## Action: Edit Detail (Logic Check)
 
-![Action: Edit Detail](./screenshots/006-edit-detail.png)
+![Action: Edit Detail (Logic Check)](./screenshots/006-edit-detail.png)
 
 **Verifications:**
-- [x] Edit saves correctly
+- [x] Edit Fiber updates Total Carbs
 
 ---
 
@@ -71,6 +71,7 @@
 
 **Verifications:**
 - [x] Caffeine value is now 50
+- [x] Fiber is 40 and Carbs is 52
 
 ---
 
