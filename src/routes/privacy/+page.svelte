@@ -37,6 +37,7 @@
         <p>To estimate calories, Food Sheets uses the <strong>Google Gemini API</strong>.</p>
 
         <h3>Image Analysis</h3>
+        <p>We utilize the <code>generative-language.retriever</code> permission scope to access the Gemini API.</p>
         <p>When you select a food photo, it is sent to the Gemini API for analysis.</p>
         <ul>
             <li><strong>Direct Connection:</strong> The app connects directly to Google's API using your personal credentials. No developer server sits in the middle.</li>
