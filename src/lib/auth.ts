@@ -1,4 +1,5 @@
 import { writable } from 'svelte/store';
+import { base } from '$app/paths';
 
 // @ts-ignore
 export const GOOGLE_CLIENT_ID = (import.meta.env && import.meta.env.VITE_GOOGLE_OAUTH_ID) || undefined;
@@ -127,7 +128,7 @@ function handleTokenResponse(response: any, onSuccess: (token: string) => void) 
         signOut();
         // Redirect to signin if silent refresh fails
         // Use window.location as we are in a lib file and might not have router active or this is the safest full reset
-        window.location.href = '/';
+        window.location.href = `${base}/`;
         return;
     }
 
