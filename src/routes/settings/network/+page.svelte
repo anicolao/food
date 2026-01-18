@@ -1,5 +1,6 @@
 <script lang="ts">
   import { onMount, onDestroy } from "svelte";
+  import { base } from "$app/paths";
   import { getPendingEvents } from "$lib/db";
   import { syncManager } from "$lib/sync-manager";
   import { store, setConfig } from "$lib/store";
@@ -372,7 +373,7 @@
       We do not share or store your data: it is on your device and in your
       Google account only.
     </p>
-    <a href="/privacy" class="text-accent hover:underline"
+    <a href="{base}/privacy" class="text-accent hover:underline"
       >Read Privacy Policy</a
     >
   </section>
