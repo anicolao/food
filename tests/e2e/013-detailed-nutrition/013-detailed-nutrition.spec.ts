@@ -1,6 +1,8 @@
 import { test, expect } from '@playwright/test';
 import { mockDriveAPI } from '../helpers/mock-drive';
 import { TestStepHelper } from '../helpers/test-step-helper';
+import * as fs from 'fs';
+import * as path from 'path';
 
 test('013-detailed-nutrition: Log and Edit Detailed Nutrition', async ({ page }) => {
     const tester = new TestStepHelper(page, test.info());
@@ -39,6 +41,12 @@ test('013-detailed-nutrition: Log and Edit Detailed Nutrition', async ({ page })
             spec: 'Drive and Gemini APIs mocked',
             check: async () => {
                 await mockDriveAPI(page);
+
+                // Serve generic apple image
+                await page.route('**/mock-images/apple.png', async route => {
+                    const buffer = fs.readFileSync(path.resolve(process.cwd(), 'tests/e2e/fixtures/apple.png'));
+                    await route.fulfill({ body: buffer, contentType: 'image/png' });
+                });
 
                 // Mock Gemini Analysis Response with details
                 await page.route('**/v1beta/models/gemini-2.5-flash:generateContent*', async route => {
@@ -80,7 +88,7 @@ test('013-detailed-nutrition: Log and Edit Detailed Nutrition', async ({ page })
                             query: {
                                 pages: {
                                     '12345': {
-                                        imageinfo: [{ url: 'http://localhost:5174/images/icon-status-synced.png' }]
+                                        imageinfo: [{ url: 'http://localhost:5174/mock-images/apple.png' }]
                                     }
                                 }
                             }
