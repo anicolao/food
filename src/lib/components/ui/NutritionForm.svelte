@@ -39,27 +39,6 @@
       if (readOnly) return;
       
       metrics.details![field] = newVal;
-
-      if (!macro) return;
-
-      // Logic: The Total is a "Floor" for the sum of its components.
-      // If Sum(Components) > Total, bump Total.
-      // Otherwise, leave Total alone (it implies "Other" components exist).
-
-      let sumComponents = 0;
-      if (macro === 'carbs') {
-         // Sum Fiber + Sugar
-         const d = metrics.details || {};
-         sumComponents = (d.fiber || 0) + (d.sugar || 0);
-      } else if (macro === 'fat') {
-         // Sum Saturated + Trans
-         const d = metrics.details || {};
-         sumComponents = (d.saturatedFat || 0) + (d.transFat || 0); 
-      }
-
-      if (sumComponents > metrics[macro]) {
-          metrics[macro] = sumComponents;
-      }
   }
 
   // Direct handlers for macros
@@ -81,16 +60,28 @@
           onupdate={(v) => updateMacro('calories', v)}
           readonly={readOnly}
       />
-      <NutrientInput 
-          layout="horizontal"
-          label="Protein" 
-          value={metrics.protein} 
-          onupdate={(v) => updateMacro('protein', v)}
-          readonly={readOnly}
-      />
+      
+      <div class="divider-row">
+          <div class="divider"></div>
+          <button class="icon-toggle" onclick={() => showDetails = !showDetails}>
+             <img src="/images/icon-toggle-{showDetails ? 'collapse' : 'expand'}.png" alt="Toggle Details" width="24" height="24" />
+          </button>
+      </div>
   </div>
 
-  <div class="divider"></div>
+  <!-- Protein Section -->
+  <div class="group-section">
+      <div class="group-header">
+        <NutrientInput 
+            layout="horizontal"
+            label="Protein" 
+            value={metrics.protein} 
+            onupdate={(v) => updateMacro('protein', v)}
+            readonly={readOnly}
+            class="group-total"
+        />
+      </div>
+  </div>
 
   <!-- Carbs Section -->
   <div class="group-section">
@@ -181,10 +172,6 @@
       {/if}
   </div>
 
-  <button class="details-toggle" onclick={() => showDetails = !showDetails}>
-      {showDetails ? 'Hide Detailed Inputs' : 'Show Detailed Inputs'}
-  </button>
-
   {#if showDetails}
       <div class="other-section" transition:slide>
           <div class="section-label">Micros & Other</div>
@@ -259,11 +246,39 @@
       gap: 0px; /* Seamless stack */
   }
 
+  .divider-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 4px 0;
+  }
+
   .divider {
       height: 1px;
       background: rgba(255,255,255,0.1);
-      width: 100%;
-      margin: 4px 0;
+      flex-grow: 1;
+  }
+  
+  .icon-toggle {
+      background: none;
+      border: none;
+      padding: 0;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      /* Workaround: Crop corners to hide black box artifact */
+      border-radius: 50%;
+      overflow: hidden;
+  }
+  
+  .icon-toggle img {
+      mix-blend-mode: plus-lighter;
+      transition: transform 0.2s ease;
+  }
+  
+  .icon-toggle:hover img {
+      transform: scale(1.1);
   }
 
   .group-section {

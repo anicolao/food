@@ -56,12 +56,12 @@
 
 ---
 
-## Action: Edit Detail (Logic Check)
+## Action: Edit Detail (Independent Fields)
 
-![Action: Edit Detail (Logic Check)](./screenshots/006-edit-detail.png)
+![Action: Edit Detail (Independent Fields)](./screenshots/006-edit-detail.png)
 
 **Verifications:**
-- [x] Edit Fiber updates Total Carbs
+- [x] Edit Fiber does NOT update Total Carbs (Decoupled)
 
 ---
 
@@ -71,7 +71,7 @@
 
 **Verifications:**
 - [x] Caffeine value is now 50
-- [x] Fiber is 40 and Carbs is 52
+- [x] Fiber is 40 and Carbs is 30
 
 ---
 

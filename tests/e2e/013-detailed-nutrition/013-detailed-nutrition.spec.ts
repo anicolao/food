@@ -118,7 +118,8 @@ test('013-detailed-nutrition: Log and Edit Detailed Nutrition', async ({ page })
             {
                 spec: 'Detailed fields visible after toggle',
                 check: async () => {
-                    await page.getByRole('button', { name: /Show Detailed/ }).click();
+                    // Toggle button is now an icon button
+                    await page.locator('.icon-toggle').click();
                     await expect(page.getByLabel('Saturated')).toHaveValue('5');
                     await expect(page.getByLabel('Sodium')).toHaveValue('450');
                     await expect(page.getByLabel('Fiber')).toHaveValue('8');
@@ -154,7 +155,7 @@ test('013-detailed-nutrition: Log and Edit Detailed Nutrition', async ({ page })
         verifications: [{
             spec: 'Details align with mocked data',
             check: async () => {
-                await page.getByRole('button', { name: /Show Detailed/ }).click();
+                await page.locator('.icon-toggle').click();
                 await expect(page.getByLabel('Saturated')).toHaveValue('5');
                 await expect(page.getByLabel('Sodium')).toHaveValue('450');
             }
@@ -162,21 +163,17 @@ test('013-detailed-nutrition: Log and Edit Detailed Nutrition', async ({ page })
     });
 
     await tester.step('edit_detail', {
-        description: 'Action: Edit Detail (Logic Check)',
+        description: 'Action: Edit Detail (Independent Fields)',
         verifications: [{
-            spec: 'Edit Fiber updates Total Carbs',
+            spec: 'Edit Fiber does NOT update Total Carbs (Decoupled)',
             check: async () => {
-                // Initial: Fiber 8, Sugar 12, Carbs 30. Sum = 20.
+                // Initial: Fiber 8, Sugar 12, Carbs 30.
 
-                // 1. Change Fiber to 18. Sum = 18 + 12 = 30.
-                // 30 <= 30 (Current Total). Total should NOT change.
-                await page.getByLabel('Fiber').fill('18');
-                await expect(page.getByLabel('Carbohydrates')).toHaveValue('30');
-
-                // 2. Change Fiber to 40. Sum = 40 + 12 = 52.
-                // 52 > 30. Total should bumped to 52.
+                // Change Fiber to 40. 
                 await page.getByLabel('Fiber').fill('40');
-                await expect(page.getByLabel('Carbohydrates')).toHaveValue('52');
+
+                // Total should remain 30 because logic is decoupled
+                await expect(page.getByLabel('Carbohydrates')).toHaveValue('30');
 
                 // Also edit Caffeine for persistence check
                 await page.getByLabel('Caffeine').fill('50');
@@ -193,15 +190,15 @@ test('013-detailed-nutrition: Log and Edit Detailed Nutrition', async ({ page })
                 spec: 'Caffeine value is now 50',
                 check: async () => {
                     await page.getByText('Detailed Salad').click();
-                    await page.getByRole('button', { name: /Show Detailed/ }).click();
+                    await page.locator('.icon-toggle').click();
                     await expect(page.getByLabel('Caffeine')).toHaveValue('50');
                 }
             },
             {
-                spec: 'Fiber is 40 and Carbs is 52',
+                spec: 'Fiber is 40 and Carbs is 30',
                 check: async () => {
                     await expect(page.getByLabel('Fiber')).toHaveValue('40');
-                    await expect(page.getByLabel('Carbohydrates')).toHaveValue('52');
+                    await expect(page.getByLabel('Carbohydrates')).toHaveValue('30');
                 }
             }
         ]
