@@ -34,7 +34,7 @@
 
     <section>
         <h2>2. Artificial Intelligence & Semantic Memory</h2>
-        <p>To estimate calories and answer questions about your diet (e.g., "What did I eat last Tuesday?"), Food Sheets uses the <strong>Google Gemini API</strong>.</p>
+        <p>To estimate calories, Food Sheets uses the <strong>Google Gemini API</strong>.</p>
 
         <h3>Image Analysis</h3>
         <p>When you select a food photo, it is sent to the Gemini API for analysis.</p>

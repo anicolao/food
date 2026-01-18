@@ -24,7 +24,7 @@ We use the system's native Photo Picker (`photospicker.mediaitems.readonly`).
 
 ## 2. Artificial Intelligence & Semantic Memory
 
-To estimate calories and answer questions about your diet (e.g., "What did I eat last Tuesday?"), Food Sheets uses the **Google Gemini API**.
+To estimate calories, Food Sheets uses the **Google Gemini API**.
 
 ### Image Analysis
 When you select a food photo, it is sent to the Gemini API for analysis.
