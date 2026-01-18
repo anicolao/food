@@ -71,26 +71,23 @@
 
 <div class="nutrition-form">
   <!-- Top Level: Calories & Protein -->
-  <div class="top-row">
-      <div class="primary-macro">
-        <NutrientInput 
-            label="Calories" 
-            unit="" 
-            value={metrics.calories} 
-            onupdate={(v) => updateMacro('calories', v)}
-            class="highlight-large"
-            readonly={readOnly}
-        />
-      </div>
-      <div class="primary-macro">
-         <NutrientInput 
-            label="Protein" 
-            value={metrics.protein} 
-            onupdate={(v) => updateMacro('protein', v)}
-            class="highlight-large"
-            readonly={readOnly}
-         />
-      </div>
+  <!-- User requested "refactor to be common". We use standard NutrientInput layout="horizontal" for consistency. -->
+  <div class="primary-macros">
+      <NutrientInput 
+          layout="horizontal"
+          label="Calories" 
+          unit="" 
+          value={metrics.calories} 
+          onupdate={(v) => updateMacro('calories', v)}
+          readonly={readOnly}
+      />
+      <NutrientInput 
+          layout="horizontal"
+          label="Protein" 
+          value={metrics.protein} 
+          onupdate={(v) => updateMacro('protein', v)}
+          readonly={readOnly}
+      />
   </div>
 
   <div class="divider"></div>
@@ -98,24 +95,26 @@
   <!-- Carbs Section -->
   <div class="group-section">
       <div class="group-header">
-          <span class="group-title">Carbohydrates</span>
-          <NutrientInput 
+           <!-- Using NutrientInput even for the header to maintain perfect column alignment -->
+           <NutrientInput 
+            layout="horizontal"
+            label="Carbohydrates"
             value={metrics.carbs} 
             onupdate={(v) => updateMacro('carbs', v)}
-            class="total-input"
             readonly={readOnly}
-            aria-label="Carbohydrates"
+            class="group-total"
           />
       </div>
       
       {#if showDetails}
-        <div class="detail-list">
+        <div class="detail-list" transition:slide>
             <NutrientInput 
                 layout="horizontal"
                 label="Fiber" 
                 value={metrics.details?.fiber} 
                 onupdate={(v) => updateDetail('carbs', 'fiber', v)}
                 readonly={readOnly}
+                indent={true}
             />
             <NutrientInput 
                 layout="horizontal"
@@ -123,6 +122,7 @@
                 value={metrics.details?.sugar} 
                 onupdate={(v) => updateDetail('carbs', 'sugar', v)}
                 readonly={readOnly}
+                indent={true}
             />
             <NutrientInput 
                 layout="horizontal"
@@ -130,7 +130,8 @@
                 value={metrics.details?.addedSugar} 
                 onupdate={(v) => updateDetail('carbs', 'addedSugar', v)}
                 readonly={readOnly}
-                class="indented" 
+                class="double-indent"
+                indent={true}
             />
         </div>
       {/if}
@@ -139,24 +140,25 @@
   <!-- Fat Section -->
   <div class="group-section">
       <div class="group-header">
-          <span class="group-title">Fats</span>
           <NutrientInput 
+            layout="horizontal"
+            label="Fats"
             value={metrics.fat} 
             onupdate={(v) => updateMacro('fat', v)}
-            class="total-input"
             readonly={readOnly}
-            aria-label="Fats"
+            class="group-total"
           />
       </div>
       
       {#if showDetails}
-        <div class="detail-list">
+        <div class="detail-list" transition:slide>
             <NutrientInput 
                 layout="horizontal"
                 label="Saturated" 
                 value={metrics.details?.saturatedFat} 
                 onupdate={(v) => updateDetail('fat', 'saturatedFat', v)}
                 readonly={readOnly}
+                indent={true}
             />
             <NutrientInput 
                 layout="horizontal"
@@ -164,6 +166,7 @@
                 value={metrics.details?.transFat} 
                 onupdate={(v) => updateDetail('fat', 'transFat', v)}
                 readonly={readOnly}
+                indent={true}
             />
             <NutrientInput 
                 layout="horizontal"
@@ -172,6 +175,7 @@
                 value={metrics.details?.cholesterol} 
                 onupdate={(v) => updateDetail(null, 'cholesterol', v)}
                 readonly={readOnly}
+                indent={true}
             />
         </div>
       {/if}
@@ -182,7 +186,7 @@
   </button>
 
   {#if showDetails}
-      <div class="other-section">
+      <div class="other-section" transition:slide>
           <div class="section-label">Micros & Other</div>
           <div class="detail-list">
              <NutrientInput 
@@ -242,55 +246,39 @@
   .nutrition-form {
       display: flex;
       flex-direction: column;
-      gap: 16px;
+      gap: 12px; /* Reduced gap */
       padding: 10px;
       padding-bottom: 20px;
-      /* background: rgba(0,0,0,0.1); remove background to blend better or keep? User didn't complain about bg.*/
       background: rgba(0,0,0,0.2);
       border-radius: 16px;
   }
 
-  .top-row {
+  .primary-macros {
       display: flex;
-      justify-content: space-around;
-      gap: 20px;
-      padding-bottom: 5px;
+      flex-direction: column;
+      gap: 0px; /* Seamless stack */
   }
 
   .divider {
       height: 1px;
       background: rgba(255,255,255,0.1);
       width: 100%;
+      margin: 4px 0;
   }
 
   .group-section {
       display: flex;
       flex-direction: column;
-      gap: 5px;
   }
 
   .group-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 0 5px;
-  }
-
-  .group-title {
-      font-size: 0.9rem;
-      font-weight: 600;
-      color: var(--text-secondary, #aaa);
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
+      /* No extra styling needed, NutrientInput handles it */
   }
 
   .detail-list {
       display: flex;
       flex-direction: column;
-      gap: 2px;
-      padding: 5px 10px;
-      background: rgba(255,255,255,0.03);
-      border-radius: 12px;
+      /* Remove background/padding to make it seamless "refactor to be common" */
   }
 
   .details-toggle {
@@ -307,33 +295,26 @@
   .other-section {
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 4px;
+      margin-top: 8px;
   }
 
   .section-label {
       font-size: 0.8rem;
       font-weight: 600;
       color: rgba(255,255,255,0.5);
-      padding-left: 5px;
+      padding-left: 0; 
+      margin-bottom: 4px;
+      text-transform: uppercase;
   }
   
-  /* Indent Added Sugar visually */
-  :global(.indented) {
-      margin-left: 15px; 
-      width: calc(100% - 15px) !important;
+  :global(.double-indent) {
+      padding-left: 32px !important; /* Extra indentation for added sugar */
   }
 
-  /* Specific overrides via global or deep selectors if Component didn't expose class */
-  :global(.highlight-large .gram-input) {
-      font-size: 1.4rem !important;
-      width: 5ch !important;
-      font-weight: bold;
-      color: var(--text-accent, #fff) !important;
-      padding: 8px !important;
-  }
-  
-  :global(.total-input .gram-input) {
-      font-weight: bold;
-      background: rgba(255,255,255,0.15) !important;
+  /* Make group headers slightly more prominent */
+  :global(.group-total .input-label) {
+      color: rgba(255,255,255,0.9) !important;
+      font-weight: 600 !important;
   }
 </style>
