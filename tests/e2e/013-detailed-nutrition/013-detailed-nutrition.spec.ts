@@ -144,6 +144,8 @@ test('013-detailed-nutrition: Log and Edit Detailed Nutrition', async ({ page })
             check: async () => {
                 await page.getByRole('button', { name: 'Save Entry' }).click();
                 await expect(page).toHaveURL(/\/$/);
+                // Ensure sync completes before potential screenshots (User reported flake)
+                await expect(page.locator('[data-status="synced"]')).toBeVisible();
             }
         }]
     });
