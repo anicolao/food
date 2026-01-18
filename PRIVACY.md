@@ -28,8 +28,9 @@ To estimate calories and answer questions about your diet (e.g., "What did I eat
 
 ### Image Analysis
 When you select a food photo, it is sent to the Gemini API for analysis.
-* **Privacy Protection:** We utilize the Enterprise/Paid tier of the Gemini API. This means Google **does not** use your photos or prompts to train their public AI models.
-* **Retention:** Google may temporarily retain API logs for up to 55 days solely for abuse monitoring (to prevent the generation of illegal content), after which they are deleted.
+* **Direct Connection:** The app connects directly to Google's API using your personal credentials. No developer server sits in the middle.
+* **Data Usage:** Your data is subject to [Google's Gemini API Terms](https://ai.google.dev/gemini-api/terms). If you are using a standard free Google Account, Google may use anonymized data to improve their models.
+* **Retention:** Google may temporarily retain API logs for abuse monitoring.
 
 ### Semantic Memory (The "Retriever")
 The application uses the `generative-language.retriever` scope to create a "Private Corpus" (a searchable index) of your food logs.
