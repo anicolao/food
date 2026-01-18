@@ -32,10 +32,6 @@ When you select a food photo, it is sent to the Gemini API for analysis.
 * **Data Usage:** Your data is subject to [Google's Gemini API Terms](https://ai.google.dev/gemini-api/terms). If you are using a standard free Google Account, Google may use anonymized data to improve their models.
 * **Retention:** Google may temporarily retain API logs for abuse monitoring.
 
-### Semantic Memory (The "Retriever")
-The application uses the `generative-language.retriever` scope to create a "Private Corpus" (a searchable index) of your food logs.
-* **Purpose:** This allows the AI to "remember" your past meals to provide better context and answer your questions about your history.
-* **Isolation:** This index is stored securely within the Google Gemini ecosystem and is strictly isolated to your authenticated account. It is not shared with other users.
 
 ## 3. Account & Authorization
 

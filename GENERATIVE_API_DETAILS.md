@@ -26,11 +26,7 @@ We use **Google OAuth 2.0** to obtain a strict, limited-scope access token direc
     - **Free Tier:** If you are using a standard free Google account, Google [may use this data to improve their models](https://ai.google.dev/gemini-api/terms).
     - **Paid/Enterprise:** If your account is covered by a Workspace Enterprise agreement or you have paid API billing enabled, data protections are stricter.
 
-### 2. Semantic Memory (Retriever)
-- **Scope:** `https://www.googleapis.com/auth/generative-language.retriever`
-- **Purpose:** To index your past logs so you can ask questions like "What did I eat last week?".
-- **Data Storage:** The "Corpus" (index) is created within the Google Gemini ecosystem, tied specifically to your authenticated user ID.
-- **Access:** Only your authenticated account can query this corpus.
+
 
 ## Data Retention & Training
 

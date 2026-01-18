@@ -44,12 +44,7 @@
             <li><strong>Retention:</strong> Google may temporarily retain API logs for abuse monitoring.</li>
         </ul>
 
-        <h3>Semantic Memory (The "Retriever")</h3>
-        <p>The application uses the <code>generative-language.retriever</code> scope to create a "Private Corpus" (a searchable index) of your food logs.</p>
-        <ul>
-            <li><strong>Purpose:</strong> This allows the AI to "remember" your past meals to provide better context and answer your questions about your history.</li>
-            <li><strong>Isolation:</strong> This index is stored securely within the Google Gemini ecosystem and is strictly isolated to your authenticated account. It is not shared with other users.</li>
-        </ul>
+
     </section>
 
     <section>
