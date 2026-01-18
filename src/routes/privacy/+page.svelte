@@ -28,7 +28,7 @@
         <p>We use the system's native Photo Picker (<code>photospicker.mediaitems.readonly</code>).</p>
         <ul>
             <li><strong>User-Initiated Only:</strong> The application does not have general access to your camera roll. It can only process the specific images you explicitly tap to select for analysis.</li>
-            <li><strong>No Background Scanning:</strong> We do not scan your library in the background.</li>
+            <li><strong>No Background Scanning:</strong> We <strong>cannot</strong> scan or access your library in the background.</li>
         </ul>
     </section>
 
