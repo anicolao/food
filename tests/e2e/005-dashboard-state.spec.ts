@@ -19,7 +19,13 @@ test('US-014: Dashboard State Persistence', async ({ page }, testInfo) => {
     const today = '2024-06-15';
     const yesterday = '2024-06-14';
 
-    await page.addInitScript(() => {
+    await page.addInitScript(async () => {
+        if (navigator.serviceWorker) {
+            const registrations = await navigator.serviceWorker.getRegistrations();
+            for (const registration of registrations) {
+                await registration.unregister();
+            }
+        }
         (window as any).google = {
             accounts: {
                 oauth2: {
