@@ -151,6 +151,9 @@ test('US-003 to US-010: User logs food flow', async ({ page }, testInfo) => {
     // Wait for Gemini Mock
     await expect(page.getByLabel('Log Description')).toHaveValue('Mock Apple');
 
+    // Ensure nutrition form icons are loaded (User reported flake)
+    await expect(page.locator('.icon-toggle')).toBeVisible();
+
     await tester.step('analysis', {
         description: 'AI Analysis Received',
         verifications: [
