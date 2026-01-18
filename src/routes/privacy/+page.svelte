@@ -39,8 +39,9 @@
         <h3>Image Analysis</h3>
         <p>When you select a food photo, it is sent to the Gemini API for analysis.</p>
         <ul>
-            <li><strong>Privacy Protection:</strong> We utilize the Enterprise/Paid tier of the Gemini API. This means Google <strong>does not</strong> use your photos or prompts to train their public AI models.</li>
-            <li><strong>Retention:</strong> Google may temporarily retain API logs for up to 55 days solely for abuse monitoring (to prevent the generation of illegal content), after which they are deleted.</li>
+            <li><strong>Direct Connection:</strong> The app connects directly to Google's API using your personal credentials. No developer server sits in the middle.</li>
+            <li><strong>Data Usage:</strong> Your data is subject to <a href="https://ai.google.dev/gemini-api/terms" target="_blank">Google's Gemini API Terms</a>. If you are using a standard free Google Account, Google may use anonymized data to improve their models.</li>
+            <li><strong>Retention:</strong> Google may temporarily retain API logs for abuse monitoring.</li>
         </ul>
 
         <h3>Semantic Memory (The "Retriever")</h3>
