@@ -41,6 +41,7 @@ export default defineConfig({
             use: {
                 // Ensure we use the global viewport settings by not overriding them with desktop defaults
                 browserName: 'chromium',
+                channel: 'chrome', // or just use default chromium
             },
         },
     ],
