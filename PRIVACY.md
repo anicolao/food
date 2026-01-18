@@ -71,5 +71,5 @@ Because the code is Open Source, any changes to how data is handled will be visi
 ## 9. Contact Us
 If you have questions about this privacy policy or the open-source nature of the project, please contact:
 
-**[Your Name / Support Email]**
-[Link to GitHub Repository]
+**Alex Nicolaou / alex@stockgamblers.com**
+[https://github.com/anicolao/food](https://github.com/anicolao/food)

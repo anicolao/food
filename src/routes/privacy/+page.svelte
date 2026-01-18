@@ -106,8 +106,8 @@
     <section>
         <h2>9. Contact Us</h2>
         <p>If you have questions about this privacy policy or the open-source nature of the project, please contact:</p>
-        <p><strong>[Your Name / Support Email]</strong><br>
-        [Link to GitHub Repository]</p>
+        <p><strong>Alex Nicolaou / <a href="mailto:alex@stockgamblers.com">alex@stockgamblers.com</a></strong><br>
+        <a href="https://github.com/anicolao/food">https://github.com/anicolao/food</a></p>
     </section>
 </div>
 
