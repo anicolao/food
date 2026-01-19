@@ -38,8 +38,7 @@ test('US-012: Stats persist after reload', async ({ page }, testInfo) => {
             await route.fulfill({
                 json: {
                     values: [
-                        ['HeaderID', 'Time', 'Type', 'Payload'],
-                        // Row 2: Confirmed Entry
+                        // Row 1: Confirmed Entry (No Header)
                         ['uuid-1', '2024-03-15', 'log/entryConfirmed', JSON.stringify({
                             entry: {
                                 id: '1',
