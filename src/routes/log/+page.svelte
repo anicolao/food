@@ -514,15 +514,23 @@
         if (raceResult) {
             // All finished (or failed) within 3s
             const files = raceResult;
-            driveUrls = files.filter(f => f !== null).map(f => {
-                if (f && f.thumbnailLink) return f.thumbnailLink;
-                if (f && f.id) return `https://drive.google.com/thumbnail?id=${f.id}&sz=w2048`;
-                if (f && f.webViewLink) return f.webViewLink;
-                return '';
-            }).filter(u => u).join(', ');
+            driveUrls = attachedMedia.map((m, i) => {
+                const f = files[i];
+                // 1. If we have a new upload file, use it
+                if (f) {
+                    if (f.thumbnailLink) return f.thumbnailLink;
+                    if (f.id) return `https://drive.google.com/thumbnail?id=${f.id}&sz=w2048`;
+                    if (f.webViewLink) return f.webViewLink;
+                }
+                // 2. If no new upload (null result), check if it was an existing remote image
+                if (m.previewUrl && m.previewUrl.startsWith('http')) {
+                    return m.previewUrl;
+                }
+                return null;
+            }).filter(u => u !== null).join(', ');
         } else {
              console.warn('Image upload timed out (backgrounding). Saving entry with pending media.');
-             // Logic note: The uploadPromises are still running. They will dispatch Completed/Failed when done.
+             // Fallback: Best effort to save what we have locally
         }
 
         const isoDateTime = new Date(`${entryDate}T${entryTime}`).toISOString();
@@ -550,7 +558,7 @@
             fat: nutrition.fat,
             carbs: nutrition.carbs,
             protein: nutrition.protein,
-            imageDriveUrl: driveUrls || (attachedMedia.length > 0 && attachedMedia[0].previewUrl.startsWith('http') ? attachedMedia[0].previewUrl : ''), 
+            imageDriveUrl: driveUrls, 
             mediaIds: mediaIds, // Link to lifecycle events
             rawJson: JSON.parse(JSON.stringify(form)),
             details: JSON.parse(JSON.stringify(nutrition.details))
