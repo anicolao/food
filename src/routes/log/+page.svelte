@@ -274,9 +274,17 @@
     if (imagePreviews.length === 0) return;
     
     analyzing = true;
+    const requestId = crypto.randomUUID();
+
     try {
       // Force render tick to ensure 'analyzing' state is visible even if analyzeImage fails fast
       await new Promise(r => setTimeout(r, 1)); 
+
+      store.dispatch(dispatchEvent('ai/analysisRequested', {
+        requestId,
+        inputType: 'image',
+        contentLength: imagePreviews.length
+      }));
 
       const images = imagePreviews.map((preview, i) => {
           try {
@@ -295,7 +303,7 @@
       // Use analyzeFood which supports both
       const result = await analyzeFood({ 
           images: images.length > 0 ? images : undefined,
-          text: (currentMode === 'TEXT' || currentMode === 'VOICE') ? rationale : undefined // If we re-analyze, rationale holds the text
+          text: (currentMode === 'TEXT' || currentMode === 'VOICE') ? rationale : undefined 
       }, correction ? previousRationale : undefined, correction);
       
       itemName = result.item_name || '';
@@ -312,11 +320,16 @@
       }
 
       store.dispatch(dispatchEvent('log/aiEstimateReceived', { 
+        requestId, // tracing
         imagesCount: imageFiles.length, 
         rawJson: result 
       }));
     } catch (e) {
       console.error('Analysis failed', e);
+      store.dispatch(dispatchEvent('ai/analysisFailed', {
+        requestId,
+        error: e instanceof Error ? e.message : String(e)
+      }));
       toasts.error('Gemini analysis failed. Please try again.');
     } finally {
       analyzing = false;
@@ -328,10 +341,18 @@
       sheetOpen = true; // Open the log sheet to show progress/results
       
       analyzing = true;
+      const requestId = crypto.randomUUID();
+
       try {
+          store.dispatch(dispatchEvent('ai/analysisRequested', {
+            requestId,
+            inputType: 'text',
+            contentLength: text.length
+          }));
+
           // 1. Get Nutrition Analysis
           const result = await analyzeFood({ text });
-          applyAnalysisResult(result);
+          applyAnalysisResult(result, requestId);
           
           // 2. Fetch Representative Image
           if (result.searchQuery) {
@@ -372,13 +393,17 @@
           }
       } catch (e) {
           console.error(e);
+          store.dispatch(dispatchEvent('ai/analysisFailed', {
+            requestId,
+            error: e instanceof Error ? e.message : String(e)
+          }));
           toasts.error('Analysis failed');
       } finally {
           analyzing = false;
       }
   }
   
-  function applyAnalysisResult(result: NutritionEstimate) {
+  function applyAnalysisResult(result: NutritionEstimate, requestId?: string) {
       itemName = result.item_name || '';
       rationale = result.rationale || '';
       nutrition.calories = result.calories || 0;
@@ -388,6 +413,7 @@
       nutrition.details = result.details || {};
       
       store.dispatch(dispatchEvent('log/aiEstimateReceived', { 
+         requestId,
          imagesCount: imageFiles.length, 
          rawJson: result,
          inputType: 'text'
@@ -408,32 +434,81 @@
         const folderId = state.config?.folderId || undefined;
         
         let driveUrls = '';
-        try {
-            if (imageFiles.length > 0) {
-                // Wrap upload in a race with a timeout (e.g., 3s)
-                // If offline, native fetch usually fails fast, but this guarantees UI responsiveness.
-                const timeoutProm = new Promise<never>((_, reject) => 
-                    setTimeout(() => reject(new Error('Upload timed out')), 3000)
-                );
 
-                const uploadPromises = imageFiles.map(file => 
-                    uploadImage(file, `FoodLog-${Date.now()}-${file.name}`, folderId)
-                );
+        // Media Lifecycle: Link tempIds
+        const mediaItems = imageFiles.map(file => ({
+            tempId: crypto.randomUUID(),
+            file
+        }));
+        
+        const mediaIds = mediaItems.map(m => m.tempId);
 
-                const driveFiles = await Promise.race([
-                    Promise.all(uploadPromises),
-                    timeoutProm
-                ]) as GoogleDriveFile[];
+        // 1. Dispatch STARTED events
+        mediaItems.forEach(item => {
+            store.dispatch(dispatchEvent('media/uploadStarted', {
+                tempId: item.tempId,
+                mimeType: item.file.type,
+                name: item.file.name,
+                size: item.file.size,
+                context: 'log_entry',
+                timestamp: new Date().toISOString()
+            }));
+        });
 
-
-                driveUrls = driveFiles.map(f => {
-                    if (f.thumbnailLink) return f.thumbnailLink;
-                    if (f.id) return `https://drive.google.com/thumbnail?id=${f.id}&sz=w2048`;
-                    return f.webViewLink;
-                }).join(', ');
+        // 2. Start Uploads (Detached from navigation blocker if needed, but we race to capture current context)
+        const uploadPromises = mediaItems.map(async (item) => {
+            try {
+                // Return keys for mapping later
+                const driveFile = await uploadImage(item.file, `FoodLog-${Date.now()}-${item.file.name}`, folderId);
+                
+                // Dispatch SUCCESS
+                store.dispatch(dispatchEvent('media/uploadCompleted', {
+                    tempId: item.tempId,
+                    providerId: driveFile.id,
+                    url: driveFile.thumbnailLink || driveFile.webViewLink,
+                    timestamp: new Date().toISOString()
+                }));
+                
+                return driveFile;
+            } catch (e) {
+                 // Dispatch FAIL
+                store.dispatch(dispatchEvent('media/uploadFailed', {
+                    tempId: item.tempId,
+                    reason: e instanceof Error ? e.message : String(e),
+                    timestamp: new Date().toISOString()
+                }));
+                // We re-throw so Promise.allSettled knows? Or we return null?
+                // The race below expects DriveFiles for url construction.
+                // We'll return null here.
+                return null;
             }
-        } catch (uploadError) {
-            console.warn('Image upload failed (likely offline). Proceeding with save.', uploadError);
+        });
+
+        // Use Promise.race to maintain responsiveness, but ENSURE uploads continue.
+        // We attach the catch to the race only. The original promises inside `uploadPromises` are already handled (catch logs error).
+        // Actually, we need to collect URLs if they succeed FAST enough.
+        
+        const timeoutProm = new Promise<null>((resolve) => 
+            setTimeout(() => resolve(null), 3000)
+        );
+
+        // We use allSettled to get what we can
+        const raceResult = await Promise.race([
+            Promise.all(uploadPromises),
+            timeoutProm 
+        ]);
+
+        if (raceResult) {
+            // All finished (or failed) within 3s
+            const files = raceResult;
+            driveUrls = files.filter(f => f !== null).map(f => {
+                if (f.thumbnailLink) return f.thumbnailLink;
+                if (f.id) return `https://drive.google.com/thumbnail?id=${f.id}&sz=w2048`;
+                return f.webViewLink;
+            }).join(', ');
+        } else {
+             console.warn('Image upload timed out (backgrounding). Saving entry with pending media.');
+             // Logic note: The uploadPromises are still running. They will dispatch Completed/Failed when done.
         }
 
         const isoDateTime = new Date(`${entryDate}T${entryTime}`).toISOString();
@@ -462,6 +537,7 @@
             carbs: nutrition.carbs,
             protein: nutrition.protein,
             imageDriveUrl: driveUrls || (imagePreviews.length > 0 && imagePreviews[0].startsWith('http') ? imagePreviews[0] : ''), 
+            mediaIds: mediaIds, // Link to lifecycle events
             rawJson: JSON.parse(JSON.stringify(form)),
             details: JSON.parse(JSON.stringify(nutrition.details))
         };
@@ -530,7 +606,7 @@
             {#if currentMode === 'VOICE'}
                 <VoiceRecorder 
                     on:close={() => currentMode = 'IDLE'}
-                    on:analyze={(e) => handleTextAnalyze(e.detail)} 
+                    on:analyze={(e: CustomEvent) => handleTextAnalyze(e.detail)} 
                 />
             {/if}
             

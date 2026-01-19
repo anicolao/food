@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount, onDestroy, createEventDispatcher } from 'svelte';
   import { toasts } from '$lib/toast';
+  import { store, dispatchEvent } from '$lib/store';
 
   const dispatch = createEventDispatcher();
   
@@ -14,6 +15,7 @@
   let microphone: MediaStreamAudioSourceNode;
   let stream: MediaStream;
   let animationId: number;
+  let startTime = 0;
 
   onMount(async () => {
     // 1. Initialize Speech Recognition
@@ -32,6 +34,7 @@
 
     recognition.onstart = () => {
         recognizing = true;
+        startTime = Date.now();
         resetSilenceTimer();
     };
 
@@ -198,6 +201,12 @@
   function done() {
       stop();
       if (transcript.trim()) {
+          const duration = startTime ? (Date.now() - startTime) / 1000 : 0;
+          store.dispatch(dispatchEvent('voice/captureCompleted', {
+              traceId: crypto.randomUUID(),
+              durationSeconds: duration,
+              transcript: transcript
+          }));
           dispatch('analyze', transcript);
       } else {
           close();

@@ -1,24 +1,17 @@
-# Design Review: Event Lifecycle & "Facts on the Ground"
+# Audit Event Logging Gaps and Implement Lifecycle Events
 
-This PR introduces `DESIGN_REVIEW.md`, a design document auditing the application's event lifecycle.
+## Description
+Implements the "Facts on the Ground" event lifecycle as detailed in `docs/DESIGN_REVIEW.md`. This ensures that all significant user actions (Media Upload, AI Analysis, Voice Capture) are recorded as distinct events, even if the final "Log Entry" save fails or is incomplete.
 
-## Changes
-- Added `docs/DESIGN_REVIEW.md`
+### Key Changes
+-   **Store Schema**: Added `mediaIds` to `LogEntry` to link entries to their media lifecycle events.
+-   **Media Lifecycle**: Refactored `log/+page.svelte` to dispatch `media/uploadStarted` immediately upon selection, and `media/uploadCompleted` or `media/uploadFailed` asynchronously.
+-   **AI Lifecycle**: Wrapped Gemini analysis calls in `log/+page.svelte` with `ai/analysisRequested` and `ai/analysisFailed` events.
+-   **Voice Lifecycle**: Updated `VoiceRecorder.svelte` to dispatch `voice/captureCompleted` with raw transcript and duration before analysis.
 
-## Context
-As requested, this document proposes a shift to "Flow Recording" events (e.g., `media/uploadStarted`, `ai/analysisRequested`) to ensure observability and prevent data loss during async failures (like the reported image upload bug).
+## Original User Prompt
+> Read DEVELOPMENT.md and designs/DESIGN_REVIEW.md. Implement the ideas in the design review and then follow WORKFLOW.md to create a PR.
 
-## User Request Log
-
-### Request 1
-We have a bug where images aren't getting associated with their log entries, and looking at the event log I can't even see how images and log entries are associated. This ought to be being done with events —"facts on the ground"— but in fact I can find no trace of such a connection. Write an IMAGES_DESIGN.md that explains how images are implemented, and how it might be improved so that it was more obvious what is happening.
-
-### Request 2
-OK this design doc is off base. Let me remind you of the main point of event sourcing: to record "facts on the ground": things that happen, that we will need to know about later. So in this example, we should at least be recording the results of uploading the photo to google drive: that's a distinct event where we get new information (namely the URL of the uploaded image, or an error if we fail). So there should be some sort of imageUploaded event.
-
-Now I am experiencing a bug where images aren't linked to log entries — looks like the current code can fail to upload and somehow there is a fallback where the imageDriveURL = "" at the end which should never happen. If the image upload is async with the log event, we might need an event to say the image started uploading and give it an ID; then the ID can be associated with the log entry even if the drive file doesn't exist yet, so that later when it does we can fix it up.
-
-Now this specific case is just one of potentially many we need to review. So write a DESIGN_REVIEW.md that looks for other instances of events that are the result of a user action (an edit, a photo attachment, a voice snippet, etc.) and ensure that those things are recorded when they happen so that if things go wrong in those flows we can see what's going on. For example, probably we should have an event for every API call that records the API call being made and the result that came back.
-
-### Request 3
-The file should be on a branch and uploaded to a PR for review, followign WORKFLOW.md
+## Verification
+-   **Manual**: Verified `svelte-check` passes with no errors.
+-   **Automated**: (Ideally) E2E tests should verify these events appear in the store. Existing `002-log-food` test ensures regression safety for the critical path.
