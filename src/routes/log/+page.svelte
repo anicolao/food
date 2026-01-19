@@ -742,7 +742,7 @@
       const state = store.getState();
       const favs = state.projections.favourites || [];
       if (favs.length === 0) {
-        toasts.info("Create favourites by visiting and old entry and logging.");
+        toasts.info("Create favourites by visiting an old entry and logging.");
       } else {
         favourites = favs;
         showFavouritesPicker = true;
