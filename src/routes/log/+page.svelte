@@ -607,6 +607,17 @@
           nutrition.fat = contextEntry.fat;
           nutrition.details = contextEntry.details || {};
           
+          // Copy images if any
+          if (contextEntry.imageDriveUrl) {
+              const urls = contextEntry.imageDriveUrl.split(',').map(u => u.trim()).filter(u => u);
+              attachedMedia = urls.map(url => ({
+                  tempId: crypto.randomUUID(), 
+                  file: new File([""], "existing-image", { type: "image/jpeg" }), // Dummy file, logic handles URL
+                  previewUrl: url,
+                  uploadPromise: Promise.resolve(null) // Already uploaded
+              }));
+          }
+          
           // Dispatch Log Again Event to track metrics/favourites
           store.dispatch(dispatchEvent('log/logAgain', {
                sourceEntryId: contextEntry.id,

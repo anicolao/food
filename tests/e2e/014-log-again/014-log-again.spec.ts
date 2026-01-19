@@ -107,7 +107,8 @@ test('US-014: Log Again and Favourites', async ({ page }, testInfo) => {
         verifications: [
             { spec: 'Name is Existing Salad', check: async () => await expect(page.getByLabel('Log Description')).toHaveValue('Existing Salad') },
             { spec: 'Calories is 350', check: async () => await expect(page.getByLabel('Calories')).toHaveValue('350') },
-            { spec: 'Date is Today (15th)', check: async () => await expect(page.getByLabel('Date')).toHaveValue('2024-03-15') } // NOT 14th!
+            { spec: 'Date is Today (15th)', check: async () => await expect(page.getByLabel('Date')).toHaveValue('2024-03-15') },
+            { spec: 'Media is preserved', check: async () => await expect(page.locator('.preview-strip img')).toHaveCount(1) } // Check image copy
         ]
     });
 
