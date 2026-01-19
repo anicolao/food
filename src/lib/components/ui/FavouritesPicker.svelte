@@ -24,7 +24,7 @@
     </div>
 
     <div class="grid">
-      {#each favourites.sort((a, b) => b.usageCount - a.usageCount) as item}
+      {#each [...favourites].sort((a, b) => b.usageCount - a.usageCount) as item}
         <button class="fav-item glass-panel" onclick={() => handleSelect(item)}>
           <div class="icon">⭐</div>
           <div class="details">

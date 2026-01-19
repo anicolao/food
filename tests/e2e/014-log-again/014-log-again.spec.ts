@@ -142,6 +142,8 @@ test('US-014: Log Again and Favourites', async ({ page }, testInfo) => {
     // 12. Verify Form filled again
     await expect(page.locator('.modal')).not.toBeVisible();
     await expect(page.getByLabel('Log Description')).toHaveValue('Existing Salad');
+    // Verify Media also restored from favourite (since Log Again populated it previously)
+    await expect(page.locator('.preview-strip img')).toHaveCount(2);
 
     tester.generateDocs();
 });
