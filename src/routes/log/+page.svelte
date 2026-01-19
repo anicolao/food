@@ -665,8 +665,6 @@
         <div class="start-ui">
             <h1>Log Food</h1>
             
-            <h1>Log Food</h1>
-            
             <InputGrid {contextEntry} on:select={(e) => handleModeSelect(e.detail)} />
 
             {#if currentMode === 'TEXT'}
