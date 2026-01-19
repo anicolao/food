@@ -8,11 +8,12 @@ I have implemented the "Facts on the Ground" event lifecycle to ensure robust ob
 -   Added `mediaIds` to `LogEntry` in `src/lib/store.ts` to link entries with their media lifecycle events.
 
 ### 2. Media Lifecycle
--   Refactored `log/+page.svelte` to dispatch events:
-    -   `media/uploadStarted`: Immediately upon file selection.
-    -   `media/uploadCompleted`: Upon successful Drive upload.
-    -   `media/uploadFailed`: If upload fails (captures error reason).
+-   Refactored `log/+page.svelte` to implement "Upload on Pick":
+    -   `media/uploadStarted`: Dispatched immediately upon file selection (generated `tempId`).
+    -   `media/uploadCompleted`: Dispatched when background upload finishes.
+    -   `media/uploadFailed`: Dispatched if upload fails.
 -   Decoupled upload failure from entry saving to prevent data loss.
+-   `handleSubmit` now waits for the *existing* upload promises initiated at pick time.
 
 ### 3. AI Lifecycle
 -   Updated `log/+page.svelte` to dispatch events:

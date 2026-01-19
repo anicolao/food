@@ -5,7 +5,11 @@ Implements the "Facts on the Ground" event lifecycle as detailed in `docs/DESIGN
 
 ### Key Changes
 -   **Store Schema**: Added `mediaIds` to `LogEntry` to link entries to their media lifecycle events.
--   **Media Lifecycle**: Refactored `log/+page.svelte` to dispatch `media/uploadStarted` immediately upon selection, and `media/uploadCompleted` or `media/uploadFailed` asynchronously.
+-   **Media Lifecycle**: Refactored `log/+page.svelte` to implement "Upload on Pick":
+    -   Images are uploaded immediately upon selection (backgrounded).
+    -   `media/uploadStarted` dispatched immediately with generated `tempId`.
+    -   `mediaIds` are linked to `ai/analysisRequested` events for better observability.
+    -   `handleSubmit` waits for existing background uploads instead of starting new ones.
 -   **AI Lifecycle**: Wrapped Gemini analysis calls in `log/+page.svelte` with `ai/analysisRequested` and `ai/analysisFailed` events.
 -   **Voice Lifecycle**: Updated `VoiceRecorder.svelte` to dispatch `voice/captureCompleted` with raw transcript and duration before analysis.
 

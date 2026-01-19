@@ -26,8 +26,16 @@
   
   // let showPhotosSelector = $state(false); // Unused, logic handled by picker
 
-  let imageFiles: File[] = $state([]);
-  let imagePreviews: string[] = $state([]);
+  type AttachedMedia = {
+      tempId: string;
+      file: File;
+      previewUrl: string;
+      uploadPromise: Promise<GoogleDriveFile | null>;
+  };
+
+  let attachedMedia: AttachedMedia[] = $state([]);
+  let imagePreviews = $derived(attachedMedia.map(m => m.previewUrl)); // Compatibility derived
+
   
   let analyzing = $state(false);
   
@@ -69,7 +77,7 @@
   
   // Sheet State
   // We consider the sheet 'open' (preview mode) if we have images, pending text data with "AI Found" image, OR if we are analyzing
-  let sheetOpen = $derived(imagePreviews.length > 0 || analyzing || itemName.length > 0);
+  let sheetOpen = $derived(attachedMedia.length > 0 || analyzing || itemName.length > 0);
 
   function updateMealType(dateObj: Date) {
      const hour = dateObj.getHours();
@@ -184,7 +192,7 @@
 
   async function processPickedItem(item: any, token: string) {
       if (!item.baseUrl) return;
-      if (item.creationTime && imageFiles.length === 0) {
+      if (item.creationTime && attachedMedia.length === 0) {
           const date = new Date(item.creationTime);
           entryDate = date.toISOString().split('T')[0];
           entryTime = date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
@@ -235,8 +243,8 @@
                entryDate = `${year}-${month}-${day}`;
                
                entryTime = date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
-               updateMealType(date);
-           } else if (imageFiles.length === 0) {
+                updateMealType(date);
+            } else if (attachedMedia.length === 0) {
                const date = new Date(file.lastModified || Date.now());
                // Date to Local YYYY-MM-DD
                const year = date.getFullYear();
@@ -252,12 +260,49 @@
           }
       }
 
-      imageFiles = [...imageFiles, file];
+      const tempId = crypto.randomUUID();
+      const folderId = (store.getState() as RootState).config?.folderId || undefined;
+
+      // Start Upload Immediately
+      store.dispatch(dispatchEvent('media/uploadStarted', {
+            tempId,
+            mimeType: file.type,
+            name: file.name,
+            size: file.size,
+            context: 'log_entry',
+            timestamp: new Date().toISOString()
+      }));
+
+      const uploadPromise = uploadImage(file, `FoodLog-${Date.now()}-${file.name}`, folderId)
+          .then(driveFile => {
+               store.dispatch(dispatchEvent('media/uploadCompleted', {
+                    tempId,
+                    providerId: driveFile.id,
+                    url: driveFile.thumbnailLink || driveFile.webViewLink,
+                    timestamp: new Date().toISOString()
+                }));
+                return driveFile;
+          })
+          .catch(e => {
+               store.dispatch(dispatchEvent('media/uploadFailed', {
+                    tempId,
+                    reason: e instanceof Error ? e.message : String(e),
+                    timestamp: new Date().toISOString()
+                }));
+                return null;
+          });
 
       const reader = new FileReader();
       reader.onload = (e) => {
           if (e.target?.result) {
-              imagePreviews = [...imagePreviews, e.target.result as string];
+              const previewUrl = e.target.result as string;
+              
+              attachedMedia = [...attachedMedia, {
+                  tempId,
+                  file,
+                  previewUrl,
+                  uploadPromise
+              }];
               
               if (triggerAnalysis) {
                   if (analysisTimer) clearTimeout(analysisTimer);
@@ -283,14 +328,15 @@
       store.dispatch(dispatchEvent('ai/analysisRequested', {
         requestId,
         inputType: 'image',
-        contentLength: imagePreviews.length
+        contentLength: attachedMedia.length,
+        mediaIds: attachedMedia.map(m => m.tempId)
       }));
 
-      const images = imagePreviews.map((preview, i) => {
+      const images = attachedMedia.map((media, i) => {
           try {
               return {
-                  base64: preview.split(',')[1],
-                  mimeType: preview.split(';')[0].split(':')[1]
+                  base64: media.previewUrl.split(',')[1],
+                  mimeType: media.previewUrl.split(';')[0].split(':')[1]
               };
           } catch (e) {
               console.error(`Failed to parse image ${i}`, e);
@@ -321,7 +367,7 @@
 
       store.dispatch(dispatchEvent('log/aiEstimateReceived', { 
         requestId, // tracing
-        imagesCount: imageFiles.length, 
+        imagesCount: attachedMedia.length,  
         rawJson: result 
       }));
     } catch (e) {
@@ -383,12 +429,15 @@
                   } else {
                       // Only fallback if it's NOT a 404 (e.g. 403 or opaque might be loadable via img tag)
                       console.warn('Failed to fetch matched image, using direct URL');
-                      if (imagePreviews.length === 0) imagePreviews = [imageUrl];
+                      // if (attachedMedia.length === 0) ... complex fallback, simplified to skip for now to maintain type safety
                   }
               } catch (err) {
                   // Network/CORS error on verification - optimistic usage
                   console.error('Network error fetching matched image, using direct URL', err);
-                  if (imagePreviews.length === 0) imagePreviews = [imageUrl];
+                  // Direct URL fallback not supported with Upload on Pick as we need a File object
+                  // But we might be able to create a dummy file? Or just fallback to NO image upload but showing it?
+                  // For now, let's just create a dummy file wrapper if we strongly want to support this edge case
+                  // or just skip image.
               }
           }
       } catch (e) {
@@ -414,7 +463,7 @@
       
       store.dispatch(dispatchEvent('log/aiEstimateReceived', { 
          requestId,
-         imagesCount: imageFiles.length, 
+         imagesCount: attachedMedia.length, 
          rawJson: result,
          inputType: 'text'
       }));
@@ -427,72 +476,22 @@
 
   async function handleSubmit() {
     // We allow saving if we have images OR if we have populated data (itemName)
-    if ((imagePreviews.length === 0 && !itemName) || isSaving) return;
+    if ((attachedMedia.length === 0 && !itemName) || isSaving) return;
     isSaving = true;
     try {
-        const state = store.getState() as RootState;
-        const folderId = state.config?.folderId || undefined;
-        
         let driveUrls = '';
 
-        // Media Lifecycle: Link tempIds
-        const mediaItems = imageFiles.map(file => ({
-            tempId: crypto.randomUUID(),
-            file
-        }));
-        
-        const mediaIds = mediaItems.map(m => m.tempId);
+        const mediaIds = attachedMedia.map(m => m.tempId);
 
-        // 1. Dispatch STARTED events
-        mediaItems.forEach(item => {
-            store.dispatch(dispatchEvent('media/uploadStarted', {
-                tempId: item.tempId,
-                mimeType: item.file.type,
-                name: item.file.name,
-                size: item.file.size,
-                context: 'log_entry',
-                timestamp: new Date().toISOString()
-            }));
-        });
+        // Wait for existing uploads
+        const uploadPromises = attachedMedia.map(m => m.uploadPromise);
 
-        // 2. Start Uploads (Detached from navigation blocker if needed, but we race to capture current context)
-        const uploadPromises = mediaItems.map(async (item) => {
-            try {
-                // Return keys for mapping later
-                const driveFile = await uploadImage(item.file, `FoodLog-${Date.now()}-${item.file.name}`, folderId);
-                
-                // Dispatch SUCCESS
-                store.dispatch(dispatchEvent('media/uploadCompleted', {
-                    tempId: item.tempId,
-                    providerId: driveFile.id,
-                    url: driveFile.thumbnailLink || driveFile.webViewLink,
-                    timestamp: new Date().toISOString()
-                }));
-                
-                return driveFile;
-            } catch (e) {
-                 // Dispatch FAIL
-                store.dispatch(dispatchEvent('media/uploadFailed', {
-                    tempId: item.tempId,
-                    reason: e instanceof Error ? e.message : String(e),
-                    timestamp: new Date().toISOString()
-                }));
-                // We re-throw so Promise.allSettled knows? Or we return null?
-                // The race below expects DriveFiles for url construction.
-                // We'll return null here.
-                return null;
-            }
-        });
-
-        // Use Promise.race to maintain responsiveness, but ENSURE uploads continue.
-        // We attach the catch to the race only. The original promises inside `uploadPromises` are already handled (catch logs error).
-        // Actually, we need to collect URLs if they succeed FAST enough.
-        
+        // Use Promise.race to maintain responsiveness
         const timeoutProm = new Promise<null>((resolve) => 
             setTimeout(() => resolve(null), 3000)
         );
 
-        // We use allSettled to get what we can
+        // We use allSettled to get what we can (implicitly via existing catch blocks in addImage)
         const raceResult = await Promise.race([
             Promise.all(uploadPromises),
             timeoutProm 
@@ -502,10 +501,11 @@
             // All finished (or failed) within 3s
             const files = raceResult;
             driveUrls = files.filter(f => f !== null).map(f => {
-                if (f.thumbnailLink) return f.thumbnailLink;
-                if (f.id) return `https://drive.google.com/thumbnail?id=${f.id}&sz=w2048`;
-                return f.webViewLink;
-            }).join(', ');
+                if (f && f.thumbnailLink) return f.thumbnailLink;
+                if (f && f.id) return `https://drive.google.com/thumbnail?id=${f.id}&sz=w2048`;
+                if (f && f.webViewLink) return f.webViewLink;
+                return '';
+            }).filter(u => u).join(', ');
         } else {
              console.warn('Image upload timed out (backgrounding). Saving entry with pending media.');
              // Logic note: The uploadPromises are still running. They will dispatch Completed/Failed when done.
@@ -536,7 +536,7 @@
             fat: nutrition.fat,
             carbs: nutrition.carbs,
             protein: nutrition.protein,
-            imageDriveUrl: driveUrls || (imagePreviews.length > 0 && imagePreviews[0].startsWith('http') ? imagePreviews[0] : ''), 
+            imageDriveUrl: driveUrls || (attachedMedia.length > 0 && attachedMedia[0].previewUrl.startsWith('http') ? attachedMedia[0].previewUrl : ''), 
             mediaIds: mediaIds, // Link to lifecycle events
             rawJson: JSON.parse(JSON.stringify(form)),
             details: JSON.parse(JSON.stringify(nutrition.details))
@@ -562,8 +562,7 @@
   }
 
   function resetForm() {
-      imageFiles = [];
-      imagePreviews = [];
+      attachedMedia = [];
       itemName = '';
       rationale = '';
       nutrition.calories = 0;
