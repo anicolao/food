@@ -33,6 +33,20 @@ export interface DetailedNutrients {
   alcohol?: number;      // g 
 }
 
+export interface FavouriteItem {
+  id: string; // specialized ID
+  description: string;
+  defaultNutrition: {
+    calories: number;
+    protein: number;
+    carbs: number;
+    fat: number;
+    details: DetailedNutrients;
+  };
+  lastUsed: string;
+  usageCount: number;
+}
+
 export interface LogEntry {
   id: string;
   date: string;
@@ -62,12 +76,14 @@ interface AppState {
   events: FoodEvent[];
   log: LogEntry[];
   stats: Record<string, DailyStats>; // Keyed by YYYY-MM-DD
+  favourites: FavouriteItem[];
 }
 
 const initialState: AppState = {
   events: [],
   log: [],
-  stats: {}
+  stats: {},
+  favourites: []
 };
 
 // --- Slices ---
@@ -188,12 +204,49 @@ const applyEventToState = (state: any, event: FoodEvent) => {
       }
       break;
     }
+    case 'log/logAgain': {
+      const { description, sourceEntryId, timestamp } = event.payload;
+
+      // Upsert into Favourites
+      // We need to find the full entry details to store default nutrition
+      // Since this is a projection, we can look up the source entry in the *current* state (if we are consistent)
+      // OR, the payload should ideally carry the nutrition info to be self-contained. 
+      // However, for the "Log Again" logic, the event denotes the ACTION.
+      // ACTUALLY: For the reducer to work purely, we might need to rely on the fact that the entry exists in the log.
+
+      const sourceEntry = state.log.find((e: LogEntry) => e.id === sourceEntryId);
+
+      const existingIndex = state.favourites.findIndex((f: FavouriteItem) => f.description.toLowerCase() === description.toLowerCase());
+
+      if (existingIndex !== -1) {
+        // Update existing
+        state.favourites[existingIndex].usageCount += 1;
+        state.favourites[existingIndex].lastUsed = timestamp;
+      } else if (sourceEntry) {
+        // Create new from source
+        if (!state.favourites) state.favourites = [];
+        state.favourites.push({
+          id: crypto.randomUUID(),
+          description: sourceEntry.description,
+          defaultNutrition: {
+            calories: sourceEntry.calories,
+            protein: sourceEntry.protein,
+            carbs: sourceEntry.carbs,
+            fat: sourceEntry.fat,
+            details: sourceEntry.details || {}
+          },
+          lastUsed: timestamp,
+          usageCount: 1
+        });
+      }
+      break;
+    }
   }
 };
 
 const projectionsSlice = createSlice({
   name: 'projections',
-  initialState: { log: initialState.log, stats: initialState.stats },
+  initialState: { log: initialState.log, stats: initialState.stats, favourites: initialState.favourites },
   reducers: {
     processEvent: (state, action: PayloadAction<FoodEvent>) => {
       applyEventToState(state, action.payload);
