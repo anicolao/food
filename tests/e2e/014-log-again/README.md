@@ -18,6 +18,7 @@
 - [x] Name is Existing Salad
 - [x] Calories is 350
 - [x] Date is Today (15th)
+- [x] Media is preserved
 
 ---
 

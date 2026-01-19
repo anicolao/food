@@ -2,7 +2,17 @@
     import { base } from '$app/paths';
     import NavItem from './NavItem.svelte';
 
+    import { page } from '$app/stores';
+
     // Desktop sidebar is vertical
+    
+    let logUrl = $derived.by(() => {
+        if ($page.url.pathname.includes('/entry')) {
+             const id = $page.url.searchParams.get('id');
+             if (id) return `${base}/log?from_entry=${id}`;
+        }
+        return `${base}/log`;
+    });
 </script>
 
 <aside class="desktop-sidebar glass-panel">
@@ -17,7 +27,7 @@
             {/snippet}
         </NavItem>
         
-        <NavItem href="{base}/log" label="Log Food">
+        <NavItem href="{logUrl}" label="Log Food">
             {#snippet icon()}
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>
             {/snippet}
