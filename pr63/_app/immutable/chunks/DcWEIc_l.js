@@ -1,0 +1,1 @@
+import{l as c,m as o,t as i,k as u}from"./CLiEQSYX.js";import{B as f}from"./CsJ53y2f.js";function k(r,a,e){c&&o();var t=new f(r),s=!i();u(()=>{var n=a();s&&n!==null&&typeof n=="object"&&(n={}),t.ensure(n,e)})}function m(r){return r}function b(r){const a=r-1;return a*a*a+1}export{b as c,k,m as l};
