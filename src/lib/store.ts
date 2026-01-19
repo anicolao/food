@@ -47,6 +47,7 @@ export interface LogEntry {
   rawJson?: any; // Full Gemini response
   rationale?: string; // Explainer text for the estimation
   details?: DetailedNutrients;
+  mediaIds?: string[]; // IDs for media lifecycle event correlation
 }
 
 interface DailyStats {
