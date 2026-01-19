@@ -658,6 +658,17 @@
       nutrition.carbs = item.defaultNutrition.carbs;
       nutrition.fat = item.defaultNutrition.fat;
       nutrition.details = item.defaultNutrition.details || {};
+
+      // Copy images if any
+      if (item.defaultImage) {
+          const urls = item.defaultImage.split(',').map(u => u.trim()).filter(u => u);
+          attachedMedia = urls.map(url => ({
+              tempId: crypto.randomUUID(), 
+              file: new File([""], "existing-image", { type: "image/jpeg" }), // Dummy file, logic handles URL
+              previewUrl: url,
+              uploadPromise: Promise.resolve(null) // Already uploaded
+          }));
+      }
       
       // Dispatch logAgain to increment usage count
       store.dispatch(dispatchEvent('log/logAgain', {

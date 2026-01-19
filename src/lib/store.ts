@@ -45,6 +45,7 @@ export interface FavouriteItem {
   };
   lastUsed: string;
   usageCount: number;
+  defaultImage?: string; // Optional: Keep track of an image to reuse
 }
 
 export interface LogEntry {
@@ -222,6 +223,10 @@ const applyEventToState = (state: any, event: FoodEvent) => {
         // Update existing
         state.favourites[existingIndex].usageCount += 1;
         state.favourites[existingIndex].lastUsed = timestamp;
+        // Optionally update image if the new log had one? Let's say yes, keep it fresh.
+        if (sourceEntry && sourceEntry.imageDriveUrl) {
+          state.favourites[existingIndex].defaultImage = sourceEntry.imageDriveUrl;
+        }
       } else if (sourceEntry) {
         // Create new from source
         if (!state.favourites) state.favourites = [];
@@ -236,7 +241,8 @@ const applyEventToState = (state: any, event: FoodEvent) => {
             details: sourceEntry.details || {}
           },
           lastUsed: timestamp,
-          usageCount: 1
+          usageCount: 1,
+          defaultImage: sourceEntry.imageDriveUrl
         });
       }
       break;
