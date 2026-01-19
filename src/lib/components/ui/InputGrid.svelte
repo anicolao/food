@@ -1,9 +1,12 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
+  import type { LogEntry } from '$lib/store';
+
+  export let contextEntry: LogEntry | null = null;
 
   const dispatch = createEventDispatcher();
 
-  function selectMode(mode: 'CAMERA' | 'LIBRARY' | 'VOICE' | 'TEXT') {
+  function selectMode(mode: 'CAMERA' | 'LIBRARY' | 'VOICE' | 'TEXT' | 'LOG_AGAIN' | 'FAVOURITES') {
     dispatch('select', mode);
   }
 </script>
@@ -50,6 +53,28 @@
       </svg>
     </div>
     <span>Text</span>
+  </button>
+
+  {#if contextEntry}
+    <button class="grid-btn glass-panel" onclick={() => selectMode('LOG_AGAIN')}>
+      <div class="icon">
+         <!-- Reuse loop/repeat icon or similar -->
+         <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"></polyline><polyline points="23 20 23 14 17 14"></polyline><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"></path></svg>
+      </div>
+      <span>Log Again</span>
+      {#if contextEntry.imageDriveUrl}
+         <!-- Optional: Thumbnail overlay or background if complex UI desired, sticking to icon for now as per simple update -->
+      {/if}
+    </button>
+  {/if}
+
+  <button class="grid-btn glass-panel" onclick={() => selectMode('FAVOURITES')}>
+    <div class="icon">
+      <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+      </svg>
+    </div>
+    <span>Favourites</span>
   </button>
 </div>
 

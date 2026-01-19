@@ -3,11 +3,12 @@
   import { analyzeFood, type NutritionEstimate } from '$lib/gemini';
   import { searchFoodImage } from '$lib/image-search';
   import { uploadImage, type GoogleDriveFile } from '$lib/sheets';
-  import { dispatchEvent, store, type RootState } from '$lib/store';
+  import { dispatchEvent, store, type RootState, type LogEntry, type FavouriteItem } from '$lib/store';
   import { signIn } from '$lib/auth';
   import { toasts } from '$lib/toast';
   import { goto } from '$app/navigation';
   import { base } from '$app/paths';
+  import { page } from '$app/stores';
   import exifr from 'exifr'; 
   import { createPickerSession, pollPickerSession, listSessionMediaItems } from '$lib/google-photos';
   
@@ -16,12 +17,14 @@
   import TextInputModal from '$lib/components/ui/TextInputModal.svelte';
   import VoiceRecorder from '$lib/components/ui/VoiceRecorder.svelte';
   import NutritionForm from '$lib/components/ui/NutritionForm.svelte';
+  import FavouritesPicker from '$lib/components/ui/FavouritesPicker.svelte';
 
   let fileInput = $state<HTMLInputElement>();
   let cameraInput = $state<HTMLInputElement>();
 
   
-  type LogMode = 'IDLE' | 'CAMERA' | 'VOICE' | 'TEXT' | 'LIBRARY';
+  
+  type LogMode = 'IDLE' | 'CAMERA' | 'VOICE' | 'TEXT' | 'LIBRARY' | 'LOG_AGAIN' | 'FAVOURITES';
   let currentMode = $state<LogMode>('IDLE');
   
   // let showPhotosSelector = $state(false); // Unused, logic handled by picker
@@ -36,6 +39,9 @@
   let attachedMedia: AttachedMedia[] = $state([]);
   let imagePreviews = $derived(attachedMedia.map(m => m.previewUrl)); // Compatibility derived
 
+  let contextEntry = $state<LogEntry | null>(null);
+  let showFavouritesPicker = $state(false);
+  let favourites = $state<FavouriteItem[]>([]);
   
   let analyzing = $state(false);
   
@@ -95,6 +101,14 @@
 
   // Pre-fetch session when page mounts to enable synchronous Click-to-Open
   onMount(() => {
+     // Check for Log Again context
+     const fromId = $page.url.searchParams.get('from_entry');
+     if (fromId) {
+        const state = store.getState();
+        const found = state.projections.log.find(e => e.id === fromId);
+        if (found) contextEntry = JSON.parse(JSON.stringify(found));
+     }
+
      updateMealType(new Date());
      initPickerSession();
      
@@ -582,9 +596,56 @@
           cameraInput?.click();
       } else if (mode === 'LIBRARY') {
           handleGooglePhotosPick();
+      } else if (mode === 'LOG_AGAIN') {
+          if (!contextEntry) return; // Should be hidden anyway
+          
+          itemName = contextEntry.description;
+          rationale = contextEntry.rationale || '';
+          nutrition.calories = contextEntry.calories;
+          nutrition.protein = contextEntry.protein;
+          nutrition.carbs = contextEntry.carbs;
+          nutrition.fat = contextEntry.fat;
+          nutrition.details = contextEntry.details || {};
+          
+          // Dispatch Log Again Event to track metrics/favourites
+          store.dispatch(dispatchEvent('log/logAgain', {
+               sourceEntryId: contextEntry.id,
+               description: contextEntry.description,
+               timestamp: new Date().toISOString()
+           }));
+           
+           // Sheet opens automatically due to $derived sheetOpen checking itemName length
+      } else if (mode === 'FAVOURITES') {
+           const state = store.getState();
+           const favs = state.projections.favourites || [];
+           if (favs.length === 0) {
+              toasts.info("Favourites are created whenever you log a food item more than once using 'Log Again'.");
+           } else {
+              favourites = favs;
+              showFavouritesPicker = true;
+           }
       } else {
           currentMode = mode;
       }
+  }
+
+  function handleFavouriteSelect(e: CustomEvent<FavouriteItem>) {
+      const item = e.detail;
+      showFavouritesPicker = false;
+      
+      itemName = item.description;
+      nutrition.calories = item.defaultNutrition.calories;
+      nutrition.protein = item.defaultNutrition.protein;
+      nutrition.carbs = item.defaultNutrition.carbs;
+      nutrition.fat = item.defaultNutrition.fat;
+      nutrition.details = item.defaultNutrition.details || {};
+      
+      // Dispatch logAgain to increment usage count
+      store.dispatch(dispatchEvent('log/logAgain', {
+           sourceEntryId: 'favourite', 
+           description: item.description,
+           timestamp: new Date().toISOString()
+       }));
   }
 </script>
 
@@ -593,7 +654,9 @@
         <div class="start-ui">
             <h1>Log Food</h1>
             
-            <InputGrid on:select={(e) => handleModeSelect(e.detail)} />
+            <h1>Log Food</h1>
+            
+            <InputGrid {contextEntry} on:select={(e) => handleModeSelect(e.detail)} />
 
             {#if currentMode === 'TEXT'}
                 <TextInputModal 
@@ -607,6 +670,10 @@
                     on:close={() => currentMode = 'IDLE'}
                     on:analyze={(e: CustomEvent) => handleTextAnalyze(e.detail)} 
                 />
+            {/if}
+            
+            {#if showFavouritesPicker}
+                <FavouritesPicker {favourites} on:select={handleFavouriteSelect} on:close={() => showFavouritesPicker = false} />
             {/if}
             
     <input type="file" accept="image/*" multiple bind:this={fileInput} onchange={handleFileSelect} hidden />
