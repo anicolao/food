@@ -42,8 +42,14 @@ export class TestStepHelper {
         // 3. Stabilization: Wait for Network Sync (if present)
         const networkStatus = this.page.locator('button[data-status]');
         const expectedStatus = options.networkStatus ?? 'synced';
-        if (expectedStatus !== 'skip' && await networkStatus.count() > 0 && await networkStatus.isVisible()) {
-            await expect(networkStatus).toHaveAttribute('data-status', expectedStatus, { timeout: 30000 });
+        if (expectedStatus !== 'skip') {
+            const statusVisible = await networkStatus.first()
+                .waitFor({ state: 'visible', timeout: 5000 })
+                .then(() => true)
+                .catch(() => false);
+            if (statusVisible) {
+                await expect(networkStatus.first()).toHaveAttribute('data-status', expectedStatus, { timeout: 30000 });
+            }
         }
 
         const toggleIcons = this.page.locator('img[alt="Toggle Details"]');

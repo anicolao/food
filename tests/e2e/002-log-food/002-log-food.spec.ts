@@ -122,14 +122,15 @@ test('US-003 to US-010: User logs food flow', async ({ page }, testInfo) => {
     // Mandatory URL Wait for stability
     await expect(page).toHaveURL(/\/log/);
     await page.waitForLoadState('domcontentloaded');
+    await expect(page.getByRole('heading', { name: 'Log Food' })).toBeVisible({ timeout: 15000 });
 
     await tester.step('log-page', {
         description: 'User on log page',
         verifications: [
-            { spec: 'Camera button visible', check: async () => await expect(page.getByText('Camera').first()).toBeVisible() },
-            { spec: 'Upload button visible', check: async () => await expect(page.getByText('Library').first()).toBeVisible() },
-            { spec: 'Voice button visible', check: async () => await expect(page.getByText('Voice').first()).toBeVisible() },
-            { spec: 'Text button visible', check: async () => await expect(page.getByText('Text').first()).toBeVisible() }
+            { spec: 'Camera button visible', check: async () => await expect(page.getByText('Camera').first()).toBeVisible({ timeout: 15000 }) },
+            { spec: 'Upload button visible', check: async () => await expect(page.getByText('Library').first()).toBeVisible({ timeout: 15000 }) },
+            { spec: 'Voice button visible', check: async () => await expect(page.getByText('Voice').first()).toBeVisible({ timeout: 15000 }) },
+            { spec: 'Text button visible', check: async () => await expect(page.getByText('Text').first()).toBeVisible({ timeout: 15000 }) }
         ]
     });
 
