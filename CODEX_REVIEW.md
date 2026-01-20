@@ -6,7 +6,7 @@
 - Resolved: `media/uploadCompleted` now updates the projection so entries that saved before uploads finished backfill `imageDriveUrl` when the upload completes.
 
 ### Medium
-- `src/lib/store.ts:208-246`: `applyEventToState` generates `FavouriteItem.id` with `crypto.randomUUID()` inside the reducer. This makes event replays nondeterministic across devices and can diverge favorites between clients in an event-sourced system. Prefer emitting the ID in the event payload or deriving it deterministically from the source entry. `FavouriteItem.id` is only assigned in the reducer and is not referenced elsewhere; UI/test usage relies on `description`, `usageCount`, `defaultNutrition`, and `defaultImage` without any lookup by id.
+- Resolved: Removed the unused `FavouriteItem.id` field and stopped generating UUIDs in the reducer to keep event replays deterministic.
 - `src/lib/sync-manager.ts:57-127`: Sync pointers (`lastSyncedRow`, `lastSyncedEventId`) are stored globally in `localStorage` without namespacing by `spreadsheetId` or user. Switching accounts/spreadsheets can reuse stale pointers and skip or duplicate events until a reset. Store pointers per spreadsheet/user or reset them when config changes.
 
 ### Low
