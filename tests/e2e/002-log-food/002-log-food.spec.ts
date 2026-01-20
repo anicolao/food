@@ -101,8 +101,6 @@ test('US-003 to US-010: User logs food flow', async ({ page }, testInfo) => {
     await page.goto('/');
     // Allow polling to initialize tokenClient
     await page.waitForFunction(() => (window as any)._authReady);
-    // Explicit wait for hydration/interactivity
-    await page.waitForTimeout(1000);
     const signInBtn = page.getByText('Sign In with Google');
     await expect(signInBtn).toBeVisible();
     await signInBtn.click();
@@ -113,11 +111,13 @@ test('US-003 to US-010: User logs food flow', async ({ page }, testInfo) => {
     const logBtn = page.getByLabel('Log new food entry').first();
     await expect(logBtn).toBeVisible();
     await expect(logBtn).toBeEnabled();
-    const isVisible = await logBtn.isVisible();
 
     // Fallback if click fails silently: force click
     // await logBtn.click({ force: true });
-    await page.goto('/log');
+    await Promise.all([
+        page.waitForURL(/\/log/, { timeout: 2000 }),
+        logBtn.click()
+    ]);
 
     // Mandatory URL Wait for stability
     await expect(page).toHaveURL(/\/log/);
