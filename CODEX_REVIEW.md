@@ -3,10 +3,10 @@
 ## Findings
 
 ### High
-- `src/routes/log/+page.svelte:587-660`: `handleSubmit` races uploads with a 3s timeout and proceeds when the timeout wins, but the entry is saved with an empty `imageDriveUrl` even if uploads complete later. Since `media/uploadCompleted` does not update the entry, those images never appear in the dashboard/detail views. Consider persisting pending media IDs and updating the entry (or projection) when uploads finish, or block save until at least one URL is resolved.
+- Resolved: `media/uploadCompleted` now updates the projection so entries that saved before uploads finished backfill `imageDriveUrl` when the upload completes.
 
 ### Medium
-- `src/lib/store.ts:208-246`: `applyEventToState` generates `FavouriteItem.id` with `crypto.randomUUID()` inside the reducer. This makes event replays nondeterministic across devices and can diverge favorites between clients in an event-sourced system. Prefer emitting the ID in the event payload or deriving it deterministically from the source entry.
+- `src/lib/store.ts:208-246`: `applyEventToState` generates `FavouriteItem.id` with `crypto.randomUUID()` inside the reducer. This makes event replays nondeterministic across devices and can diverge favorites between clients in an event-sourced system. Prefer emitting the ID in the event payload or deriving it deterministically from the source entry. `FavouriteItem.id` is only assigned in the reducer and is not referenced elsewhere; UI/test usage relies on `description`, `usageCount`, `defaultNutrition`, and `defaultImage` without any lookup by id.
 - `src/lib/sync-manager.ts:57-127`: Sync pointers (`lastSyncedRow`, `lastSyncedEventId`) are stored globally in `localStorage` without namespacing by `spreadsheetId` or user. Switching accounts/spreadsheets can reuse stale pointers and skip or duplicate events until a reset. Store pointers per spreadsheet/user or reset them when config changes.
 
 ### Low
@@ -14,7 +14,6 @@
 - `src/lib/images.ts:3-30`: `resolveDriveImage` caches `URL.createObjectURL` results indefinitely without revocation. Over long sessions this can leak memory. Consider evicting old entries and calling `URL.revokeObjectURL` when images are no longer needed.
 
 ## Questions / Assumptions
-- Is it acceptable for entries saved during slow uploads to omit `imageDriveUrl`, or should those entries be backfilled once uploads finish?
 - Do you expect users to sign into multiple Google accounts on the same device/browser? If yes, local sync pointers need to be scoped per account/spreadsheet.
 
 ## Notes
