@@ -87,7 +87,9 @@ test('US-014: Log Again and Favourites', async ({ page }, testInfo) => {
     await expect(page.locator('.big-text')).toHaveValue('Existing Salad');
 
     // 2. Click FAB
-    await page.getByLabel('Log new food entry').click();
+    const fab = page.getByLabel('Log new food entry');
+    await expect(fab).toBeVisible();
+    await fab.click();
 
     // 3. Verify Log Again Button
     await tester.step('check-log-again', {
@@ -99,7 +101,9 @@ test('US-014: Log Again and Favourites', async ({ page }, testInfo) => {
     });
 
     // 4. Click Log Again
-    await page.getByText('Log Again').click();
+    const logAgainBtn = page.getByText('Log Again');
+    await expect(logAgainBtn).toBeVisible();
+    await logAgainBtn.click();
 
     // 5. Verify Sheet Open and Pre-filled
     await tester.step('verify-prefill', {
@@ -124,7 +128,9 @@ test('US-014: Log Again and Favourites', async ({ page }, testInfo) => {
     await page.goto('/log'); // Go to log page directly
 
     // 9. Click Favourites
-    await page.getByText('Favourites').click();
+    const favBtn = page.getByText('Favourites');
+    await expect(favBtn).toBeVisible();
+    await favBtn.click();
 
     // 10. Verify Picker shows item
     await tester.step('verify-favourites', {
@@ -137,7 +143,9 @@ test('US-014: Log Again and Favourites', async ({ page }, testInfo) => {
     });
 
     // 11. Select Item
-    await page.locator('.fav-item').click();
+    const favItem = page.locator('.fav-item');
+    await expect(favItem).toBeVisible();
+    await favItem.click();
 
     // 12. Verify Form filled again
     await expect(page.locator('.modal')).not.toBeVisible();
