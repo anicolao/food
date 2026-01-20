@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<script src="https://accounts.google.com/gsi/client" async defer></script>
+	<link rel="manifest" href="/food/pr66/manifest.webmanifest">
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<meta name="mobile-web-app-capable" content="yes">
+	<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+	<meta name="apple-mobile-web-app-title" content="Food Fixups">
+	<link rel="apple-touch-icon" href="/food/pr66/apple-touch-icon.png">
+	
+		<link rel="modulepreload" href="/food/pr66/_app/immutable/entry/start.BAAmmNOo.js">
+		<link rel="modulepreload" href="/food/pr66/_app/immutable/chunks/1hS5gkIh.js">
+		<link rel="modulepreload" href="/food/pr66/_app/immutable/chunks/ftQVkC1w.js">
+		<link rel="modulepreload" href="/food/pr66/_app/immutable/chunks/CLiEQSYX.js">
+		<link rel="modulepreload" href="/food/pr66/_app/immutable/chunks/DygPkTW2.js">
+		<link rel="modulepreload" href="/food/pr66/_app/immutable/entry/app.CdzYmxPI.js">
+		<link rel="modulepreload" href="/food/pr66/_app/immutable/chunks/PPVm8Dsz.js">
+		<link rel="modulepreload" href="/food/pr66/_app/immutable/chunks/DsnmJJEf.js">
+		<link rel="modulepreload" href="/food/pr66/_app/immutable/chunks/BokW3LaI.js">
+		<link rel="modulepreload" href="/food/pr66/_app/immutable/chunks/bAV9KOOO.js">
+		<link rel="modulepreload" href="/food/pr66/_app/immutable/chunks/8BHfL4-0.js">
+</head>
+
+<body data-sveltekit-preload-data="hover">
+	<div style="display: contents">
+			<script>
+				{
+					__sveltekit_zym247 = {
+						base: "/food/pr66",
+						assets: "/food/pr66"
+					};
+
+					const element = document.currentScript.parentElement;
+
+					Promise.all([
+						import("/food/pr66/_app/immutable/entry/start.BAAmmNOo.js"),
+						import("/food/pr66/_app/immutable/entry/app.CdzYmxPI.js")
+					]).then(([kit, app]) => {
+						kit.start(app, element);
+					});
+
+					if ('serviceWorker' in navigator) {
+						addEventListener('load', function () {
+							navigator.serviceWorker.register('/food/pr66/service-worker.js');
+						});
+					}
+				}
+			</script>
+		</div>
+</body>
+
+</html>
