@@ -55,9 +55,7 @@ export const syncManager = {
             const { spreadsheetId } = state.config;
 
             if (spreadsheetId) {
-                // Get last synced row index (default to 0 if no headers involved in tracking)
-                const lastSyncedRow = parseInt(localStorage.getItem('lastSyncedRow') || '0', 10);
-                const lastSyncedEventId = localStorage.getItem('lastSyncedEventId') || '';
+                const { lastSyncedRow, lastSyncedEventId } = getSyncPointers(spreadsheetId);
 
                 // If we have synced data (row > 0), we fetch overlapping to verify.
                 // If row is 0, we fetch from 1.
@@ -77,8 +75,7 @@ export const syncManager = {
                         // If lastSyncedEventId exists (for safety), verify it matches
                         if (lastSyncedEventId && overlappingEventId !== lastSyncedEventId) {
                             console.warn(`[SyncManager] Sync Mismatch! Expected ${lastSyncedEventId}, got ${overlappingEventId}. Resetting sync pointer.`);
-                            localStorage.setItem('lastSyncedRow', '0');
-                            localStorage.removeItem('lastSyncedEventId');
+                            clearSyncPointers(spreadsheetId);
                             return; // Next sync will start from 1
                         }
 
@@ -121,10 +118,7 @@ export const syncManager = {
                         // Update Pointer
                         const finalRowIndex = lastSyncedRow + newRows.length;
 
-                        localStorage.setItem('lastSyncedRow', finalRowIndex.toString());
-                        if (lastEventIdProcessed) {
-                            localStorage.setItem('lastSyncedEventId', lastEventIdProcessed);
-                        }
+                        setSyncPointers(spreadsheetId, finalRowIndex, lastEventIdProcessed);
 
                     } else {
 
@@ -134,8 +128,7 @@ export const syncManager = {
                     // If lastSyncedRow > 0, we expected at least overlap.
                     if (lastSyncedRow > 0) {
                         console.warn('[SyncManager] Last synced row missing. Sheet truncated? Resetting.');
-                        localStorage.setItem('lastSyncedRow', '0');
-                        localStorage.removeItem('lastSyncedEventId');
+                        clearSyncPointers(spreadsheetId);
                     }
                 }
             }
@@ -155,8 +148,10 @@ export const syncManager = {
 
                 if (errObj.status === 400) {
                     console.warn('[SyncManager] 400 Error on fetch. Pointer invalid. Resetting.');
-                    localStorage.setItem('lastSyncedRow', '0');
-                    localStorage.removeItem('lastSyncedEventId');
+                    const { spreadsheetId } = store.getState().config;
+                    if (spreadsheetId) {
+                        clearSyncPointers(spreadsheetId);
+                    }
                     // We successfully handled it by resetting, so maybe don't show user error?
                     // Actually, let's show it so they know *why* it might re-sync next time or if it persists.
                     // But if we reset, the next sync (poll) might succeed.
@@ -184,8 +179,12 @@ export const syncManager = {
         this.syncError = null;
 
         // 1. Reset Pointer
-        localStorage.setItem('lastSyncedRow', '0');
-        localStorage.removeItem('lastSyncedEventId');
+        const { spreadsheetId } = store.getState().config;
+        if (spreadsheetId) {
+            clearSyncPointers(spreadsheetId);
+        } else {
+            clearLegacySyncPointers();
+        }
 
         // 2. Clear Local Cache (Synced Items Only - preserve pending!)
         await clearAllSyncedEvents();
@@ -197,4 +196,56 @@ export const syncManager = {
     }
 };
 
+const SYNC_POINTER_PREFIX = 'syncPointer';
+const LEGACY_ROW_KEY = 'lastSyncedRow';
+const LEGACY_EVENT_KEY = 'lastSyncedEventId';
 
+const getScopedKey = (spreadsheetId: string, key: string) =>
+    `${SYNC_POINTER_PREFIX}:${spreadsheetId}:${key}`;
+
+const getSyncPointers = (spreadsheetId: string) => {
+    const rowKey = getScopedKey(spreadsheetId, 'row');
+    const eventKey = getScopedKey(spreadsheetId, 'eventId');
+
+    const storedRow = localStorage.getItem(rowKey);
+    const storedEventId = localStorage.getItem(eventKey);
+
+    if (storedRow !== null || storedEventId !== null) {
+        return {
+            lastSyncedRow: parseInt(storedRow || '0', 10),
+            lastSyncedEventId: storedEventId || ''
+        };
+    }
+
+    const legacyRow = localStorage.getItem(LEGACY_ROW_KEY);
+    const legacyEventId = localStorage.getItem(LEGACY_EVENT_KEY);
+
+    if (legacyRow !== null || legacyEventId !== null) {
+        const lastSyncedRow = parseInt(legacyRow || '0', 10);
+        const lastSyncedEventId = legacyEventId || '';
+        setSyncPointers(spreadsheetId, lastSyncedRow, lastSyncedEventId);
+        clearLegacySyncPointers();
+        return { lastSyncedRow, lastSyncedEventId };
+    }
+
+    return { lastSyncedRow: 0, lastSyncedEventId: '' };
+};
+
+const setSyncPointers = (spreadsheetId: string, row: number, eventId: string) => {
+    localStorage.setItem(getScopedKey(spreadsheetId, 'row'), row.toString());
+    if (eventId) {
+        localStorage.setItem(getScopedKey(spreadsheetId, 'eventId'), eventId);
+    } else {
+        localStorage.removeItem(getScopedKey(spreadsheetId, 'eventId'));
+    }
+};
+
+const clearSyncPointers = (spreadsheetId: string) => {
+    localStorage.setItem(getScopedKey(spreadsheetId, 'row'), '0');
+    localStorage.removeItem(getScopedKey(spreadsheetId, 'eventId'));
+};
+
+const clearLegacySyncPointers = () => {
+    localStorage.setItem(LEGACY_ROW_KEY, '0');
+    localStorage.removeItem(LEGACY_EVENT_KEY);
+};
