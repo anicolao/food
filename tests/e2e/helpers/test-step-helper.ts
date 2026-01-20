@@ -10,6 +10,7 @@ export interface Verification {
 export interface StepOptions {
     description: string;
     verifications: Verification[];
+    networkStatus?: 'synced' | 'offline' | 'error' | 'skip';
 }
 
 interface DocStep {
@@ -40,13 +41,9 @@ export class TestStepHelper {
 
         // 3. Stabilization: Wait for Network Sync (if present)
         const networkStatus = this.page.locator('button[data-status]');
-        if (await networkStatus.count() > 0 && await networkStatus.isVisible()) {
-            // Wait for it to be 'synced' or 'offline' (if we are testing offline mode, we might expect offline)
-            // But usually we want stable 'synced'.
-            // If the test puts it in offline mode, it will say 'offline'.
-            // We just want to avoid 'pending' or 'syncing'.
-            await expect(networkStatus).not.toHaveAttribute('data-status', 'pending', { timeout: 30000 });
-            await expect(networkStatus).not.toHaveAttribute('data-status', 'syncing', { timeout: 30000 });
+        const expectedStatus = options.networkStatus ?? 'synced';
+        if (expectedStatus !== 'skip' && await networkStatus.count() > 0 && await networkStatus.isVisible()) {
+            await expect(networkStatus).toHaveAttribute('data-status', expectedStatus, { timeout: 30000 });
         }
 
         // 4. Capture & Verify (Zero-Pixel Tolerance)
