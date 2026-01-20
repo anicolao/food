@@ -1,8 +1,8 @@
-# Fix: Upload Completion Race
+# Docs: Update Codex Review
 
 ## Changes
-- Update projections to attach `media/uploadCompleted` URLs to entries that reference pending media IDs.
-- Mark the upload race as fixed in `docs/DESIGN_REVIEW.md`.
+- Mark the upload-completion race as resolved.
+- Summarize `FavouriteItem.id` usage and note it is only generated in the reducer.
 
 ## Testing
 - Not run (not requested).
@@ -43,7 +43,6 @@
 >   <shell>zsh</shell>
 > </environment_context>
 >
-> read DEVELOPMENT.md and WORKFLOW.md and CODEX_REVIEW.md. Fix the race by making the reducer for upload complete update the state appropriately if the uplaod ends later. Mark it fixed in the markdown. Follow WORKFLOW.md to put this up as a PR. Put questions or open issues in the PR, don't pause to ask me things.
-
-## Relevant User Comments
-> Your main is not up to date which is why you're not finding CODEX_REVIEW; I have fetched it but you need to rebase against origin/main, fix any mrege conflicts, and put up the PR again.
+> I have rebased and committed your branch to main. Switch to main, pull, read CODEX_REVIEW.md and update it for the completed task. REview all uses of FavouriteItem.id and add to that section a summary of all places that id is used and why.
+>
+> follow WORKFLOW.md to create a PR for your changes
