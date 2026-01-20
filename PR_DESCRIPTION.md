@@ -5,7 +5,7 @@
 - Summarize `FavouriteItem.id` usage and note it is only generated in the reducer.
 
 ## Testing
-- Not run (not requested).
+- `npm run check` (passes with warnings).
 
 ## Questions / Open Issues
 - None.
