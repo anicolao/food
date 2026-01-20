@@ -64,4 +64,5 @@ This automatically:
 
 -   **Browsers**: Tests run in Chromium by default.
 -   **Flags**: We use flags like `--disable-gpu`, `--font-render-hinting=none` to ensure consistent rendering.
--   **Timeouts**: Avoid `waitForTimeout`. Use `waitForSelector`, `expect().toBeVisible()`, etc.
+-   **Timeouts**: The maximum acceptable timeout for any condition is **2000ms**.
+-   **Waits**: `waitForTimeout` and other arbitrary waits are not allowed; always wait on real UI conditions like `expect().toBeVisible()` or `waitForSelector`.
