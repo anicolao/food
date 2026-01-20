@@ -65,6 +65,7 @@ test.describe('Sync Error UX', () => {
 
         await tester.step('error-icon-visible', {
             description: 'Error icon is displayed on sync failure',
+            networkStatus: 'error',
             verifications: [
                 { spec: 'Status button has error state', check: async () => await expect(statusBtn).toHaveAttribute('data-status', 'error') }
             ]
@@ -81,6 +82,7 @@ test.describe('Sync Error UX', () => {
 
         await tester.step('error-details-visible', {
             description: 'Error details and troubleshooting section are visible',
+            networkStatus: 'error',
             verifications: [
                 { spec: 'Error panel visible', check: async () => await expect(errorSection).toBeVisible() },
                 { spec: 'Correct error message', check: async () => await expect(errorSection).toContainText('400: Bad Request') }

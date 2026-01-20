@@ -1,48 +1,26 @@
-# Docs: Update Codex Review
+# Fix: Wait for Synced Status Before Screenshots
 
 ## Changes
-- Mark the upload-completion race as resolved.
-- Summarize `FavouriteItem.id` usage and note it is only generated in the reducer.
+- Require a stable `data-status` value (default `synced`) before Playwright screenshots.
+- Allow tests to override expected network status (used for sync-error screenshots).
+- Wait for the nutrition details toggle icon to finish loading before taking screenshots.
 
 ## Testing
-- `.husky/pre-commit` (warnings in `svelte-check`, Playwright: 13 passed, 1 skipped).
+- `.husky/pre-commit` (svelte-check warnings; Playwright: 13 passed, 1 skipped).
 
 ## Questions / Open Issues
 - None.
 
 ## Original User Prompt(s)
-> # AGENTS.md instructions for /Users/anicolao/projects/antigravity/food-fixups
+> The e2e tests failed in CI. Use gh to download the logs and artifacts and resolve the failure.
 >
-> <INSTRUCTIONS>
-> ## Skills
-> A skill is a set of local instructions to follow that is stored in a `SKILL.md` file. Below is the list of skills that can be used. Each entry includes a name, description, and file path so you can open the source for full instructions when using a specific skill.
-> ### Available skills
-> - skill-creator: Guide for creating effective skills. This skill should be used when users want to create a new skill (or update an existing skill) that extends Codex's capabilities with specialized knowledge, workflows, or tool integrations. (file: /Users/anicolao/.codex/skills/.system/skill-creator/SKILL.md)
-> - skill-installer: Install Codex skills into $CODEX_HOME/skills from a curated list or a GitHub repo path. Use when a user asks to list installable skills, install a curated skill, or install a skill from another repo (including private repos). (file: /Users/anicolao/.codex/skills/.system/skill-installer/SKILL.md)
-> ### How to use skills
-> - Discovery: The list above is the skills available in this session (name + description + file path). Skill bodies live on disk at the listed paths.
-> - Trigger rules: If the user names a skill (with `$SkillName` or plain text) OR the task clearly matches a skill's description shown above, you must use that skill for that turn. Multiple mentions mean use them all. Do not carry skills across turns unless re-mentioned.
-> - Missing/blocked: If a named skill isn't in the list or the path can't be read, say so briefly and continue with the best fallback.
-> - How to use a skill (progressive disclosure):
->   1) After deciding to use a skill, open its `SKILL.md`. Read only enough to follow the workflow.
->   2) If `SKILL.md` points to extra folders such as `references/`, load only the specific files needed for the request; don't bulk-load everything.
->   3) If `scripts/` exist, prefer running or patching them instead of retyping large code blocks.
->   4) If `assets/` or templates exist, reuse them instead of recreating from scratch.
-> - Coordination and sequencing:
->   - If multiple skills apply, choose the minimal set that covers the request and state the order you'll use them.
->   - Announce which skill(s) you're using and why (one short line). If you skip an obvious skill, say why.
-> - Context hygiene:
->   - Keep context small: summarize long sections instead of pasting them; only load extra files when needed.
->   - Avoid deep reference-chasing: prefer opening only files directly linked from `SKILL.md` unless you're blocked.
->   - When variants exist (frameworks, providers, domains), pick only the relevant reference file(s) and note that choice.
-> - Safety and fallback: If a skill can't be applied cleanly (missing files, unclear instructions), state the issue, pick the next-best approach, and continue.
-> </INSTRUCTIONS>
+> for installing tools, you can use nix (edit flake.nix) and run them with nix develop -c
+> it isn't an error state in CI, CI isn't waiting for sync to complete before taking the screenshot and that is the problem/the correct fix
 >
-> <environment_context>
->   <cwd>/Users/anicolao/projects/antigravity/food-fixups</cwd>
->   <shell>zsh</shell>
-> </environment_context>
+> Ok I have rebased and merged the branch. go to main and pull and then resolve the next item from CODEX_REVIEW.md
 >
-> I have rebased and committed your branch to main. Switch to main, pull, read CODEX_REVIEW.md and update it for the completed task. REview all uses of FavouriteItem.id and add to that section a summary of all places that id is used and why.
+> On your new branch with the e2e fix, CI is failing. Look at the run to determine waht the problem is and fix the PR.
 >
-> follow WORKFLOW.md to create a PR for your changes
+> You seem to not be able to look at the screenshot. In this case, teh problem is a missing + icon from the nutrient details form. The expected screenshot is correct. The acutal screenshot has been taken befor ethe + icon has loaded and is missing the icon. It's a new problem, unrelated to the fix on this branch, but nonetheless needs fixing.
+>
+> all PRs should be based off of origin main and updated on github, so please fix it for easy review.
