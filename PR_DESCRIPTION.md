@@ -5,7 +5,7 @@
 - Summarize `FavouriteItem.id` usage and note it is only generated in the reducer.
 
 ## Testing
-- `npm run check` (passes with warnings).
+- `.husky/pre-commit` (warnings in `svelte-check`, Playwright: 13 passed, 1 skipped).
 
 ## Questions / Open Issues
 - None.
