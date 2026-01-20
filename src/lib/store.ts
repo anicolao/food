@@ -34,7 +34,6 @@ export interface DetailedNutrients {
 }
 
 export interface FavouriteItem {
-  id: string; // specialized ID
   description: string;
   defaultNutrition: {
     calories: number;
@@ -231,7 +230,6 @@ const applyEventToState = (state: any, event: FoodEvent) => {
         // Create new from source
         if (!state.favourites) state.favourites = [];
         state.favourites.push({
-          id: crypto.randomUUID(),
           description: sourceEntry.description,
           defaultNutrition: {
             calories: sourceEntry.calories,
