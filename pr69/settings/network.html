@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<script src="https://accounts.google.com/gsi/client" async defer></script>
+	<link rel="manifest" href="../manifest.webmanifest">
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<meta name="mobile-web-app-capable" content="yes">
+	<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+	<meta name="apple-mobile-web-app-title" content="Food Fixups">
+	<link rel="apple-touch-icon" href="../apple-touch-icon.png">
+	
+		<link rel="modulepreload" href="../_app/immutable/entry/start.tro6Zd5g.js">
+		<link rel="modulepreload" href="../_app/immutable/chunks/B8-wPc2r.js">
+		<link rel="modulepreload" href="../_app/immutable/chunks/ftQVkC1w.js">
+		<link rel="modulepreload" href="../_app/immutable/chunks/CLiEQSYX.js">
+		<link rel="modulepreload" href="../_app/immutable/chunks/Bo6AsOZ3.js">
+		<link rel="modulepreload" href="../_app/immutable/entry/app.CJhHtrfj.js">
+		<link rel="modulepreload" href="../_app/immutable/chunks/PPVm8Dsz.js">
+		<link rel="modulepreload" href="../_app/immutable/chunks/DsnmJJEf.js">
+		<link rel="modulepreload" href="../_app/immutable/chunks/BokW3LaI.js">
+		<link rel="modulepreload" href="../_app/immutable/chunks/bAV9KOOO.js">
+		<link rel="modulepreload" href="../_app/immutable/chunks/8BHfL4-0.js">
+</head>
+
+<body data-sveltekit-preload-data="hover">
+	<div style="display: contents">
+			<script>
+				{
+					__sveltekit_2964z9 = {
+						base: new URL("..", location).pathname.slice(0, -1),
+						assets: "/food/pr69"
+					};
+
+					const element = document.currentScript.parentElement;
+
+					Promise.all([
+						import("../_app/immutable/entry/start.tro6Zd5g.js"),
+						import("../_app/immutable/entry/app.CJhHtrfj.js")
+					]).then(([kit, app]) => {
+						kit.start(app, element);
+					});
+
+					if ('serviceWorker' in navigator) {
+						addEventListener('load', function () {
+							navigator.serviceWorker.register('../service-worker.js');
+						});
+					}
+				}
+			</script>
+		</div>
+</body>
+
+</html>
