@@ -46,6 +46,16 @@ export class TestStepHelper {
             await expect(networkStatus).toHaveAttribute('data-status', expectedStatus, { timeout: 30000 });
         }
 
+        const toggleIcons = this.page.locator('img[alt="Toggle Details"]');
+        if (await toggleIcons.count() > 0) {
+            await this.page.waitForFunction(() => {
+                const icons = Array.from(
+                    document.querySelectorAll<HTMLImageElement>('img[alt="Toggle Details"]')
+                );
+                return icons.every((img) => img.complete && img.naturalWidth > 0);
+            }, { timeout: 30000 });
+        }
+
         // 4. Capture & Verify (Zero-Pixel Tolerance)
         // This will check against the baseline in 'screenshots/{filename}'.
         // If the file doesn't exist, it will fail (unless --update-snapshots is used).
