@@ -4,6 +4,8 @@
 - Require a stable `data-status` value (default `synced`) before Playwright screenshots.
 - Allow tests to override expected network status (used for sync-error screenshots).
 - Wait for the nutrition details toggle icon to finish loading before taking screenshots.
+- Wait for the log page header/buttons to render before screenshot steps to avoid timing flake.
+- Refresh the detailed nutrition edit snapshot after syncing completes.
 
 ## Testing
 - `.husky/pre-commit` (svelte-check warnings; Playwright: 13 passed, 1 skipped).
