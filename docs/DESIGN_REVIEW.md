@@ -11,6 +11,7 @@ Audit the codebase to ensure that distinct user actions and external system inte
 - On "Save", `uploadImage` is called inside a `Promise.race` with a 3-second timeout.
 - **Data Loss Risk**: If the upload times out or fails (e.g., offline), the error is caught, `driveUrls` remains empty, and the entry is saved *without* the images.
 - **Observability Void**: There is no record that the user *attempted* to upload images. The `log/entryConfirmed` event simply appears as a text-only entry.
+- **Status**: Fixed by updating projections to attach `media/uploadCompleted` URLs to entries that reference the pending `tempId`.
 
 **Missing Events**:
 - `media/uploadStarted`: Capturing the intent to upload, including a temporary client-side ID.
