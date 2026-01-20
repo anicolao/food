@@ -247,6 +247,24 @@ const applyEventToState = (state: any, event: FoodEvent) => {
       }
       break;
     }
+    case 'media/uploadCompleted': {
+      const { tempId, url } = event.payload;
+      if (!tempId || !url) break;
+
+      state.log.forEach((entry: LogEntry) => {
+        if (!entry.mediaIds?.includes(tempId)) return;
+
+        const existingUrls = entry.imageDriveUrl
+          ? entry.imageDriveUrl.split(',').map((u) => u.trim()).filter(Boolean)
+          : [];
+
+        if (!existingUrls.includes(url)) {
+          existingUrls.push(url);
+          entry.imageDriveUrl = existingUrls.join(', ');
+        }
+      });
+      break;
+    }
   }
 };
 
