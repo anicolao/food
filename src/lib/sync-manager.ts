@@ -1,6 +1,6 @@
 import { getPendingEvents, markEventsSynced, addSyncedEvent, clearAllSyncedEvents } from './db';
 import { appendRow, fetchRows, appendRows } from './sheets'; // We'll need to update sheets.ts to support batch append if we want true batching, or just loop for now
-import { store, processEvent, appendEvent, ingestSyncedEvent } from './store';
+import { store, processEvent, appendEvent, ingestSyncedEvent, type FoodEvent } from './store';
 import { get } from 'svelte/store';
 
 // We need a way to check online status.
@@ -94,7 +94,7 @@ export const syncManager = {
                             lastEventIdProcessed = eventId;
 
                             // Check if we already have this event (deduplication still good safety net)
-                            const existingEvent = state.events.find(e => e.eventId === eventId);
+                            const existingEvent = state.events.find((e: FoodEvent) => e.eventId === eventId);
 
                             if (!existingEvent) {
                                 let payload = {};

@@ -131,7 +131,7 @@
     const fromId = $page.url.searchParams.get("from_entry");
     if (fromId) {
       const state = store.getState();
-      const found = state.projections.log.find((e) => e.id === fromId);
+      const found = state.projections.log.find((e: LogEntry) => e.id === fromId);
       if (found) contextEntry = JSON.parse(JSON.stringify(found));
     }
 

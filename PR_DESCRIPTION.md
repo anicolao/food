@@ -1,18 +1,21 @@
-# Fix: Namespace Sync Pointers
+# Sharing Feature Implementation
+
+This PR implements the requested Sharing Feature, allowing users to share their Food Log via a read-only link.
+
+## User Request
+(Verbatim from context)
+> Implement a sharing feature where I can share a view of my food log with someone else (like a coach or doctor). They should have a read-only view.
 
 ## Changes
-- Namespace sync pointer keys by `spreadsheetId` and migrate legacy global keys on first use.
-- Update Codex review notes for the resolved sync-pointer issue.
-- Raise the log-page visibility checks to 2000ms to match the timeout cap.
-- Navigate to the log page via the dashboard button to avoid slow full reloads in CI.
+- **Shadow Route Architecture**: Created `src/routes/sharing/` to handle shared context without polluting the main app logic with conditionals.
+- **Context Isolation**: `EntryPage` and `ActivityCard` components are now context-aware, adapting to "Read-Only" mode when accessed via sharing routes.
+- **Security**: Root Layout prevents the default "Personal Log" initialization when in "Sharing Mode" to avoid data leaks or overwrites.
+- **E2E Testing**: Complete validation flow in `tests/e2e/020-sharing-flow/`.
 
-## Testing
-- `.husky/pre-commit` (svelte-check warnings; Playwright: 13 passed, 1 skipped).
+## Verification
+See [Walkthrough](docs/walkthrough.md) for detailed verification steps and results.
 
-## Questions / Open Issues
-- None.
-
-## Original User Prompt(s)
-> Ok I have rebased and merged the branch. go to main and pull and then resolve the next item from CODEX_REVIEW.md
->
-> never bypass precommit. make a rule about that. Run the precommit checks now.
+## Checklist
+- [x] Read-Only View
+- [x] Context-Aware Navigation
+- [x] E2E Tests Passing
