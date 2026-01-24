@@ -284,14 +284,19 @@ const projectionsSlice = createSlice({
 interface ConfigState {
   spreadsheetId: string | null;
   folderId: string | null;
+  isReadOnly: boolean;
 }
 
 const configSlice = createSlice({
   name: 'config',
-  initialState: { spreadsheetId: null, folderId: null } as ConfigState,
+  initialState: { spreadsheetId: null, folderId: null, isReadOnly: false } as ConfigState,
   reducers: {
-    setConfig: (state, action: PayloadAction<ConfigState>) => {
-      state.spreadsheetId = action.payload.spreadsheetId;
+    setConfig: (state, action: PayloadAction<Partial<ConfigState>>) => {
+      // Merges partial updates
+      return { ...state, ...action.payload };
+    },
+    setContext: (state, action: PayloadAction<{ isReadOnly: boolean; folderId: string | null }>) => {
+      state.isReadOnly = action.payload.isReadOnly;
       state.folderId = action.payload.folderId;
     }
   }
@@ -329,20 +334,42 @@ const settingsSlice = createSlice({
   }
 });
 
+// --- Root Reducer with Reset Capability ---
+const combinedReducer = {
+  events: eventLogSlice.reducer,
+  projections: projectionsSlice.reducer,
+  config: configSlice.reducer,
+  settings: settingsSlice.reducer
+};
+
+const rootReducer = (state: any, action: any) => {
+  if (action.type === 'global/resetState') {
+    // Keep config but reset everything else? 
+    // Actually, distinct context switch might want total clear, but we usually set config immediately after.
+    // Let's go for FULL reset to initial state, forcing re-hydration.
+    state = undefined;
+  }
+
+  // Manual combineReducers to handle undefined state for init
+  const nextState: any = {};
+
+  Object.keys(combinedReducer).forEach(key => {
+    // @ts-ignore
+    nextState[key] = combinedReducer[key](state ? state[key] : undefined, action);
+  });
+
+  return nextState;
+};
+
 // --- Store ---
 export const store = configureStore({
-  reducer: {
-    events: eventLogSlice.reducer,
-    projections: projectionsSlice.reducer,
-    config: configSlice.reducer,
-    settings: settingsSlice.reducer
-  },
+  reducer: rootReducer,
   middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(syncMiddleware)
 });
 
 export const { appendEvent } = eventLogSlice.actions;
 export const { processEvent } = projectionsSlice.actions;
-export const { setConfig } = configSlice.actions;
+export const { setConfig, setContext } = configSlice.actions;
 export const { updateGoals } = settingsSlice.actions;
 
 // --- Selectors ---

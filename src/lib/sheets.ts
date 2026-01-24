@@ -200,6 +200,33 @@ export async function ensureDataStructures() {
     return { folderId, spreadsheetId };
 }
 
+export async function ensureConnectedToSharedFolder(folderId: string) {
+    const token = await ensureValidToken();
+    if (!token) throw new Error('Not authenticated');
+
+    // 1. Verify Folder Access (implicitly by searching inside it)
+    // We expect the DB file to be there.
+    const dbFiles = await findDatabaseFiles(folderId);
+
+    if (dbFiles.length === 0) {
+        // Legacy check?
+        const legacyName = 'TheFoodTrackerEventLog';
+        const q = `name='${legacyName}' and '${folderId}' in parents and trashed=false`;
+        const searchRes = await fetch(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(q)}`, {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        const searchData = await searchRes.json();
+
+        if (searchData.files && searchData.files.length > 0) {
+            return { folderId, spreadsheetId: searchData.files[0].id };
+        }
+
+        throw new Error('Shared Log not found in this folder.');
+    }
+
+    return { folderId, spreadsheetId: dbFiles[0].id };
+}
+
 async function ensureSheetExists(spreadsheetId: string, title: string) {
     const token = await ensureValidToken();
     if (!token) return; // Should be checked earlier

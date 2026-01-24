@@ -5,6 +5,8 @@
   import type { ActivityGroup } from '$lib/activity-grouping';
   import MacroSummary from './MacroSummary.svelte';
 
+  import { store } from '$lib/store';
+  
   // Props
   export let group: ActivityGroup;
   export let expanded = true;
@@ -17,8 +19,40 @@
 
   function getMainImage(urlStr?: string) {
       if (!urlStr) return null;
-      const urls = urlStr.split(',').map(u => u.trim());
+      const urls = urlStr.split(',').map((u: string) => u.trim());
       return urls.length > 0 ? urls[0] : null;
+  }
+  
+  // Context-Aware Link Logic
+  // We can't use $derived directly on store state easily in Svelte 5 runes transition unless we import store properly
+  // But let's verify if ActivityCard is Svelte 5 or 4 context. It seems Svelte 4 syntax (export let).
+  // store.subscribe approach? Or just read current state? 
+  // Ideally, valid store usage:
+  
+  let folderId = "";
+  let isReadOnly = false;
+  
+  // Subscribe to store updates for config
+  import { onMount } from 'svelte';
+  onMount(() => {
+      // Initialize from current state
+      const update = () => {
+          const s = store.getState().config;
+          folderId = s.folderId || "";
+          isReadOnly = s.isReadOnly;
+      };
+      update();
+      
+      const unsub = store.subscribe(update);
+      return unsub;
+  });
+
+  function getLink(itemId: string, fid: string) {
+      // Only use Sharing Link if we are in Read-Only context
+      if (fid && isReadOnly) {
+          return `${base}/sharing/entry/${itemId}?folderId=${fid}`;
+      }
+      return `${base}/entry?id=${itemId}`;
   }
 </script>
 
@@ -45,7 +79,7 @@
     <div class="details-list">
         {#each group.items as item}
             {@const mainImage = getMainImage(item.imageDriveUrl)}
-            <a href="{base}/entry?id={item.id}" class="item-row">
+            <a href="{getLink(item.id, folderId)}" class="item-row">
                 <div class="item-visual">
                     {#if mainImage}
                         {#await resolveDriveImage(mainImage)}

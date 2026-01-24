@@ -31,6 +31,14 @@
         previousUrl = new URL($page.url.href);
         initializeAuth(async () => { 
             console.log('[Auth] Initialized in Layout');
+            
+            // Skip default data initialization if we are in the sharing route
+            // The Sharing Layout will handle its own initialization
+            if ($page.url.pathname.startsWith('/sharing')) {
+                console.log('[Layout] Skipping default data init (Sharing Mode)');
+                return;
+            }
+
             try {
                 const { spreadsheetId, folderId } = await ensureDataStructures();
                 store.dispatch(setConfig({ spreadsheetId, folderId }));

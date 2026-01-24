@@ -12,14 +12,28 @@ interface FoodTrackerDB extends DBSchema {
     };
 }
 
-const DB_NAME = 'events-db';
 const DB_VERSION = 1;
 
-let dbPromise: Promise<IDBPDatabase<FoodTrackerDB>>;
+const BASE_DB_NAME = 'events-db';
+let currentContextId = 'default';
+let dbPromise: Promise<IDBPDatabase<FoodTrackerDB>> | null = null;
+
+// Context Management
+export function setDatabaseContext(contextId: string | null) {
+    const newContext = contextId || 'default';
+    if (currentContextId !== newContext) {
+        console.log(`[DB] Switching context from ${currentContextId} to ${newContext}`);
+        currentContextId = newContext;
+        dbPromise = null; // Force reconnection
+    }
+}
 
 export async function initDB() {
     if (!dbPromise) {
-        dbPromise = openDB<FoodTrackerDB>(DB_NAME, DB_VERSION, {
+        const dbName = currentContextId === 'default' ? BASE_DB_NAME : `${BASE_DB_NAME}-${currentContextId}`;
+        console.log(`[DB] Opening database: ${dbName}`);
+
+        dbPromise = openDB<FoodTrackerDB>(dbName, DB_VERSION, {
             upgrade(db) {
                 const store = db.createObjectStore('events', {
                     keyPath: 'eventId',

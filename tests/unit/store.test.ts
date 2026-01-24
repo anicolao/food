@@ -69,7 +69,7 @@ describe('Store Reducer Logic', () => {
 
         // Find the edited entry
         const entryId = "ec693587-27f8-4172-8958-a7c0ff00b101";
-        const entry = state.log.find(e => e.id === entryId);
+        const entry = state.log.find((e: LogEntry) => e.id === entryId);
 
         assert.ok(entry, "Entry should exist");
         assert.strictEqual(entry.description, "Ham and creamy sauce low carb tortilla wrap");
