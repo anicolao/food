@@ -209,16 +209,30 @@ export async function ensureConnectedToSharedFolder(folderId: string) {
     const dbFiles = await findDatabaseFiles(folderId);
 
     if (dbFiles.length === 0) {
-        // Legacy check?
-        const legacyName = 'TheFoodTrackerEventLog';
-        const q = `name='${legacyName}' and '${folderId}' in parents and trashed=false`;
-        const searchRes = await fetch(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(q)}`, {
-            headers: { Authorization: `Bearer ${token}` }
-        });
-        const searchData = await searchRes.json();
+        // Helper to perform search
+        const search = async (q: string) => {
+            const searchRes = await fetch(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(q)}&orderBy=modifiedTime desc`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            const searchData = await searchRes.json();
+            return searchData.files || [];
+        };
 
-        if (searchData.files && searchData.files.length > 0) {
-            return { folderId, spreadsheetId: searchData.files[0].id };
+        // 2. Legacy Name Check
+        const legacyName = 'TheFoodTrackerEventLog';
+        const legacyFiles = await search(`name='${legacyName}' and '${folderId}' in parents and trashed=false`);
+        if (legacyFiles.length > 0) {
+            return { folderId, spreadsheetId: legacyFiles[0].id };
+        }
+
+        // 3. Fallback: Any Spreadsheet in the folder
+        // The user might have renamed it. If they shared this folder, assume the spreadsheet inside is the one.
+        console.log('[Sheets] No tagged or named DB found. Searching for ANY spreadsheet.');
+        const anySheetFiles = await search(`mimeType='application/vnd.google-apps.spreadsheet' and '${folderId}' in parents and trashed=false`);
+
+        if (anySheetFiles.length > 0) {
+            console.log('[Sheets] Found untargeted spreadsheet. Using it:', anySheetFiles[0].name);
+            return { folderId, spreadsheetId: anySheetFiles[0].id };
         }
 
         throw new Error('Shared Log not found in this folder.');
