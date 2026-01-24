@@ -5,12 +5,18 @@
     import { setDatabaseContext, getAllEvents } from '$lib/db';
     import { syncManager } from '$lib/sync-manager';
     import { initializeAuth } from '$lib/auth';
+    import { openDrivePicker } from '$lib/drive-picker';
+    import { ensureValidToken } from '$lib/auth';
+    import { toasts } from '$lib/toast';
+
     import { ensureConnectedToSharedFolder } from '$lib/sheets';
     import { batchHydrateEvents } from '$lib/store';
     import ToastContainer from '$lib/components/ui/ToastContainer.svelte';
     import DesktopSidebar from '$lib/components/ui/DesktopSidebar.svelte';
 
     let { children } = $props();
+
+    let needsManualConnection = $state(false);
 
     let isLoading = $state(true);
     let error = $state<string | null>(null);
@@ -40,37 +46,61 @@
                 // Verify we can access the folder/DB
                 const { spreadsheetId } = await ensureConnectedToSharedFolder(folderId);
                 
-                // Update Config with explicit spreadsheetId found in that folder
-                store.dispatch({ 
-                    type: 'config/setConfig', 
-                    payload: { spreadsheetId, folderId, isReadOnly: true } 
-                });
-
-                // 3. Hydrate from Context-Scoped DB
-                console.log('[SharingLayout] Hydrating from keyspace...');
-                const events = await getAllEvents();
-                if (events.length > 0) {
-                     store.dispatch(batchHydrateEvents(events) as any);
-                }
-
-                // 4. Trigger Sync (Read Only)
-                // The sync manager will see isReadOnly in storeconfig? 
-                // Actually syncManager doesn't check isReadOnly, it just syncs.
-                // But redux-middleware blocks writes.
-                // SyncManager inbound sync is fine.
-                // SyncManager outbound sync will be empty because we prevent writes.
-                await syncManager.sync();
-
-                isLoading = false;
+                await connect(spreadsheetId);
 
             } catch (e: any) {
                 console.error('[SharingLayout] Initialization Failed', e);
-                error = `Failed to load shared log: ${e.message}`;
-                isLoading = false;
+                // If the error is about not finding the file, offer manual picker
+                if (e.message.includes('Shared Log not found') || e.message.includes('Drive Search Failed')) {
+                     needsManualConnection = true;
+                     isLoading = false;
+                } else {
+                    error = `Failed to load shared log: ${e.message}`;
+                    isLoading = false;
+                }
             }
         });
     });
 
+    async function connect(spreadsheetId: string) {
+        // Update Config with explicit spreadsheetId found in that folder
+        store.dispatch({ 
+            type: 'config/setConfig', 
+            payload: { spreadsheetId, folderId, isReadOnly: true } 
+        });
+
+        // 3. Hydrate from Context-Scoped DB
+        console.log('[SharingLayout] Hydrating from keyspace...');
+        const events = await getAllEvents();
+        if (events.length > 0) {
+                store.dispatch(batchHydrateEvents(events) as any);
+        }
+
+        // 4. Trigger Sync (Read Only)
+        await syncManager.sync();
+
+        isLoading = false;
+        needsManualConnection = false;
+    }
+
+    async function handleManualConnect() {
+        const token = await ensureValidToken();
+        if (!token) {
+            toasts.error('Please sign in first.');
+            return;
+        }
+        try {
+            const spreadsheetId = await openDrivePicker(token, folderId);
+            if (spreadsheetId) {
+                isLoading = true;
+                await connect(spreadsheetId);
+            }
+        } catch (e: any) {
+            console.error('Picker failed', e);
+            toasts.error('Failed to pick file: ' + e.message);
+        }
+    }
+    
     onDestroy(() => {
         console.log('[SharingLayout] Destroying Shared Context.');
         // Revert to default
@@ -78,34 +108,15 @@
         store.dispatch({ type: 'global/resetState' }); // Clear Shared Data
         store.dispatch(setContext({ isReadOnly: false, folderId: null })); // Reset Config
         
-        // We do NOT automatically re-hydrate the main app here because
-        // SvelteKit will typically navigate to another route which will standardly mount its own layout or page
-        // However, if we navigate to root '/', the root layout might *already* be mounted if this was nested?
-        // Wait, /sharing is a sibling of /, so root +layout.svelte is likely PARENT to both or shared.
-        // If src/routes/+layout.svelte is the root, it stays mounted.
-        // It has onMount logic.
-        // If we navigate from /sharing to /, the root layout does NOT re-mount. 
-        // So we MUST manually trigger re-hydration of the default context if we are returning to the app.
-
-        // But wait, if sharing layout unmounts, we are effectively leaving the shared zone.
-        // We should trigger a re-hydration of the default DB.
-        
-        // Let's do a best-effort re-hydration of default data.
         restoreDefaultContext();
     });
 
     async function restoreDefaultContext() {
-        // Only run if we are indeed ensuring the default context is restoring
-        // setDatabaseContext('default') was called above.
-        
-        // We need to fetch default events and hydrate.
         try {
-             // Basic restoration
              const events = await getAllEvents(); // Now querying 'default'
              if (events.length > 0) {
                  store.dispatch(batchHydrateEvents(events) as any);
              }
-             // Trigger sync for main app?
              syncManager.sync();
         } catch (e) {
             console.warn('[SharingLayout] Failed to restore default context on exit', e);
@@ -120,6 +131,12 @@
             <h1>Unable to load shared log</h1>
             <p>{error}</p>
             <a href="/">Return Home</a>
+        </div>
+    {:else if needsManualConnection}
+         <div class="error-container">
+            <h1>Connect Shared Log</h1>
+            <p>We couldn't automatically find the Food Log in this folder. Please select it manually.</p>
+            <button class="action-btn" onclick={handleManualConnect}>Select File from Drive</button>
         </div>
     {:else if isLoading}
         <div class="loading-container">
@@ -159,5 +176,15 @@
     }
     @keyframes spin {
         to { transform: rotate(360deg); }
+    }
+    .action-btn {
+        background: var(--color-primary, cyan);
+        color: black;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 20px;
+        font-weight: bold;
+        cursor: pointer;
+        font-size: 1rem;
     }
 </style>
