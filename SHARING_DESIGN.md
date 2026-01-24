@@ -17,53 +17,65 @@ Recipients should see a read-only version of the food log, backed by the shared 
 ### 1. Context-Aware Database (`src/lib/db.ts`)
 The current `db.ts` uses a hardcoded `DB_NAME`. We will refactor this to support dynamic database namespaces.
 
-*   **Change**: Introduce a context management system in `db.ts`.
+*   **Change**: Introduces `setDatabaseContext(contextId: string)`.
 *   **Mechanism**:
-    *   Export `setDatabaseContext(contextId: string)`.
     *   `contextId` defaults to `'default'` (User's private log).
     *   For sharing, `contextId` will be the `folderId`.
     *   Updates `initDB` to open `events-db-${contextId}`.
 
 ### 2. Synchronization Context (`src/lib/sync-manager.ts`)
-The `syncManager` currently relies on the global store configuration. It needs to become context-aware to sync strictly with the target folder.
+The `syncManager` needs to become context-aware to support syncing from a specific Shared Folder.
 
 *   **Change**: `syncManager` must respect the active Data Context.
-*   **Discovery**: Update `ensureDataStructures` (or create a variant `ensureSharedDataConnection`) to look strictly within the provided `folderId` and *not* create new folders if missing (fail if not found).
+*   **Discovery**: Update discovery logic to look strictly within the provided `folderId` and *not* create new folders if missing (fail if not found).
 
 ### 3. Redux Store Adaptation (`src/lib/store.ts`)
 The Redux store is a singleton. To support context switching without a full page reload, we need a mechanism to "reset" and "re-hydrate" the store when switching contexts.
 
 *   **New Action**: `config/setContext`
     *   Payload: `{ isReadOnly: boolean, folderId: string | null }`
-    *   Effect: Updates `config.isReadOnly`.
+    *   Effect: Updates `config.isReadOnly` and `config.folderId`.
 *   **New Action**: `global/resetState`
     *   Effect: Clears `events`, `log`, `stats`, `favourites` to initial empty state.
 *   **Middleware**: Update `syncMiddleware` to block `eventLog/appendEvent` if `state.config.isReadOnly` is true.
 
-### 4. Routing (`src/routes/sharing/+page.svelte`)
-A new route will handle the context switching lifecycle.
+### 4. Routing & Navigation Strategy
 
-**Lifecycle on Mount:**
-1.  Parse `folderId` from URL query params.
-2.  **Auth Check**: Ensure user is authenticated (reuse `auth.ts`).
-3.  **Context Switch**:
-    *   Call `db.setDatabaseContext(folderId)`.
-    *   Dispatch `global/resetState`.
-    *   Dispatch `config/setContext({ isReadOnly: true, folderId })`.
-4.  **Hydration**:
-    *   Call `db.getAllEvents()` to load cached shared data.
-    *   Dispatch `hydrateAllEvents` to Redux.
-5.  **Sync**:
-    *   Trigger `syncManager.sync()` (which will now use the shared DB and shared folder).
+We will use a **Shadow Route** strategy to encapsulate the shared context while reusing components.
 
-**Lifecycle on Destroy (Navigation Away):**
-1.  **Context Revert**:
-    *   Call `db.setDatabaseContext('default')`.
-    *   Dispatch `global/resetState`.
-    *   Dispatch `config/setContext({ isReadOnly: false, folderId: null })`.
-2.  **Hydration**:
-    *   Load user's personal data from `db.getAllEvents('default')`.
-    *   Hydrate Redux.
+**Route Structure:**
+*   `/sharing`
+    *   `+layout.svelte`: **The Context Controller**
+    *   `+page.svelte`: Reuses `LogPage`.
+    *   `entry/`
+        *   `[id]/`
+            *   `+page.svelte`: Reuses `EntryPage`.
+
+**Lifecycle (The Context Controller):**
+The `src/routes/sharing/+layout.svelte` will manage the boundary between "My Data" and "Shared Data".
+*   **Mount**:
+    1.  Parse `folderId` from URL query params (or persist from Store if navigating within sub-routes).
+    2.  **Auth Check**: Ensure user is authenticated.
+    3.  **Context Engage**:
+        *   Call `db.setDatabaseContext(folderId)`.
+        *   Dispatch `global/resetState`.
+        *   Dispatch `config/setContext({ isReadOnly: true, folderId })`.
+    4.  **Hydration & Sync**:
+        *   Load event stream from the context-scoped DB.
+        *   Trigger sync against the shared folder.
+*   **Destroy**:
+    *   **Context Disengage**:
+        *   Revert DB context to `'default'`.
+        *   Reset & Restore user's personal store state from 'default' DB.
+        *   Dispatch `config/setContext({ isReadOnly: false, folderId: null })`.
+
+**Component Navigation Logic:**
+Existing components (`src/routes/entry/+page.svelte`, etc.) contain internal navigation (e.g., "Back" button, clicking a list item). To ensure users stay within the `/sharing` context:
+
+*   **Logic Update**: Key components will be updated to check `store.config.folderId`.
+    *   **Back Links**: If `folderId` is set, the Back button in `EntryPage` will link to `/sharing?folderId=...` instead of `/`.
+    *   **Deep Links**: If `folderId` is set, clicking a log item will link to `/sharing/entry/[id]?folderId=...` instead of `/entry/[id]`.
+*   **Refactoring**: We will modify the components to compute `baseRoute` dynamically (e.g., `let baseRoute = $store.config.folderId ? '/sharing' : '';`).
 
 ### 5. UI Components
 Components must respect the `readOnly` state.
@@ -79,9 +91,12 @@ Components must respect the `readOnly` state.
 1.  **Refactor DB**: Update `src/lib/db.ts` to support `setDatabaseContext`.
 2.  **Update Store**: Add `resetState` reducer and `isReadOnly` config.
 3.  **Update Middleware**: Block writes in `redux-sync-middleware.ts` when ReadOnly.
-4.  **Create Route**: Implement `src/routes/sharing/+page.svelte` with the lifecycle logic described.
-5.  **Update Components**: Audit key components (`LogPage`, `EntryDetail`, `NutritionCard`) to hide controls when `isReadOnly`.
-6.  **Discovery Logic**: Ensure `sheets.ts` can find the DB file strictly inside a given `folderId` without creating it.
+4.  **Implement Route Infrastructure**:
+    *   Create `src/routes/sharing/+layout.svelte`.
+    *   Create `src/routes/sharing/+page.svelte` (Shadow of Home).
+    *   Create `src/routes/sharing/entry/[id]/+page.svelte` (Shadow of Entry Detail).
+5.  **Component "Awareness"**: Update `LogPage` (extracted from home) and `entry/+page.svelte` to handle `isReadOnly` UI states and `folderId` based navigation paths.
+6.  **Discovery Logic**: Update `sheets.ts` to support finding the DB file strictly inside a given `folderId`.
 
 ## Auth Note
 "Anyone with the link" refers to the Drive Folder permission.
