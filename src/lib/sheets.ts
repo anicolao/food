@@ -379,13 +379,17 @@ export async function fetchRows(spreadsheetId: string, sheetName: string, startR
     const response = await fetch(url, { headers });
 
     if (!response.ok) {
-        if ((response.status === 403 || response.status === 401) && token && GOOGLE_API_KEY) {
-            console.warn('[Sheets] Token access failed, retrying with API Key only (Anonymous access)...');
+        // If 403/401 OR 404 (hidden by scope) and we used Token, maybe retry with ONLY API Key (Anonymous)?
+        if ((response.status === 403 || response.status === 401 || response.status === 404) && token && GOOGLE_API_KEY) {
+            console.warn(`[Sheets] Token access failed (${response.status}), retrying with API Key only (Anonymous access)...`);
             const retryUrl = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${range}?key=${GOOGLE_API_KEY}`;
+            // Important: Do NOT send Authorization header
             const retryRes = await fetch(retryUrl);
             if (retryRes.ok) {
                 const data = await retryRes.json();
                 return data.values || [];
+            } else {
+                console.warn('[Sheets] Anonymous retry failed:', retryRes.status);
             }
         }
 
