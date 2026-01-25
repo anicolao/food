@@ -1,5 +1,5 @@
 <script lang="ts">
-	import favicon from '$lib/assets/favicon.svg';
+
 	import '../app.css';
 
 	import MobileNav from '$lib/components/ui/MobileNav.svelte';
@@ -141,9 +141,7 @@
 
 <svelte:window bind:innerWidth={width} bind:innerHeight={height} />
 
-<svelte:head>
-	<link rel="icon" href={favicon} />
-</svelte:head>
+
 
 <div class="app-shell">
 	<div class="desktop-nav">
