@@ -90,6 +90,12 @@ self.addEventListener('fetch', (event) => {
                 if (cachedResponse) return cachedResponse;
 
                 const networkResponse = await fetch(e.request);
+
+                // [NEW] Cache the successful navigation response to support offline reload
+                if (networkResponse.ok) {
+                    cache.put(e.request, networkResponse.clone());
+                }
+
                 return networkResponse;
             } catch (error) {
                 // Offline Fallback
