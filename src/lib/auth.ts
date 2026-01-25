@@ -272,3 +272,20 @@ export function signOut() {
         g.accounts.oauth2.revoke(tokenToRevoke, () => { });
     }
 }
+
+export async function getUserInfo(): Promise<UserProfile | null> {
+    const token = await ensureValidToken();
+    if (!token) return null;
+
+    try {
+        const response = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        if (response.ok) {
+            return await response.json();
+        }
+    } catch (e) {
+        console.error('Failed to fetch user info', e);
+    }
+    return null;
+}

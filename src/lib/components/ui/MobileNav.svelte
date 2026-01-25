@@ -6,6 +6,19 @@
 
     // Simple Icon component placeholders or inline svgs
     
+    import { store } from '$lib/store';
+    import { onMount } from 'svelte';
+
+    let isReadOnly = $state(false);
+
+    onMount(() => {
+        const update = () => {
+            isReadOnly = store.getState().config.isReadOnly;
+        };
+        update();
+        return store.subscribe(update);
+    });
+
     let logUrl = $derived.by(() => {
         if ($page.url.pathname.includes('/entry')) {
              const id = $page.url.searchParams.get('id');
@@ -25,14 +38,16 @@
         </NavItem>
     </div>
 
+    {#if !isReadOnly}
     <div class="fab-container">
         <a href="{logUrl}" class="fab" aria-label="Log new food entry">
             <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
         </a>
     </div>
+    {/if}
 
     <div class="nav-group">
-        <NavItem href="{base}/settings" label="Settings">
+        <NavItem href={isReadOnly ? `${base}/switcher` : `${base}/settings`} label={isReadOnly ? "Switch User" : "Settings"}>
             {#snippet icon()}
             <!-- Settings/User Icon -->
              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>

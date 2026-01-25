@@ -7,7 +7,8 @@
     import { initializeAuth } from '$lib/auth';
     import { ensureValidToken } from '$lib/auth';
 
-    import { ensureConnectedToSharedFolder } from '$lib/sheets';
+    import { ensureConnectedToSharedFolder, fetchIdentity } from '$lib/sheets';
+    import { sharedUsers } from '$lib/shared-users';
     import { batchHydrateEvents } from '$lib/store';
     import ToastContainer from '$lib/components/ui/ToastContainer.svelte';
     import DesktopSidebar from '$lib/components/ui/DesktopSidebar.svelte';
@@ -80,6 +81,18 @@
 
         // 4. Trigger Sync (Read Only)
         await syncManager.sync();
+
+        // 5. Fetch Identity & Cache User
+        fetchIdentity(spreadsheetId).then(profile => {
+             console.log('[SharingLayout] Identity:', profile);
+             if (profile.name) {
+                 sharedUsers.addOrUpdateUser({
+                     folderId,
+                     name: profile.name,
+                     avatar: profile.avatar || ''
+                 });
+             }
+        }).catch(e => console.warn('[SharingLayout] Failed to fetch identity', e));
 
         isLoading = false;
     }
