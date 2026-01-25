@@ -98,8 +98,19 @@ Components must respect the `readOnly` state.
 5.  **Component "Awareness"**: Update `LogPage` (extracted from home) and `entry/+page.svelte` to handle `isReadOnly` UI states and `folderId` based navigation paths.
 6.  **Discovery Logic**: Update `sheets.ts` to support finding the DB file strictly inside a given `folderId`.
 
-## Auth Note
-"Anyone with the link" refers to the Drive Folder permission.
-*   The Viewer **must** sign in with their Google Account to use the Drive API.
-*   The App's `auth.ts` handles this naturally.
-*   If the folder is shared with "Anyone with the link", the Viewer's token will successfully list/read files in that folder.
+## Authentication & Privacy
+The sharing model supports two modes:
+
+1.  **Anonymous Access (Public Link)**:
+    *   If the Drive Folder is shared with "Anyone with the link", the app uses a **Google API Key** to discover and read the database.
+    *   **No Sign-In Required**: The viewer does not need to log in to Google to view the data.
+    *   This ensures zero friction for viewing shared logs.
+
+2.  **Authenticated Access (Private Share)**:
+    *   If the folder is shared with specific email addresses, the viewer **must sign in** to access the data via their OAuth token.
+    *   The app automatically fails over to this mode if the Anonymous check fails.
+
+### Identity
+*   Viewers *can* optionally sign in even on a public link.
+*   If signed in, their Name and Avatar are fetched and displayed in the "Identity Header" and stored in the shared log's "Identity" sheet (if writable) or just displayed locally.
+*   The system uses `userinfo.profile` scope to personalise the experience.
