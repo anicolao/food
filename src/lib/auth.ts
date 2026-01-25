@@ -20,6 +20,7 @@ export interface UserProfile {
 }
 
 export const authState = writable<{ token: string | null, ready: boolean }>({ token: null, ready: false });
+export const userProfile = writable<UserProfile | null>(null);
 
 // Simple wrapper around Google Identity Services (GIS)
 // Assumes <script src="https://accounts.google.com/gsi/client" async defer></script> in app.html derived layout
@@ -284,7 +285,9 @@ export async function getUserInfo(): Promise<UserProfile | null> {
             headers: { Authorization: `Bearer ${token}` }
         });
         if (response.ok) {
-            return await response.json();
+            const data = await response.json();
+            userProfile.set(data);
+            return data;
         }
     } catch (e) {
         console.error('Failed to fetch user info', e);
