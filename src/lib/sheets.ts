@@ -475,3 +475,50 @@ export async function renameFile(fileId: string, newName: string) {
 
     return await response.json();
 }
+
+// --- Identity Management ---
+
+export interface IdentityProfile {
+    name?: string;
+    avatar?: string;
+}
+
+export async function fetchIdentity(spreadsheetId: string): Promise<IdentityProfile> {
+    try {
+        const rows = await fetchRows(spreadsheetId, 'Identity');
+        const profile: IdentityProfile = {};
+        for (const row of rows) {
+            if (row[0] === 'Name') profile.name = row[1];
+            if (row[0] === 'Avatar') profile.avatar = row[1];
+        }
+        return profile;
+    } catch (e) {
+        // Tab might not exist or empty
+        return {};
+    }
+}
+
+export async function saveIdentity(spreadsheetId: string, profile: IdentityProfile) {
+    // We overwrite the entire Identity tab contents logically, 
+    // but Sheets API is append-heavy.
+    // Better to use batchUpdate to clear/write or just update specific cells.
+    // For simplicity: Update A1:B2 directly.
+
+    // First ensure tab exists
+    await ensureSheetExists(spreadsheetId, 'Identity');
+
+    const token = await ensureValidToken();
+    if (!token) return;
+
+    const values = [
+        ['Name', profile.name || ''],
+        ['Avatar', profile.avatar || '']
+    ];
+
+    const url = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/Identity!A1:B2?valueInputOption=USER_ENTERED`;
+    await fetch(url, {
+        method: 'PUT',
+        headers: { Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ values })
+    });
+}

@@ -123,6 +123,22 @@ export async function mockDriveAPI(page: Page) {
             return;
         }
 
+        if (url.includes('values/Identity')) {
+            if (method === 'PUT' || method === 'POST') {
+                await route.fulfill({ json: { updatedRange: 'Identity!A1:B2' } });
+            } else {
+                await route.fulfill({
+                    json: {
+                        values: [
+                            ['Name', 'Test User'],
+                            ['Avatar', 'http://localhost:5174/mock-images/apple.png']
+                        ]
+                    }
+                });
+            }
+            return;
+        }
+
         // Get Spreadsheet (Metadata)
         if (url.match(/spreadsheets\/[^/]+$/)) {
             await route.fulfill({ json: { sheets: [{ properties: { title: 'Events' } }] } });
@@ -181,5 +197,16 @@ export async function mockDriveAPI(page: Page) {
         // Return a placeholder image
         const buffer = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKwftQAAAABJRU5ErkJggg==', 'base64');
         await route.fulfill({ body: buffer, contentType: 'image/png' });
+    });
+
+    // 5. Mock UserInfo
+    await page.route('**googleapis.com/oauth2/v3/userinfo**', async route => {
+        await route.fulfill({
+            json: {
+                name: 'Test User',
+                email: 'test@example.com',
+                picture: 'http://localhost:5174/mock-images/apple.png'
+            }
+        });
     });
 }

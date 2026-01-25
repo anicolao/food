@@ -9,12 +9,12 @@
 	import { page } from '$app/stores';
 	import { getTransitionDirection, getTransitionParams } from '$lib/transitions';
 	import { onMount } from 'svelte';
-    import { initializeAuth, ensureValidToken } from '$lib/auth';
+    import { initializeAuth, ensureValidToken, getUserInfo } from '$lib/auth';
     import { afterNavigate, beforeNavigate } from '$app/navigation';
     import { getAllEvents } from '$lib/db';
     import { syncManager } from '$lib/sync-manager';
     import { store, batchHydrateEvents, setConfig } from '$lib/store';
-    import { ensureDataStructures } from '$lib/sheets';
+    import { ensureDataStructures, saveIdentity } from '$lib/sheets';
 
 	let { children } = $props();
 
@@ -45,6 +45,16 @@
                 
                 // Kick off sync manager after config is loaded
                 syncManager.sync();
+
+                // Sync Identity (Name/Avatar) to Sheet
+                getUserInfo().then(profile => {
+                    if (profile) {
+                         // We map UserProfile (name, picture) to IdentityProfile (name, avatar)
+                         saveIdentity(spreadsheetId, { name: profile.name, avatar: profile.picture })
+                            .catch(e => console.warn('[Layout] Failed to save identity', e));
+                    }
+                });
+
             } catch (e) {
                 console.error('[Layout] Failed to init sheets config', e);
             }
