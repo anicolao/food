@@ -129,7 +129,8 @@
     .avatar-fab {
         background: #333; /* Fallback for transparency */
         overflow: hidden;
-        border: 4px solid var(--accent, #43e97b); /* Green ring for shared */
+        border: 2px solid var(--accent, #43e97b); /* Green ring for shared */
+        box-shadow: 0 10px 20px #43e97b44;
     }
 
     .avatar-fab img {
