@@ -250,6 +250,10 @@
              <!-- SVG Gradients for Macros -->
              <svg width="0" height="0" class="visually-hidden">
                 <defs>
+                    <linearGradient id="calories-ring" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="#43e97b"/>
+                        <stop offset="100%" stop-color="#38f9d7"/>
+                    </linearGradient>
                     <linearGradient id="protein-grad" x1="0%" y1="0%" x2="100%" y2="100%">
                         <stop offset="0%" stop-color="#c471ed"/>
                         <stop offset="100%" stop-color="#f64f59"/>

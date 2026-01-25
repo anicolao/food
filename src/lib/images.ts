@@ -1,4 +1,4 @@
-import { ensureValidToken } from './auth';
+import { ensureValidToken, GOOGLE_API_KEY } from './auth';
 
 const imageCache = new Map<string, string>();
 
@@ -17,11 +17,21 @@ export async function resolveDriveImage(url: string): Promise<string> {
 
     if (fileId) {
         const token = await ensureValidToken();
+        const headers: any = {};
+        let fetchUrl = `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`;
+
         if (token) {
+            headers.Authorization = `Bearer ${token}`;
+        } else if (GOOGLE_API_KEY) {
+            fetchUrl += `&key=${GOOGLE_API_KEY}`;
+        } else {
+            // No token and no API Key, and url is not a public uc link? 
+            // If we are here, we probably need one of them.
+        }
+
+        if (token || GOOGLE_API_KEY) {
             try {
-                const res = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`, {
-                    headers: { Authorization: `Bearer ${token}` }
-                });
+                const res = await fetch(fetchUrl, { headers });
                 if (res.ok) {
                     const blob = await res.blob();
                     const blobUrl = URL.createObjectURL(blob);
@@ -29,7 +39,7 @@ export async function resolveDriveImage(url: string): Promise<string> {
                     return blobUrl;
                 }
             } catch (e) {
-                console.error('Failed to fetch authenticated image', e);
+                console.error('Failed to fetch image', e);
             }
         }
     }
