@@ -50,20 +50,25 @@ export async function openDrivePicker(oauthToken: string, folderId?: string): Pr
             return;
         }
 
-        const view = new google.picker.View(google.picker.ViewId.SPREADSHEETS);
+        // Primary View: The Shared Folder (if exists)
+        // Use ViewId.DOCS to ensure we can see files even if SPREADSHEETS view is buggy with setParent
+        const folderView = new google.picker.View(google.picker.ViewId.DOCS);
+        folderView.setMimeTypes('application/vnd.google-apps.spreadsheet');
 
-        // If folderId is provided, we *could* try to restrict to it, or just enable searching inside it.
-        // setParent(folderId) sets the initial view location.
         if (folderId) {
-            view.setParent(folderId);
+            folderView.setParent(folderId);
         }
 
+        // Secondary View: All Spreadsheets (Fallback if folder is empty/inaccessible)
+        const allView = new google.picker.View(google.picker.ViewId.SPREADSHEETS);
+
         const picker = new google.picker.PickerBuilder()
-            .enableFeature(google.picker.Feature.NAV_HIDDEN) // Hide nav to keep focus
-            .enableFeature(google.picker.Feature.SUPPORT_DRIVES) // Support shared drives just in case
+            // .enableFeature(google.picker.Feature.NAV_HIDDEN) // Allow navigation so user can look elsewhere
+            .enableFeature(google.picker.Feature.SUPPORT_DRIVES)
             .setAppId(GOOGLE_CLIENT_ID)
             .setOAuthToken(oauthToken)
-            .addView(view)
+            .addView(folderView)
+            .addView(allView)
             .setCallback((data: any) => {
                 if (data[google.picker.Response.ACTION] === google.picker.Action.PICKED) {
                     const doc = data[google.picker.Response.DOCUMENTS][0];
