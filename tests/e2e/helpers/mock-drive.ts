@@ -58,6 +58,12 @@ export async function mockDriveAPI(page: Page) {
 
         // 4. Single File Operations
         if (url.match(/\/files\/[^/?]+(\?|$)/)) {
+            // If it is a media request, allow fallback so specific tests can handle it (or network)
+            if (url.includes('alt=media')) {
+                await route.fallback();
+                return;
+            }
+
             if (method === 'PATCH') {
                 const body = route.request().postDataJSON();
                 await route.fulfill({

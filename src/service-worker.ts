@@ -8,6 +8,8 @@ import { build, files, version } from '$service-worker';
 // Create a unique cache name for this deployment
 const CACHE = `cache-${version}`;
 
+const PHOTOS_CACHE = 'photos-v1';
+
 const ASSETS = [
     ...build, // the app itself
     ...files  // everything in `static`
@@ -29,18 +31,22 @@ self.addEventListener('activate', (event) => {
     // Remove previous caches
     async function deleteOldCaches() {
         for (const key of await caches.keys()) {
-            if (key !== CACHE) await caches.delete(key);
+            if (key !== CACHE && key !== PHOTOS_CACHE) await caches.delete(key);
         }
     }
 
     e.waitUntil(deleteOldCaches());
+    e.waitUntil((self as unknown as ServiceWorkerGlobalScope).clients.claim());
 });
 
 self.addEventListener('fetch', (event) => {
     const e = event as FetchEvent;
 
-    // IGNORE requests for Google APIs
-    if (e.request.url.includes('googleapis.com')) return;
+    // Check if this is a Drive Photo URL
+    const isDrivePhoto = e.request.url.includes('googleapis.com/drive/v3/files') && e.request.url.includes('alt=media');
+
+    // IGNORE requests for Google APIs (except photos)
+    if (e.request.url.includes('googleapis.com') && !isDrivePhoto) return;
 
     // Ignore non-GET requests
     if (e.request.method !== 'GET') return;
@@ -49,6 +55,25 @@ self.addEventListener('fetch', (event) => {
     if (e.request.url.startsWith('chrome-extension://')) return;
 
     async function respond() {
+        // 0. Photos: CACHE-FIRST (Long-lived)
+        if (isDrivePhoto) {
+            const cache = await caches.open(PHOTOS_CACHE);
+            const cachedResponse = await cache.match(e.request);
+            if (cachedResponse) return cachedResponse;
+
+            try {
+                const networkResponse = await fetch(e.request);
+                // Only cache successful responses
+                if (networkResponse.ok) {
+                    cache.put(e.request, networkResponse.clone());
+                }
+                return networkResponse;
+            } catch (error) {
+                // If offline and not in cache, we let it fail (it will be handled by resolveDriveImage catch block)
+                throw error;
+            }
+        }
+
         const url = new URL(e.request.url);
         const cache = await caches.open(CACHE);
 
