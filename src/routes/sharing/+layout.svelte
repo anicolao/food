@@ -5,7 +5,7 @@
     import { setDatabaseContext, getAllEvents } from '$lib/db';
     import { syncManager } from '$lib/sync-manager';
     import { initializeAuth } from '$lib/auth';
-    import { openDrivePicker } from '$lib/drive-picker';
+    import { openDrivePicker, PickType } from '$lib/drive-picker';
     import { ensureValidToken } from '$lib/auth';
     import { toasts } from '$lib/toast';
 
@@ -90,14 +90,42 @@
             return;
         }
         try {
-            const spreadsheetId = await openDrivePicker(token, folderId);
-            if (spreadsheetId) {
+            // First try to pick the FOLDER. This grants access to the folder context.
+            const pickedFolderId = await openDrivePicker(token, folderId, PickType.FOLDER);
+            
+            if (pickedFolderId) {
                 isLoading = true;
-                await connect(spreadsheetId);
+                // Now try discovery again with the confirmed (and now authorized) folder
+                try {
+                     const { spreadsheetId } = await ensureConnectedToSharedFolder(pickedFolderId);
+                     await connect(spreadsheetId);
+                     return;
+                } catch (discoveryError) {
+                    console.warn('Discovery failed in picked folder, falling back to file pick', discoveryError);
+                    isLoading = false;
+                }
             }
+
+            // Fallback: Pick the FILE directly if folder picking didn't work or didn't yield a DB
+            // Or maybe the user cancelled folder pick? 
+            // If pickedFolderId was null, user cancelled. don't auto open file picker.
+            // But if discovery failed, maybe the file is there but not detected?
+            
+            if (pickedFolderId) {
+                 const proceed = confirm('We opened the folder but couldn\'t find the log file automatically. Would you like to pick the Spreadsheet file directly?');
+                 if (!proceed) return;
+    
+                 const pickedSpreadsheetId = await openDrivePicker(token, pickedFolderId, PickType.FILE);
+                 if (pickedSpreadsheetId) {
+                     isLoading = true;
+                     await connect(pickedSpreadsheetId);
+                 }
+            }
+            
         } catch (e: any) {
             console.error('Picker failed', e);
             toasts.error('Failed to pick file: ' + e.message);
+            isLoading = false;
         }
     }
     

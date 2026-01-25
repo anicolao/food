@@ -40,7 +40,12 @@ export async function loadPickerApi() {
     });
 }
 
-export async function openDrivePicker(oauthToken: string, folderId?: string): Promise<string | null> {
+export enum PickType {
+    FILE = 'FILE',
+    FOLDER = 'FOLDER'
+}
+
+export async function openDrivePicker(oauthToken: string, folderId?: string, type: PickType = PickType.FILE): Promise<string | null> {
     await loadPickerApi();
 
     return new Promise((resolve, reject) => {
@@ -50,25 +55,36 @@ export async function openDrivePicker(oauthToken: string, folderId?: string): Pr
             return;
         }
 
-        // Primary View: The Shared Folder (if exists)
-        // Use ViewId.DOCS to ensure we can see files even if SPREADSHEETS view is buggy with setParent
-        const folderView = new google.picker.View(google.picker.ViewId.DOCS);
-        folderView.setMimeTypes('application/vnd.google-apps.spreadsheet');
+        let view;
 
-        if (folderId) {
-            folderView.setParent(folderId);
+        if (type === PickType.FOLDER) {
+            view = new google.picker.DocsView(google.picker.ViewId.FOLDERS)
+                .setIncludeFolders(true)
+                .setSelectFolderEnabled(true);
+        } else {
+            // FILE Mode
+            // Primary View: The Shared Folder (if likely accessible) or just Docs
+            view = new google.picker.DocsView(google.picker.ViewId.DOCS);
+            view.setMimeTypes('application/vnd.google-apps.spreadsheet');
         }
 
-        // Secondary View: All Spreadsheets (Fallback if folder is empty/inaccessible)
-        const allView = new google.picker.View(google.picker.ViewId.SPREADSHEETS);
+        if (folderId) {
+            view.setParent(folderId);
+        }
 
-        const picker = new google.picker.PickerBuilder()
-            // .enableFeature(google.picker.Feature.NAV_HIDDEN) // Allow navigation so user can look elsewhere
+        const builder = new google.picker.PickerBuilder()
             .enableFeature(google.picker.Feature.SUPPORT_DRIVES)
             .setAppId(GOOGLE_CLIENT_ID)
             .setOAuthToken(oauthToken)
-            .addView(folderView)
-            .addView(allView)
+            .addView(view);
+
+        // Add fallback view for files
+        if (type === PickType.FILE) {
+            const allView = new google.picker.View(google.picker.ViewId.SPREADSHEETS);
+            builder.addView(allView);
+        }
+
+        const picker = builder
             .setCallback((data: any) => {
                 if (data[google.picker.Response.ACTION] === google.picker.Action.PICKED) {
                     const doc = data[google.picker.Response.DOCUMENTS][0];
