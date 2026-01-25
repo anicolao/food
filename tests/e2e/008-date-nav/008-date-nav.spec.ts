@@ -10,17 +10,8 @@ test('US-023: Date Navigation', async ({ page }, testInfo) => {
     // Mock Auth & Clock
     // "Today" is March 15th, 12:00 PM
     await page.clock.install({ time: new Date('2024-03-15T16:00:00Z') });
-    await page.addInitScript(() => {
-        (window as any).google = {
-            accounts: {
-                oauth2: {
-                    initTokenClient: (c: any) => ({ requestAccessToken: () => c.callback({ access_token: 'mock' }) }),
-                    revoke: (token: string, cb: any) => cb()
-                }
-            }
-        };
-    });
-    await page.route('https://accounts.google.com/gsi/client', route => route.abort());
+    // Legacy mocks removed for redirect flow
+
 
     // Mock Data: 
     // 1. Entry Today (March 15)
@@ -55,15 +46,16 @@ test('US-023: Date Navigation', async ({ page }, testInfo) => {
             await route.fallback();
         } else if (url.includes('userinfo')) {
             await route.fulfill({
-                json: { name: 'Test User', picture: '' }
+                json: { name: 'Test User', email: 'test@example.com', picture: '' }
             });
         } else {
-            await route.fulfill({ json: {} });
+            await route.fallback();
         }
     });
 
     await page.goto('/');
-    await page.waitForFunction(() => (window as any)._authReady);
+    // await page.waitForFunction(() => (window as any)._authReady);
+
     await page.getByText('Sign In with Google').click();
 
     await tester.step('view-today', {

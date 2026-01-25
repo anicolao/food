@@ -19,25 +19,9 @@ test('US-014: Dashboard State Persistence', async ({ page }, testInfo) => {
     const today = '2024-06-15';
     const yesterday = '2024-06-14';
 
-    await page.addInitScript(async () => {
-        if (navigator.serviceWorker) {
-            const registrations = await navigator.serviceWorker.getRegistrations();
-            for (const registration of registrations) {
-                await registration.unregister();
-            }
-        }
-        (window as any).google = {
-            accounts: {
-                oauth2: {
-                    initTokenClient: (c: any) => ({ requestAccessToken: () => c.callback({ access_token: 'mock' }) }),
-                    revoke: (token: string, cb: any) => cb()
-                }
-            }
-        };
-    });
+    // Legacy mocks removed to support new Redirect Auth Flow
+    // (window.google mocking is no longer needed/supported for signInWithRedirect)
 
-    // Block real Google Identity script to prevent overwriting mocks
-    await page.route('https://accounts.google.com/gsi/client', route => route.abort());
 
     // Robust Google API Mocks
     await mockDriveAPI(page);
@@ -68,10 +52,10 @@ test('US-014: Dashboard State Persistence', async ({ page }, testInfo) => {
                     }
                 });
             } else {
-                await route.fulfill({ json: {} });
+                await route.fallback();
             }
         } else {
-            await route.continue();
+            await route.fallback();
         }
     });
 
@@ -84,7 +68,7 @@ test('US-014: Dashboard State Persistence', async ({ page }, testInfo) => {
     await expect(page.getByTestId('debug-load')).toBeVisible({ timeout: 30000 });
 
     // Sign In
-    await page.waitForFunction(() => (window as any)._authReady);
+    // await page.waitForFunction(() => (window as any)._authReady); // Not needed for redirect flow
     await page.getByText('Sign In with Google').click();
     await expect(page.locator('.feed-header h2')).toBeVisible({ timeout: 10000 });
 

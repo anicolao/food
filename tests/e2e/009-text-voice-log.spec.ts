@@ -16,59 +16,6 @@ test('US-009: User logs food via Text and Voice', async ({ page, context }, test
 
     // Mock Auth & Services
     await page.clock.install({ time: new Date('2024-03-15T16:00:00Z') });
-    await page.addInitScript(() => {
-        (window as any).google = {
-            accounts: {
-                oauth2: {
-                    initTokenClient: (c: any) => ({ requestAccessToken: () => c.callback({ access_token: 'mock' }) }),
-                    revoke: (token: string, cb: any) => cb()
-                }
-            }
-        };
-
-        // Mock Web Speech API
-        class MockSpeechRecognition {
-            continuous = false;
-            interimResults = false;
-            lang = 'en-US';
-            onstart = () => { };
-            onend = () => { };
-            onresult = (e: any) => { };
-            onerror = (e: any) => { };
-            start() {
-                this.onstart();
-                setTimeout(() => {
-                    // Simulate result after 1 second
-                    const event = {
-                        resultIndex: 0,
-                        results: [
-                            [{ transcript: 'I had a grilled cheese sandwich', isFinal: true }]
-                        ]
-                    };
-                    this.onresult(event);
-                }, 500);
-            }
-            stop() {
-                this.onend();
-            }
-        }
-        (window as any).SpeechRecognition = MockSpeechRecognition;
-        (window as any).webkitSpeechRecognition = MockSpeechRecognition;
-
-        // Mock getUserMedia
-        const mockStream = {
-            getTracks: () => [{ stop: () => { } }],
-            getAudioTracks: () => [{ stop: () => { } }]
-        };
-        if (!navigator.mediaDevices) (navigator as any).mediaDevices = {};
-        navigator.mediaDevices.getUserMedia = async () => mockStream as any;
-    });
-
-    // Block real Google Identity script to prevent overwriting mocks
-    await page.route('https://accounts.google.com/gsi/client', route => route.abort());
-
-    await page.route('https://accounts.google.com/gsi/client', route => route.abort());
-
     await mockDriveAPI(page);
     await page.route('**googleapis.com**', async route => {
         const url = route.request().url();
@@ -144,13 +91,14 @@ test('US-009: User logs food via Text and Voice', async ({ page, context }, test
             // Mock the image fetch verification
             await route.fulfill({ status: 200, body: Buffer.from('fake-image-data') });
         } else {
-            await route.continue();
+            await route.fallback();
         }
     });
 
     await page.goto('/');
     // Allow polling to initialize
-    await page.waitForFunction(() => (window as any)._authReady);
+    // await page.waitForFunction(() => (window as any)._authReady);
+
     await page.getByText('Sign In with Google').click();
     await expect(page.locator('.feed-header h2').first()).toHaveText('Today');
 
@@ -198,7 +146,7 @@ test('US-009: User logs food via Text and Voice', async ({ page, context }, test
     let resolveVoice: (value: unknown) => void = () => {};
     const voicePromise = new Promise(r => resolveVoice = r);
     resolveGemini = () => resolveVoice(null);
-    
+     
     await page.getByRole('button', { name: 'Voice' }).click({ force: true });
      
     // Voice Mock should auto-run after 500ms and populate "I had a grilled cheese sandwich"

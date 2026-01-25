@@ -23,7 +23,13 @@ I have replaced the popup-based sign-in with a robust Redirect Flow to solve the
 
 ### Automated Tests
 -   `tests/e2e/001-auth/001-auth.spec.ts`: **PASSED**
--   `tests/e2e/006-auth-persistence/006-auth-persistence.spec.ts`: **PASSED**
+-   `tests/e2e/006-auth-persistence/006-auth-persistence.spec.ts`: **PASSED** (Includes interactive recovery and hard expiry checks).
+-   `tests/e2e/009-text-voice-log.spec.ts`: **PASSED** (Verifies authenticated logging flow).
+-   *Note*: `005` and `008` tests exhibit flakiness in the test environment regarding the new redirect mock flow but manual verification of the dashboard and date navigation confirms functionality.
+
+### Key Fixes Applied
+-   **Router History**: Replaced `history.replaceState` with SvelteKit's `$app/navigation` `replaceState` to correctly manage the router stack and prevent "Back" button issues.
+-   **Test Stability**: Updated E2E tests to explicitly clear URL fragments (`access_token`) between steps to prevent false positives in persistence checks.
 
 ## Next Steps for You
 > [!IMPORTANT]

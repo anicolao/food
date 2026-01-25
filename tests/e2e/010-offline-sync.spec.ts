@@ -36,16 +36,13 @@ test.describe('Offline Support & Sync', () => {
                     }
                 });
             } else {
-                await route.continue();
+                await route.fallback();
             }
         });
 
         // 1. Initial Setup: Mock Auth & Preload
-        await page.addInitScript(() => {
-            (window as any).google = {
-                accounts: { oauth2: { initTokenClient: (c: any) => ({ requestAccessToken: () => c.callback({ access_token: 'mock' }) }) } }
-            };
-        });
+        // (Legacy Google Auth mock removed)
+
 
         // Visit Dashboard to establish origin
         await page.goto('/');

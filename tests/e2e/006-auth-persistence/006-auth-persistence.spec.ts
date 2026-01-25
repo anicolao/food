@@ -149,7 +149,10 @@ test('US-023: Auth Persistence', async ({ page }, testInfo) => {
                         localStorage.setItem('food_log_token_expiry', (Date.now() - FORTY_EIGHT_HOURS_MS - 10000).toString());
                     });
 
-                    await page.reload();
+                    // Clear any lingering URL fragments from previous tests (e.g. interactive redirect)
+                    // to ensure we are testing local storage persistence, not new hash login
+                    await page.goto('/');
+                    await page.reload(); // Ensure full reload from disk
                     await expect(page.getByText('Sign In with Google')).toBeVisible();
                 }
             }

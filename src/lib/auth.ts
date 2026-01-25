@@ -1,5 +1,6 @@
 import { writable } from 'svelte/store';
 import { base } from '$app/paths';
+import { replaceState } from '$app/navigation';
 
 // @ts-ignore
 export const GOOGLE_CLIENT_ID = (import.meta.env && import.meta.env.VITE_GOOGLE_OAUTH_ID) || undefined;
@@ -223,6 +224,7 @@ export function signIn() {
 function signInWithRedirect() {
     // Use origin as the stable redirect URI to avoid needing to whitelist every path
     const redirectUri = window.location.origin + '/';
+    //...
     // Pass current path in state to restore context after redirect
     const returnPath = window.location.pathname + window.location.search;
 
@@ -278,9 +280,10 @@ function handleRedirectCallback(onSuccess: (token: string) => void): boolean {
         // Clear the hash from the URL
         // If state contains a valid relative path, restore it
         if (state && state.startsWith('/') && state !== 'pass-through-value') {
-            history.replaceState(null, '', state);
+            // Use SvelteKit's replaceState to avoid router conflicts
+            replaceState(state, {});
         } else {
-            history.replaceState(null, '', window.location.pathname + window.location.search);
+            replaceState(window.location.pathname + window.location.search, {});
         }
         return true;
     }
