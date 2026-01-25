@@ -5,9 +5,33 @@ import { GOOGLE_CLIENT_ID } from './auth';
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 let pickerApiLoaded = false;
+let gapiScriptLoaded = false;
 
-export function loadPickerApi() {
+function injectGapiScript(): Promise<void> {
+    if ((window as any).gapi) {
+        return Promise.resolve();
+    }
+    if (gapiScriptLoaded) return Promise.resolve();
+
+    return new Promise((resolve, reject) => {
+        const script = document.createElement('script');
+        script.src = 'https://apis.google.com/js/api.js';
+        script.async = true;
+        script.defer = true;
+        script.onload = () => {
+            gapiScriptLoaded = true;
+            resolve();
+        };
+        script.onerror = () => reject(new Error('Failed to load Google API'));
+        document.body.appendChild(script);
+    });
+}
+
+export async function loadPickerApi() {
     if (pickerApiLoaded) return Promise.resolve();
+
+    await injectGapiScript();
+
     return new Promise<void>((resolve) => {
         (window as any).gapi.load('picker', () => {
             pickerApiLoaded = true;
