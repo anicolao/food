@@ -3,6 +3,8 @@ import { base } from '$app/paths';
 
 // @ts-ignore
 export const GOOGLE_CLIENT_ID = (import.meta.env && import.meta.env.VITE_GOOGLE_OAUTH_ID) || undefined;
+// @ts-ignore
+export const GOOGLE_API_KEY = (import.meta.env && import.meta.env.VITE_GOOGLE_API_KEY) || undefined;
 export const SCOPES = [
     'https://www.googleapis.com/auth/drive.file',
     'https://www.googleapis.com/auth/photospicker.mediaitems.readonly',

@@ -1,15 +1,22 @@
-import { ensureValidToken } from './auth';
-
-// --- Sheets API ---
-// --- Sheets API ---
-
-// --- Sheets API ---
+import { ensureValidToken, GOOGLE_API_KEY } from './auth';
 
 export interface GoogleDriveFile {
     id: string;
     name: string;
     webViewLink: string;
     thumbnailLink?: string;
+}
+
+// Helper: List files using API Key (Public/Anonymous access)
+async function listPublicFiles(q: string) {
+    if (!GOOGLE_API_KEY) return [];
+
+    const url = `https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(q)}&orderBy=modifiedTime desc&key=${GOOGLE_API_KEY}`;
+    const response = await fetch(url);
+
+    if (!response.ok) return [];
+    const data = await response.json();
+    return data.files || [];
 }
 
 // Helper: Search or create folder
@@ -80,8 +87,6 @@ async function findOrCreateFile(name: string, parentId: string, mimeType: string
     const createData = await createRes.json();
     return createData.id;
 }
-
-
 
 // Robust Discovery Implementation
 
@@ -154,24 +159,15 @@ async function createDatabaseFile(name: string, parentId: string) {
 
 // Modified Discovery Logic
 export async function ensureDataStructures() {
-
     const folderId = await findOrCreateFolder('FoodLog');
-
-
-    // Step 1: Search by Tag (The new, robust way)
     const dbFiles = await findDatabaseFiles(folderId);
 
     let spreadsheetId;
 
     if (dbFiles.length > 0) {
-        // Found tagged files! Use the most recently modified one.
-
         spreadsheetId = dbFiles[0].id;
     } else {
-        // Step 2: Fallback - Search by Legacy Name (The old way)
-
-
-        // Use existing (but modified) search logic inline here or call a helper
+        // Fallback
         const legacyName = 'TheFoodTrackerEventLog';
         const token = await ensureValidToken();
         const q = `name='${legacyName}' and '${folderId}' in parents and trashed=false`;
@@ -181,84 +177,94 @@ export async function ensureDataStructures() {
         const searchData = await searchRes.json();
 
         if (searchData.files && searchData.files.length > 0) {
-            // Found legacy file! Migration time.
-
             spreadsheetId = searchData.files[0].id;
             await tagDatabaseFile(spreadsheetId);
         } else {
-            // Step 3: Create New (Clean Slate)
-
             spreadsheetId = await createDatabaseFile('TheFoodTrackerEventLog', folderId);
         }
     }
 
-
-
-    // Ensure "Events" tab exists (default is Sheet1)
     await ensureSheetExists(spreadsheetId, 'Events');
 
     return { folderId, spreadsheetId };
 }
 
 export async function ensureConnectedToSharedFolder(folderId: string) {
-    const token = await ensureValidToken();
-    if (!token) throw new Error('Not authenticated');
+    // Strategy: Try Public/Anonymous Access First (via API Key)
+    // This supports "Anyone with the link" folders without user having to "Add to Drive".
 
-    // 1. Verify Folder Access (implicitly by searching inside it)
-    // We expect the DB file to be there.
-    const dbFiles = await findDatabaseFiles(folderId);
+    // 1. Try finding tagged DB in Public Folder
+    const publicQ = `appProperties has { key='type' and value='food_tracker_db' } and '${folderId}' in parents and trashed=false`;
+    let files = await listPublicFiles(publicQ);
 
-    if (dbFiles.length === 0) {
-        // Helper to perform search
-        const search = async (q: string) => {
-            const searchRes = await fetch(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(q)}&orderBy=modifiedTime desc`, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
-            const searchData = await searchRes.json();
-            return searchData.files || [];
-        };
-
-        // 2. Legacy Name Check
-        const legacyName = 'TheFoodTrackerEventLog';
-        const legacyFiles = await search(`name='${legacyName}' and '${folderId}' in parents and trashed=false`);
-        if (legacyFiles.length > 0) {
-            return { folderId, spreadsheetId: legacyFiles[0].id };
-        }
-
-        // 3. Fallback: Any Spreadsheet in the folder
-        // The user might have renamed it. If they shared this folder, assume the spreadsheet inside is the one.
-        console.log('[Sheets] No tagged or named DB found. Searching for ANY spreadsheet.');
-        const anySheetFiles = await search(`mimeType='application/vnd.google-apps.spreadsheet' and '${folderId}' in parents and trashed=false`);
-
-        if (anySheetFiles.length > 0) {
-            console.log('[Sheets] Found untargeted spreadsheet. Using it:', anySheetFiles[0].name);
-            return { folderId, spreadsheetId: anySheetFiles[0].id };
-        }
-
-        throw new Error('Shared Log not found in this folder.');
+    if (files.length > 0) {
+        return { folderId, spreadsheetId: files[0].id };
     }
 
-    return { folderId, spreadsheetId: dbFiles[0].id };
+    // 2. Try Fallback Legacy Name in Public Folder
+    const legacyName = 'TheFoodTrackerEventLog';
+    files = await listPublicFiles(`name='${legacyName}' and '${folderId}' in parents and trashed=false`);
+    if (files.length > 0) {
+        return { folderId, spreadsheetId: files[0].id };
+    }
+
+    // 3. Try "Any Spreadsheet" in Public Folder
+    files = await listPublicFiles(`mimeType='application/vnd.google-apps.spreadsheet' and '${folderId}' in parents and trashed=false`);
+    if (files.length > 0) {
+        console.log('[Sheets] Found public spreadsheet:', files[0].name);
+        return { folderId, spreadsheetId: files[0].id };
+    }
+
+    // --- If Public Access Failed, Try Authenticated Access ---
+
+    const token = await ensureValidToken();
+    if (!token) {
+        throw new Error('Shared Log not found (Public access failed, and not signed in)');
+    }
+
+    // 4. Verify Folder Access (Authenticated)
+    const dbFiles = await findDatabaseFiles(folderId);
+    if (dbFiles.length > 0) {
+        return { folderId, spreadsheetId: dbFiles[0].id };
+    }
+
+    // 5. Authenticated Fallback Name
+    const search = async (q: string) => {
+        const searchRes = await fetch(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(q)}&orderBy=modifiedTime desc`, {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        const searchData = await searchRes.json();
+        return searchData.files || [];
+    };
+
+    const legacyFiles = await search(`name='${legacyName}' and '${folderId}' in parents and trashed=false`);
+    if (legacyFiles.length > 0) {
+        return { folderId, spreadsheetId: legacyFiles[0].id };
+    }
+
+    // 6. Authenticated Fallback Any Spreadsheet
+    const anySheetFiles = await search(`mimeType='application/vnd.google-apps.spreadsheet' and '${folderId}' in parents and trashed=false`);
+    if (anySheetFiles.length > 0) {
+        return { folderId, spreadsheetId: anySheetFiles[0].id };
+    }
+
+    throw new Error('Shared Log not found in this folder.');
 }
 
 async function ensureSheetExists(spreadsheetId: string, title: string) {
     const token = await ensureValidToken();
-    if (!token) return; // Should be checked earlier
+    if (!token) return;
 
     try {
-        // 1. Get metadata
         const metaRes = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}`, {
             headers: { Authorization: `Bearer ${token}` }
         });
-        if (!metaRes.ok) return; // Fail silently or log?
+        if (!metaRes.ok) return;
         const meta = await metaRes.json();
 
-        // 2. Check if exists
         if (meta.sheets?.some((s: any) => s.properties.title === title)) {
             return;
         }
-
-        // 3. Create if missing
 
         const updateRes = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}:batchUpdate`, {
             method: 'POST',
@@ -329,16 +335,34 @@ export async function appendRows(spreadsheetId: string, sheetName: string, rows:
 
 export async function fetchRows(spreadsheetId: string, sheetName: string, startRow?: number): Promise<any[]> {
     const token = await ensureValidToken();
-    if (!token) throw new Error('Not authenticated');
 
     const range = startRow ? `${sheetName}!A${startRow}:Z` : `${sheetName}!A:Z`;
-    const url = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${range}`;
+    let url = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${range}`;
 
-    const response = await fetch(url, {
-        headers: { Authorization: `Bearer ${token}` }
-    });
+    if (GOOGLE_API_KEY) {
+        url += `?key=${GOOGLE_API_KEY}`;
+    }
+
+    const headers: any = {};
+    if (token) {
+        headers.Authorization = `Bearer ${token}`;
+    } else if (!GOOGLE_API_KEY) {
+        throw new Error('Not authenticated and no API Key');
+    }
+
+    const response = await fetch(url, { headers });
 
     if (!response.ok) {
+        if ((response.status === 403 || response.status === 401) && token && GOOGLE_API_KEY) {
+            console.warn('[Sheets] Token access failed, retrying with API Key only (Anonymous access)...');
+            const retryUrl = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${range}?key=${GOOGLE_API_KEY}`;
+            const retryRes = await fetch(retryUrl);
+            if (retryRes.ok) {
+                const data = await retryRes.json();
+                return data.values || [];
+            }
+        }
+
         throw new Error(JSON.stringify({
             status: response.status,
             message: response.statusText,
@@ -382,7 +406,7 @@ export async function uploadImage(file: Blob, filename: string, folderId?: strin
         throw new Error(`Drive API Error: ${response.statusText}`);
     }
 
-    return await response.json(); // Returns file object with ID
+    return await response.json();
 }
 
 export async function getFileMetadata(fileId: string) {
