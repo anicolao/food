@@ -15,10 +15,14 @@
     import { syncManager } from '$lib/sync-manager';
     import { store, batchHydrateEvents, setConfig } from '$lib/store';
     import { ensureDataStructures, saveIdentity } from '$lib/sheets';
+    import DesktopHeader from '$lib/components/ui/DesktopHeader.svelte';
 
 	let { children } = $props();
 
 	let width = $state(0);
+    // ... (rest of script)
+
+
 	let height = $state(0);
 	let reducedMotion = $state(false);
 	let transitionsEnabled = $state(false);
@@ -144,24 +148,27 @@
 	</div>
 	
 	<div class="main-content">
-		{#if reducedMotion || !transitionsEnabled}
-			<div class="transition-wrapper">
-				{@render children()}
-			</div>
-		{:else}
-			{#key $page.url.pathname}
-				{@const direction = previousUrl ? getTransitionDirection(previousUrl, $page.url) : 'crossfade'}
-				{@const config = getTransitionParams(direction, width, height)}
+        <DesktopHeader />
+        <div class="content-area-grid">
+            {#if reducedMotion || !transitionsEnabled}
+                <div class="transition-wrapper">
+                    {@render children()}
+                </div>
+            {:else}
+                {#key $page.url.pathname}
+                    {@const direction = previousUrl ? getTransitionDirection(previousUrl, $page.url) : 'crossfade'}
+                    {@const config = getTransitionParams(direction, width, height)}
 
-				<div 
-					class="transition-wrapper"
-					in:config.in={config.inParams}
-					out:config.out={config.outParams}
-				>
-					<PageTransitionWrapper {children} pageKey={$page.url.pathname} />
-				</div>
-			{/key}
-		{/if}
+                    <div 
+                        class="transition-wrapper"
+                        in:config.in={config.inParams}
+                        out:config.out={config.outParams}
+                    >
+                        <PageTransitionWrapper {children} pageKey={$page.url.pathname} />
+                    </div>
+                {/key}
+            {/if}
+        </div>
 	</div>
 
 	<div class="mobile-nav-wrapper">
@@ -191,11 +198,20 @@
 		width: 100%;
 		max-width: 100%;
 		
-		/* Grid Stacking for Transitions */
-		display: grid;
-		grid-template-areas: "content";
-		overflow-x: hidden; /* Prevent horizontal scrollbar during slide */
+        /* Flex column to stack Header and Page Content */
+        display: flex;
+        flex-direction: column;
+		overflow-x: hidden; 
 	}
+    
+    /* Dedicated grid container for transitions */
+    .content-area-grid {
+        flex: 1;
+        display: grid;
+        grid-template-areas: "content";
+        width: 100%;
+        position: relative;
+    }
 
 	.transition-wrapper {
 		grid-area: content;
@@ -216,6 +232,7 @@
 
 		.main-content {
 			padding-bottom: 0;
+            /* On desktop, main-content is right side of flex row */
 		}
 	}
 </style>

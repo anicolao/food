@@ -53,6 +53,10 @@ test('US-023: Date Navigation', async ({ page }, testInfo) => {
         } else if (url.includes('drive/v3/files')) {
             // Standard file mocks
             await route.fallback();
+        } else if (url.includes('userinfo')) {
+            await route.fulfill({
+                json: { name: 'Test User', picture: '' }
+            });
         } else {
             await route.fulfill({ json: {} });
         }
