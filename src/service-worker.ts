@@ -20,7 +20,7 @@ self.addEventListener('install', (event) => {
     // Create a new cache and add all files to it
     async function addFilesToCache() {
         const cache = await caches.open(CACHE);
-        await cache.addAll(ASSETS);
+        await cache.addAll([...ASSETS, (self as unknown as ServiceWorkerGlobalScope).registration.scope]);
     }
 
     e.waitUntil(addFilesToCache());
@@ -102,7 +102,7 @@ self.addEventListener('fetch', (event) => {
                 const offlineCache = await cache.match('/offline.html');
                 if (offlineCache) return offlineCache;
 
-                const rootCache = await cache.match('/');
+                const rootCache = await cache.match((self as unknown as ServiceWorkerGlobalScope).registration.scope);
                 if (rootCache) return rootCache;
 
                 return new Response('Offline', { status: 408 });
