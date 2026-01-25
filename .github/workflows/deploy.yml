@@ -44,6 +44,7 @@ jobs:
           NODE_ENV: production
           PUBLIC_BASE_PATH: ${{ steps.base_path.outputs.path }}
           VITE_GOOGLE_OAUTH_ID: ${{ secrets.GOOGLE_OAUTH_ID }}
+          VITE_GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
           COMMIT_HASH: ${{ github.event.pull_request.head.sha || github.sha }}
       
       - name: Verify OAuth configuration
