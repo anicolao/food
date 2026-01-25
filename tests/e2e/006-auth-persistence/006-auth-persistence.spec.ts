@@ -45,7 +45,15 @@ test('US-023: Auth Persistence', async ({ page }, testInfo) => {
     // Allow polling to initialize tokenClient
     await page.waitForFunction(() => (window as any)._authReady);
     await page.waitForTimeout(1000);
+
+    // Initial Sign In via Redirect Flow
+    const authRequestPromise = page.waitForRequest(req => req.url().includes('accounts.google.com/o/oauth2/v2/auth'));
     await page.getByText('Sign In with Google').click();
+    const authRequest = await authRequestPromise; // Ensure we tried to redirect
+
+    // Simulate Return
+    await page.goto('/#access_token=mock-persistent-token&expires_in=3600&scope=https://www.googleapis.com/auth/drive.file&state=pass-through-value');
+
     await expect(page.locator('.mobile-nav a').filter({ hasText: 'Settings' }).first()).toBeVisible();
 
     await tester.step('persisted', {
@@ -86,6 +94,43 @@ test('US-023: Auth Persistence', async ({ page }, testInfo) => {
                     // Should attempt silent refresh and SUCCEED because of mocked Google client
                     await expect(page.locator('.mobile-nav a').filter({ hasText: 'Settings' }).first()).toBeVisible();
                     await expect(page.getByText('Sign In with Google')).not.toBeVisible();
+                }
+            }
+        ]
+    });
+
+    // Test Interactive Recovery (Force Redirect on Click)
+    await tester.step('interactive_recovery', {
+        description: 'Simulate click triggering interactive refresh',
+        verifications: [
+            {
+                spec: 'Click triggers redirect refresh',
+                check: async () => {
+                    // Expire token again
+                    await page.evaluate(() => {
+                        localStorage.setItem('food_log_token_expiry', (Date.now() - 1000).toString());
+                    });
+
+                    // Listen for redirect
+                    const authRequestPromise = page.waitForRequest(req => req.url().includes('accounts.google.com/o/oauth2/v2/auth'));
+
+                    // Click specifically on the body or a neutral element to trigger the global listener
+                    await page.mouse.click(10, 10);
+
+                    // Verify redirect flow initiated
+                    const authRequest = await authRequestPromise;
+                    expect(authRequest.url()).toContain('response_type=token');
+
+                    // Simulate Return (via full reload)
+                    await page.goto('about:blank'); // Ensure we leave the page
+                    await page.goto('/#access_token=mock-interactive-token&expires_in=3600&scope=https://www.googleapis.com/auth/drive.file&state=pass-through-value');
+
+                    // Verify logged in
+                    await expect(page.locator('.mobile-nav a').filter({ hasText: 'Settings' }).first()).toBeVisible();
+
+                    // Verify new token persisted
+                    const token = await page.evaluate(() => localStorage.getItem('food_log_access_token'));
+                    expect(token).toBe('mock-interactive-token');
                 }
             }
         ]

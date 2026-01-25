@@ -91,7 +91,7 @@
     // This solves the issue of stale tokens on return without requiring a full reload or sign-out
     $effect(() => {
         const handleInteraction = () => {
-             ensureValidToken().catch(e => console.warn('[Auth] Background refresh failed', e));
+             ensureValidToken(true).catch(e => console.warn('[Auth] Background refresh failed', e));
         };
         document.addEventListener('click', handleInteraction, true); // Capture phase to likely happen first
         

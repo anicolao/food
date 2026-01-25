@@ -40,6 +40,11 @@ let refreshPromise: Promise<string | null> | null = null;
 let refreshResolver: ((token: string | null) => void) | null = null;
 
 export function initializeAuth(onSuccess: (token: string) => void) {
+    // 0. Check for redirect callback immediately
+    if (handleRedirectCallback(onSuccess)) {
+        return; // Stop other initialization if we just processed a redirect
+    }
+
     // 1. Try to restore from localStorage first
     const storedToken = localStorage.getItem(TOKEN_KEY);
     const storedExpiry = localStorage.getItem(EXPIRY_KEY);
@@ -206,23 +211,90 @@ export function refreshAuth(): Promise<string | null> {
         return refreshPromise;
     }
 
+    // Keep silent refresh using GIS if available, as it's cleaner for background work
+    // But for interactive sign-in, use Redirect to avoid popup blockers
     return Promise.resolve(null);
 }
 
 export function signIn() {
-    if (tokenClient) {
-        // Force account selection to ensure fresh consent and correct account
-        tokenClient.requestAccessToken({ prompt: 'select_account', scope: SCOPES });
-    } else {
-        console.error('Auth not initialized yet');
-    }
+    signInWithRedirect();
 }
+
+function signInWithRedirect() {
+    // Use origin as the stable redirect URI to avoid needing to whitelist every path
+    const redirectUri = window.location.origin + '/';
+    // Pass current path in state to restore context after redirect
+    const returnPath = window.location.pathname + window.location.search;
+
+    const params = new URLSearchParams({
+        client_id: GOOGLE_CLIENT_ID,
+        redirect_uri: redirectUri,
+        response_type: 'token',
+        scope: SCOPES,
+        include_granted_scopes: 'true',
+        state: returnPath
+    });
+
+    const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`;
+    window.location.href = authUrl;
+}
+
+function handleRedirectCallback(onSuccess: (token: string) => void): boolean {
+    const hash = window.location.hash;
+    if (!hash || !hash.includes('access_token')) return false;
+
+    // Parse the hash
+    const params = new URLSearchParams(hash.substring(1)); // remove #
+    const error = params.get('error');
+
+    if (error) {
+        console.error('[Auth] Redirect error:', error);
+        // Clear hash to prevent loops or stale state
+        history.replaceState(null, '', window.location.pathname + window.location.search);
+        return false;
+    }
+
+    const token = params.get('access_token');
+    const expiresIn = params.get('expires_in');
+    const state = params.get('state');
+
+    if (token) {
+        console.log('[Auth] Successfully handled redirect callback');
+        accessToken = token;
+
+        // Calculate expiry
+        const expiresInSeconds = expiresIn ? parseInt(expiresIn) : 3599;
+        const expiryTime = Date.now() + (expiresInSeconds * 1000);
+
+        localStorage.setItem(TOKEN_KEY, accessToken);
+        localStorage.setItem(EXPIRY_KEY, expiryTime.toString());
+
+        authState.update(s => ({ ...s, token: accessToken, ready: true }));
+        (window as any)._authReady = true;
+
+        onSuccess(accessToken);
+        scheduleRefresh(expiresInSeconds, onSuccess);
+
+        // Clear the hash from the URL
+        // If state contains a valid relative path, restore it
+        if (state && state.startsWith('/') && state !== 'pass-through-value') {
+            history.replaceState(null, '', state);
+        } else {
+            history.replaceState(null, '', window.location.pathname + window.location.search);
+        }
+        return true;
+    }
+
+    return false;
+}
+
 
 /**
  * Ensures a valid token is available, refreshing if necessary.
  * Use this for all API calls instead of getAccessToken().
+ * @param forceInteractive If true, will trigger a full redirect flow if token is expired/buffering. Use this for user-initiated actions.
  */
-export async function ensureValidToken(): Promise<string | null> {
+export async function ensureValidToken(forceInteractive: boolean = false): Promise<string | null> {
     const storedExpiry = localStorage.getItem(EXPIRY_KEY);
 
     // If no token at all, return null
@@ -239,7 +311,15 @@ export async function ensureValidToken(): Promise<string | null> {
         if (remainingSeconds < REFRESH_BUFFER_SECONDS) {
             // Check if within 48h recoverable window
             if (now < expiryTime + FORTY_EIGHT_HOURS_MS) {
-                console.log('[Auth] Token expired/buffered but within 48h grace period. Refreshing...');
+                console.log('[Auth] Token expired/buffered but within 48h grace period.');
+
+                if (forceInteractive) {
+                    console.log('[Auth] Force interactive refresh requested. Redirecting...');
+                    signInWithRedirect();
+                    return null; // Will redirect
+                }
+
+                console.log('[Auth] Attempting silent refresh...');
                 return refreshAuth();
             } else {
                 console.log('[Auth] Token expired > 48h ago. Forcing sign-out.');

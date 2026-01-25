@@ -24,6 +24,24 @@ export async function mockDriveAPI(page: Page) {
         await route.fulfill({ body: buffer, contentType: 'image/png' });
     });
 
+    // 0.5 Mock Auth Redirect (Global Handler)
+    // This allows clicking "Sign In" to work in all tests by simulating the return from Google
+    await page.route('**/accounts.google.com/o/oauth2/v2/auth**', async route => {
+        const url = new URL(route.request().url());
+        const redirectUri = url.searchParams.get('redirect_uri');
+        const state = url.searchParams.get('state') || 'pass-through-value';
+
+        if (redirectUri) {
+            const callbackUrl = `${redirectUri}#access_token=mock-global-token&expires_in=3600&scope=https://www.googleapis.com/auth/drive.file&state=${state}`;
+            await route.fulfill({
+                status: 302,
+                headers: { Location: callbackUrl }
+            });
+        } else {
+            await route.abort();
+        }
+    });
+
     // 1. Mock Drive API
     await page.route('**/drive/v3/**', async route => {
         const url = route.request().url();

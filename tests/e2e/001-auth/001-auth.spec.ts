@@ -35,6 +35,7 @@ test('US-001: User signs in', async ({ page }, testInfo) => {
         console.log('PAGE CONTENT:', await page.content());
     }
 
+    // Verify Initial Load
     await expect(page.getByTestId('debug-load')).toBeVisible({ timeout: 30000 });
     await tester.step('initial-load', {
         description: 'User sees sign in button',
@@ -43,9 +44,24 @@ test('US-001: User signs in', async ({ page }, testInfo) => {
         ]
     });
 
-    // Allow polling to initialize tokenClient
+    // Wait for auth initialized
     await page.waitForFunction(() => (window as any)._authReady);
+
+    // Setup listener for the redirect navigation
+    const authRequestPromise = page.waitForRequest(req => req.url().includes('accounts.google.com/o/oauth2/v2/auth'));
+
+    // Click Sign In
     await page.getByText('Sign In with Google').click();
+
+    // Verify we tried to go to Google with correct params
+    const authRequest = await authRequestPromise;
+    const url = new URL(authRequest.url());
+    expect(url.searchParams.get('response_type')).toBe('token');
+    expect(url.searchParams.get('scope')).toContain('https://www.googleapis.com/auth/drive.file');
+
+    // Simulate the Redirect Return
+    // We go back to the app with the token in the hash
+    await page.goto('/#access_token=mock-token&expires_in=3600&state=pass-through-value');
 
     // Verify authenticated state
     await expect(page.locator('img[alt="Synced"]')).toBeVisible();

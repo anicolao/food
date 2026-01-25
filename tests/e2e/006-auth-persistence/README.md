@@ -19,9 +19,18 @@
 
 ---
 
+## Simulate click triggering interactive refresh
+
+![Simulate click triggering interactive refresh](./screenshots/002-interactive-recovery.png)
+
+**Verifications:**
+- [x] Click triggers redirect refresh
+
+---
+
 ## Simulate token expiration beyond 48h window
 
-![Simulate token expiration beyond 48h window](./screenshots/002-hard-expiry.png)
+![Simulate token expiration beyond 48h window](./screenshots/003-hard-expiry.png)
 
 **Verifications:**
 - [x] Logged out after 48h expiry
