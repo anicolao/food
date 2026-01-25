@@ -14,7 +14,18 @@ async function listPublicFiles(q: string) {
         return [];
     }
 
-    const url = `https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(q)}&orderBy=modifiedTime desc&key=${GOOGLE_API_KEY}`;
+    // supportsAllDrives & includeItemsFromAllDrives are needed to see files in some shared contexts,
+    // even if not strictly "Shared Drives" (e.g. widely shared folders).
+    const params = new URLSearchParams({
+        q: q,
+        orderBy: 'modifiedTime desc',
+        key: GOOGLE_API_KEY,
+        supportsAllDrives: 'true',
+        includeItemsFromAllDrives: 'true',
+        fields: 'files(id, name, mimeType, parents)' // Request specific fields for clarity
+    });
+
+    const url = `https://www.googleapis.com/drive/v3/files?${params.toString()}`;
     console.log(`[Sheets] Public Search Query: ${q}`);
 
     try {
