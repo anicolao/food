@@ -7,17 +7,29 @@
     // Simple Icon component placeholders or inline svgs
     
     import { store } from '$lib/store';
+    import { sharedUsers } from '$lib/shared-users';
     import { onMount } from 'svelte';
 
     let isReadOnly = $state(false);
+    let currentFolderId = $state<string | null>(null);
+    let users = $state<any[]>([]);
 
     onMount(() => {
-        const update = () => {
-            isReadOnly = store.getState().config.isReadOnly;
+        const updateConfig = () => {
+            const state = store.getState();
+            isReadOnly = state.config.isReadOnly;
+            currentFolderId = state.config.folderId;
         };
-        update();
-        return store.subscribe(update);
+        updateConfig();
+        const unsubStore = store.subscribe(updateConfig);
+        const unsubUsers = sharedUsers.subscribe(u => users = u);
+        return () => {
+            unsubStore();
+            unsubUsers();
+        };
     });
+
+    let currentUser = $derived(users.find(u => u.folderId === currentFolderId));
 
     let logUrl = $derived.by(() => {
         if ($page.url.pathname.includes('/entry')) {
@@ -38,13 +50,24 @@
         </NavItem>
     </div>
 
-    {#if !isReadOnly}
     <div class="fab-container">
-        <a href="{logUrl}" class="fab" aria-label="Log new food entry">
-            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-        </a>
+        {#if isReadOnly}
+            <a href="{base}/switcher" class="fab avatar-fab" aria-label="Switch User">
+                {#if currentUser && currentUser.avatar}
+                    <img src={currentUser.avatar} alt={currentUser.name} />
+                {:else if currentUser}
+                    <span class="initial">{currentUser.name[0]}</span>
+                {:else}
+                    <!-- Fallback User Icon -->
+                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                {/if}
+            </a>
+        {:else}
+            <a href="{logUrl}" class="fab" aria-label="Log new food entry">
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            </a>
+        {/if}
     </div>
-    {/if}
 
     <div class="nav-group">
         <NavItem href={isReadOnly ? `${base}/switcher` : `${base}/settings`} label={isReadOnly ? "Switch User" : "Settings"}>
@@ -100,5 +123,24 @@
     .nav-group {
         display: flex;
         gap: 20px;
+    }
+
+    /* Avatar FAB Styles */
+    .avatar-fab {
+        background: #333; /* Fallback for transparency */
+        overflow: hidden;
+        border: 4px solid var(--accent, #43e97b); /* Green ring for shared */
+    }
+
+    .avatar-fab img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .avatar-fab .initial {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: white;
     }
 </style>
