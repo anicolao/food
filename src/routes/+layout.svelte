@@ -111,6 +111,9 @@
         }
 
         // Snapshot the current page content before it updates
+        // Optimization: Skip snapshotting if transitions are disabled or reduced motion is on
+        if (reducedMotion || !transitionsEnabled) return;
+
         const currentPath = $page.url.pathname;
         const wrapperId = 'ptw-' + currentPath.replace(/[^a-zA-Z0-9-]/g, '_');
         const element = document.getElementById(wrapperId);

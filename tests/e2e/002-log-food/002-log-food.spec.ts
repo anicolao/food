@@ -20,6 +20,8 @@ test('US-003 to US-010: User logs food flow', async ({ page }, testInfo) => {
     // Use UTC to ensure it maps to 12:00 PM EDT (UTC-4) in the browser
     // 12:00 PM EDT = 16:00 PM UTC
     await page.clock.install({ time: new Date('2024-03-15T16:00:00Z') });
+    // Disable animations for stability and speed
+    await page.emulateMedia({ reducedMotion: 'reduce' });
     // Block real GSI aggressively
     await page.route('**/gsi/client', route => route.abort());
 
