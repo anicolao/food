@@ -112,15 +112,10 @@ test('US-003 to US-010: User logs food flow', async ({ page }, testInfo) => {
     await expect(logBtn).toBeVisible();
     await expect(logBtn).toBeEnabled();
 
-    // Fallback if click fails silently: force click
-    // await logBtn.click({ force: true });
-    await Promise.all([
-        page.waitForURL(/\/log/, { timeout: 2000 }),
-        logBtn.click()
-    ]);
+    await logBtn.click();
+    await expect(page).toHaveURL(/\/log/, { timeout: 2000 });
 
     // Mandatory URL Wait for stability
-    await expect(page).toHaveURL(/\/log/);
     await page.waitForLoadState('domcontentloaded');
     await expect(page.getByRole('heading', { name: 'Log Food' })).toBeVisible({ timeout: 2000 });
 
