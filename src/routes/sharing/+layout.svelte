@@ -36,7 +36,17 @@
 
         console.log('[SharingLayout] Mounting Shared Context. Folder:', folderId);
 
-        // 2. Auth & Connect
+        // 1. Try Anonymous / Fast Path first (for "Anyone with the link")
+        try {
+            console.log('[SharingLayout] Attempting Anonymous Discovery...');
+            const { spreadsheetId } = await ensureConnectedToSharedFolder(folderId);
+            await connect(spreadsheetId);
+            return; // Success! Skip Auth initialization block for discovery.
+        } catch (e: any) {
+             console.warn('[SharingLayout] Anonymous discovery failed, falling back to Authenticated...', e);
+        }
+
+        // 2. Failover to Authenticated Path (if user has specific permissions)
         initializeAuth(async () => {
             try {
                 // Verify we can access the folder/DB
