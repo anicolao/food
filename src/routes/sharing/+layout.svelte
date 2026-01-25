@@ -5,9 +5,7 @@
     import { setDatabaseContext, getAllEvents } from '$lib/db';
     import { syncManager } from '$lib/sync-manager';
     import { initializeAuth } from '$lib/auth';
-    import { openDrivePicker, PickType } from '$lib/drive-picker';
     import { ensureValidToken } from '$lib/auth';
-    import { toasts } from '$lib/toast';
 
     import { ensureConnectedToSharedFolder } from '$lib/sheets';
     import { batchHydrateEvents } from '$lib/store';
@@ -15,8 +13,6 @@
     import DesktopSidebar from '$lib/components/ui/DesktopSidebar.svelte';
 
     let { children } = $props();
-
-    let needsManualConnection = $state(false);
 
     let isLoading = $state(true);
     let error = $state<string | null>(null);
@@ -50,14 +46,10 @@
 
             } catch (e: any) {
                 console.error('[SharingLayout] Initialization Failed', e);
-                // If the error is about not finding the file, offer manual picker
-                if (e.message.includes('Shared Log not found') || e.message.includes('Drive Search Failed')) {
-                     needsManualConnection = true;
-                     isLoading = false;
-                } else {
-                    error = `Failed to load shared log: ${e.message}`;
-                    isLoading = false;
-                }
+                // If the error is about not finding the file, previously we offered manual picker.
+                // Now we just fail gracefully with a message instructing the user to check permissions.
+                error = `Failed to load shared log: ${e.message}`;
+                isLoading = false;
             }
         });
     });
@@ -80,53 +72,6 @@
         await syncManager.sync();
 
         isLoading = false;
-        needsManualConnection = false;
-    }
-
-    async function handleManualConnect() {
-        const token = await ensureValidToken();
-        if (!token) {
-            toasts.error('Please sign in first.');
-            return;
-        }
-        try {
-            // First try to pick the FOLDER. This grants access to the folder context.
-            const pickedFolderId = await openDrivePicker(token, folderId, PickType.FOLDER);
-            
-            if (pickedFolderId) {
-                isLoading = true;
-                // Now try discovery again with the confirmed (and now authorized) folder
-                try {
-                     const { spreadsheetId } = await ensureConnectedToSharedFolder(pickedFolderId);
-                     await connect(spreadsheetId);
-                     return;
-                } catch (discoveryError) {
-                    console.warn('Discovery failed in picked folder, falling back to file pick', discoveryError);
-                    isLoading = false;
-                }
-            }
-
-            // Fallback: Pick the FILE directly if folder picking didn't work or didn't yield a DB
-            // Or maybe the user cancelled folder pick? 
-            // If pickedFolderId was null, user cancelled. don't auto open file picker.
-            // But if discovery failed, maybe the file is there but not detected?
-            
-            if (pickedFolderId) {
-                 const proceed = confirm('We opened the folder but couldn\'t find the log file automatically. Would you like to pick the Spreadsheet file directly?');
-                 if (!proceed) return;
-    
-                 const pickedSpreadsheetId = await openDrivePicker(token, pickedFolderId, PickType.FILE);
-                 if (pickedSpreadsheetId) {
-                     isLoading = true;
-                     await connect(pickedSpreadsheetId);
-                 }
-            }
-            
-        } catch (e: any) {
-            console.error('Picker failed', e);
-            toasts.error('Failed to pick file: ' + e.message);
-            isLoading = false;
-        }
     }
     
     onDestroy(() => {
@@ -158,13 +103,8 @@
         <div class="error-container">
             <h1>Unable to load shared log</h1>
             <p>{error}</p>
+            <p class="subtext">Please ensure the link is correct and the shared folder allows "Anyone with the link".</p>
             <a href="/">Return Home</a>
-        </div>
-    {:else if needsManualConnection}
-         <div class="error-container">
-            <h1>Connect Shared Log</h1>
-            <p>We couldn't automatically find the Food Log in this folder. Please select it manually.</p>
-            <button class="action-btn" onclick={handleManualConnect}>Select File from Drive</button>
         </div>
     {:else if isLoading}
         <div class="loading-container">
@@ -194,6 +134,11 @@
         gap: 20px;
         text-align: center;
     }
+    .subtext {
+        font-size: 0.9rem;
+        color: #888;
+        max-width: 400px;
+    }
     .spinner {
         width: 40px;
         height: 40px;
@@ -204,15 +149,5 @@
     }
     @keyframes spin {
         to { transform: rotate(360deg); }
-    }
-    .action-btn {
-        background: var(--color-primary, cyan);
-        color: black;
-        border: none;
-        padding: 12px 24px;
-        border-radius: 20px;
-        font-weight: bold;
-        cursor: pointer;
-        font-size: 1rem;
     }
 </style>

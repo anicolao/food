@@ -9,14 +9,29 @@ export interface GoogleDriveFile {
 
 // Helper: List files using API Key (Public/Anonymous access)
 async function listPublicFiles(q: string) {
-    if (!GOOGLE_API_KEY) return [];
+    if (!GOOGLE_API_KEY) {
+        console.warn('[Sheets] No API Key available for public search');
+        return [];
+    }
 
     const url = `https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(q)}&orderBy=modifiedTime desc&key=${GOOGLE_API_KEY}`;
-    const response = await fetch(url);
+    console.log(`[Sheets] Public Search Query: ${q}`);
 
-    if (!response.ok) return [];
-    const data = await response.json();
-    return data.files || [];
+    try {
+        const response = await fetch(url);
+
+        if (!response.ok) {
+            console.error('[Sheets] Public search failed:', response.status, response.statusText, await response.text());
+            return [];
+        }
+
+        const data = await response.json();
+        console.log(`[Sheets] Public search found ${data.files?.length || 0} files`);
+        return data.files || [];
+    } catch (e) {
+        console.error('[Sheets] Public search exception:', e);
+        return [];
+    }
 }
 
 // Helper: Search or create folder
