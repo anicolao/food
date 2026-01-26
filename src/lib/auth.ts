@@ -222,8 +222,9 @@ export function signIn() {
 }
 
 function signInWithRedirect() {
-    // Use origin as the stable redirect URI to avoid needing to whitelist every path
-    const redirectUri = window.location.origin + '/';
+    // Use origin + base as the stable redirect URI (e.g. https://domain.com/base)
+    // Must match Google Console configs exactly (no trailing slash if config has none)
+    const redirectUri = window.location.origin + base;
     //...
     // Pass current path in state to restore context after redirect
     const returnPath = window.location.pathname + window.location.search;
