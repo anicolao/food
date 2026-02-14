@@ -573,7 +573,7 @@
   }
 
   function handleReanalyze() {
-    if (!userCorrection) return;
+    if (!userCorrection?.trim()) return;
     runAnalysis(userCorrection);
   }
 
@@ -939,7 +939,7 @@
               <button
                 class="primary-btn small"
                 onclick={handleReanalyze}
-                disabled={!userCorrection}>Retry</button
+                disabled={!userCorrection?.trim() || analyzing}>Retry</button
               >
             </div>
           {/if}
@@ -947,7 +947,7 @@
           <button
             class="save-btn-primary"
             onclick={handleSubmit}
-            disabled={isSaving}
+            disabled={isSaving || (showCorrectionInput && !!userCorrection?.trim())}
           >
             {isSaving ? "Saving..." : "Save Entry"}
           </button>
