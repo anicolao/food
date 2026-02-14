@@ -947,7 +947,7 @@
           <button
             class="save-btn-primary"
             onclick={handleSubmit}
-            disabled={isSaving || (showCorrectionInput && userCorrection.trim().length > 0)}
+            disabled={isSaving || (showCorrectionInput && !!userCorrection && userCorrection.trim().length > 0)}
           >
             {isSaving ? "Saving..." : "Save Entry"}
           </button>
