@@ -148,6 +148,21 @@ test('US-009: User logs food via Text and Voice', async ({ page, context }, test
         }
     });
 
+    // Mock Wikimedia image search to return a local image
+    await page.route('**commons.wikimedia.org/w/api.php*', async route => {
+        await route.fulfill({
+            json: {
+                query: {
+                    pages: {
+                        '12345': {
+                            imageinfo: [{ url: 'http://localhost:5174/mock-images/apple.png' }]
+                        }
+                    }
+                }
+            }
+        });
+    });
+
     await page.goto('/');
     // Allow polling to initialize
     await page.waitForFunction(() => (window as any)._authReady);

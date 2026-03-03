@@ -49,6 +49,7 @@
     file: File;
     previewUrl: string;
     uploadPromise: Promise<GoogleDriveFile | null>;
+    systemGenerated?: boolean;
   };
 
   let attachedMedia: AttachedMedia[] = $state([]);
@@ -287,6 +288,7 @@
     file: File,
     triggerAnalysis: boolean = true,
     skipExif: boolean = false,
+    systemGenerated: boolean = false,
   ) {
     if (!skipExif) {
       try {
@@ -378,6 +380,7 @@
             file,
             previewUrl,
             uploadPromise,
+            systemGenerated,
           },
         ];
 
@@ -393,7 +396,8 @@
   }
 
   async function runAnalysis(correction?: string) {
-    if (imagePreviews.length === 0) return;
+    const userImages = attachedMedia.filter((m) => !m.systemGenerated);
+    if (userImages.length === 0 && !correction) return;
 
     analyzing = true;
     const requestId = crypto.randomUUID();
@@ -411,7 +415,7 @@
         }),
       );
 
-      const images = attachedMedia.map((media, i) => {
+      const images = userImages.map((media, i) => {
         try {
           return {
             base64: media.previewUrl.split(",")[1],
@@ -521,7 +525,8 @@
             );
             // PASS FALSE to skip re-analysis!
             // PASS TRUE to skip EXIF (use current time for search/generated images)
-            await addImage(file, false, true);
+            // PASS TRUE to mark as system-generated (excluded from AI re-analysis turns)
+            await addImage(file, false, true, true);
           } else {
             // Only fallback if it's NOT a 404 (e.g. 403 or opaque might be loadable via img tag)
             console.warn("Failed to fetch matched image, using direct URL");
