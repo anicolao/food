@@ -91,6 +91,7 @@
     // This solves the issue of stale tokens on return without requiring a full reload or sign-out
     $effect(() => {
         const handleInteraction = () => {
+             console.debug('[Auth] Preemptive click interaction check');
              ensureValidToken().catch(e => console.warn('[Auth] Background refresh failed', e));
         };
         document.addEventListener('click', handleInteraction, true); // Capture phase to likely happen first
@@ -100,7 +101,7 @@
         };
     });
 
-    // Handle history updates for direction calculation    // Handle history updates for direction calculation
+    // Handle history updates for direction calculation
     import { transitionSnapshots } from '$lib/transitions';
 
     beforeNavigate((nav) => {
