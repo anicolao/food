@@ -30,6 +30,7 @@ export const userProfile = writable<UserProfile | null>(null);
 let tokenClient: any;
 let accessToken: string | null = null;
 let refreshTimeoutId: any = null;
+let refreshTimeoutTimer: any = null;
 
 const TOKEN_KEY = 'food_log_access_token';
 const EXPIRY_KEY = 'food_log_token_expiry';
@@ -38,6 +39,20 @@ const REFRESH_BUFFER_SECONDS = 300; // Refresh 5 minutes before expiry
 // Promise to track active refresh operation
 let refreshPromise: Promise<string | null> | null = null;
 let refreshResolver: ((token: string | null) => void) | null = null;
+
+async function refreshInBackground(onSuccess: (token: string) => void) {
+    const token = await refreshAuth();
+    if (token === null) {
+        const storedExpiry = localStorage.getItem(EXPIRY_KEY);
+        if (storedExpiry) {
+            const expiryTime = parseInt(storedExpiry);
+            if (Date.now() >= expiryTime) {
+                console.log('[Auth] Refresh failed and token is expired. Signing out.');
+                signOut();
+            }
+        }
+    }
+}
 
 export function initializeAuth(onSuccess: (token: string) => void) {
     // 1. Try to restore from localStorage first
@@ -98,7 +113,7 @@ export function initializeAuth(onSuccess: (token: string) => void) {
             console.log('[Auth] Google Identity Services found');
             initClient(onSuccess);
             if (shouldTrySilentRefresh) {
-                refreshAuth();
+                refreshInBackground(onSuccess);
             }
         } else {
             attempts++;
@@ -129,6 +144,11 @@ function initClient(onSuccess: (token: string) => void) {
 }
 
 function handleTokenResponse(response: any, onSuccess: (token: string) => void) {
+    if (refreshTimeoutTimer) {
+        clearTimeout(refreshTimeoutTimer);
+        refreshTimeoutTimer = null;
+    }
+
     if (response.error) {
         console.error('[Auth] Token request failed:', response.error);
         signOut();
@@ -171,10 +191,10 @@ function scheduleRefresh(expiresInSeconds: number, onSuccess: (token: string) =>
 
     if (timeTillRefresh <= 0) {
         // Expiring very soon or already into buffer zone, refresh immediately
-        refreshAuth();
+        refreshInBackground(onSuccess);
     } else {
         refreshTimeoutId = setTimeout(() => {
-            refreshAuth();
+            refreshInBackground(onSuccess);
         }, timeTillRefresh);
     }
 }
@@ -187,7 +207,7 @@ function checkAndRefreshIfNeeded(onSuccess: (token: string) => void) {
     const remainingSeconds = (expiryTime - Date.now()) / 1000;
 
     if (remainingSeconds < REFRESH_BUFFER_SECONDS) {
-        refreshAuth();
+        refreshInBackground(onSuccess);
     } else {
         scheduleRefresh(remainingSeconds, onSuccess);
     }
@@ -200,6 +220,16 @@ export function refreshAuth(): Promise<string | null> {
         console.log('Refreshing auth token...');
         refreshPromise = new Promise((resolve) => {
             refreshResolver = resolve;
+
+            // Set 10s timeout for silent refresh
+            refreshTimeoutTimer = setTimeout(() => {
+                console.warn('[Auth] Token refresh timed out after 10s');
+                if (refreshResolver) {
+                    refreshResolver(null);
+                    refreshResolver = null;
+                    refreshPromise = null;
+                }
+            }, 10000);
         });
         // prompt: '' is the key for silent refresh if user is already signed in
         tokenClient.requestAccessToken({ prompt: '', scope: SCOPES });
@@ -240,7 +270,17 @@ export async function ensureValidToken(): Promise<string | null> {
             // Check if within 48h recoverable window
             if (now < expiryTime + FORTY_EIGHT_HOURS_MS) {
                 console.log('[Auth] Token expired/buffered but within 48h grace period. Refreshing...');
-                return refreshAuth();
+                const refreshedToken = await refreshAuth();
+                if (refreshedToken === null) {
+                    if (now >= expiryTime) {
+                        console.log('[Auth] Refresh failed and token is expired. Signing out.');
+                        signOut();
+                        return null;
+                    }
+                    // If refresh failed but token is still valid (in buffer), return current token
+                    return accessToken;
+                }
+                return refreshedToken;
             } else {
                 console.log('[Auth] Token expired > 48h ago. Forcing sign-out.');
                 signOut();
