@@ -18,3 +18,12 @@
 
 ---
 
+## Verify click interaction triggers preemptive auth check
+
+![Verify click interaction triggers preemptive auth check](./screenshots/002-preemptive-refresh-on-click.png)
+
+**Verifications:**
+- [x] Triggers ensureValidToken on click
+
+---
+

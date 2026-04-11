@@ -115,5 +115,32 @@ test('Issue #95: Auth Refresh Robustness', async ({ page }, testInfo) => {
         ]
     });
 
+    await tester.step('preemptive_refresh_on_click', {
+        description: 'Verify click interaction triggers preemptive auth check',
+        verifications: [
+            {
+                spec: 'Triggers ensureValidToken on click',
+                check: async () => {
+                    // Reset hang refresh to avoid interfering
+                    await page.evaluate(() => {
+                        localStorage.setItem('_hangRefresh', 'false');
+                    });
+
+                    let logSeen = false;
+                    page.on('console', msg => {
+                        if (msg.text().includes('[Auth] Preemptive click interaction check')) {
+                            logSeen = true;
+                        }
+                    });
+
+                    // Click somewhere neutral
+                    await page.locator('body').click();
+                    
+                    expect(logSeen).toBe(true);
+                }
+            }
+        ]
+    });
+
     tester.generateDocs();
 });

@@ -14,4 +14,8 @@
 4.  **No Sign-out**: Ensure the user is NOT signed out and can proceed with logging immediately.
 
 ## Automated Tests
-- No new E2E tests added as "user gesture" context is specific to browser security models and hard to mock reliably in headless Chrome without actually triggering the same security constraints. The existing auth unit tests ensure `ensureValidToken` logic itself is sound.
+- **E2E Test**: `tests/e2e/095-auth-refresh-robustness.spec.ts` verifies:
+    - Token refresh timeout (10s) and explicit logout on expiry.
+    - Token retention if refresh hangs but token is still valid (in buffer).
+    - Preemptive auth check triggered by click interaction.
+
