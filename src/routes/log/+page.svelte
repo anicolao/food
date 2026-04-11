@@ -49,6 +49,7 @@
     file: File;
     previewUrl: string;
     uploadPromise: Promise<GoogleDriveFile | null>;
+    isRepresentative?: boolean;
   };
 
   let attachedMedia: AttachedMedia[] = $state([]);
@@ -287,6 +288,7 @@
     file: File,
     triggerAnalysis: boolean = true,
     skipExif: boolean = false,
+    isRepresentative: boolean = false,
   ) {
     if (!skipExif) {
       try {
@@ -378,6 +380,7 @@
             file,
             previewUrl,
             uploadPromise,
+            isRepresentative,
           },
         ];
 
@@ -393,7 +396,11 @@
   }
 
   async function runAnalysis(correction?: string) {
-    if (imagePreviews.length === 0) return;
+    // Only send non-representative images to Gemini for analysis
+    const realMedia = attachedMedia.filter((m) => !m.isRepresentative);
+    
+    // We allow analysis if we have real images OR if it's a correction/text analysis
+    if (realMedia.length === 0 && !correction && currentMode !== "TEXT" && currentMode !== "VOICE") return;
 
     analyzing = true;
     const requestId = crypto.randomUUID();
@@ -405,13 +412,13 @@
       store.dispatch(
         dispatchEvent("ai/analysisRequested", {
           requestId,
-          inputType: "image",
-          contentLength: attachedMedia.length,
-          mediaIds: attachedMedia.map((m) => m.tempId),
+          inputType: realMedia.length > 0 ? "image" : "text",
+          contentLength: realMedia.length > 0 ? realMedia.length : correction?.length || 0,
+          mediaIds: realMedia.map((m) => m.tempId),
         }),
       );
 
-      const images = attachedMedia.map((media, i) => {
+      const images = realMedia.map((media, i) => {
         try {
           return {
             base64: media.previewUrl.split(",")[1],
@@ -454,7 +461,7 @@
       store.dispatch(
         dispatchEvent("log/aiEstimateReceived", {
           requestId, // tracing
-          imagesCount: attachedMedia.length,
+          imagesCount: realMedia.length,
           rawJson: result,
         }),
       );
@@ -521,7 +528,8 @@
             );
             // PASS FALSE to skip re-analysis!
             // PASS TRUE to skip EXIF (use current time for search/generated images)
-            await addImage(file, false, true);
+            // PASS TRUE to mark as representative (prevent sending back to Gemini)
+            await addImage(file, false, true, true);
           } else {
             // Only fallback if it's NOT a 404 (e.g. 403 or opaque might be loadable via img tag)
             console.warn("Failed to fetch matched image, using direct URL");
