@@ -30,6 +30,7 @@ export const userProfile = writable<UserProfile | null>(null);
 let tokenClient: any;
 let accessToken: string | null = null;
 let refreshTimeoutId: any = null;
+let hardExpiryTimeoutId: any = null;
 let refreshTimeoutTimer: any = null;
 
 const TOKEN_KEY = 'food_log_access_token';
@@ -54,6 +55,26 @@ async function refreshInBackground(onSuccess: (token: string) => void) {
     }
 }
 
+function scheduleHardExpiry(expiryTime: number) {
+    if (hardExpiryTimeoutId) {
+        clearTimeout(hardExpiryTimeoutId);
+        hardExpiryTimeoutId = null;
+    }
+    
+    const now = Date.now();
+    const delay = expiryTime - now;
+    
+    if (delay <= 0) {
+        console.log('[Auth] Token already expired. Signing out.');
+        signOut();
+    } else {
+        hardExpiryTimeoutId = setTimeout(() => {
+            console.log('[Auth] Token expired (timer). Signing out.');
+            signOut();
+        }, delay);
+    }
+}
+
 export function initializeAuth(onSuccess: (token: string) => void) {
     // 1. Try to restore from localStorage first
     const storedToken = localStorage.getItem(TOKEN_KEY);
@@ -63,8 +84,15 @@ export function initializeAuth(onSuccess: (token: string) => void) {
     // Setup visibility listener to catch expiry when waking from sleep
     document.addEventListener('visibilitychange', () => {
         if (document.visibilityState === 'visible') {
+            console.log('[Auth] Visibility changed to visible. Checking expiry.');
             checkAndRefreshIfNeeded(onSuccess);
         }
+    });
+
+    // Handle online event to recover from offline expiry
+    window.addEventListener('online', () => {
+        console.log('[Auth] Connection back online. Checking expiry.');
+        checkAndRefreshIfNeeded(onSuccess);
     });
 
     if (storedToken && storedExpiry) {
@@ -117,9 +145,9 @@ export function initializeAuth(onSuccess: (token: string) => void) {
             }
         } else {
             attempts++;
-            if (attempts > 50) { // 5 seconds
+            if (attempts > 200) { // 20 seconds
                 clearInterval(interval);
-                console.error('Google Identity Services script failed to load.');
+                console.error('Google Identity Services script failed to load after 20s.');
             }
         }
     }, 100);
@@ -197,6 +225,9 @@ function scheduleRefresh(expiresInSeconds: number, onSuccess: (token: string) =>
             refreshInBackground(onSuccess);
         }, timeTillRefresh);
     }
+
+    // Also schedule hard expiry logout
+    scheduleHardExpiry(Date.now() + (expiresInSeconds * 1000));
 }
 
 function checkAndRefreshIfNeeded(onSuccess: (token: string) => void) {
@@ -217,19 +248,19 @@ export function refreshAuth(): Promise<string | null> {
     if (refreshPromise) return refreshPromise;
 
     if (tokenClient) {
-        console.log('Refreshing auth token...');
+        console.log('[Auth] Refreshing auth token silently...');
         refreshPromise = new Promise((resolve) => {
             refreshResolver = resolve;
 
-            // Set 10s timeout for silent refresh
+            // Set 20s timeout for silent refresh
             refreshTimeoutTimer = setTimeout(() => {
-                console.warn('[Auth] Token refresh timed out after 10s');
+                console.warn('[Auth] Token refresh timed out after 20s');
                 if (refreshResolver) {
                     refreshResolver(null);
                     refreshResolver = null;
                     refreshPromise = null;
                 }
-            }, 10000);
+            }, 20000);
         });
         // prompt: '' is the key for silent refresh if user is already signed in
         tokenClient.requestAccessToken({ prompt: '', scope: SCOPES });
@@ -254,6 +285,23 @@ export function signIn() {
  */
 export async function ensureValidToken(): Promise<string | null> {
     const storedExpiry = localStorage.getItem(EXPIRY_KEY);
+    const storedToken = localStorage.getItem(TOKEN_KEY);
+
+    // Sync in-memory state with localStorage if it changed elsewhere (e.g. another tab)
+    if (storedToken && storedToken !== accessToken) {
+        console.log('[Auth] Token updated from localStorage');
+        accessToken = storedToken;
+        authState.update(s => ({ ...s, token: accessToken }));
+        
+        // Also need to reschedule timers if it was updated elsewhere
+        if (storedExpiry) {
+            const expiryTime = parseInt(storedExpiry);
+            const remainingSeconds = (expiryTime - Date.now()) / 1000;
+            if (remainingSeconds > 0) {
+                scheduleRefresh(remainingSeconds, () => {}); // No-op callback for background refresh
+            }
+        }
+    }
 
     // If no token at all, return null
     if (!accessToken && !storedExpiry) return null;
@@ -306,6 +354,10 @@ export function signOut() {
     if (refreshTimeoutId) {
         clearTimeout(refreshTimeoutId);
         refreshTimeoutId = null;
+    }
+    if (hardExpiryTimeoutId) {
+        clearTimeout(hardExpiryTimeoutId);
+        hardExpiryTimeoutId = null;
     }
     localStorage.removeItem(TOKEN_KEY);
     localStorage.removeItem(EXPIRY_KEY);
