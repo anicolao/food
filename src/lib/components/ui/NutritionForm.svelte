@@ -1,6 +1,7 @@
 <script lang="ts">
   import { slide } from 'svelte/transition';
   import { base } from '$app/paths';
+  import { store } from '$lib/store';
   import NutrientInput from './NutrientInput.svelte';
 
   interface Props {
@@ -30,6 +31,15 @@
   let { metrics = $bindable(), readOnly = false }: Props = $props();
 
   let showDetails = $state(false);
+  let showHealthMetrics = $state(store.getState().settings.showHealthMetrics);
+
+  // Subscribe to settings for showHealthMetrics
+  $effect(() => {
+    const unsubscribe = store.subscribe(() => {
+        showHealthMetrics = store.getState().settings.showHealthMetrics;
+    });
+    return unsubscribe;
+  });
 
   // Initialize details if missing
   if (!metrics.details) {
@@ -98,33 +108,37 @@
           />
       </div>
       
-      {#if showDetails}
-        <div class="detail-list" transition:slide>
+      {#if showDetails || showHealthMetrics}
+        <div class="detail-list">
             <NutrientInput 
                 layout="horizontal"
-                label="Fiber" 
+                label="🌾 Fiber" 
                 value={metrics.details?.fiber} 
                 onupdate={(v) => updateDetail('carbs', 'fiber', v)}
                 readonly={readOnly}
                 indent={true}
             />
-            <NutrientInput 
-                layout="horizontal"
-                label="Sugar" 
-                value={metrics.details?.sugar} 
-                onupdate={(v) => updateDetail('carbs', 'sugar', v)}
-                readonly={readOnly}
-                indent={true}
-            />
-            <NutrientInput 
-                layout="horizontal"
-                label="Added Sugar" 
-                value={metrics.details?.addedSugar} 
-                onupdate={(v) => updateDetail('carbs', 'addedSugar', v)}
-                readonly={readOnly}
-                class="double-indent"
-                indent={true}
-            />
+            {#if showDetails}
+                <div transition:slide>
+                    <NutrientInput 
+                        layout="horizontal"
+                        label="Sugar" 
+                        value={metrics.details?.sugar} 
+                        onupdate={(v) => updateDetail('carbs', 'sugar', v)}
+                        readonly={readOnly}
+                        indent={true}
+                    />
+                    <NutrientInput 
+                        layout="horizontal"
+                        label="Added Sugar" 
+                        value={metrics.details?.addedSugar} 
+                        onupdate={(v) => updateDetail('carbs', 'addedSugar', v)}
+                        readonly={readOnly}
+                        class="double-indent"
+                        indent={true}
+                    />
+                </div>
+            {/if}
         </div>
       {/if}
   </div>
@@ -173,57 +187,63 @@
       {/if}
   </div>
 
-  {#if showDetails}
-      <div class="other-section" transition:slide>
-          <div class="section-label">Micros & Other</div>
+  {#if showDetails || showHealthMetrics}
+      <div class="other-section">
+          {#if showDetails}
+            <div class="section-label" transition:slide>Micros & Other</div>
+          {/if}
           <div class="detail-list">
              <NutrientInput 
                 layout="horizontal"
-                label="Sodium" 
+                label="🧂 Sodium" 
                 unit="mg"
                 value={metrics.details?.sodium} 
                 onupdate={(v) => updateDetail(null, 'sodium', v)}
                 readonly={readOnly}
             />
-            <NutrientInput 
-                layout="horizontal"
-                label="Potassium" 
-                unit="mg"
-                value={metrics.details?.potassium} 
-                onupdate={(v) => updateDetail(null, 'potassium', v)}
-                readonly={readOnly}
-            />
-             <NutrientInput 
-                layout="horizontal"
-                label="Calcium" 
-                unit="mg"
-                value={metrics.details?.calcium} 
-                onupdate={(v) => updateDetail(null, 'calcium', v)}
-                readonly={readOnly}
-            />
-             <NutrientInput 
-                layout="horizontal"
-                label="Iron" 
-                unit="mg"
-                value={metrics.details?.iron} 
-                onupdate={(v) => updateDetail(null, 'iron', v)}
-                readonly={readOnly}
-            />
-            <NutrientInput 
-                layout="horizontal"
-                label="Caffeine" 
-                unit="mg"
-                value={metrics.details?.caffeine} 
-                onupdate={(v) => updateDetail(null, 'caffeine', v)}
-                readonly={readOnly}
-            />
-             <NutrientInput 
-                layout="horizontal"
-                label="Alcohol" 
-                value={metrics.details?.alcohol} 
-                onupdate={(v) => updateDetail(null, 'alcohol', v)}
-                readonly={readOnly}
-            />
+            {#if showDetails}
+                <div transition:slide>
+                    <NutrientInput 
+                        layout="horizontal"
+                        label="Potassium" 
+                        unit="mg"
+                        value={metrics.details?.potassium} 
+                        onupdate={(v) => updateDetail(null, 'potassium', v)}
+                        readonly={readOnly}
+                    />
+                     <NutrientInput 
+                        layout="horizontal"
+                        label="Calcium" 
+                        unit="mg"
+                        value={metrics.details?.calcium} 
+                        onupdate={(v) => updateDetail(null, 'calcium', v)}
+                        readonly={readOnly}
+                    />
+                     <NutrientInput 
+                        layout="horizontal"
+                        label="Iron" 
+                        unit="mg"
+                        value={metrics.details?.iron} 
+                        onupdate={(v) => updateDetail(null, 'iron', v)}
+                        readonly={readOnly}
+                    />
+                    <NutrientInput 
+                        layout="horizontal"
+                        label="Caffeine" 
+                        unit="mg"
+                        value={metrics.details?.caffeine} 
+                        onupdate={(v) => updateDetail(null, 'caffeine', v)}
+                        readonly={readOnly}
+                    />
+                     <NutrientInput 
+                        layout="horizontal"
+                        label="Alcohol" 
+                        value={metrics.details?.alcohol} 
+                        onupdate={(v) => updateDetail(null, 'alcohol', v)}
+                        readonly={readOnly}
+                    />
+                </div>
+            {/if}
           </div>
       </div>
   {/if}
@@ -287,25 +307,10 @@
       flex-direction: column;
   }
 
-  .group-header {
-      /* No extra styling needed, NutrientInput handles it */
-  }
-
   .detail-list {
       display: flex;
       flex-direction: column;
       /* Remove background/padding to make it seamless "refactor to be common" */
-  }
-
-  .details-toggle {
-      background: none;
-      border: none;
-      color: var(--color-primary, #4caf50);
-      font-size: 0.85rem;
-      cursor: pointer;
-      align-self: center;
-      padding: 8px;
-      opacity: 0.9;
   }
 
   .other-section {

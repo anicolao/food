@@ -14,6 +14,7 @@
   
   import StatsRing from '$lib/components/ui/StatsRing.svelte';
   import MacroBubble from '$lib/components/ui/MacroBubble.svelte';
+  import HealthSummary from '$lib/components/ui/HealthSummary.svelte';
   import ActivityCard from '$lib/components/ui/ActivityCard.svelte';
   import NetworkStatus from '$lib/components/ui/NetworkStatus.svelte';
 
@@ -138,24 +139,28 @@
 
   // Derived stats
   let stats = $derived.by(() => {
-      const newStats = { totalCalories: 0, totalProtein: 0, totalFat: 0, totalCarbs: 0 };
+      const newStats = { totalCalories: 0, totalProtein: 0, totalFat: 0, totalCarbs: 0, totalFiber: 0, totalSodium: 0 };
       visibleLogs.forEach(entry => {
           newStats.totalCalories += Number(entry.calories || 0);
           newStats.totalProtein += Number(entry.protein || 0);
           newStats.totalFat += Number(entry.fat || 0);
           newStats.totalCarbs += Number(entry.carbs || 0);
+          newStats.totalFiber += Number(entry.details?.fiber || 0);
+          newStats.totalSodium += Number(entry.details?.sodium || 0);
       });
       return newStats;
   });
 
   // Derived goals from settings
   let goals = $derived.by(() => {
-    const { targetCalories, macroRatios } = settings;
+    const { targetCalories, macroRatios, fiberTarget, sodiumTarget } = settings;
     return {
         calories: targetCalories,
         protein: Math.round((targetCalories * macroRatios.protein) / 4),
         fat: Math.round((targetCalories * macroRatios.fat) / 9),
-        carbs: Math.round((targetCalories * macroRatios.carbs) / 4)
+        carbs: Math.round((targetCalories * macroRatios.carbs) / 4),
+        fiber: fiberTarget,
+        sodium: sodiumTarget
     };
   });
 
@@ -246,6 +251,15 @@
                     iconSrc="/images/icon-fat.png" 
                 />
              </div>
+             
+             {#if settings.showHealthMetrics}
+                <HealthSummary 
+                    fiber={stats.totalFiber} 
+                    fiberTarget={goals.fiber} 
+                    sodium={stats.totalSodium} 
+                    sodiumTarget={goals.sodium} 
+                />
+             {/if}
              
              <!-- SVG Gradients for Macros -->
              <svg width="0" height="0" class="visually-hidden">
