@@ -70,6 +70,8 @@ interface DailyStats {
   totalProtein: number;
   totalFat: number;
   totalCarbs: number;
+  totalFiber: number;
+  totalSodium: number;
 }
 
 interface AppState {
@@ -136,13 +138,23 @@ const applyEventToState = (state: any, event: FoodEvent) => {
 
       // Update Stats
       if (!state.stats[entry.date]) {
-        state.stats[entry.date] = { date: entry.date, totalCalories: 0, totalProtein: 0, totalFat: 0, totalCarbs: 0 };
+        state.stats[entry.date] = {
+          date: entry.date,
+          totalCalories: 0,
+          totalProtein: 0,
+          totalFat: 0,
+          totalCarbs: 0,
+          totalFiber: 0,
+          totalSodium: 0
+        };
       }
       const stat = state.stats[entry.date];
       stat.totalCalories += sanitizedEntry.calories;
       stat.totalProtein += sanitizedEntry.protein;
       stat.totalFat += sanitizedEntry.fat;
       stat.totalCarbs += sanitizedEntry.carbs;
+      stat.totalFiber += Number(sanitizedEntry.details?.fiber || 0);
+      stat.totalSodium += Number(sanitizedEntry.details?.sodium || 0);
       break;
     }
 
@@ -159,6 +171,8 @@ const applyEventToState = (state: any, event: FoodEvent) => {
           stat.totalProtein -= Number(oldEntry.protein || 0);
           stat.totalFat -= Number(oldEntry.fat || 0);
           stat.totalCarbs -= Number(oldEntry.carbs || 0);
+          stat.totalFiber -= Number(oldEntry.details?.fiber || 0);
+          stat.totalSodium -= Number(oldEntry.details?.sodium || 0);
         }
 
         // 2. Update Entry (Sanitize new values)
@@ -174,13 +188,23 @@ const applyEventToState = (state: any, event: FoodEvent) => {
 
         // 3. Increment new stats
         if (!state.stats[newEntry.date]) {
-          state.stats[newEntry.date] = { date: newEntry.date, totalCalories: 0, totalProtein: 0, totalFat: 0, totalCarbs: 0 };
+          state.stats[newEntry.date] = {
+            date: newEntry.date,
+            totalCalories: 0,
+            totalProtein: 0,
+            totalFat: 0,
+            totalCarbs: 0,
+            totalFiber: 0,
+            totalSodium: 0
+          };
         }
         const stat = state.stats[newEntry.date];
         stat.totalCalories += Number(newEntry.calories || 0);
         stat.totalProtein += Number(newEntry.protein || 0);
         stat.totalFat += Number(newEntry.fat || 0);
         stat.totalCarbs += Number(newEntry.carbs || 0);
+        stat.totalFiber += Number(newEntry.details?.fiber || 0);
+        stat.totalSodium += Number(newEntry.details?.sodium || 0);
       }
       break;
     }
@@ -197,6 +221,8 @@ const applyEventToState = (state: any, event: FoodEvent) => {
           stat.totalProtein -= Number(entry.protein || 0);
           stat.totalFat -= Number(entry.fat || 0);
           stat.totalCarbs -= Number(entry.carbs || 0);
+          stat.totalFiber -= Number(entry.details?.fiber || 0);
+          stat.totalSodium -= Number(entry.details?.sodium || 0);
         }
 
         // Remove from log
@@ -312,6 +338,9 @@ export interface MacroRatios {
 export interface SettingsState {
   targetCalories: number;
   macroRatios: MacroRatios;
+  fiberTarget: number;
+  sodiumTarget: number;
+  showHealthMetrics: boolean;
 }
 
 const initialSettings: SettingsState = {
@@ -320,7 +349,10 @@ const initialSettings: SettingsState = {
     protein: 0.3, // 30%
     fat: 0.35,    // 35%
     carbs: 0.35   // 35%
-  }
+  },
+  fiberTarget: 25,
+  sodiumTarget: 2300,
+  showHealthMetrics: true
 };
 
 const settingsSlice = createSlice({
@@ -330,6 +362,9 @@ const settingsSlice = createSlice({
     updateGoals: (state, action: PayloadAction<SettingsState>) => {
       state.targetCalories = action.payload.targetCalories;
       state.macroRatios = action.payload.macroRatios;
+      state.fiberTarget = action.payload.fiberTarget;
+      state.sodiumTarget = action.payload.sodiumTarget;
+      state.showHealthMetrics = action.payload.showHealthMetrics;
     }
   }
 });

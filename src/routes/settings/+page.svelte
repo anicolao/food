@@ -10,7 +10,10 @@
     // State
     const defaultSettings: SettingsState = {
         targetCalories: 2000,
-        macroRatios: { protein: 0.3, fat: 0.35, carbs: 0.35 }
+        macroRatios: { protein: 0.3, fat: 0.35, carbs: 0.35 },
+        fiberTarget: 25,
+        sodiumTarget: 2300,
+        showHealthMetrics: true
     };
     
     // "Draft" state (User edits)
@@ -26,7 +29,10 @@
         return s.targetCalories != o.targetCalories ||
                Math.abs(s.macroRatios.protein - o.macroRatios.protein) > 0.001 ||
                Math.abs(s.macroRatios.fat - o.macroRatios.fat) > 0.001 ||
-               Math.abs(s.macroRatios.carbs - o.macroRatios.carbs) > 0.001;
+               Math.abs(s.macroRatios.carbs - o.macroRatios.carbs) > 0.001 ||
+               s.fiberTarget !== o.fiberTarget ||
+               s.sodiumTarget !== o.sodiumTarget ||
+               s.showHealthMetrics !== o.showHealthMetrics;
     });
 
     // Subscribe to store
@@ -303,6 +309,45 @@
                 </div>
             </div>
         </div>
+
+        <div class="health-targets-section glass-panel">
+            <h2 class="section-title">Health Targets</h2>
+            <div class="target-row">
+                <div class="label-group">
+                    <span class="target-name">Fiber Goal</span>
+                    <span class="target-desc">Daily minimum (g)</span>
+                </div>
+                <div class="input-group">
+                    <input 
+                        type="number" 
+                        class="bare-input target-input" 
+                        bind:value={settings.fiberTarget}
+                    />
+                    <span class="suffix-sm">g</span>
+                </div>
+            </div>
+            <div class="target-row">
+                <div class="label-group">
+                    <span class="target-name">Sodium Limit</span>
+                    <span class="target-desc">Daily maximum (mg)</span>
+                </div>
+                <div class="input-group">
+                    <input 
+                        type="number" 
+                        class="bare-input target-input" 
+                        bind:value={settings.sodiumTarget}
+                    />
+                    <span class="suffix-sm">mg</span>
+                </div>
+            </div>
+            <div class="toggle-row">
+                <span class="target-name">Show on Dashboard</span>
+                <label class="switch">
+                    <input type="checkbox" bind:checked={settings.showHealthMetrics}>
+                    <span class="slider round"></span>
+                </label>
+            </div>
+        </div>
     </div>
     
     <div class="actions-footer">
@@ -398,6 +443,108 @@
         display: flex;
         flex-direction: column;
         gap: 12px; /* Reduced from 16px */
+    }
+
+    /* Health Targets Section */
+    .health-targets-section {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .section-title {
+        font-size: 1.1rem;
+        font-weight: 700;
+        margin-bottom: 5px;
+    }
+
+    .target-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .target-name {
+        font-weight: 700;
+        font-size: 1rem;
+    }
+
+    .target-desc {
+        font-size: 0.75rem;
+        color: rgba(255,255,255,0.5);
+    }
+
+    .target-input {
+        background: rgba(255,255,255,0.05);
+        padding: 4px 8px;
+        border-radius: 6px;
+        width: 6ch;
+        text-align: center;
+    }
+
+    /* Toggle Switch */
+    .toggle-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-top: 10px;
+        border-top: 1px solid rgba(255,255,255,0.05);
+        margin-top: 5px;
+    }
+
+    .switch {
+        position: relative;
+        display: inline-block;
+        width: 44px;
+        height: 24px;
+    }
+
+    .switch input { 
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+
+    .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(255,255,255,0.1);
+        transition: .4s;
+    }
+
+    .slider:before {
+        position: absolute;
+        content: "";
+        height: 18px;
+        width: 18px;
+        left: 3px;
+        bottom: 3px;
+        background-color: white;
+        transition: .4s;
+    }
+
+    input:checked + .slider {
+        background-color: var(--color-primary, #ff4d4d);
+    }
+
+    input:focus + .slider {
+        box-shadow: 0 0 1px var(--color-primary, #ff4d4d);
+    }
+
+    input:checked + .slider:before {
+        transform: translateX(20px);
+    }
+
+    .slider.round {
+        border-radius: 24px;
+    }
+
+    .slider.round:before {
+        border-radius: 50%;
     }
     
     .macro-card {
