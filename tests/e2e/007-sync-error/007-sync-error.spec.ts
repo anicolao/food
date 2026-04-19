@@ -51,16 +51,11 @@ test.describe('Sync Error UX', () => {
         await expect(page.locator('.dashboard-grid')).toBeVisible({ timeout: 15000 });
 
         // 6. Trigger Sync
-        // We need to trigger a sync. The layout syncs on mount. 
-        // But since we just logged in, a sync might have kicked off but maybe before our route fail took effect?
-        // Route was set up at start.
-        // Let's force a sync by navigating to settings and clicking Force Sync, or just waiting.
-        // The app polls every 2s. Wait for 5s.
-        await page.waitForTimeout(5000);
+        // The app polls every 2s. Wait for the error icon to appear.
+        const statusBtn = page.locator('button.network-status:visible');
+        await expect(statusBtn).toHaveAttribute('data-status', 'error', { timeout: 15000 });
 
         // 7. Verify Error Icon
-        const statusBtn = page.locator('button.network-status:visible');
-        await expect(statusBtn).toHaveAttribute('data-status', 'error', { timeout: 10000 });
         await expect(statusBtn).toHaveAttribute('aria-label', /Error/);
 
         await tester.step('error-icon-visible', {

@@ -5,11 +5,11 @@ console.log("Verifying Zero Tolerance Policy in playwright.config.ts...");
 const maxDiffPixels = config.expect?.toHaveScreenshot?.maxDiffPixels;
 const maxDiffPixelRatio = config.expect?.toHaveScreenshot?.maxDiffPixelRatio;
 
-if (maxDiffPixels !== 0 && (maxDiffPixelRatio === undefined || maxDiffPixelRatio > 0.05)) {
+if (maxDiffPixels !== 0 || maxDiffPixelRatio !== undefined) {
   console.error(
     `❌ ZERO TOLERANCE VIOLATION: maxDiffPixels is ${maxDiffPixels} and maxDiffPixelRatio is ${maxDiffPixelRatio}.`,
   );
-  console.error("   One of them must be 0 (pixels) or <= 0.05 (ratio).");
+  console.error("   maxDiffPixels MUST be 0 and maxDiffPixelRatio MUST be undefined.");
   console.error("   ******************************************");
   console.error("   ** You may NOT bypass precommit checks  **");
   console.error("   ** You MAY NOT mark e2e tests as skip.  **");
