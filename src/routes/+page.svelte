@@ -139,13 +139,30 @@
 
   // Derived stats
   let stats = $derived.by(() => {
-      const newStats = { totalCalories: 0, totalProtein: 0, totalFat: 0, totalCarbs: 0, totalFiber: 0, totalSodium: 0 };
+      const newStats = { 
+          totalCalories: 0, 
+          totalProtein: 0, 
+          totalFat: 0, 
+          totalCarbs: 0, 
+          totalFiber: 0, 
+          totalSugar: 0,
+          totalAddedSugar: 0,
+          totalSaturatedFat: 0,
+          totalTransFat: 0,
+          totalCholesterol: 0,
+          totalSodium: 0 
+      };
       visibleLogs.forEach(entry => {
           newStats.totalCalories += Number(entry.calories || 0);
           newStats.totalProtein += Number(entry.protein || 0);
           newStats.totalFat += Number(entry.fat || 0);
           newStats.totalCarbs += Number(entry.carbs || 0);
           newStats.totalFiber += Number(entry.details?.fiber || 0);
+          newStats.totalSugar += Number(entry.details?.sugar || 0);
+          newStats.totalAddedSugar += Number(entry.details?.addedSugar || 0);
+          newStats.totalSaturatedFat += Number(entry.details?.saturatedFat || 0);
+          newStats.totalTransFat += Number(entry.details?.transFat || 0);
+          newStats.totalCholesterol += Number(entry.details?.cholesterol || 0);
           newStats.totalSodium += Number(entry.details?.sodium || 0);
       });
       return newStats;
@@ -153,14 +170,12 @@
 
   // Derived goals from settings
   let goals = $derived.by(() => {
-    const { targetCalories, macroRatios, fiberTarget, sodiumTarget } = settings;
+    const { targetCalories, macroRatios } = settings;
     return {
         calories: targetCalories,
         protein: Math.round((targetCalories * macroRatios.protein) / 4),
         fat: Math.round((targetCalories * macroRatios.fat) / 9),
-        carbs: Math.round((targetCalories * macroRatios.carbs) / 4),
-        fiber: fiberTarget,
-        sodium: sodiumTarget
+        carbs: Math.round((targetCalories * macroRatios.carbs) / 4)
     };
   });
 
@@ -254,10 +269,7 @@
              
              {#if settings.showHealthMetrics}
                 <HealthSummary 
-                    fiber={stats.totalFiber} 
-                    fiberTarget={goals.fiber} 
-                    sodium={stats.totalSodium} 
-                    sodiumTarget={goals.sodium} 
+                    {stats}
                 />
              {/if}
              
