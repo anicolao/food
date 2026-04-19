@@ -40,8 +40,8 @@
             value={stats.totalFiber} 
             target={settings.fiberGoal.value} 
             unit="g" 
-            gradientStart="#43e97b" 
-            gradientEnd="#38f9d7" 
+            gradientStart="#00f2fe" 
+            gradientEnd="#4facfe" 
         />
     {/if}
 

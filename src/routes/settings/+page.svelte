@@ -11,7 +11,7 @@
     const defaultSettings: SettingsState = {
         targetCalories: 2000,
         macroRatios: { protein: 0.3, fat: 0.35, carbs: 0.35 },
-        fiberGoal: { value: 25, enabled: true },
+        fiberGoal: { value: 30, enabled: true },
         sugarLimit: { value: 30, enabled: false },
         addedSugarLimit: { value: 10, enabled: false },
         satFatLimit: { value: 10, enabled: false },
@@ -307,7 +307,7 @@
             
             <div class="health-grid">
                 <!-- Fiber -->
-                <div class="macro-card glass-panel" style="--accent: #43e97b; opacity: {settings.fiberGoal.enabled ? 1 : 0.5}">
+                <div class="macro-card glass-panel" style="--accent: #00f2fe; opacity: {settings.fiberGoal.enabled ? 1 : 0.5}">
                     <div class="macro-header">
                         <label class="switch-sm">
                             <input type="checkbox" bind:checked={settings.fiberGoal.enabled}>
@@ -890,7 +890,7 @@
     .protein-slider::-webkit-slider-runnable-track { background: linear-gradient(90deg, #ff4d4d 0%, rgba(255,77,77,0.2) 100%); }
     .fat-slider::-webkit-slider-runnable-track { background: linear-gradient(90deg, #ffca28 0%, rgba(255,202,40,0.2) 100%); }
     .carbs-slider::-webkit-slider-runnable-track { background: linear-gradient(90deg, #00e5ff 0%, rgba(0,229,255,0.2) 100%); }
-    .fiber-slider::-webkit-slider-runnable-track { background: linear-gradient(90deg, #43e97b 0%, rgba(67,233,123,0.2) 100%); }
+    .fiber-slider::-webkit-slider-runnable-track { background: linear-gradient(90deg, #00f2fe 0%, rgba(0,242,254,0.2) 100%); }
     .sugar-slider::-webkit-slider-runnable-track { background: linear-gradient(90deg, #f6d365 0%, rgba(246,211,101,0.2) 100%); }
     .sat-fat-slider::-webkit-slider-runnable-track { background: linear-gradient(90deg, #ff416c 0%, rgba(255,65,108,0.2) 100%); }
     .sodium-slider::-webkit-slider-runnable-track { background: linear-gradient(90deg, #ffca28 0%, rgba(255,202,40,0.2) 100%); }
@@ -920,7 +920,7 @@
     .protein-slider::-moz-range-track { background: linear-gradient(90deg, #ff4d4d 0%, rgba(255,77,77,0.2) 100%); }
     .fat-slider::-moz-range-track { background: linear-gradient(90deg, #ffca28 0%, rgba(255,202,40,0.2) 100%); }
     .carbs-slider::-moz-range-track { background: linear-gradient(90deg, #00e5ff 0%, rgba(0,229,255,0.2) 100%); }
-    .fiber-slider::-moz-range-track { background: linear-gradient(90deg, #43e97b 0%, rgba(67,233,123,0.2) 100%); }
+    .fiber-slider::-moz-range-track { background: linear-gradient(90deg, #00f2fe 0%, rgba(0,242,254,0.2) 100%); }
     .sugar-slider::-moz-range-track { background: linear-gradient(90deg, #f6d365 0%, rgba(246,211,101,0.2) 100%); }
     .sat-fat-slider::-moz-range-track { background: linear-gradient(90deg, #ff416c 0%, rgba(255,65,108,0.2) 100%); }
     .sodium-slider::-moz-range-track { background: linear-gradient(90deg, #ffca28 0%, rgba(255,202,40,0.2) 100%); }
