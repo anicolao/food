@@ -14,7 +14,7 @@ test('User configures macro settings', async ({ page }, testInfo) => {
         description: 'Settings page loads with defaults',
         verifications: [
             { spec: 'Url is correct', check: async () => await expect(page).toHaveURL(/\/settings/) },
-            { spec: 'Title is visible', check: async () => await expect(page.locator('.header h1')).toContainText('Macro Goals', { timeout: 15000 }) },
+            { spec: 'Title is visible', check: async () => await expect(page.locator('.header h1')).toContainText('Goals & Targets', { timeout: 15000 }) },
             { spec: 'Donut chart is visible', check: async () => await expect(page.locator('.donut-chart svg')).toBeVisible() },
             {
                 spec: 'Calories input is 2000', check: async () => {
