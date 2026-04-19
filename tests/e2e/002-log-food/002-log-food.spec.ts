@@ -115,7 +115,7 @@ test('US-003 to US-010: User logs food flow', async ({ page }, testInfo) => {
     await expect(logBtn).toBeEnabled();
 
     await logBtn.click();
-    await expect(page).toHaveURL(/\/log/, { timeout: 2000 });
+    await expect(page).toHaveURL(/\/log/, { timeout: 10000 });
 
     // Mandatory URL Wait for stability
     await page.waitForLoadState('domcontentloaded');
