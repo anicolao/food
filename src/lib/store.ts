@@ -376,24 +376,18 @@ export interface SubCategoryGoal {
   enabled: boolean;
 }
 
-export interface MicroGoal {
-  min: number;
-  max: number;
-  enabled: boolean;
-}
-
 export interface SettingsState {
   targetCalories: number;
   macroRatios: MacroRatios;
-  // Sub-categories (Units/1000kcal)
-  fiberGoal: SubCategoryGoal;
+  // Sub-categories (Units/1000kcal, except Fiber which is absolute grams)
+  fiberGoal: { value: number; enabled: boolean };
   sugarLimit: SubCategoryGoal;
   addedSugarLimit: SubCategoryGoal;
   satFatLimit: SubCategoryGoal;
   transFatLimit: SubCategoryGoal;
   cholesterolLimit: SubCategoryGoal;
-  // Micros (Range)
-  sodiumGoal: MicroGoal;
+  // Micros (Absolute limit)
+  sodiumGoal: { value: number; enabled: boolean };
   showHealthMetrics: boolean;
 }
 
@@ -404,13 +398,13 @@ const initialSettings: SettingsState = {
     fat: 0.35,    // 35%
     carbs: 0.35   // 35%
   },
-  fiberGoal: { value: 14, enabled: true },
+  fiberGoal: { value: 25, enabled: true },
   sugarLimit: { value: 30, enabled: false },
   addedSugarLimit: { value: 10, enabled: false },
   satFatLimit: { value: 10, enabled: false },
   transFatLimit: { value: 0, enabled: false },
   cholesterolLimit: { value: 150, enabled: false },
-  sodiumGoal: { min: 1500, max: 2300, enabled: true },
+  sodiumGoal: { value: 2300, enabled: true },
   showHealthMetrics: true
 };
 

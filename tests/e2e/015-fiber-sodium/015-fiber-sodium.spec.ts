@@ -91,16 +91,16 @@ test('US-015: Fiber and Sodium tracking', async ({ page }, testInfo) => {
 
     // 2. Adjust Fiber goal and Sodium limit
     const fiberInput = page.locator('.macro-card', { hasText: 'Fiber' }).locator('input[type="number"]').first();
-    await fiberInput.fill('17.5');
+    await fiberInput.fill('35');
     
-    const sodiumMaxInput = page.locator('.sodium-input').last();
-    await sodiumMaxInput.fill('2000');
+    const sodiumLimitInput = page.locator('.macro-card', { hasText: 'Sodium' }).locator('input[type="number"]').first();
+    await sodiumLimitInput.fill('2000');
 
     await tester.step('settings-configured', {
         description: 'Health targets configured in settings',
         verifications: [
-            { spec: 'Fiber input updated', check: async () => await expect(fiberInput).toHaveValue('17.5') },
-            { spec: 'Sodium max input updated', check: async () => await expect(sodiumMaxInput).toHaveValue('2000') }
+            { spec: 'Fiber input updated', check: async () => await expect(fiberInput).toHaveValue('35') },
+            { spec: 'Sodium limit input updated', check: async () => await expect(sodiumLimitInput).toHaveValue('2000') }
         ]
     });
 

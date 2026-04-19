@@ -6,7 +6,7 @@
 
 **Verifications:**
 - [x] Fiber input updated
-- [x] Sodium max input updated
+- [x] Sodium limit input updated
 
 ---
 
