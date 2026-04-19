@@ -38,7 +38,7 @@
         <HealthBar 
             label="Fiber" 
             value={stats.totalFiber} 
-            target={getSubTarget(settings.fiberGoal.value)} 
+            target={settings.fiberGoal.value} 
             unit="g" 
             gradientStart="#43e97b" 
             gradientEnd="#38f9d7" 
@@ -109,7 +109,7 @@
         <HealthBar 
             label="Sodium" 
             value={stats.totalSodium} 
-            target={settings.sodiumGoal.max} 
+            target={settings.sodiumGoal.value} 
             unit="mg" 
             gradientStart="#f6d365" 
             gradientEnd="#fda085" 

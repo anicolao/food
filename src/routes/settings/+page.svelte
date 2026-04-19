@@ -6,19 +6,18 @@
     import { toasts } from '$lib/toast';
     import { store, dispatchEvent, selectSettings, updateGoals, type SettingsState, type MacroRatios } from '$lib/store';
     import DonutChart from '$lib/components/ui/DonutChart.svelte';
-    import RangeSlider from '$lib/components/ui/RangeSlider.svelte';
 
     // State
     const defaultSettings: SettingsState = {
         targetCalories: 2000,
         macroRatios: { protein: 0.3, fat: 0.35, carbs: 0.35 },
-        fiberGoal: { value: 14, enabled: true },
+        fiberGoal: { value: 25, enabled: true },
         sugarLimit: { value: 30, enabled: false },
         addedSugarLimit: { value: 10, enabled: false },
         satFatLimit: { value: 10, enabled: false },
         transFatLimit: { value: 0, enabled: false },
         cholesterolLimit: { value: 150, enabled: false },
-        sodiumGoal: { min: 1500, max: 2300, enabled: true },
+        sodiumGoal: { value: 2300, enabled: true },
         showHealthMetrics: true
     };
     
@@ -316,7 +315,7 @@
                         </label>
                         <div class="label-group">
                             <span class="macro-name">Fiber</span>
-                            <span class="macro-desc">Target: {Math.round(settings.targetCalories / 1000 * settings.fiberGoal.value)}g</span>
+                            <span class="macro-desc">Daily Goal (grams)</span>
                         </div>
                         <div class="values">
                              <div class="input-group">
@@ -325,7 +324,7 @@
                                     class="bare-input pct-input val-input" 
                                     bind:value={settings.fiberGoal.value}
                                 />
-                                <span class="suffix-sm">g/1k</span>
+                                <span class="suffix-sm">g</span>
                             </div>
                         </div>
                     </div>
@@ -434,7 +433,7 @@
                             min="0" 
                             max="50" 
                             bind:value={settings.satFatLimit.value}
-                            class="custom-slider fat-slider"
+                            class="custom-slider sat-fat-slider"
                         />
                     </div>
                 </div>
@@ -468,7 +467,7 @@
                             max="10" 
                             step="0.1"
                             bind:value={settings.transFatLimit.value}
-                            class="custom-slider fat-slider"
+                            class="custom-slider sat-fat-slider"
                         />
                     </div>
                 </div>
@@ -502,7 +501,7 @@
                             max="1000" 
                             step="10"
                             bind:value={settings.cholesterolLimit.value}
-                            class="custom-slider fat-slider"
+                            class="custom-slider sat-fat-slider"
                         />
                     </div>
                 </div>
@@ -516,37 +515,27 @@
                         </label>
                         <div class="label-group">
                             <span class="macro-name">Sodium</span>
-                            <span class="macro-desc">Range: {settings.sodiumGoal.min} - {settings.sodiumGoal.max}mg</span>
+                            <span class="macro-desc">Daily Limit (mg)</span>
                         </div>
                         <div class="values">
                              <div class="input-group">
                                 <input 
                                     type="number" 
-                                    class="bare-input gram-input sodium-input" 
-                                    bind:value={settings.sodiumGoal.min}
-                                />
-                                <span class="suffix-sm">-</span>
-                                <input 
-                                    type="number" 
-                                    class="bare-input gram-input sodium-input" 
-                                    bind:value={settings.sodiumGoal.max}
+                                    class="bare-input pct-input val-input" 
+                                    bind:value={settings.sodiumGoal.value}
                                 />
                                 <span class="suffix-sm">mg</span>
                             </div>
                         </div>
                     </div>
                     <div class="slider-container">
-                        <RangeSlider 
-                            bind:min={settings.sodiumGoal.min} 
-                            bind:max={settings.sodiumGoal.max} 
-                            rangeMin={0} 
-                            rangeMax={5000} 
-                            step={50}
-                            accentColor="#ffca28"
-                            onchange={(min, max) => {
-                                settings.sodiumGoal.min = min;
-                                settings.sodiumGoal.max = max;
-                            }}
+                        <input 
+                            type="range" 
+                            min="0" 
+                            max="5000" 
+                            step="50"
+                            bind:value={settings.sodiumGoal.value}
+                            class="custom-slider sodium-slider"
                         />
                     </div>
                 </div>
@@ -903,6 +892,8 @@
     .carbs-slider::-webkit-slider-runnable-track { background: linear-gradient(90deg, #00e5ff 0%, rgba(0,229,255,0.2) 100%); }
     .fiber-slider::-webkit-slider-runnable-track { background: linear-gradient(90deg, #43e97b 0%, rgba(67,233,123,0.2) 100%); }
     .sugar-slider::-webkit-slider-runnable-track { background: linear-gradient(90deg, #f6d365 0%, rgba(246,211,101,0.2) 100%); }
+    .sat-fat-slider::-webkit-slider-runnable-track { background: linear-gradient(90deg, #ff416c 0%, rgba(255,65,108,0.2) 100%); }
+    .sodium-slider::-webkit-slider-runnable-track { background: linear-gradient(90deg, #ffca28 0%, rgba(255,202,40,0.2) 100%); }
     
     /* Thumb Styling */
     .custom-slider::-webkit-slider-thumb {
@@ -931,6 +922,8 @@
     .carbs-slider::-moz-range-track { background: linear-gradient(90deg, #00e5ff 0%, rgba(0,229,255,0.2) 100%); }
     .fiber-slider::-moz-range-track { background: linear-gradient(90deg, #43e97b 0%, rgba(67,233,123,0.2) 100%); }
     .sugar-slider::-moz-range-track { background: linear-gradient(90deg, #f6d365 0%, rgba(246,211,101,0.2) 100%); }
+    .sat-fat-slider::-moz-range-track { background: linear-gradient(90deg, #ff416c 0%, rgba(255,65,108,0.2) 100%); }
+    .sodium-slider::-moz-range-track { background: linear-gradient(90deg, #ffca28 0%, rgba(255,202,40,0.2) 100%); }
 
     .custom-slider::-moz-range-thumb {
         width: 24px;
