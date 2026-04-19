@@ -6,13 +6,19 @@
     import { toasts } from '$lib/toast';
     import { store, dispatchEvent, selectSettings, updateGoals, type SettingsState, type MacroRatios } from '$lib/store';
     import DonutChart from '$lib/components/ui/DonutChart.svelte';
+    import RangeSlider from '$lib/components/ui/RangeSlider.svelte';
 
     // State
     const defaultSettings: SettingsState = {
         targetCalories: 2000,
         macroRatios: { protein: 0.3, fat: 0.35, carbs: 0.35 },
-        fiberTarget: 25,
-        sodiumTarget: 2300,
+        fiberGoal: { value: 14, enabled: true },
+        sugarLimit: { value: 30, enabled: false },
+        addedSugarLimit: { value: 10, enabled: false },
+        satFatLimit: { value: 10, enabled: false },
+        transFatLimit: { value: 0, enabled: false },
+        cholesterolLimit: { value: 150, enabled: false },
+        sodiumGoal: { min: 1500, max: 2300, enabled: true },
         showHealthMetrics: true
     };
     
@@ -24,15 +30,7 @@
     
     // Derived dirty state
     let dirty = $derived.by(() => {
-        const s = settings;
-        const o = savedSettings;
-        return s.targetCalories != o.targetCalories ||
-               Math.abs(s.macroRatios.protein - o.macroRatios.protein) > 0.001 ||
-               Math.abs(s.macroRatios.fat - o.macroRatios.fat) > 0.001 ||
-               Math.abs(s.macroRatios.carbs - o.macroRatios.carbs) > 0.001 ||
-               s.fiberTarget !== o.fiberTarget ||
-               s.sodiumTarget !== o.sodiumTarget ||
-               s.showHealthMetrics !== o.showHealthMetrics;
+        return JSON.stringify(settings) !== JSON.stringify(savedSettings);
     });
 
     // Subscribe to store
@@ -64,9 +62,6 @@
         const oldVal = settings.macroRatios[type];
         const delta = newVal - oldVal;
         
-        // Constants for precision
-        const PRECISION = 10000;
-
         if (delta === 0) return;
 
         // Clone ratios
@@ -159,7 +154,7 @@
         <button class="icon-btn back-btn" onclick={() => goto(`${base}/`)}>
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
         </button>
-        <h1>Macro Goals</h1>
+        <h1>Goals & Targets</h1>
         <div class="actions-right">
             <button class="ghost-btn icon-only" onclick={() => goto(`${base}/switcher`)} aria-label="Switch User">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
@@ -179,8 +174,6 @@
                     onCaloriesChange={handleUpdateCalories}
                 />
             </div>
-            
-            <!-- Removed redundant daily target input row -->
         </div>
 
 
@@ -310,41 +303,260 @@
             </div>
         </div>
 
-        <div class="health-targets-section glass-panel">
+        <div class="health-targets-section">
             <h2 class="section-title">Health Targets</h2>
-            <div class="target-row">
-                <div class="label-group">
-                    <span class="target-name">Fiber Goal</span>
-                    <span class="target-desc">Daily minimum (g)</span>
+            
+            <div class="health-grid">
+                <!-- Fiber -->
+                <div class="macro-card glass-panel" style="--accent: #43e97b; opacity: {settings.fiberGoal.enabled ? 1 : 0.5}">
+                    <div class="macro-header">
+                        <label class="switch-sm">
+                            <input type="checkbox" bind:checked={settings.fiberGoal.enabled}>
+                            <span class="toggle-slider round"></span>
+                        </label>
+                        <div class="label-group">
+                            <span class="macro-name">Fiber</span>
+                            <span class="macro-desc">Target: {Math.round(settings.targetCalories / 1000 * settings.fiberGoal.value)}g</span>
+                        </div>
+                        <div class="values">
+                             <div class="input-group">
+                                <input 
+                                    type="number" 
+                                    class="bare-input pct-input val-input" 
+                                    bind:value={settings.fiberGoal.value}
+                                />
+                                <span class="suffix-sm">g/1k</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="slider-container">
+                        <input 
+                            type="range" 
+                            min="0" 
+                            max="50" 
+                            bind:value={settings.fiberGoal.value}
+                            class="custom-slider fiber-slider"
+                        />
+                    </div>
                 </div>
-                <div class="input-group">
-                    <input 
-                        type="number" 
-                        class="bare-input target-input" 
-                        bind:value={settings.fiberTarget}
-                    />
-                    <span class="suffix-sm">g</span>
+
+                <!-- Sugar -->
+                <div class="macro-card glass-panel" style="--accent: #f6d365; opacity: {settings.sugarLimit.enabled ? 1 : 0.5}">
+                    <div class="macro-header">
+                        <label class="switch-sm">
+                            <input type="checkbox" bind:checked={settings.sugarLimit.enabled}>
+                            <span class="toggle-slider round"></span>
+                        </label>
+                        <div class="label-group">
+                            <span class="macro-name">Total Sugar</span>
+                            <span class="macro-desc">Limit: {Math.round(settings.targetCalories / 1000 * settings.sugarLimit.value)}g</span>
+                        </div>
+                        <div class="values">
+                             <div class="input-group">
+                                <input 
+                                    type="number" 
+                                    class="bare-input pct-input val-input" 
+                                    bind:value={settings.sugarLimit.value}
+                                />
+                                <span class="suffix-sm">g/1k</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="slider-container">
+                        <input 
+                            type="range" 
+                            min="0" 
+                            max="100" 
+                            bind:value={settings.sugarLimit.value}
+                            class="custom-slider sugar-slider"
+                        />
+                    </div>
+                </div>
+
+                 <!-- Added Sugar -->
+                 <div class="macro-card glass-panel" style="--accent: #fda085; opacity: {settings.addedSugarLimit.enabled ? 1 : 0.5}">
+                    <div class="macro-header">
+                        <label class="switch-sm">
+                            <input type="checkbox" bind:checked={settings.addedSugarLimit.enabled}>
+                            <span class="toggle-slider round"></span>
+                        </label>
+                        <div class="label-group">
+                            <span class="macro-name">Added Sugar</span>
+                            <span class="macro-desc">Limit: {Math.round(settings.targetCalories / 1000 * settings.addedSugarLimit.value)}g</span>
+                        </div>
+                        <div class="values">
+                             <div class="input-group">
+                                <input 
+                                    type="number" 
+                                    class="bare-input pct-input val-input" 
+                                    bind:value={settings.addedSugarLimit.value}
+                                />
+                                <span class="suffix-sm">g/1k</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="slider-container">
+                        <input 
+                            type="range" 
+                            min="0" 
+                            max="50" 
+                            bind:value={settings.addedSugarLimit.value}
+                            class="custom-slider sugar-slider"
+                        />
+                    </div>
+                </div>
+
+                <!-- Sat Fat -->
+                <div class="macro-card glass-panel" style="--accent: #ff416c; opacity: {settings.satFatLimit.enabled ? 1 : 0.5}">
+                    <div class="macro-header">
+                        <label class="switch-sm">
+                            <input type="checkbox" bind:checked={settings.satFatLimit.enabled}>
+                            <span class="toggle-slider round"></span>
+                        </label>
+                        <div class="label-group">
+                            <span class="macro-name">Saturated Fat</span>
+                            <span class="macro-desc">Limit: {Math.round(settings.targetCalories / 1000 * settings.satFatLimit.value)}g</span>
+                        </div>
+                        <div class="values">
+                             <div class="input-group">
+                                <input 
+                                    type="number" 
+                                    class="bare-input pct-input val-input" 
+                                    bind:value={settings.satFatLimit.value}
+                                />
+                                <span class="suffix-sm">g/1k</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="slider-container">
+                        <input 
+                            type="range" 
+                            min="0" 
+                            max="50" 
+                            bind:value={settings.satFatLimit.value}
+                            class="custom-slider fat-slider"
+                        />
+                    </div>
+                </div>
+
+                <!-- Trans Fat -->
+                <div class="macro-card glass-panel" style="--accent: #ff4b2b; opacity: {settings.transFatLimit.enabled ? 1 : 0.5}">
+                    <div class="macro-header">
+                        <label class="switch-sm">
+                            <input type="checkbox" bind:checked={settings.transFatLimit.enabled}>
+                            <span class="toggle-slider round"></span>
+                        </label>
+                        <div class="label-group">
+                            <span class="macro-name">Trans Fat</span>
+                            <span class="macro-desc">Limit: {Math.round(settings.targetCalories / 1000 * settings.transFatLimit.value)}g</span>
+                        </div>
+                        <div class="values">
+                             <div class="input-group">
+                                <input 
+                                    type="number" 
+                                    class="bare-input pct-input val-input" 
+                                    bind:value={settings.transFatLimit.value}
+                                />
+                                <span class="suffix-sm">g/1k</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="slider-container">
+                        <input 
+                            type="range" 
+                            min="0" 
+                            max="10" 
+                            step="0.1"
+                            bind:value={settings.transFatLimit.value}
+                            class="custom-slider fat-slider"
+                        />
+                    </div>
+                </div>
+
+                <!-- Cholesterol -->
+                <div class="macro-card glass-panel" style="--accent: #fda085; opacity: {settings.cholesterolLimit.enabled ? 1 : 0.5}">
+                    <div class="macro-header">
+                        <label class="switch-sm">
+                            <input type="checkbox" bind:checked={settings.cholesterolLimit.enabled}>
+                            <span class="toggle-slider round"></span>
+                        </label>
+                        <div class="label-group">
+                            <span class="macro-name">Cholesterol</span>
+                            <span class="macro-desc">Limit: {Math.round(settings.targetCalories / 1000 * settings.cholesterolLimit.value)}mg</span>
+                        </div>
+                        <div class="values">
+                             <div class="input-group">
+                                <input 
+                                    type="number" 
+                                    class="bare-input pct-input val-input" 
+                                    bind:value={settings.cholesterolLimit.value}
+                                />
+                                <span class="suffix-sm">mg/1k</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="slider-container">
+                        <input 
+                            type="range" 
+                            min="0" 
+                            max="1000" 
+                            step="10"
+                            bind:value={settings.cholesterolLimit.value}
+                            class="custom-slider fat-slider"
+                        />
+                    </div>
+                </div>
+
+                <!-- Sodium -->
+                <div class="macro-card glass-panel" style="--accent: #ffca28; opacity: {settings.sodiumGoal.enabled ? 1 : 0.5}">
+                    <div class="macro-header">
+                        <label class="switch-sm">
+                            <input type="checkbox" bind:checked={settings.sodiumGoal.enabled}>
+                            <span class="toggle-slider round"></span>
+                        </label>
+                        <div class="label-group">
+                            <span class="macro-name">Sodium</span>
+                            <span class="macro-desc">Range: {settings.sodiumGoal.min} - {settings.sodiumGoal.max}mg</span>
+                        </div>
+                        <div class="values">
+                             <div class="input-group">
+                                <input 
+                                    type="number" 
+                                    class="bare-input gram-input sodium-input" 
+                                    bind:value={settings.sodiumGoal.min}
+                                />
+                                <span class="suffix-sm">-</span>
+                                <input 
+                                    type="number" 
+                                    class="bare-input gram-input sodium-input" 
+                                    bind:value={settings.sodiumGoal.max}
+                                />
+                                <span class="suffix-sm">mg</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="slider-container">
+                        <RangeSlider 
+                            bind:min={settings.sodiumGoal.min} 
+                            bind:max={settings.sodiumGoal.max} 
+                            rangeMin={0} 
+                            rangeMax={5000} 
+                            step={50}
+                            accentColor="#ffca28"
+                            onchange={(min, max) => {
+                                settings.sodiumGoal.min = min;
+                                settings.sodiumGoal.max = max;
+                            }}
+                        />
+                    </div>
                 </div>
             </div>
-            <div class="target-row">
-                <div class="label-group">
-                    <span class="target-name">Sodium Limit</span>
-                    <span class="target-desc">Daily maximum (mg)</span>
-                </div>
-                <div class="input-group">
-                    <input 
-                        type="number" 
-                        class="bare-input target-input" 
-                        bind:value={settings.sodiumTarget}
-                    />
-                    <span class="suffix-sm">mg</span>
-                </div>
-            </div>
-            <div class="toggle-row">
+
+            <div class="toggle-row glass-panel">
                 <span class="target-name">Show on Dashboard</span>
                 <label class="switch">
                     <input type="checkbox" bind:checked={settings.showHealthMetrics}>
-                    <span class="slider round"></span>
+                    <span class="toggle-slider round"></span>
                 </label>
             </div>
         </div>
@@ -354,21 +566,16 @@
         <button class="save-btn" disabled={!dirty} onclick={save}>
             Save Changes
         </button>
-        <div style="display:none;" data-testid="debug-state">
-            Dirty: {dirty}
-            DiffCals: {settings.targetCalories - (savedSettings?.targetCalories || 0)}
-            DiffP: {settings.macroRatios.protein - (savedSettings?.macroRatios.protein || 0)}
-        </div>
     </div>
 </div>
 
 <style>
     .settings-page {
-        padding: 10px; /* Reduced from 20px */
+        padding: 10px;
         max-width: 800px;
         margin: 0 auto;
         color: white;
-        padding-bottom: 80px; /* Reduced from 100px */
+        padding-bottom: 80px;
         min-height: 100vh;
     }
     
@@ -376,7 +583,7 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 20px; /* Reduced from 30px */
+        margin-bottom: 20px;
     }
     
     .header h1 {
@@ -418,38 +625,47 @@
     .content-grid {
         display: grid;
         grid-template-columns: 1fr;
-        gap: 15px; /* Reduced from 20px */
+        gap: 15px;
     }
-
-    /* ... media query unchanged ... */
 
     .glass-panel {
         background: rgba(255, 255, 255, 0.05);
         backdrop-filter: blur(10px);
         border: 1px solid rgba(255, 255, 255, 0.1);
         border-radius: 20px;
-        padding: 15px; /* Reduced from 20px */
+        padding: 15px;
     }
 
     .chart-section {
         display: flex;
         flex-direction: column;
         align-items: center;
-        gap: 15px; /* Reduced from 20px */
+        gap: 15px;
     }
     
     /* Sliders Section */
     .sliders-section {
         display: flex;
         flex-direction: column;
-        gap: 12px; /* Reduced from 16px */
+        gap: 12px;
     }
 
-    /* Health Targets Section */
     .health-targets-section {
         display: flex;
         flex-direction: column;
         gap: 15px;
+    }
+
+    .health-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+
+    @media (min-width: 768px) {
+        .health-grid {
+            grid-template-columns: 1fr 1fr;
+        }
     }
     
     .section-title {
@@ -458,28 +674,9 @@
         margin-bottom: 5px;
     }
 
-    .target-row {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-
     .target-name {
         font-weight: 700;
         font-size: 1rem;
-    }
-
-    .target-desc {
-        font-size: 0.75rem;
-        color: rgba(255,255,255,0.5);
-    }
-
-    .target-input {
-        background: rgba(255,255,255,0.05);
-        padding: 4px 8px;
-        border-radius: 6px;
-        width: 6ch;
-        text-align: center;
     }
 
     /* Toggle Switch */
@@ -487,25 +684,29 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding-top: 10px;
-        border-top: 1px solid rgba(255,255,255,0.05);
+        padding: 15px;
         margin-top: 5px;
     }
 
-    .switch {
+    .switch, .switch-sm {
         position: relative;
         display: inline-block;
         width: 44px;
         height: 24px;
     }
 
-    .switch input { 
+    .switch-sm {
+        width: 32px;
+        height: 18px;
+    }
+
+    .switch input, .switch-sm input { 
         opacity: 0;
         width: 0;
         height: 0;
     }
 
-    .slider {
+    .toggle-slider {
         position: absolute;
         cursor: pointer;
         top: 0;
@@ -516,7 +717,7 @@
         transition: .4s;
     }
 
-    .slider:before {
+    .toggle-slider:before {
         position: absolute;
         content: "";
         height: 18px;
@@ -527,42 +728,58 @@
         transition: .4s;
     }
 
-    input:checked + .slider {
-        background-color: var(--color-primary, #ff4d4d);
+    .switch-sm .toggle-slider:before {
+        height: 12px;
+        width: 12px;
+        left: 3px;
+        bottom: 3px;
     }
 
-    input:focus + .slider {
-        box-shadow: 0 0 1px var(--color-primary, #ff4d4d);
+    input:checked + .toggle-slider {
+        background-color: var(--accent, #ff4d4d);
     }
 
-    input:checked + .slider:before {
+    input:checked + .toggle-slider:before {
         transform: translateX(20px);
     }
 
-    .slider.round {
+    .switch-sm input:checked + .toggle-slider:before {
+        transform: translateX(14px);
+    }
+
+    .toggle-slider.round {
         border-radius: 24px;
     }
 
-    .slider.round:before {
+    .toggle-slider.round:before {
         border-radius: 50%;
     }
     
     .macro-card {
         display: flex;
         flex-direction: column;
-        gap: 10px; /* Reduced from 15px */
+        gap: 10px;
+        transition: opacity 0.3s;
     }
     
     .macro-header {
         display: flex;
         align-items: center;
-        gap: 10px; /* Reduced from 12px */
+        gap: 10px;
     }
     
     .icon-badge {
-        width: 32px; /* Reduced from 40px */
+        width: 32px;
         height: 32px;
         font-size: 1rem;
+        flex-shrink: 0;
+        background: var(--accent);
+        color: black;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 800;
     }
     
     .label-group {
@@ -573,7 +790,7 @@
     
     .macro-name {
         font-weight: 700;
-        font-size: 1.1rem;
+        font-size: 1rem;
     }
     
     .macro-desc {
@@ -603,7 +820,6 @@
         text-align: right;
         padding: 0;
         width: 3ch;
-        /* -moz-appearance: textfield; */
     }
     
     .bare-input:focus {
@@ -616,6 +832,10 @@
         color: var(--accent);
         font-weight: 800;
     }
+
+    .val-input {
+        width: 4ch;
+    }
     
     .gram-input {
         font-size: 0.85rem;
@@ -625,6 +845,10 @@
         border-radius: 4px;
         width: 5ch;
         text-align: center;
+    }
+
+    .sodium-input {
+        width: 6ch;
     }
     
     .gram-input:focus {
@@ -654,14 +878,14 @@
         padding: 5px 0;
         display: flex;
         align-items: center;
-        height: 30px; /* Ensure space for thumb */
+        height: 30px;
     }
     
     .custom-slider {
         -webkit-appearance: none;
         appearance: none;
         width: 100%;
-        background: transparent; /* Track handles background */
+        background: transparent;
         outline: none;
         cursor: pointer;
     }
@@ -674,15 +898,11 @@
         background: rgba(255,255,255,0.1);
     }
     
-    .protein-slider::-webkit-slider-runnable-track {
-        background: linear-gradient(90deg, #ff4d4d 0%, rgba(255,77,77,0.2) 100%);
-    }
-    .fat-slider::-webkit-slider-runnable-track {
-        background: linear-gradient(90deg, #ffca28 0%, rgba(255,202,40,0.2) 100%);
-    }
-    .carbs-slider::-webkit-slider-runnable-track {
-        background: linear-gradient(90deg, #00e5ff 0%, rgba(0,229,255,0.2) 100%);
-    }
+    .protein-slider::-webkit-slider-runnable-track { background: linear-gradient(90deg, #ff4d4d 0%, rgba(255,77,77,0.2) 100%); }
+    .fat-slider::-webkit-slider-runnable-track { background: linear-gradient(90deg, #ffca28 0%, rgba(255,202,40,0.2) 100%); }
+    .carbs-slider::-webkit-slider-runnable-track { background: linear-gradient(90deg, #00e5ff 0%, rgba(0,229,255,0.2) 100%); }
+    .fiber-slider::-webkit-slider-runnable-track { background: linear-gradient(90deg, #43e97b 0%, rgba(67,233,123,0.2) 100%); }
+    .sugar-slider::-webkit-slider-runnable-track { background: linear-gradient(90deg, #f6d365 0%, rgba(246,211,101,0.2) 100%); }
     
     /* Thumb Styling */
     .custom-slider::-webkit-slider-thumb {
@@ -694,7 +914,7 @@
         background: white;
         cursor: pointer;
         box-shadow: 0 0 10px var(--accent);
-        margin-top: -8px; /* (8px track - 24px thumb) / 2 = -8px */
+        margin-top: -8px;
         border: 2px solid var(--accent);
         background-clip: padding-box;
     }
@@ -709,6 +929,8 @@
     .protein-slider::-moz-range-track { background: linear-gradient(90deg, #ff4d4d 0%, rgba(255,77,77,0.2) 100%); }
     .fat-slider::-moz-range-track { background: linear-gradient(90deg, #ffca28 0%, rgba(255,202,40,0.2) 100%); }
     .carbs-slider::-moz-range-track { background: linear-gradient(90deg, #00e5ff 0%, rgba(0,229,255,0.2) 100%); }
+    .fiber-slider::-moz-range-track { background: linear-gradient(90deg, #43e97b 0%, rgba(67,233,123,0.2) 100%); }
+    .sugar-slider::-moz-range-track { background: linear-gradient(90deg, #f6d365 0%, rgba(246,211,101,0.2) 100%); }
 
     .custom-slider::-moz-range-thumb {
         width: 24px;
@@ -729,7 +951,7 @@
         display: flex;
         justify-content: center;
         background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
-        pointer-events: none; /* Let clicks pass through transparent top */
+        pointer-events: none;
         z-index: 1000;
     }
     

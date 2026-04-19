@@ -112,7 +112,7 @@
         <div class="detail-list">
             <NutrientInput 
                 layout="horizontal"
-                label="🌾 Fiber" 
+                label="Fiber" 
                 value={metrics.details?.fiber} 
                 onupdate={(v) => updateDetail('carbs', 'fiber', v)}
                 readonly={readOnly}
@@ -195,7 +195,7 @@
           <div class="detail-list">
              <NutrientInput 
                 layout="horizontal"
-                label="🧂 Sodium" 
+                label="Sodium" 
                 unit="mg"
                 value={metrics.details?.sodium} 
                 onupdate={(v) => updateDetail(null, 'sodium', v)}

@@ -70,7 +70,14 @@ interface DailyStats {
   totalProtein: number;
   totalFat: number;
   totalCarbs: number;
+  // Sub-categories
   totalFiber: number;
+  totalSugar: number;
+  totalAddedSugar: number;
+  totalSaturatedFat: number;
+  totalTransFat: number;
+  totalCholesterol: number;
+  // Micros
   totalSodium: number;
 }
 
@@ -120,7 +127,6 @@ const applyEventToState = (state: any, event: FoodEvent) => {
       const entry = event.payload.entry as LogEntry;
 
       // Idempotency Check: using business ID (entry.id)
-      // Idempotency Check: using business ID (entry.id)
       if (state.log.some((e: LogEntry) => e.id === entry.id)) {
         return;
       }
@@ -145,6 +151,11 @@ const applyEventToState = (state: any, event: FoodEvent) => {
           totalFat: 0,
           totalCarbs: 0,
           totalFiber: 0,
+          totalSugar: 0,
+          totalAddedSugar: 0,
+          totalSaturatedFat: 0,
+          totalTransFat: 0,
+          totalCholesterol: 0,
           totalSodium: 0
         };
       }
@@ -154,6 +165,11 @@ const applyEventToState = (state: any, event: FoodEvent) => {
       stat.totalFat += sanitizedEntry.fat;
       stat.totalCarbs += sanitizedEntry.carbs;
       stat.totalFiber += Number(sanitizedEntry.details?.fiber || 0);
+      stat.totalSugar += Number(sanitizedEntry.details?.sugar || 0);
+      stat.totalAddedSugar += Number(sanitizedEntry.details?.addedSugar || 0);
+      stat.totalSaturatedFat += Number(sanitizedEntry.details?.saturatedFat || 0);
+      stat.totalTransFat += Number(sanitizedEntry.details?.transFat || 0);
+      stat.totalCholesterol += Number(sanitizedEntry.details?.cholesterol || 0);
       stat.totalSodium += Number(sanitizedEntry.details?.sodium || 0);
       break;
     }
@@ -172,6 +188,11 @@ const applyEventToState = (state: any, event: FoodEvent) => {
           stat.totalFat -= Number(oldEntry.fat || 0);
           stat.totalCarbs -= Number(oldEntry.carbs || 0);
           stat.totalFiber -= Number(oldEntry.details?.fiber || 0);
+          stat.totalSugar -= Number(oldEntry.details?.sugar || 0);
+          stat.totalAddedSugar -= Number(oldEntry.details?.addedSugar || 0);
+          stat.totalSaturatedFat -= Number(oldEntry.details?.saturatedFat || 0);
+          stat.totalTransFat -= Number(oldEntry.details?.transFat || 0);
+          stat.totalCholesterol -= Number(oldEntry.details?.cholesterol || 0);
           stat.totalSodium -= Number(oldEntry.details?.sodium || 0);
         }
 
@@ -195,6 +216,11 @@ const applyEventToState = (state: any, event: FoodEvent) => {
             totalFat: 0,
             totalCarbs: 0,
             totalFiber: 0,
+            totalSugar: 0,
+            totalAddedSugar: 0,
+            totalSaturatedFat: 0,
+            totalTransFat: 0,
+            totalCholesterol: 0,
             totalSodium: 0
           };
         }
@@ -204,6 +230,11 @@ const applyEventToState = (state: any, event: FoodEvent) => {
         stat.totalFat += Number(newEntry.fat || 0);
         stat.totalCarbs += Number(newEntry.carbs || 0);
         stat.totalFiber += Number(newEntry.details?.fiber || 0);
+        stat.totalSugar += Number(newEntry.details?.sugar || 0);
+        stat.totalAddedSugar += Number(newEntry.details?.addedSugar || 0);
+        stat.totalSaturatedFat += Number(newEntry.details?.saturatedFat || 0);
+        stat.totalTransFat += Number(newEntry.details?.transFat || 0);
+        stat.totalCholesterol += Number(newEntry.details?.cholesterol || 0);
         stat.totalSodium += Number(newEntry.details?.sodium || 0);
       }
       break;
@@ -222,6 +253,11 @@ const applyEventToState = (state: any, event: FoodEvent) => {
           stat.totalFat -= Number(entry.fat || 0);
           stat.totalCarbs -= Number(entry.carbs || 0);
           stat.totalFiber -= Number(entry.details?.fiber || 0);
+          stat.totalSugar -= Number(entry.details?.sugar || 0);
+          stat.totalAddedSugar -= Number(entry.details?.addedSugar || 0);
+          stat.totalSaturatedFat -= Number(entry.details?.saturatedFat || 0);
+          stat.totalTransFat -= Number(entry.details?.transFat || 0);
+          stat.totalCholesterol -= Number(entry.details?.cholesterol || 0);
           stat.totalSodium -= Number(entry.details?.sodium || 0);
         }
 
@@ -335,11 +371,29 @@ export interface MacroRatios {
   carbs: number;   // 0.0 - 1.0
 }
 
+export interface SubCategoryGoal {
+  value: number; // units per 1000 kcal
+  enabled: boolean;
+}
+
+export interface MicroGoal {
+  min: number;
+  max: number;
+  enabled: boolean;
+}
+
 export interface SettingsState {
   targetCalories: number;
   macroRatios: MacroRatios;
-  fiberTarget: number;
-  sodiumTarget: number;
+  // Sub-categories (Units/1000kcal)
+  fiberGoal: SubCategoryGoal;
+  sugarLimit: SubCategoryGoal;
+  addedSugarLimit: SubCategoryGoal;
+  satFatLimit: SubCategoryGoal;
+  transFatLimit: SubCategoryGoal;
+  cholesterolLimit: SubCategoryGoal;
+  // Micros (Range)
+  sodiumGoal: MicroGoal;
   showHealthMetrics: boolean;
 }
 
@@ -350,8 +404,13 @@ const initialSettings: SettingsState = {
     fat: 0.35,    // 35%
     carbs: 0.35   // 35%
   },
-  fiberTarget: 25,
-  sodiumTarget: 2300,
+  fiberGoal: { value: 14, enabled: true },
+  sugarLimit: { value: 30, enabled: false },
+  addedSugarLimit: { value: 10, enabled: false },
+  satFatLimit: { value: 10, enabled: false },
+  transFatLimit: { value: 0, enabled: false },
+  cholesterolLimit: { value: 150, enabled: false },
+  sodiumGoal: { min: 1500, max: 2300, enabled: true },
   showHealthMetrics: true
 };
 
@@ -360,11 +419,7 @@ const settingsSlice = createSlice({
   initialState: initialSettings,
   reducers: {
     updateGoals: (state, action: PayloadAction<SettingsState>) => {
-      state.targetCalories = action.payload.targetCalories;
-      state.macroRatios = action.payload.macroRatios;
-      state.fiberTarget = action.payload.fiberTarget;
-      state.sodiumTarget = action.payload.sodiumTarget;
-      state.showHealthMetrics = action.payload.showHealthMetrics;
+      return { ...state, ...action.payload };
     }
   }
 });
