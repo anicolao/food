@@ -52,6 +52,6 @@ export default defineConfig({
     timeout: 60000, // Increase failure timeout for CI
     expect: {
         timeout: 5000, // Shorten assertion timeout
-        toHaveScreenshot: { maxDiffPixelRatio: 0.05 }
+        toHaveScreenshot: { maxDiffPixels: 0 }
     }
 });
