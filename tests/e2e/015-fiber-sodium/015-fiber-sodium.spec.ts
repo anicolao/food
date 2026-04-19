@@ -135,8 +135,9 @@ test('US-015: Fiber and Sodium tracking', async ({ page }, testInfo) => {
     
     // Expand details to verify emojis
     await page.locator('.icon-toggle').click();
-    await page.waitForTimeout(500);
+    await page.waitForTimeout(1000);
     
+    await expect(page.getByText('Sugar', { exact: true })).toBeVisible();
     await tester.step('nutrition-form-icons', {
         description: 'Nutrition form shows fiber and sodium icons',
         verifications: [
