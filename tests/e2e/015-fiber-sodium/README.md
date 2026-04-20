@@ -6,7 +6,9 @@
 
 **Verifications:**
 - [x] Fiber input updated
+- [x] Fiber goal enabled
 - [x] Sodium limit input updated
+- [x] Sodium goal enabled
 - [x] Dashboard toggle enabled
 
 ---
