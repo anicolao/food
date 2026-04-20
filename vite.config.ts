@@ -29,8 +29,8 @@ export default defineConfig({
 	plugins: [sveltekit()],
 	define: {
 		'import.meta.env.VITE_APP_VERSION': JSON.stringify(pkg.version),
-		'import.meta.env.VITE_APP_COMMIT_HASH': JSON.stringify(process.env.CI ? 'deadbee' : getGitHash()),
-		'import.meta.env.VITE_APP_BUILD_DATE': JSON.stringify(process.env.CI ? '2026-01-01T00:00:00.000Z' : new Date().toISOString()),
+		'import.meta.env.VITE_APP_COMMIT_HASH': JSON.stringify(getGitHash()),
+		'import.meta.env.VITE_APP_BUILD_DATE': JSON.stringify(new Date().toISOString()),
 		'import.meta.env.VITE_APP_DIRTY_FLAG': JSON.stringify(process.env.CI ? false : getGitDirty())
 	}
 });
