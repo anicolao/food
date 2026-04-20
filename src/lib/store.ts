@@ -405,7 +405,7 @@ const initialSettings: SettingsState = {
   transFatLimit: { value: 0, enabled: false },
   cholesterolLimit: { value: 150, enabled: false },
   sodiumGoal: { value: 2300, enabled: true },
-  showHealthMetrics: false
+  showHealthMetrics: true
 };
 
 const settingsSlice = createSlice({
