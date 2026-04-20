@@ -42,10 +42,9 @@ jobs:
           COMMIT_HASH: ${{ github.event.pull_request.head.sha || github.sha }}
 
 
-      - name: Upload Playwright report
+      - name: Upload updated snapshots
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: playwright-report
-          path: playwright-report/
-          retention-days: 30
+          name: updated-snapshots
+          path: tests/e2e/015-fiber-sodium/screenshots/
