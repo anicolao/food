@@ -132,9 +132,13 @@ function handleTokenResponse(response: any, onSuccess: (token: string) => void) 
     if (response.error) {
         console.error('[Auth] Token request failed:', response.error);
         signOut();
-        // Redirect to signin if silent refresh fails
-        // Use window.location as we are in a lib file and might not have router active or this is the safest full reset
-        window.location.href = `${base}/`;
+        
+        // Resolve any pending refresh promise with null
+        if (refreshResolver) {
+            refreshResolver(null);
+            refreshResolver = null;
+            refreshPromise = null;
+        }
         return;
     }
 
@@ -200,9 +204,22 @@ export function refreshAuth(): Promise<string | null> {
         console.log('Refreshing auth token...');
         refreshPromise = new Promise((resolve) => {
             refreshResolver = resolve;
+
+            // Add timeout to prevent hanging
+            setTimeout(() => {
+                if (refreshPromise) {
+                    console.warn('[Auth] Refresh timed out after 8s');
+                    signOut();
+                    if (refreshResolver) {
+                        refreshResolver(null);
+                        refreshResolver = null;
+                    }
+                    refreshPromise = null;
+                }
+            }, 8000);
         });
-        // prompt: '' is the key for silent refresh if user is already signed in
-        tokenClient.requestAccessToken({ prompt: '', scope: SCOPES });
+        // prompt: 'none' is the key for silent refresh if user is already signed in
+        tokenClient.requestAccessToken({ prompt: 'none', scope: SCOPES });
         return refreshPromise;
     }
 
