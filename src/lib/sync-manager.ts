@@ -2,6 +2,7 @@ import { getPendingEvents, markEventsSynced, addSyncedEvent, clearAllSyncedEvent
 import { appendRow, fetchRows, appendRows } from './sheets'; // We'll need to update sheets.ts to support batch append if we want true batching, or just loop for now
 import { store, processEvent, appendEvent, ingestSyncedEvent, type FoodEvent } from './store';
 import { get } from 'svelte/store';
+import { signOut } from './auth';
 
 // We need a way to check online status.
 // For now, we'll rely on navigator.onLine and window events in the UI/Layout to trigger this.
@@ -161,6 +162,7 @@ export const syncManager = {
                 // 403 / 401 usually mean Auth, which might need re-login.
                 if (errObj.status === 401 || errObj.status === 403) {
                     errorMessage = "Authentication Failed. Please sign in again.";
+                    signOut();
                 }
 
             } catch (jsonErr) {

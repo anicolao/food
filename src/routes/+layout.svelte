@@ -87,19 +87,6 @@
 		transitionsEnabled = true;
 	});
 
-    // Global click listener to ensure auth is fresh on user interaction
-    // This solves the issue of stale tokens on return without requiring a full reload or sign-out
-    $effect(() => {
-        const handleInteraction = () => {
-             ensureValidToken().catch(e => console.warn('[Auth] Background refresh failed', e));
-        };
-        document.addEventListener('click', handleInteraction, true); // Capture phase to likely happen first
-        
-        return () => {
-             document.removeEventListener('click', handleInteraction, true);
-        };
-    });
-
     // Handle history updates for direction calculation    // Handle history updates for direction calculation
     import { transitionSnapshots } from '$lib/transitions';
 
