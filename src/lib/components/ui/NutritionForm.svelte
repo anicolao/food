@@ -36,6 +36,9 @@
   let fiberGoalEnabled = $derived(settings.fiberGoal.enabled);
   let sodiumGoalEnabled = $derived(settings.sodiumGoal.enabled);
 
+  const reducedMotion = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const slideParams = { duration: reducedMotion ? 0 : 300 };
+
   // Subscribe to settings
   $effect(() => {
     const unsubscribe = store.subscribe(() => {
@@ -122,7 +125,7 @@
                 indent={true}
             />
             {#if showDetails}
-                <div transition:slide>
+                <div transition:slide={slideParams}>
                     <NutrientInput 
                         layout="horizontal"
                         label="Sugar" 
@@ -160,7 +163,7 @@
       </div>
       
       {#if showDetails}
-        <div class="detail-list" transition:slide>
+        <div class="detail-list" transition:slide={slideParams}>
             <NutrientInput 
                 layout="horizontal"
                 label="Saturated" 
@@ -193,7 +196,7 @@
   {#if showDetails || showHealthMetrics || sodiumGoalEnabled}
       <div class="other-section">
           {#if showDetails}
-            <div class="section-label" transition:slide>Micros & Other</div>
+            <div class="section-label" transition:slide={slideParams}>Micros & Other</div>
           {/if}
           <div class="detail-list">
              <NutrientInput 
@@ -205,7 +208,7 @@
                 readonly={readOnly}
             />
             {#if showDetails}
-                <div transition:slide>
+                <div transition:slide={slideParams}>
                     <NutrientInput 
                         layout="horizontal"
                         label="Potassium" 
