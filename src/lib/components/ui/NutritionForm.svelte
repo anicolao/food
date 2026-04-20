@@ -31,12 +31,15 @@
   let { metrics = $bindable(), readOnly = false }: Props = $props();
 
   let showDetails = $state(false);
-  let showHealthMetrics = $state(store.getState().settings.showHealthMetrics);
+  let settings = $state(store.getState().settings);
+  let showHealthMetrics = $derived(settings.showHealthMetrics);
+  let fiberGoalEnabled = $derived(settings.fiberGoal.enabled);
+  let sodiumGoalEnabled = $derived(settings.sodiumGoal.enabled);
 
-  // Subscribe to settings for showHealthMetrics
+  // Subscribe to settings
   $effect(() => {
     const unsubscribe = store.subscribe(() => {
-        showHealthMetrics = store.getState().settings.showHealthMetrics;
+        settings = store.getState().settings;
     });
     return unsubscribe;
   });
@@ -108,7 +111,7 @@
           />
       </div>
       
-      {#if showDetails || showHealthMetrics}
+      {#if showDetails || showHealthMetrics || fiberGoalEnabled}
         <div class="detail-list">
             <NutrientInput 
                 layout="horizontal"
@@ -187,7 +190,7 @@
       {/if}
   </div>
 
-  {#if showDetails || showHealthMetrics}
+  {#if showDetails || showHealthMetrics || sodiumGoalEnabled}
       <div class="other-section">
           {#if showDetails}
             <div class="section-label" transition:slide>Micros & Other</div>
