@@ -42,6 +42,13 @@ jobs:
           COMMIT_HASH: ${{ github.event.pull_request.head.sha || github.sha }}
 
 
+      - name: Upload updated snapshots
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: updated-snapshots
+          path: tests/e2e/**/screenshots/*.png
+
       - name: Upload Playwright report
         uses: actions/upload-artifact@v4
         if: always()
