@@ -7,6 +7,7 @@
 **Verifications:**
 - [x] Fiber input updated
 - [x] Sodium limit input updated
+- [x] Dashboard toggle enabled
 
 ---
 
@@ -22,19 +23,28 @@
 
 ---
 
-## Nutrition form shows fiber and sodium icons
+## Fiber and Sodium are visible before expanding details because health tracking is enabled
 
-![Nutrition form shows fiber and sodium icons](./screenshots/002-nutrition-form-icons.png)
+![Fiber and Sodium are visible before expanding details because health tracking is enabled](./screenshots/002-nutrition-form-pinned-metrics.png)
 
 **Verifications:**
-- [x] Fiber icon visible
-- [x] Sodium icon visible
+- [x] Fiber visible (pinned)
+- [x] Sodium visible (pinned)
+
+---
+
+## Nutrition form shows other icons after expansion
+
+![Nutrition form shows other icons after expansion](./screenshots/003-nutrition-form-icons.png)
+
+**Verifications:**
+- [x] Sugar visible
 
 ---
 
 ## Sodium bar reflects increase
 
-![Sodium bar reflects increase](./screenshots/003-dashboard-ramen-logged.png)
+![Sodium bar reflects increase](./screenshots/004-dashboard-ramen-logged.png)
 
 **Verifications:**
 - [x] Sodium value updated
@@ -44,7 +54,7 @@
 
 ## Sodium bar turns red when limit exceeded
 
-![Sodium bar turns red when limit exceeded](./screenshots/004-dashboard-limit-exceeded.png)
+![Sodium bar turns red when limit exceeded](./screenshots/005-dashboard-limit-exceeded.png)
 
 **Verifications:**
 - [x] Sodium total is 2300mg
@@ -54,7 +64,7 @@
 
 ## Sodium breakdown modal shows detailed logs
 
-![Sodium breakdown modal shows detailed logs](./screenshots/005-health-breakdown-modal.png)
+![Sodium breakdown modal shows detailed logs](./screenshots/006-health-breakdown-modal.png)
 
 **Verifications:**
 - [x] Modal is visible
