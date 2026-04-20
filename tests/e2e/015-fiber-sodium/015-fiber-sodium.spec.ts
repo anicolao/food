@@ -96,14 +96,18 @@ test('US-015: Fiber and Sodium tracking', async ({ page }, testInfo) => {
     const sodiumLimitInput = page.locator('.macro-card', { hasText: 'Sodium' }).locator('input[type="number"]').first();
     await sodiumLimitInput.fill('2000');
 
-    // Enable "Show on Dashboard"
-    await page.locator('.toggle-row', { hasText: 'Show on Dashboard' }).locator('.toggle-slider').click();
+    // Ensure "Show on Dashboard" is enabled
+    const dashboardToggle = page.locator('.toggle-row', { hasText: 'Show on Dashboard' }).locator('input[type="checkbox"]');
+    if (!(await dashboardToggle.isChecked())) {
+        await page.locator('.toggle-row', { hasText: 'Show on Dashboard' }).locator('.toggle-slider').click();
+    }
 
     await tester.step('settings-configured', {
         description: 'Health targets configured in settings',
         verifications: [
             { spec: 'Fiber input updated', check: async () => await expect(fiberInput).toHaveValue('35') },
-            { spec: 'Sodium limit input updated', check: async () => await expect(sodiumLimitInput).toHaveValue('2000') }
+            { spec: 'Sodium limit input updated', check: async () => await expect(sodiumLimitInput).toHaveValue('2000') },
+            { spec: 'Dashboard toggle enabled', check: async () => await expect(dashboardToggle).toBeChecked() }
         ]
     });
 
@@ -136,14 +140,22 @@ test('US-015: Fiber and Sodium tracking', async ({ page }, testInfo) => {
     // Wait for analysis
     await expect(page.getByLabel('Log Description')).toHaveValue('High Sodium Ramen');
     
-    // Expand details to verify emojis
+    // Verify Fiber and Sodium are pinned (visible BEFORE expanding details)
+    await tester.step('nutrition-form-pinned-metrics', {
+        description: 'Fiber and Sodium are visible before expanding details because health tracking is enabled',
+        verifications: [
+            { spec: 'Fiber visible (pinned)', check: async () => await expect(page.getByText('🌾 Fiber')).toBeVisible() },
+            { spec: 'Sodium visible (pinned)', check: async () => await expect(page.getByText('🧂 Sodium')).toBeVisible() }
+        ]
+    });
+
+    // Expand details to verify other fields
     await page.locator('.icon-toggle').click();
     await expect(page.getByText('Sugar', { exact: true })).toBeVisible();
     await tester.step('nutrition-form-icons', {
-        description: 'Nutrition form shows fiber and sodium icons',
+        description: 'Nutrition form shows other icons after expansion',
         verifications: [
-            { spec: 'Fiber icon visible', check: async () => await expect(page.getByText('🌾 Fiber')).toBeVisible() },
-            { spec: 'Sodium icon visible', check: async () => await expect(page.getByText('🧂 Sodium')).toBeVisible() }
+            { spec: 'Sugar visible', check: async () => await expect(page.getByText('Sugar', { exact: true })).toBeVisible() }
         ]
     });
 
