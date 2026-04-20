@@ -6,6 +6,8 @@ on:
 jobs:
   regenerate:
     runs-on: macos-latest
+    permissions:
+      contents: write
     if: github.ref != 'refs/heads/main' && github.ref != 'refs/heads/develop'
     steps:
       - name: Checkout repository
