@@ -78,7 +78,7 @@ export async function analyzeFood(inputs: { images?: ImageInput[], text?: string
     const token = await ensureValidToken();
     if (!token) throw new Error('User not authenticated for Gemini analysis');
 
-    const url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent';
+    const url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent';
 
     let prompt = SYSTEM_PROMPT;
 

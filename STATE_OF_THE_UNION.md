@@ -274,25 +274,19 @@ const spreadsheetId = state.config?.spreadsheetId;
 
 ## 7. Incomplete Features
 
-### 7.1 Image Generation Not Fully Implemented
-**Location:** `src/lib/gemini.ts:104-142`
-**Issue:** The `generateImageWithGemini()` function exists but is never called. It appears to be a work-in-progress feature for generating food images using Imagen.
-**Status:** Implemented but unused
-**Recommendation:** Either integrate this feature or remove the dead code.
-
-### 7.2 Google Photos Library API Partially Implemented
+### 7.1 Google Photos Library API Partially Implemented
 **Location:** `src/lib/google-photos.ts:99-135`
 **Issue:** `listLibraryItems()` function exists but is never called. The app only uses the picker API.
 **Status:** Implemented but unused
 **Recommendation:** Remove if not needed, or document for future use.
 
-### 7.3 Macro Visualization Not Hooked Up
+### 7.2 Macro Visualization Not Hooked Up
 **Location:** Settings page has complex macro adjustment logic but missing some features
 **Issue:** The donut chart interaction in settings works, but could be enhanced with better visual feedback.
 **Status:** Working but could be improved
 **Severity:** Very Low
 
-### 7.4 Debug/Test Code in Production
+### 7.3 Debug/Test Code in Production
 **Locations:**
 - `src/routes/+page.svelte:162-166` - CI-DEBUG console logs
 - `src/routes/+page.svelte:169` - `data-testid="debug-load"`
@@ -468,7 +462,7 @@ Despite the issues identified above, the codebase has several strengths:
 1. Fix authentication token revocation bug (§2.1)
 2. Add idempotency checks for all event types (§2.6)
 3. Implement error notifications for sheet sync failures (§4.1)
-4. Remove or gate debug code (§7.4)
+4. Remove or gate debug code (§7.3)
 5. Add GDPR compliance features (§13)
 
 ### Medium Priority (Fix Soon)
@@ -483,7 +477,7 @@ Despite the issues identified above, the codebase has several strengths:
 2. Refactor large components (§5.5)
 3. Add unit tests (§9.1)
 4. Implement image cache management (§6.4)
-5. Remove unused code (§7.1, §7.2)
+5. Remove unused code (§7.1)
 6. Add JSDoc documentation (§9.3)
 
 ### Nice-to-Have (Future Enhancements)
