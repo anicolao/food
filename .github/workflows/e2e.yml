@@ -2,9 +2,9 @@ name: E2E Tests
 
 on:
   push:
-    branches: [main, develop, feat/fiber-sodium-ui]
+    branches: [main, develop]
   pull_request:
-    branches: [main, develop, feat/fiber-sodium-ui]
+    branches: [main, develop]
 
 jobs:
   e2e-tests:
@@ -30,7 +30,7 @@ jobs:
 
       - name: Run Playwright tests
         id: playwright
-        run: npm run test:e2e:update-snapshots
+        run: npm run test:e2e
         env:
           CI: true
           # Provide dummy values for build/runtime to succeed
@@ -42,9 +42,10 @@ jobs:
           COMMIT_HASH: ${{ github.event.pull_request.head.sha || github.sha }}
 
 
-      - name: Upload updated snapshots
+      - name: Upload Playwright report
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: updated-snapshots
-          path: tests/e2e/015-fiber-sodium/screenshots/
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 30
