@@ -270,6 +270,7 @@
              {#if settings.showHealthMetrics}
                 <HealthSummary 
                     {stats}
+                    logs={visibleLogs}
                 />
              {/if}
              

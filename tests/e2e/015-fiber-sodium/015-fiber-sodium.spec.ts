@@ -96,6 +96,9 @@ test('US-015: Fiber and Sodium tracking', async ({ page }, testInfo) => {
     const sodiumLimitInput = page.locator('.macro-card', { hasText: 'Sodium' }).locator('input[type="number"]').first();
     await sodiumLimitInput.fill('2000');
 
+    // Enable "Show on Dashboard"
+    await page.locator('.toggle-row', { hasText: 'Show on Dashboard' }).locator('.toggle-slider').click();
+
     await tester.step('settings-configured', {
         description: 'Health targets configured in settings',
         verifications: [
