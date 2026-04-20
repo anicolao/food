@@ -132,15 +132,15 @@
         settings.targetCalories = cals;
     }
 
-    function save() {
+    async function save() {
         // Optimistically update saved state
         const snap = JSON.parse(JSON.stringify(settings));
         savedSettings = snap;
 
         try {
             // Pass plain object to Redux to avoid Svelte proxy conflicts
-            store.dispatch(dispatchEvent('settings/goalsUpdated', snap));
-            goto(`${base}/`);
+            await store.dispatch(dispatchEvent('settings/goalsUpdated', snap) as any);
+            await goto(`${base}/`);
         } catch (e) {
             console.error(e);
             toasts.error('Failed to save settings.');
