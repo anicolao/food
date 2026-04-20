@@ -215,5 +215,30 @@ test('US-015: Fiber and Sodium tracking', async ({ page }, testInfo) => {
         ]
     });
 
+    // 7. Verify Health Breakdown Modal
+    await sodiumBar.click();
+    
+    await tester.step('health-breakdown-modal', {
+        description: 'Sodium breakdown modal shows detailed logs',
+        verifications: [
+            { spec: 'Modal is visible', check: async () => await expect(page.getByRole('dialog')).toBeVisible() },
+            { spec: 'Modal title is correct', check: async () => await expect(page.getByRole('heading', { name: 'Sodium Breakdown' })).toBeVisible() },
+            { spec: 'First item is High Sodium Ramen (1800mg)', check: async () => {
+                const firstItem = page.locator('.modal-content .item').first();
+                await expect(firstItem.locator('.name')).toHaveText('High Sodium Ramen');
+                await expect(firstItem.locator('.amount')).toHaveText('1800');
+            }},
+            { spec: 'Second item is Another Ramen (500mg)', check: async () => {
+                const secondItem = page.locator('.modal-content .item').nth(1);
+                await expect(secondItem.locator('.name')).toHaveText('Another Ramen');
+                await expect(secondItem.locator('.amount')).toHaveText('500');
+            }}
+        ]
+    });
+
+    // Close modal
+    await page.locator('.modal-content .primary-btn').click();
+    await expect(page.getByRole('dialog')).not.toBeVisible();
+
     tester.generateDocs();
 });

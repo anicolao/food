@@ -15,7 +15,7 @@
     const filteredLogs = $derived(
         logs
             .map(log => ({
-                name: log.name || 'Unnamed Entry',
+                name: log.description || 'Unnamed Entry',
                 amount: Number(log.details?.[nutrientKey] || 0)
             }))
             .filter(item => item.amount > 0)

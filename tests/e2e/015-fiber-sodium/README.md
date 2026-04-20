@@ -52,3 +52,15 @@
 
 ---
 
+## Sodium breakdown modal shows detailed logs
+
+![Sodium breakdown modal shows detailed logs](./screenshots/005-health-breakdown-modal.png)
+
+**Verifications:**
+- [x] Modal is visible
+- [x] Modal title is correct
+- [x] First item is High Sodium Ramen (1800mg)
+- [x] Second item is Another Ramen (500mg)
+
+---
+
