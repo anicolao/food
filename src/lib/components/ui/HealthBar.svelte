@@ -22,8 +22,10 @@
         isLimit = false
     }: Props = $props();
 
+    const reducedMotion = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
     const displayedValue = tweened(value, {
-        duration: 800,
+        duration: reducedMotion ? 0 : 800,
         easing: cubicOut
     });
 
@@ -87,5 +89,11 @@
         border-radius: 5px;
         transition: width 0.3s ease-out;
         box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .bar-fill {
+            transition: none !important;
+        }
     }
 </style>
