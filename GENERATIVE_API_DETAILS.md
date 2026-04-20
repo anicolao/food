@@ -16,7 +16,7 @@ We use **Google OAuth 2.0** to obtain a strict, limited-scope access token direc
 ## API Usage
 
 ### 1. Nutrition Analysis (Gemini Flash)
-- **Endpoint:** `generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent`
+- **Endpoint:** `generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent`
 - **Method:** POST
 - **Data Sent:**
     - Your food image (Base64 encoded)
@@ -25,6 +25,15 @@ We use **Google OAuth 2.0** to obtain a strict, limited-scope access token direc
 - **Privacy Implication:** This request acts as a standard API call from your Google Account.
     - **Free Tier:** If you are using a standard free Google account, Google [may use this data to improve their models](https://ai.google.dev/gemini-api/terms).
     - **Paid/Enterprise:** If your account is covered by a Workspace Enterprise agreement or you have paid API billing enabled, data protections are stricter.
+
+### 2. Image Generation (Imagen 3)
+- **Endpoint:** `generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-001:predict`
+- **Method:** POST
+- **OAuth Scope:** `https://www.googleapis.com/auth/generative-language`
+- **Data Sent:**
+    - A text prompt describing the food.
+- **Privacy Implication:** Similar to Gemini Flash, usage is tied to your Google Account.
+
 
 
 
