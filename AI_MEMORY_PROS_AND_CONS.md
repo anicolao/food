@@ -36,4 +36,9 @@ Remove the scope request and the corresponding section from the Privacy Policy.
 2.  Remove the "Semantic Memory" section from `PRIVACY.md` and `/privacy`.
 3.  Remove the mention from `GENERATIVE_API_DETAILS.md`.
 
-This aligns with the goal of "Privacy First" and accurate documentation. We can revisit Option A as a dedicated feature release in the future.
+## Update (April 2026)
+We have now transitioned to the `generative-language` scope. While we still do not use the Retriever API for "Semantic Memory," this broader scope is required for:
+1. **Imagen 3 Image Generation:** High-quality food image generation via `imagen-3.0-generate-001`.
+2. **Gemini 1.5 Flash:** Nutritional analysis.
+
+The "Semantic Memory" (Retriever API) remains unimplemented for the reasons stated above, but the permission structure now supports our current AI features.

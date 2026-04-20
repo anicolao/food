@@ -33,19 +33,18 @@
     </section>
 
     <section>
-        <h2>2. Artificial Intelligence & Semantic Memory</h2>
-        <p>To estimate calories, Food Sheets uses the <strong>Google Gemini API</strong>.</p>
+        <h2>2. Artificial Intelligence</h2>
+        <p>To estimate calories and generate food images, Food Sheets uses the <strong>Google Gemini API</strong>.</p>
 
-        <h3>Image Analysis</h3>
-        <p>We utilize the <code>generative-language.retriever</code> permission scope to access the Gemini API.</p>
-        <p>When you select a food photo, it is sent to the Gemini API for analysis.</p>
+        <h3>Analysis & Generation</h3>
+        <p>We utilize the <code>generative-language</code> permission scope to access the Gemini API.</p>
         <ul>
+            <li><strong>Nutrition Analysis:</strong> When you select a food photo or enter a text description, it is sent to the Gemini API to estimate nutritional content.</li>
+            <li><strong>Image Generation:</strong> When you log food via text or voice, we use the Google Imagen 3 model to generate a high-quality, representative image of your meal for your personal logs.</li>
             <li><strong>Direct Connection:</strong> The app connects directly to Google's API using your personal credentials. No developer server sits in the middle.</li>
             <li><strong>Data Usage:</strong> Your data is subject to <a href="https://ai.google.dev/gemini-api/terms" target="_blank">Google's Gemini API Terms</a>. If you are using a standard free Google Account, Google may use anonymized data to improve their models.</li>
             <li><strong>Retention:</strong> Google may temporarily retain API logs for abuse monitoring.</li>
         </ul>
-
-
     </section>
 
     <section>

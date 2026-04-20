@@ -22,12 +22,13 @@ We use the system's native Photo Picker (`photospicker.mediaitems.readonly`).
 * **User-Initiated Only:** The application does not have general access to your camera roll. It can only process the specific images you explicitly tap to select for analysis.
 * **No Background Scanning:** We **cannot** scan or access your library in the background.
 
-## 2. Artificial Intelligence & Semantic Memory
+## 2. Artificial Intelligence
 
-To estimate calories, Food Sheets uses the **Google Gemini API**.
+To estimate calories and generate food images, Food Sheets uses the **Google Gemini API**.
 
-### Image Analysis
-When you select a food photo, it is sent to the Gemini API for analysis.
+### Analysis & Generation
+When you select a food photo or enter a text description, it is sent to the Gemini API to estimate nutritional content. When you log food via text or voice, we use the Google Imagen 3 model to generate a high-quality, representative image of your meal for your personal logs.
+
 * **Direct Connection:** The app connects directly to Google's API using your personal credentials. No developer server sits in the middle.
 * **Data Usage:** Your data is subject to [Google's Gemini API Terms](https://ai.google.dev/gemini-api/terms). If you are using a standard free Google Account, Google may use anonymized data to improve their models.
 * **Retention:** Google may temporarily retain API logs for abuse monitoring.
