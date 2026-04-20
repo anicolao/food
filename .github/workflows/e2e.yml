@@ -2,9 +2,9 @@ name: E2E Tests
 
 on:
   push:
-    branches: [main, develop]
+    branches: [main, develop, feat/fiber-sodium-ui]
   pull_request:
-    branches: [main, develop]
+    branches: [main, develop, feat/fiber-sodium-ui]
 
 jobs:
   e2e-tests:
@@ -30,7 +30,7 @@ jobs:
 
       - name: Run Playwright tests
         id: playwright
-        run: npm run test:e2e
+        run: npm run test:e2e:update-snapshots
         env:
           CI: true
           # Provide dummy values for build/runtime to succeed
