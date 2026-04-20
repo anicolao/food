@@ -40,52 +40,50 @@ test('013-detailed-nutrition: Log and Edit Detailed Nutrition', async ({ page })
             check: async () => {
                 await mockDriveAPI(page);
 
-                // Mock Gemini Analysis Response with details
-                await page.route('**/v1beta/models/gemini-2.5-flash:generateContent*', async route => {
-                    const json = {
-                        candidates: [{
-                            content: {
-                                parts: [{
-                                    text: JSON.stringify({
-                                        is_label: true,
-                                        item_name: "Detailed Salad",
-                                        rationale: "Rich in nutrients",
-                                        calories: 350,
-                                        protein: 15,
-                                        fat: { total: 20 },
-                                        carbohydrates: { total: 30 },
-                                        details: {
-                                            saturatedFat: 5,
-                                            transFat: 0,
-                                            cholesterol: 10,
-                                            sodium: 450,
-                                            fiber: 8,
-                                            sugar: 12,
-                                            addedSugar: 2,
-                                            caffeine: 0
-                                        },
-                                        searchQuery: "healthy salad"
-                                    })
+                // Mock Gemini Analysis and Image Generation
+                await page.route('**/v1beta/models/**', async route => {
+                    const url = route.request().url();
+                    if (url.includes('predict')) {
+                        // Imagen 3
+                        await route.fulfill({
+                            json: {
+                                predictions: [{
+                                    bytesBase64Encoded: "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=="
                                 }]
                             }
-                        }]
-                    };
-                    await route.fulfill({ json });
-                });
-
-                // Mock Wikimedia Search to return a valid local image
-                await page.route('**commons.wikimedia.org/w/api.php*', async route => {
-                    await route.fulfill({
-                        json: {
-                            query: {
-                                pages: {
-                                    '12345': {
-                                        imageinfo: [{ url: 'http://localhost:5174/mock-images/apple.png' }]
-                                    }
+                        });
+                    } else {
+                        // Gemini Flash
+                        const json = {
+                            candidates: [{
+                                content: {
+                                    parts: [{
+                                        text: JSON.stringify({
+                                            is_label: true,
+                                            item_name: "Detailed Salad",
+                                            rationale: "Rich in nutrients",
+                                            calories: 350,
+                                            protein: 15,
+                                            fat: { total: 20 },
+                                            carbohydrates: { total: 30 },
+                                            details: {
+                                                saturatedFat: 5,
+                                                transFat: 0,
+                                                cholesterol: 10,
+                                                sodium: 450,
+                                                fiber: 8,
+                                                sugar: 12,
+                                                addedSugar: 2,
+                                                caffeine: 0
+                                            },
+                                            searchQuery: "healthy salad"
+                                        })
+                                    }]
                                 }
-                            }
-                        }
-                    });
+                            }]
+                        };
+                        await route.fulfill({ json });
+                    }
                 });
             }
         }]

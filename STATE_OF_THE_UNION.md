@@ -94,7 +94,7 @@ async function addImage(file: File, triggerAnalysis: boolean = true, skipExif: b
 
 ### 2.8 Image URL Fallback Doesn't Handle All Cases
 **Location:** `src/routes/log/+page.svelte:393-401`
-**Issue:** When fetching representative images from Wikimedia fails, the code falls back to using the URL directly. However, CORS errors will prevent these images from loading in the browser.
+**Issue:** When fetching representative images from Gemini fails, the code falls back to using the URL directly. However, CORS errors will prevent these images from loading in the browser.
 **Severity:** Low
 **Impact:** Images might fail to display silently.
 **Recommendation:** Show a placeholder image or fallback UI when image fetch fails.
@@ -375,8 +375,7 @@ const spreadsheetId = state.config?.spreadsheetId;
 - **Google Drive API**: File storage
 - **Google Sheets API**: Event log storage
 - **Google Photos Picker API**: Photo selection
-- **Google Gemini API**: AI analysis
-- **Wikimedia Commons API**: Image search fallback
+- **Google Gemini API**: AI analysis and image generation
 
 **Observation:** Heavy reliance on Google ecosystem. This is appropriate given the application's design but creates vendor lock-in.
 **Risk:** If any Google API has downtime or changes, the app could break.

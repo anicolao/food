@@ -79,9 +79,22 @@ test('US-009: User logs food via Text and Voice', async ({ page, context }, test
             await geminiPromise;
 
             const reqBody = route.request().postDataJSON();
-            const tools = reqBody.tools;
 
-            // Handle Tool Use (Image Search)
+            // Handle Imagen 3 Image Generation
+            if (url.includes('imagen-3.0-generate-001:predict')) {
+                console.log('MOCKING IMAGEN 3 IMAGE GEN');
+                await route.fulfill({
+                    json: {
+                        predictions: [{
+                            bytesBase64Encoded: "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=="
+                        }]
+                    }
+                });
+                return;
+            }
+
+            // Handle Tool Use (Image Search) - Keep for compatibility if needed
+            const tools = reqBody.tools;
             if (tools && tools[0]?.googleSearch) {
                 console.log('MOCKING GEMINI IMAGE SEARCH');
                 await route.fulfill({
@@ -178,7 +191,7 @@ test('US-009: User logs food via Text and Voice', async ({ page, context }, test
     await expect(page.getByLabel('Log Description')).toHaveValue('Apple');
     await expect(page.getByLabel('Calories')).toHaveValue('95');
 
-    // Check if image preview is the mock placeholder (from searchFoodImage)
+    // Check if image preview is the mock placeholder (from generateImageWithGemini)
     await expect(page.locator('img.sheet-thumb')).toBeVisible();
 
     // Close sheet to reset

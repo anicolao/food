@@ -1,7 +1,6 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import { analyzeFood, type NutritionEstimate } from "$lib/gemini";
-  import { searchFoodImage } from "$lib/image-search";
+  import { analyzeFood, generateImageWithGemini, type NutritionEstimate } from "$lib/gemini";
   import { uploadImage, type GoogleDriveFile } from "$lib/sheets";
   import {
     dispatchEvent,
@@ -501,7 +500,7 @@
 
       // 2. Fetch Representative Image
       if (result.searchQuery) {
-        const imageUrl = await searchFoodImage(result.searchQuery);
+        const imageUrl = await generateImageWithGemini(result.searchQuery);
 
         if (!imageUrl) {
           console.log("No representative image found.");
