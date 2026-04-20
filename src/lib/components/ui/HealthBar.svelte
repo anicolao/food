@@ -10,6 +10,7 @@
         gradientStart: string;
         gradientEnd: string;
         isLimit?: boolean; // If true, turning red when over target (Sodium)
+        onclick?: () => void;
     }
 
     let {
@@ -19,7 +20,8 @@
         unit,
         gradientStart,
         gradientEnd,
-        isLimit = false
+        isLimit = false,
+        onclick
     }: Props = $props();
 
     const reducedMotion = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -37,7 +39,13 @@
     const isOverLimit = $derived(isLimit && value > target);
 </script>
 
-<div class="health-bar-container">
+<!-- svelte-ignore a11y_click_events_have_key_events -->
+<!-- svelte-ignore a11y_no_static_element_interactions -->
+<div 
+    class="health-bar-container" 
+    class:clickable={!!onclick}
+    {onclick}
+>
     <div class="header">
         <span class="label">{label}</span>
         <span class="value">{Math.round($displayedValue)} / {target}{unit}</span>
@@ -54,6 +62,14 @@
     .health-bar-container {
         width: 100%;
         margin-bottom: 12px;
+    }
+
+    .health-bar-container.clickable {
+        cursor: pointer;
+    }
+
+    .health-bar-container.clickable:hover .bar-bg {
+        border-color: rgba(255, 255, 255, 0.2);
     }
 
     .header {
