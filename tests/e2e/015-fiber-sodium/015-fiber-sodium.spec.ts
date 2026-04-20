@@ -90,11 +90,25 @@ test('US-015: Fiber and Sodium tracking', async ({ page }, testInfo) => {
     await expect(page.getByRole('heading', { name: 'Goals & Targets' })).toBeVisible();
 
     // 2. Adjust Fiber goal and Sodium limit
-    const fiberInput = page.locator('.macro-card', { hasText: 'Fiber' }).locator('input[type="number"]').first();
+    const fiberCard = page.locator('.macro-card', { hasText: 'Fiber' });
+    const fiberInput = fiberCard.locator('input[type="number"]').first();
     await fiberInput.fill('35');
     
-    const sodiumLimitInput = page.locator('.macro-card', { hasText: 'Sodium' }).locator('input[type="number"]').first();
+    // Ensure Fiber goal is enabled
+    const fiberToggle = fiberCard.locator('input[type="checkbox"]');
+    if (!(await fiberToggle.isChecked())) {
+        await fiberCard.locator('.toggle-slider').click();
+    }
+    
+    const sodiumCard = page.locator('.macro-card', { hasText: 'Sodium' });
+    const sodiumLimitInput = sodiumCard.locator('input[type="number"]').first();
     await sodiumLimitInput.fill('2000');
+
+    // Ensure Sodium goal is enabled
+    const sodiumToggle = sodiumCard.locator('input[type="checkbox"]');
+    if (!(await sodiumToggle.isChecked())) {
+        await sodiumCard.locator('.toggle-slider').click();
+    }
 
     // Ensure "Show on Dashboard" is enabled
     const dashboardToggle = page.locator('.toggle-row', { hasText: 'Show on Dashboard' }).locator('input[type="checkbox"]');
@@ -106,7 +120,9 @@ test('US-015: Fiber and Sodium tracking', async ({ page }, testInfo) => {
         description: 'Health targets configured in settings',
         verifications: [
             { spec: 'Fiber input updated', check: async () => await expect(fiberInput).toHaveValue('35') },
+            { spec: 'Fiber goal enabled', check: async () => await expect(fiberToggle).toBeChecked() },
             { spec: 'Sodium limit input updated', check: async () => await expect(sodiumLimitInput).toHaveValue('2000') },
+            { spec: 'Sodium goal enabled', check: async () => await expect(sodiumToggle).toBeChecked() },
             { spec: 'Dashboard toggle enabled', check: async () => await expect(dashboardToggle).toBeChecked() }
         ]
     });
