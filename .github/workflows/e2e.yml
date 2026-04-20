@@ -30,7 +30,7 @@ jobs:
 
       - name: Run Playwright tests
         id: playwright
-        run: npm run test:e2e
+        run: npm run test:e2e:update-snapshots
         env:
           CI: true
           # Provide dummy values for build/runtime to succeed

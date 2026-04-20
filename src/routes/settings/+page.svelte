@@ -11,7 +11,7 @@
     const defaultSettings: SettingsState = {
         targetCalories: 2000,
         macroRatios: { protein: 0.3, fat: 0.35, carbs: 0.35 },
-        fiberGoal: { value: 30, enabled: true },
+        fiberGoal: { value: 38, enabled: true },
         sugarLimit: { value: 30, enabled: false },
         addedSugarLimit: { value: 10, enabled: false },
         satFatLimit: { value: 10, enabled: false },
