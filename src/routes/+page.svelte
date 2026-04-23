@@ -17,13 +17,11 @@
   import HealthSummary from '$lib/components/ui/HealthSummary.svelte';
   import ActivityCard from '$lib/components/ui/ActivityCard.svelte';
   import NetworkStatus from '$lib/components/ui/NetworkStatus.svelte';
-  import HealthBreakdownModal from '$lib/components/ui/HealthBreakdownModal.svelte';
 
   // Reactive State
   let authenticated = $state(false);
   let allLogs = $state<any[]>(store.getState().projections.log); // Synced from Redux
   let settings = $state(store.getState().settings);
-  let activeBreakdown = $state<{ title: string; key: string; unit: string } | null>(null);
   
   // Current Business Date (4AM cutoff)
   const today = getBusinessDate(new Date());
@@ -272,8 +270,7 @@
              {#if settings.showHealthMetrics}
                 <HealthSummary 
                     {stats}
-                    {settings}
-                    onshowBreakdown={(title, key, unit) => activeBreakdown = { title, key, unit }}
+                    logs={visibleLogs}
                 />
              {/if}
              
@@ -349,16 +346,6 @@
             </div>
         </section>
     </div>
-
-    {#if activeBreakdown}
-        <HealthBreakdownModal 
-            title={activeBreakdown.title}
-            logs={visibleLogs}
-            nutrientKey={activeBreakdown.key}
-            unit={activeBreakdown.unit}
-            onclose={() => activeBreakdown = null}
-        />
-    {/if}
   {/if}
 
 </div>
@@ -404,7 +391,6 @@
         align-items: center;
         width: 100%;
         position: relative;
-        overflow: hidden;
     }
 
     .status-positioner {
@@ -489,5 +475,24 @@
         color: var(--text-muted);
         background: rgba(255,255,255,0.03);
         border-radius: var(--radius-m);
+    }
+
+    /* Desktop Layout */
+    @media (min-width: 1024px) {
+        .page-container {
+            padding-bottom: 40px;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 40px;
+            align-items: start;
+        }
+        
+        .stats-section {
+            position: sticky;
+            top: 40px;
+        }
     }
 </style>
