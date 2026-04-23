@@ -68,7 +68,7 @@
     }
 
     .health-bar-container.full-bleed {
-        margin-bottom: 8px;
+        margin-bottom: 0;
     }
 
     .health-bar-container.clickable {
