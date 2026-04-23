@@ -44,15 +44,51 @@
         const maxVal = Math.max(...allVals);
         const range = maxVal - minVal || 1;
 
-        const lines = [{ y: getY(target, minVal, range) }];
+        const lines = [{ y: getY(target, minVal, range), value: target }];
         if (targetRange) {
-            lines.push({ y: getY(targetRange[0], minVal, range) });
-            lines.push({ y: getY(targetRange[1], minVal, range) });
+            lines.push({ y: getY(targetRange[0], minVal, range), value: targetRange[0] });
+            lines.push({ y: getY(targetRange[1], minVal, range), value: targetRange[1] });
         }
         return lines;
     });
 
     let currentValue = $derived(data.length > 0 ? data[data.length - 1] : 0);
+
+    let hoverIndex = $state<number | null>(null);
+    let hoverData = $derived.by(() => {
+        if (hoverIndex === null || data.length === 0) return null;
+        
+        let allVals = [...data, target];
+        if (targetRange) allVals.push(...targetRange);
+        const minVal = Math.min(...allVals);
+        const maxVal = Math.max(...allVals);
+        const range = maxVal - minVal || 1;
+
+        const xStep = (width - 2 * padding) / (data.length - 1 || 1);
+        const x = padding + hoverIndex * xStep;
+        const y = getY(data[hoverIndex], minVal, range);
+        
+        return { x, y, value: data[hoverIndex] };
+    });
+
+    function handleMouseMove(e: MouseEvent) {
+        const svg = e.currentTarget as SVGSVGElement;
+        const rect = svg.getBoundingClientRect();
+        const x = (e.clientX - rect.left) * (width / rect.width);
+        
+        if (x < padding || x > width - padding || data.length < 2) {
+            hoverIndex = null;
+            return;
+        }
+
+        const xStep = (width - 2 * padding) / (data.length - 1);
+        const index = Math.round((x - padding) / xStep);
+        hoverIndex = Math.max(0, Math.min(data.length - 1, index));
+    }
+
+    function handleMouseLeave() {
+        hoverIndex = null;
+    }
 </script>
 
 <div class="chart-card">
@@ -60,7 +96,13 @@
         <span class="label">{label}</span>
         <span class="value" style="color: {color}">{Math.round(currentValue)}{unit}</span>
     </div>
-    <svg {width} {height} viewBox="0 0 {width} {height}">
+    <svg 
+        {width} {height} viewBox="0 0 {width} {height}"
+        onmousemove={handleMouseMove}
+        onmouseleave={handleMouseLeave}
+        role="img"
+        aria-label="EMA Chart for {label}"
+    >
         <defs>
             <filter id="glow-{label.replace(/\s+/g, '-')}" x="-20%" y="-20%" width="140%" height="140%">
                 <feGaussianBlur stdDeviation="2" result="blur" />
@@ -70,12 +112,23 @@
 
         <!-- Target Lines -->
         {#each targetLines as line}
-            <line 
-                x1={padding} y1={line.y} x2={width - padding} y2={line.y} 
-                stroke="rgba(255,255,255,0.15)" 
-                stroke-width="1" 
-                stroke-dasharray="4 2" 
-            />
+            <g>
+                <line 
+                    x1={padding} y1={line.y} x2={width - padding} y2={line.y} 
+                    stroke="rgba(255,255,255,0.15)" 
+                    stroke-width="1" 
+                    stroke-dasharray="4 2" 
+                />
+                <text 
+                    x={width - padding} y={line.y - 2} 
+                    text-anchor="end" 
+                    font-size="6" 
+                    fill="rgba(255,255,255,0.3)"
+                    class="target-label"
+                >
+                    {Math.round(line.value)}
+                </text>
+            </g>
         {/each}
         
         <!-- EMA Curve -->
@@ -88,6 +141,32 @@
             stroke-linejoin="round"
             filter="url(#glow-{label.replace(/\s+/g, '-')})"
         />
+
+        <!-- Hover Indicator -->
+        {#if hoverData}
+            <line 
+                x1={hoverData.x} y1={padding} x2={hoverData.x} y2={height - padding} 
+                stroke="rgba(255,255,255,0.2)" 
+                stroke-width="1"
+            />
+            <circle 
+                cx={hoverData.x} cy={hoverData.y} r="3" 
+                fill={color} 
+                stroke="white" 
+                stroke-width="1"
+            />
+            <g transform="translate({hoverData.x}, {hoverData.y < 20 ? hoverData.y + 12 : hoverData.y - 8})">
+                <text 
+                    text-anchor="middle" 
+                    font-size="8" 
+                    font-weight="bold" 
+                    fill="white"
+                    class="hover-value"
+                >
+                    {Math.round(hoverData.value)}
+                </text>
+            </g>
+        {/if}
     </svg>
 </div>
 
@@ -124,5 +203,8 @@
         display: block;
         width: 100%;
         height: auto;
+    }
+    text, line, circle, polyline {
+        pointer-events: none;
     }
 </style>
