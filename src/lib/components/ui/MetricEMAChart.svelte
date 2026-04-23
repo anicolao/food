@@ -108,7 +108,7 @@
     }
 </script>
 
-<div class="chart-card">
+<div class="chart-card" style="--chart-min-width: {width + 20}px">
     <div class="header">
         <span class="label">{label}</span>
         <span class="value" style="color: {color}">{Math.round(currentValue)}{unit}</span>
@@ -197,7 +197,7 @@
         display: flex;
         flex-direction: column;
         gap: 6px;
-        min-width: 170px;
+        min-width: var(--chart-min-width, 170px);
         flex: 1;
     }
     .header {

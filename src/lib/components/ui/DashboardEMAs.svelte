@@ -110,7 +110,7 @@
     }
 
     .ema-container.expanded {
-        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
         gap: 20px;
     }
 
