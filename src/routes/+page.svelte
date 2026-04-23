@@ -272,6 +272,7 @@
              {#if settings.showHealthMetrics}
                 <HealthSummary 
                     {stats}
+                    {settings}
                     onshowBreakdown={(title, key, unit) => activeBreakdown = { title, key, unit }}
                 />
              {/if}

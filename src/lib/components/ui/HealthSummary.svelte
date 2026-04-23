@@ -1,6 +1,6 @@
 <script lang="ts">
     import HealthBar from './HealthBar.svelte';
-    import { store } from '$lib/store';
+    import type { SettingsState } from '$lib/store';
     
     interface Props {
         stats: {
@@ -16,18 +16,11 @@
             totalCholesterol: number;
             totalSodium: number;
         };
+        settings: SettingsState;
         onshowBreakdown?: (title: string, key: string, unit: string) => void;
     }
 
-    let { stats, onshowBreakdown }: Props = $props();
-    let settings = $state(store.getState().settings);
-
-    $effect(() => {
-        const unsubscribe = store.subscribe(() => {
-            settings = store.getState().settings;
-        });
-        return unsubscribe;
-    });
+    let { stats, settings, onshowBreakdown }: Props = $props();
 
     function getSubTarget(valuePer1000: number) {
         return Math.round((settings.targetCalories / 1000) * valuePer1000);
@@ -149,8 +142,7 @@
     .health-summary {
         display: flex;
         flex-direction: column;
-        align-self: stretch;
-        width: auto;
+        width: calc(100% + 48px);
         margin: 16px -24px -24px -24px;
         padding: 16px 0;
         gap: 4px;
@@ -159,3 +151,4 @@
         box-sizing: border-box;
     }
 </style>
+
