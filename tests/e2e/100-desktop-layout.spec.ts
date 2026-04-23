@@ -14,6 +14,10 @@ test('US-112: Desktop Layout and Navigation', async ({ page }, testInfo) => {
     await page.clock.install({ time: new Date(MOCK_DATE) });
     const today = '2024-06-15';
 
+    // Promise Gate for Gemini
+    let resolveGemini: () => void = () => { };
+    let geminiPromise = new Promise<void>(r => { resolveGemini = r; });
+
     // standard mocks
     await page.addInitScript(async () => {
         if (navigator.serviceWorker) {
@@ -47,6 +51,33 @@ test('US-112: Desktop Layout and Navigation', async ({ page }, testInfo) => {
 
     // Robust Google API Mocks
     await mockDriveAPI(page);
+
+    // Mock Gemini
+    await page.route('**generativelanguage.googleapis.com**', async route => {
+        await geminiPromise;
+        await route.fulfill({
+            json: {
+                candidates: [{
+                    content: {
+                        parts: [{
+                            text: JSON.stringify({
+                                is_label: true,
+                                item_name: 'High Sodium Ramen',
+                                calories: 600,
+                                fat: { total: 20 },
+                                carbohydrates: { total: 80 },
+                                protein: 15,
+                                details: {
+                                    fiber: 10,
+                                    sodium: 1800
+                                }
+                            })
+                        }]
+                    }
+                }]
+            }
+        });
+    });
     
     // Dynamic data for Edit Flow
     let saladName = 'Desktop Salad';
@@ -121,8 +152,55 @@ test('US-112: Desktop Layout and Navigation', async ({ page }, testInfo) => {
         ]
     });
 
-    // 2. Log Page
-    // Use more robust selector and wait for navigation
+    // 2. Settings Page
+    await page.locator('.desktop-sidebar').getByRole('link', { name: 'Settings' }).click();
+    await expect(page).toHaveURL(/\/settings/);
+    await expect(page.getByRole('heading', { name: 'Goals & Targets' })).toBeVisible();
+
+    await tester.step('settings-page-desktop', {
+        description: 'Settings page in desktop layout',
+        verifications: [
+            { spec: 'Goals header visible', check: async () => await expect(page.getByRole('heading', { name: 'Goals & Targets' })).toBeVisible() }
+        ]
+    });
+
+    // Enable Fiber and Sodium goals
+    const fiberCard = page.locator('.macro-card', { hasText: 'Fiber' });
+    const fiberInput = fiberCard.locator('input[type="number"]').first();
+    await fiberInput.fill('35');
+    
+    const fiberToggle = fiberCard.locator('input[type="checkbox"]');
+    if (!(await fiberToggle.isChecked())) {
+        await fiberCard.locator('.toggle-slider').click();
+    }
+    
+    const sodiumCard = page.locator('.macro-card', { hasText: 'Sodium' });
+    const sodiumLimitInput = sodiumCard.locator('input[type="number"]').first();
+    await sodiumLimitInput.fill('2000');
+
+    const sodiumToggle = sodiumCard.locator('input[type="checkbox"]');
+    if (!(await sodiumToggle.isChecked())) {
+        await sodiumCard.locator('.toggle-slider').click();
+    }
+
+    const dashboardToggle = page.locator('.toggle-row', { hasText: 'Show on Dashboard' }).locator('input[type="checkbox"]');
+    if (!(await dashboardToggle.isChecked())) {
+        await page.locator('.toggle-row', { hasText: 'Show on Dashboard' }).locator('.toggle-slider').click();
+    }
+
+    // Save settings
+    await page.getByText('Save Changes').click();
+    await expect(page.locator('.feed-header h2').first()).toHaveText('Today');
+
+    await tester.step('dashboard-health-summary-desktop', {
+        description: 'Health summary with Fiber and Sodium visible on desktop dashboard',
+        verifications: [
+            { spec: 'Fiber bar visible', check: async () => await expect(page.locator('.health-bar-container', { hasText: 'Fiber' })).toBeVisible() },
+            { spec: 'Sodium bar visible', check: async () => await expect(page.locator('.health-bar-container', { hasText: 'Sodium' })).toBeVisible() }
+        ]
+    });
+
+    // 3. Log Page
     const logLink = page.locator('.desktop-sidebar').getByRole('link', { name: 'Log Food' });
     await expect(logLink).toBeVisible();
     await logLink.click();
@@ -137,19 +215,55 @@ test('US-112: Desktop Layout and Navigation', async ({ page }, testInfo) => {
         ]
     });
 
-    // 3. Settings Page
-    await page.locator('.desktop-sidebar').getByRole('link', { name: 'Settings' }).click();
-    await expect(page).toHaveURL(/\/settings/);
-    await expect(page.getByRole('heading', { name: 'Goals & Targets' })).toBeVisible();
+    // Log a new food using the Gemini mock
+    await page.getByText('Text').click();
+    await page.locator('textarea').fill('High Sodium Ramen');
+    await page.getByText('Analyze').click();
 
-    await tester.step('settings-page-desktop', {
-        description: 'Settings page in desktop layout',
+    resolveGemini();
+
+    await expect(page.getByLabel('Log Description')).toHaveValue('High Sodium Ramen');
+
+    await tester.step('log-form-pinned-desktop', {
+        description: 'Log form shows pinned Fiber and Sodium on desktop',
         verifications: [
-            { spec: 'Goals header visible', check: async () => await expect(page.getByRole('heading', { name: 'Goals & Targets' })).toBeVisible() }
+            { spec: 'Fiber pinned', check: async () => await expect(page.getByText('🌾 Fiber')).toBeVisible() },
+            { spec: 'Sodium pinned', check: async () => await expect(page.getByText('🧂 Sodium')).toBeVisible() }
         ]
     });
 
-    // 7. Network & Sync Page
+    // Expand details
+    await page.locator('.icon-toggle').click();
+    await expect(page.getByText('Sugar', { exact: true })).toBeVisible();
+
+    await tester.step('log-form-expanded-desktop', {
+        description: 'Expanded log form on desktop',
+        verifications: [
+            { spec: 'Sugar visible', check: async () => await expect(page.getByText('Sugar', { exact: true })).toBeVisible() }
+        ]
+    });
+
+    await page.getByText('Save Entry').click();
+    await expect(page.locator('.feed-header h2').first()).toHaveText('Today');
+
+    // 4. Health Breakdown Modal
+    const sodiumBar = page.locator('.health-bar-container', { hasText: 'Sodium' });
+    await sodiumBar.click();
+
+    await tester.step('health-breakdown-desktop', {
+        description: 'Health breakdown modal on desktop',
+        verifications: [
+            { spec: 'Modal is visible', check: async () => await expect(page.getByRole('dialog')).toBeVisible() },
+            { spec: 'Modal title is correct', check: async () => await expect(page.getByRole('heading', { name: 'Sodium Breakdown' })).toBeVisible() }
+        ]
+    });
+
+    // Close modal
+    await page.locator('.modal-content .primary-btn').click();
+    await expect(page.getByRole('dialog')).not.toBeVisible();
+
+    // 5. Network & Sync Page
+    await page.locator('.desktop-sidebar').getByRole('link', { name: 'Settings' }).click();
     await page.goto('/settings/network');
     await expect(page.getByRole('heading', { name: 'Network & Sync' })).toBeVisible();
 
@@ -160,7 +274,7 @@ test('US-112: Desktop Layout and Navigation', async ({ page }, testInfo) => {
         ]
     });
 
-    // 4. Switcher Page
+    // 6. Switcher Page
     await page.locator('.desktop-header .user-chip').click();
     await expect(page).toHaveURL(/\/switcher/);
     await expect(page.getByRole('heading', { name: 'Switch User' })).toBeVisible();
@@ -172,7 +286,7 @@ test('US-112: Desktop Layout and Navigation', async ({ page }, testInfo) => {
         ]
     });
 
-    // 8. Privacy Page
+    // 7. Privacy Page
     await page.goto('/privacy');
     await expect(page.getByRole('heading', { name: 'Privacy Policy for Food Sheets' })).toBeVisible();
 
@@ -183,7 +297,7 @@ test('US-112: Desktop Layout and Navigation', async ({ page }, testInfo) => {
         ]
     });
 
-    // 5. Sharing Page
+    // 8. Sharing Page
     const SHARED_FOLDER_ID = 'SHARED_123';
     const SHARED_DB_ID = 'SHARED_DB_456';
 
@@ -266,3 +380,4 @@ test('US-112: Desktop Layout and Navigation', async ({ page }, testInfo) => {
 
     await tester.generateDocs();
 });
+
