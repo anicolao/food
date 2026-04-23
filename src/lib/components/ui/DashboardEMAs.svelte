@@ -5,9 +5,13 @@
 
     interface Props {
         selectedDate: string;
+        variant?: 'compact' | 'expanded';
     }
 
-    let { selectedDate }: Props = $props();
+    let { selectedDate, variant = 'compact' }: Props = $props();
+
+    const chartWidth = $derived(variant === 'expanded' ? 320 : 160);
+    const chartHeight = $derived(variant === 'expanded' ? 120 : 60);
 
     let state = $state(store.getState());
 
@@ -77,11 +81,11 @@
     let fatData = $derived(getMetricEMASeries(stats, 'totalFat', selectedDate, 30, 7));
 </script>
 
-<div class="ema-container">
-    <MetricEMAChart label="Calories" data={caloriesData} target={settings.targetCalories} color="#43e97b" unit="kcal" />
-    <MetricEMAChart label="Protein" data={proteinData} target={macroTargets.protein} color="#c471ed" unit="g" />
-    <MetricEMAChart label="Carbs" data={carbsData} target={macroTargets.carbs} color="#24c6dc" unit="g" />
-    <MetricEMAChart label="Fat" data={fatData} target={macroTargets.fat} color="#D1913C" unit="g" />
+<div class="ema-container" class:expanded={variant === 'expanded'}>
+    <MetricEMAChart label="Calories" data={caloriesData} target={settings.targetCalories} color="#43e97b" unit="kcal" width={chartWidth} height={chartHeight} />
+    <MetricEMAChart label="Protein" data={proteinData} target={macroTargets.protein} color="#c471ed" unit="g" width={chartWidth} height={chartHeight} />
+    <MetricEMAChart label="Carbs" data={carbsData} target={macroTargets.carbs} color="#24c6dc" unit="g" width={chartWidth} height={chartHeight} />
+    <MetricEMAChart label="Fat" data={fatData} target={macroTargets.fat} color="#D1913C" unit="g" width={chartWidth} height={chartHeight} />
     
     {#each activeMicros as micro}
         <MetricEMAChart 
@@ -91,6 +95,8 @@
             limit={micro.limit}
             color={micro.color} 
             unit={micro.unit} 
+            width={chartWidth}
+            height={chartHeight}
         />
     {/each}
 </div>
@@ -103,9 +109,13 @@
         width: 100%;
     }
 
+    .ema-container.expanded {
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: 20px;
+    }
+
     @media (max-width: 1023px) {
         .ema-container {
-            /* On mobile, we might want a slightly different layout if it's toggled */
             padding: 4px;
         }
     }

@@ -62,24 +62,24 @@ test('US-114: EMA Mobile Layout and Target/Limit Lines', async ({ page }, testIn
 
     // 1. Initial State
     await tester.step('mobile-dashboard-initial', {
-        description: 'Dashboard on mobile initially hides trends',
+        description: 'Dashboard on mobile initially shows rings and hides trends',
         verifications: [
-            { spec: 'Trends button exists', check: async () => await expect(page.locator('.ema-toggle')).toBeVisible() },
-            { spec: 'Trends wrapper is hidden', check: async () => await expect(page.locator('.ema-mobile-wrapper')).not.toBeVisible() }
+            { spec: 'Flip toggle button exists', check: async () => await expect(page.locator('.flip-toggle').first()).toBeVisible() },
+            { spec: 'Flip container is not flipped', check: async () => await expect(page.locator('.flip-container')).not.toHaveClass(/flipped/) }
         ]
     });
 
-    // 2. Toggle Trends
-    await page.locator('.ema-toggle').click();
+    // 2. Toggle Trends (Flip)
+    await page.locator('.flip-toggle').first().click();
     
-    // Wait for slide transition
-    await page.waitForTimeout(500);
+    // Wait for flip transition
+    await page.waitForTimeout(600);
 
     await tester.step('mobile-dashboard-trends', {
-        description: 'Trends are visible after clicking the toggle button',
+        description: 'Trends are visible after clicking the flip toggle button',
         verifications: [
-            { spec: 'Trends wrapper is visible', check: async () => await expect(page.locator('.ema-mobile-wrapper')).toBeVisible() },
-            { spec: 'Calories graph is shown', check: async () => await expect(page.locator('.ema-mobile-wrapper').getByText('Calories')).toBeVisible() }
+            { spec: 'Flip container is flipped', check: async () => await expect(page.locator('.flip-container')).toHaveClass(/flipped/) },
+            { spec: 'Calories graph is shown', check: async () => await expect(page.locator('.flip-back').getByText('Calories')).toBeVisible() }
         ]
     });
 
@@ -90,7 +90,7 @@ test('US-114: EMA Mobile Layout and Target/Limit Lines', async ({ page }, testIn
             { 
                 spec: 'Calories graph has target line', 
                 check: async () => {
-                    const caloriesChart = page.locator('.ema-mobile-wrapper svg[aria-label="EMA Chart for Calories"]');
+                    const caloriesChart = page.locator('.flip-back svg[aria-label="EMA Chart for Calories"]');
                     await expect(caloriesChart.locator('.target-line')).toHaveCount(1); // Just target
                     await expect(caloriesChart.locator('text.target-label')).toHaveText('2000');
                 } 
@@ -98,7 +98,7 @@ test('US-114: EMA Mobile Layout and Target/Limit Lines', async ({ page }, testIn
             {
                 spec: 'Sodium graph has limit line',
                 check: async () => {
-                    const sodiumChart = page.locator('.ema-mobile-wrapper svg[aria-label="EMA Chart for Sodium"]');
+                    const sodiumChart = page.locator('.flip-back svg[aria-label="EMA Chart for Sodium"]');
                     await expect(sodiumChart.locator('.target-line')).toHaveCount(1); // Just limit
                     await expect(sodiumChart.locator('text.target-label')).toHaveText('2300');
                 }

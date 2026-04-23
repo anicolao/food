@@ -6,12 +6,21 @@
         limit?: number;
         color: string;
         unit?: string;
+        width?: number;
+        height?: number;
     }
 
-    let { label, data, target, limit, color, unit = '' }: Props = $props();
+    let { 
+        label, 
+        data, 
+        target, 
+        limit, 
+        color, 
+        unit = '', 
+        width = 160, 
+        height = 60 
+    }: Props = $props();
 
-    const width = 160;
-    const height = 60;
     const padding = 5;
 
     function getY(v: number, minVal: number, range: number) {
