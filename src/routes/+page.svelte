@@ -337,7 +337,7 @@
                                 </svg>
                             </button>
                             <div class="ema-mobile-content">
-                                <DashboardEMAs {selectedDate} columns={2} chartHeight={80} />
+                                <DashboardEMAs {selectedDate} columns={2} fitToHeight={392} />
                             </div>
                         </section>
                     </div>
@@ -356,7 +356,7 @@
         <!-- Right Col / Bottom Section: Feed -->
         <section class="feed-section">
             <div class="ema-desktop-wrapper desktop-only">
-                <DashboardEMAs {selectedDate} chartWidth={320} chartHeight={120} />
+                <DashboardEMAs {selectedDate} chartWidth={320} fitToHeight={600} />
             </div>
 
             <div class="feed-header">

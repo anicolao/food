@@ -8,9 +8,10 @@
         unit?: string;
         width?: number;
         height?: number;
+        compact?: boolean;
     }
 
-    let { label, data, target, limit, color, unit = '', width = 160, height = 60 }: Props = $props();
+    let { label, data, target, limit, color, unit = '', width = 160, height = 60, compact = false }: Props = $props();
 
     const padding = 5;
 
@@ -99,7 +100,7 @@
     }
 </script>
 
-<div class="chart-card">
+<div class="chart-card" class:compact>
     <div class="header">
         <span class="label">{label}</span>
         <span class="value" style="color: {color}">{Math.round(currentValue)}{unit}</span>
@@ -191,6 +192,11 @@
         min-width: 170px;
         flex: 1;
     }
+    .chart-card.compact {
+        padding: 6px;
+        gap: 2px;
+        border-radius: 8px;
+    }
     .header {
         display: flex;
         justify-content: space-between;
@@ -203,10 +209,16 @@
         letter-spacing: 0.05em;
         font-size: 0.65rem;
     }
+    .compact .label {
+        font-size: 0.55rem;
+    }
     .value {
         font-weight: 800;
         font-size: 0.95rem;
         font-variant-numeric: tabular-nums;
+    }
+    .compact .value {
+        font-size: 0.8rem;
     }
     svg {
         display: block;
