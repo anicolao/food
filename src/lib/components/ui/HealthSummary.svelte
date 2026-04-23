@@ -154,7 +154,8 @@
     .health-summary {
         display: flex;
         flex-direction: column;
-        width: calc(100% + 48px);
+        align-self: stretch;
+        width: auto;
         margin: 16px -24px -24px -24px;
         padding: 16px 0;
         gap: 4px;
