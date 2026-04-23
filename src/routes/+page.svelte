@@ -25,11 +25,13 @@
   let allLogs = $state<any[]>(store.getState().projections.log); // Synced from Redux
   let settings = $state(store.getState().settings);
   let showEMAs = $state(false);
+  let flipRotation = $state(0);
   let innerWidth = $state(0);
 
   $effect(() => {
     if (innerWidth >= 1024) {
       showEMAs = false;
+      flipRotation = 0;
     }
   });
   
@@ -239,13 +241,13 @@
     <div class="dashboard-grid">
         <div class="left-col">
             <div class="flip-card" class:flipped={showEMAs}>
-                <div class="flip-card-inner">
+                <div class="flip-card-inner" style="transform: rotateY({flipRotation}deg)">
                     <!-- Front Side: Rings and Macros -->
                     <div class="flip-card-front">
                         <section class="stats-section glass-panel">
                             <button 
                                 class="flip-toggle-btn mobile-only" 
-                                onclick={() => showEMAs = true}
+                                onclick={() => { showEMAs = true; flipRotation += 180; }}
                                 aria-label="Show Trends"
                             >
                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -329,11 +331,13 @@
                         <section class="stats-section glass-panel">
                             <button 
                                 class="flip-toggle-btn back mobile-only" 
-                                onclick={() => showEMAs = false}
+                                onclick={() => { showEMAs = false; flipRotation += 180; }}
                                 aria-label="Show Stats"
                             >
                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M3 12h18M3 12l9-9m-9 9l9 9"></path>
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <circle cx="12" cy="12" r="6"></circle>
+                                    <circle cx="12" cy="12" r="2"></circle>
                                 </svg>
                             </button>
                             <div class="ema-mobile-content">
@@ -356,7 +360,7 @@
         <!-- Right Col / Bottom Section: Feed -->
         <section class="feed-section">
             <div class="ema-desktop-wrapper desktop-only">
-                <DashboardEMAs {selectedDate} chartWidth={320} fitToHeight={600} />
+                <DashboardEMAs {selectedDate} chartWidth={320} fitToHeight={440} />
             </div>
 
             <div class="feed-header">
@@ -457,10 +461,6 @@
         text-align: center;
         transition: transform 0.6s;
         transform-style: preserve-3d;
-    }
-
-    .flip-card.flipped .flip-card-inner {
-        transform: rotateY(-180deg);
     }
 
     .flip-card-front, .flip-card-back {
@@ -638,10 +638,26 @@
         background: rgba(255, 255, 255, 0.05);
         padding: 24px;
         border-radius: 24px;
+        min-height: 480px;
     }
 
     .desktop-only {
         display: none;
+    }
+
+    @media (max-width: 1023px) {
+        .left-col {
+            display: contents;
+        }
+        .flip-card {
+            order: 1;
+        }
+        .feed-section {
+            order: 2;
+        }
+        .ai-analysis-card {
+            order: 3;
+        }
     }
 
     /* Desktop Layout */

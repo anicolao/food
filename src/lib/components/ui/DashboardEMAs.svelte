@@ -98,7 +98,7 @@
         const calculatedHeight = perCardHeight - cardOverhead;
         
         // Ensure it doesn't get TOO small or TOO large
-        return Math.max(30, Math.min(120, calculatedHeight));
+        return Math.max(30, Math.min(200, calculatedHeight));
     });
 
     let isCompact = $derived(dynamicChartHeight < 50);
