@@ -114,7 +114,7 @@
     .full-bleed .bar-bg {
         border-radius: 0;
         border: none;
-        height: 8px;
+        height: 10px;
     }
 
     .bar-fill {

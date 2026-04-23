@@ -1,6 +1,5 @@
 <script lang="ts">
     import HealthBar from './HealthBar.svelte';
-    import HealthBreakdownModal from './HealthBreakdownModal.svelte';
     import { store } from '$lib/store';
     
     interface Props {
@@ -17,13 +16,11 @@
             totalCholesterol: number;
             totalSodium: number;
         };
-        logs: any[];
+        onshowBreakdown?: (title: string, key: string, unit: string) => void;
     }
 
-    let { stats, logs }: Props = $props();
+    let { stats, onshowBreakdown }: Props = $props();
     let settings = $state(store.getState().settings);
-
-    let activeBreakdown = $state<{ title: string; key: string; unit: string } | null>(null);
 
     $effect(() => {
         const unsubscribe = store.subscribe(() => {
@@ -34,10 +31,6 @@
 
     function getSubTarget(valuePer1000: number) {
         return Math.round((settings.targetCalories / 1000) * valuePer1000);
-    }
-
-    function showBreakdown(title: string, key: string, unit: string) {
-        activeBreakdown = { title, key, unit };
     }
 
     const hasEnabledMetrics = $derived(
@@ -62,7 +55,7 @@
                 gradientStart="#43e97b" 
                 gradientEnd="#38f9d7" 
                 fullBleed={true}
-                onclick={() => showBreakdown('Fiber', 'fiber', 'g')}
+                onclick={() => onshowBreakdown?.('Fiber', 'fiber', 'g')}
             />
         {/if}
 
@@ -76,7 +69,7 @@
                 gradientEnd="#fda085" 
                 isLimit={true}
                 fullBleed={true}
-                onclick={() => showBreakdown('Sodium', 'sodium', 'mg')}
+                onclick={() => onshowBreakdown?.('Sodium', 'sodium', 'mg')}
             />
         {/if}
 
@@ -90,7 +83,7 @@
                 gradientEnd="#fda085" 
                 isLimit={true}
                 fullBleed={true}
-                onclick={() => showBreakdown('Sugar', 'sugar', 'g')}
+                onclick={() => onshowBreakdown?.('Sugar', 'sugar', 'g')}
             />
         {/if}
 
@@ -104,7 +97,7 @@
                 gradientEnd="#fda085" 
                 isLimit={true}
                 fullBleed={true}
-                onclick={() => showBreakdown('Added Sugar', 'addedSugar', 'g')}
+                onclick={() => onshowBreakdown?.('Added Sugar', 'addedSugar', 'g')}
             />
         {/if}
 
@@ -118,7 +111,7 @@
                 gradientEnd="#fda085" 
                 isLimit={true}
                 fullBleed={true}
-                onclick={() => showBreakdown('Sat Fat', 'saturatedFat', 'g')}
+                onclick={() => onshowBreakdown?.('Sat Fat', 'saturatedFat', 'g')}
             />
         {/if}
 
@@ -132,7 +125,7 @@
                 gradientEnd="#ff4b2b" 
                 isLimit={true}
                 fullBleed={true}
-                onclick={() => showBreakdown('Trans Fat', 'transFat', 'g')}
+                onclick={() => onshowBreakdown?.('Trans Fat', 'transFat', 'g')}
             />
         {/if}
 
@@ -146,28 +139,17 @@
                 gradientEnd="#fda085" 
                 isLimit={true}
                 fullBleed={true}
-                onclick={() => showBreakdown('Cholesterol', 'cholesterol', 'mg')}
+                onclick={() => onshowBreakdown?.('Cholesterol', 'cholesterol', 'mg')}
             />
         {/if}
     </div>
-{/if}
-
-{#if activeBreakdown}
-    <HealthBreakdownModal 
-        title={activeBreakdown.title}
-        logs={logs}
-        nutrientKey={activeBreakdown.key}
-        unit={activeBreakdown.unit}
-        onclose={() => activeBreakdown = null}
-    />
 {/if}
 
 <style>
     .health-summary {
         display: flex;
         flex-direction: column;
-        align-self: stretch;
-        width: auto;
+        width: calc(100% + 48px);
         margin: 16px -24px -24px -24px;
         padding: 16px 0;
         gap: 4px;
