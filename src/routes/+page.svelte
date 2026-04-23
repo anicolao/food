@@ -25,6 +25,13 @@
   let allLogs = $state<any[]>(store.getState().projections.log); // Synced from Redux
   let settings = $state(store.getState().settings);
   let showEMAs = $state(false);
+  let innerWidth = $state(0);
+
+  $effect(() => {
+    if (innerWidth >= 1024) {
+      showEMAs = false;
+    }
+  });
   
   // Current Business Date (4AM cutoff)
   const today = getBusinessDate(new Date());
@@ -218,6 +225,8 @@
   }
 </script>
 
+<svelte:window bind:innerWidth />
+
 <div class="page-container" data-testid="debug-load">
   
   {#if !authenticated}
@@ -227,92 +236,129 @@
         <button class="primary-btn" onclick={handleSignIn}>Sign In with Google</button>
     </div>
   {:else}
-    <div class="ema-desktop-wrapper desktop-only">
-        <DashboardEMAs {selectedDate} />
-    </div>
-
-    {#if showEMAs}
-        <div class="ema-mobile-wrapper mobile-only" transition:slide>
-            <DashboardEMAs {selectedDate} />
-        </div>
-    {/if}
-
     <div class="dashboard-grid">
         <div class="left-col">
-            <section class="stats-section glass-panel">
-             <div class="status-positioner">
-                 <NetworkStatus />
-             </div>
-             <div class="hero-ring">
-                 <StatsRing 
-                    value={stats.totalCalories} 
-                    max={goals.calories}  
-                    size={260} 
-                    gradientId="calories-ring"
-                    label="kcal"
-                 />
-             </div>
-             
-             <div class="macros-row">
-                 <MacroBubble 
-                    label="Protein" 
-                    value={stats.totalProtein} 
-                    max={goals.protein} 
-                    color="#c471ed"
-                    gradientId="protein-grad" 
-                    iconSrc="/images/icon-protein.png" 
-                />
-                 <MacroBubble 
-                    label="Carbs" 
-                    value={stats.totalCarbs} 
-                    max={goals.carbs} 
-                    color="#24c6dc"
-                    gradientId="carbs-grad" 
-                    iconSrc="/images/icon-carbs.png" 
-                />
-                 <MacroBubble 
-                    label="Fat" 
-                    value={stats.totalFat} 
-                    max={goals.fat} 
-                    color="#D1913C" 
-                    gradientId="fat-grad" 
-                    iconSrc="/images/icon-fat.png" 
-                />
-             </div>
-             
-             {#if settings.showHealthMetrics}
-                <HealthSummary 
-                    {stats}
-                    logs={visibleLogs}
-                />
-             {/if}
-             
-             <!-- SVG Gradients for Macros -->
-             <svg width="0" height="0" class="visually-hidden">
-                <defs>
-                    <linearGradient id="calories-ring" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" stop-color="#43e97b"/>
-                        <stop offset="100%" stop-color="#38f9d7"/>
-                    </linearGradient>
-                    <linearGradient id="protein-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" stop-color="#c471ed"/>
-                        <stop offset="100%" stop-color="#f64f59"/>
-                    </linearGradient>
-                    <linearGradient id="carbs-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" stop-color="#24c6dc"/>
-                        <stop offset="100%" stop-color="#514a9d"/>
-                    </linearGradient>
-                    <linearGradient id="fat-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" stop-color="#FFD194"/>
-                        <stop offset="100%" stop-color="#D1913C"/>
-                    </linearGradient>
-                </defs>
-             </svg>
-        </section>
+            <div class="flip-card" class:flipped={showEMAs}>
+                <div class="flip-card-inner">
+                    <!-- Front Side: Rings and Macros -->
+                    <div class="flip-card-front">
+                        <section class="stats-section glass-panel">
+                            <button 
+                                class="flip-toggle-btn mobile-only" 
+                                onclick={() => showEMAs = true}
+                                aria-label="Show Trends"
+                            >
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+                                </svg>
+                            </button>
+
+                            <div class="status-positioner">
+                                <NetworkStatus />
+                            </div>
+                            <div class="hero-ring">
+                                <StatsRing 
+                                    value={stats.totalCalories} 
+                                    max={goals.calories}  
+                                    size={260} 
+                                    gradientId="calories-ring"
+                                    label="kcal"
+                                />
+                            </div>
+                            
+                            <div class="macros-row">
+                                <MacroBubble 
+                                    label="Protein" 
+                                    value={stats.totalProtein} 
+                                    max={goals.protein} 
+                                    color="#c471ed"
+                                    gradientId="protein-grad" 
+                                    iconSrc="/images/icon-protein.png" 
+                                />
+                                <MacroBubble 
+                                    label="Carbs" 
+                                    value={stats.totalCarbs} 
+                                    max={goals.carbs} 
+                                    color="#24c6dc"
+                                    gradientId="carbs-grad" 
+                                    iconSrc="/images/icon-carbs.png" 
+                                />
+                                <MacroBubble 
+                                    label="Fat" 
+                                    value={stats.totalFat} 
+                                    max={goals.fat} 
+                                    color="#D1913C" 
+                                    gradientId="fat-grad" 
+                                    iconSrc="/images/icon-fat.png" 
+                                />
+                            </div>
+                            
+                            {#if settings.showHealthMetrics}
+                                <HealthSummary 
+                                    {stats}
+                                    logs={visibleLogs}
+                                />
+                            {/if}
+                            
+                            <!-- SVG Gradients for Macros -->
+                            <svg width="0" height="0" class="visually-hidden">
+                                <defs>
+                                    <linearGradient id="calories-ring" x1="0%" y1="0%" x2="100%" y2="100%">
+                                        <stop offset="0%" stop-color="#43e97b"/>
+                                        <stop offset="100%" stop-color="#38f9d7"/>
+                                    </linearGradient>
+                                    <linearGradient id="protein-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                        <stop offset="0%" stop-color="#c471ed"/>
+                                        <stop offset="100%" stop-color="#f64f59"/>
+                                    </linearGradient>
+                                    <linearGradient id="carbs-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                        <stop offset="0%" stop-color="#24c6dc"/>
+                                        <stop offset="100%" stop-color="#514a9d"/>
+                                    </linearGradient>
+                                    <linearGradient id="fat-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                        <stop offset="0%" stop-color="#FFD194"/>
+                                        <stop offset="100%" stop-color="#D1913C"/>
+                                    </linearGradient>
+                                </defs>
+                            </svg>
+                        </section>
+                    </div>
+
+                    <!-- Back Side: EMA Graphs -->
+                    <div class="flip-card-back">
+                        <section class="stats-section glass-panel">
+                            <button 
+                                class="flip-toggle-btn back mobile-only" 
+                                onclick={() => showEMAs = false}
+                                aria-label="Show Stats"
+                            >
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M3 12h18M3 12l9-9m-9 9l9 9"></path>
+                                </svg>
+                            </button>
+                            <div class="ema-mobile-content">
+                                <DashboardEMAs {selectedDate} columns={2} chartHeight={80} />
+                            </div>
+                        </section>
+                    </div>
+                </div>
+            </div>
+
+            <section class="ai-analysis-card glass-panel">
+                <h3>AI Analysis</h3>
+                <div class="coming-soon">
+                    <span class="badge">Coming Soon</span>
+                    <p>Personalized insights based on your nutrition trends.</p>
+                </div>
+            </section>
         </div>
 
         <!-- Right Col / Bottom Section: Feed -->
         <section class="feed-section">
+            <div class="ema-desktop-wrapper desktop-only">
+                <DashboardEMAs {selectedDate} chartWidth={320} chartHeight={120} />
+            </div>
+
             <div class="feed-header">
                 <button class="nav-btn prev" onclick={() => goToPrevDay()} aria-label="Previous Day">
                     &lt;
@@ -329,16 +375,6 @@
                 </div>
                 <button class="nav-btn next" onclick={() => goToNextDay()} disabled={selectedDate === today} aria-label="Next Day">
                     &gt;
-                </button>
-                <button 
-                    class="nav-btn ema-toggle mobile-only" 
-                    class:active={showEMAs}
-                    onclick={() => showEMAs = !showEMAs} 
-                    aria-label="Toggle Trends"
-                >
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
-                    </svg>
                 </button>
             </div>
             
@@ -407,6 +443,73 @@
         gap: 24px;
     }
 
+    /* Flip Card Styles */
+    .flip-card {
+        background-color: transparent;
+        width: 100%;
+        perspective: 1000px;
+        margin-bottom: 24px;
+    }
+
+    .flip-card-inner {
+        position: relative;
+        width: 100%;
+        text-align: center;
+        transition: transform 0.6s;
+        transform-style: preserve-3d;
+    }
+
+    .flip-card.flipped .flip-card-inner {
+        transform: rotateY(-180deg);
+    }
+
+    .flip-card-front, .flip-card-back {
+        position: relative;
+        width: 100%;
+        -webkit-backface-visibility: hidden;
+        backface-visibility: hidden;
+        border-radius: 24px;
+    }
+
+    .flip-card-back {
+        position: absolute;
+        top: 0;
+        left: 0;
+        transform: rotateY(-180deg);
+    }
+
+    .flip-toggle-btn {
+        position: absolute;
+        top: 12px;
+        left: 12px;
+        z-index: 10;
+        background: rgba(255, 255, 255, 0.1);
+        border: none;
+        color: var(--text-secondary);
+        padding: 8px;
+        border-radius: 12px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+    }
+
+    .flip-toggle-btn:hover {
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+    }
+
+    .flip-toggle-btn.back {
+        left: auto;
+        right: 12px;
+    }
+
+    .ema-mobile-content {
+        padding-top: 40px;
+        width: 100%;
+    }
+
     .stats-section {
         padding: 24px;
         display: flex;
@@ -414,14 +517,44 @@
         align-items: center;
         width: 100%;
         position: relative;
+        min-height: 480px;
+    }
+
+    /* AI Analysis Card */
+    .ai-analysis-card {
+        padding: 20px;
+        margin-bottom: 24px;
+    }
+
+    .ai-analysis-card h3 {
+        margin: 0 0 12px 0;
+        font-size: 1rem;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .coming-soon {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        color: var(--text-muted);
+    }
+
+    .badge {
+        background: var(--color-primary);
+        color: white;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 0.7rem;
+        font-weight: 700;
+        width: fit-content;
     }
 
     .status-positioner {
         position: absolute;
         top: 12px;
         right: 12px;
-        /* background: rgba(0,0,0,0.2); Removed to prevent "black box" around icon */
-        /* backdrop-filter: blur(4px); */
     }
 
     .hero-ring {
@@ -502,22 +635,13 @@
 
     .ema-desktop-wrapper {
         margin-bottom: 24px;
-    }
-
-    .ema-mobile-wrapper {
-        margin-bottom: 16px;
         background: rgba(255, 255, 255, 0.05);
-        padding: 12px;
-        border-radius: 16px;
+        padding: 24px;
+        border-radius: 24px;
     }
 
     .desktop-only {
         display: none;
-    }
-
-    .ema-toggle.active {
-        color: var(--color-primary);
-        filter: drop-shadow(0 0 8px var(--color-primary));
     }
 
     /* Desktop Layout */
@@ -541,9 +665,23 @@
             align-items: start;
         }
         
-        .stats-section {
+        .left-col {
             position: sticky;
             top: 40px;
+        }
+
+        .flip-card {
+            transform: none !important;
+            perspective: none;
+        }
+        
+        .flip-card-inner {
+            transform: none !important;
+            transform-style: flat;
+        }
+
+        .flip-card-back {
+            display: none;
         }
     }
 </style>

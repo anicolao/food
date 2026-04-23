@@ -72,22 +72,23 @@ test('US-114: EMA Graphs', async ({ page }, testInfo) => {
     await expect(page.getByTestId('debug-load')).toBeVisible();
 
     await tester.step('ema-mobile-initial', {
-        description: 'EMA graphs are hidden on mobile by default',
+        description: 'EMA graphs are hidden on mobile by default (on back of card)',
         verifications: [
-            { spec: 'Mobile EMA wrapper not visible', check: async () => await expect(page.locator('.ema-mobile-wrapper')).not.toBeVisible() },
-            { spec: 'Toggle button exists', check: async () => await expect(page.locator('.ema-toggle')).toBeVisible() }
+            { spec: 'Card is not flipped', check: async () => await expect(page.locator('.flip-card')).not.toHaveClass(/flipped/) },
+            { spec: 'Toggle button exists', check: async () => await expect(page.locator('.flip-toggle-btn').first()).toBeVisible() }
         ]
     });
 
     // Toggle on
-    await page.locator('.ema-toggle').click();
+    await page.locator('.flip-toggle-btn').first().click();
+    await page.waitForTimeout(700);
 
     await tester.step('ema-mobile-toggled', {
-        description: 'EMA graphs are visible on mobile after toggle',
+        description: 'EMA graphs are visible on mobile after flip',
         verifications: [
-            { spec: 'Mobile EMA wrapper visible', check: async () => await expect(page.locator('.ema-mobile-wrapper')).toBeVisible() },
-            { spec: 'Protein EMA chart exists', check: async () => await expect(page.locator('.ema-mobile-wrapper svg[aria-label="EMA Chart for Protein"]')).toBeVisible() },
-            { spec: 'Sodium EMA chart exists', check: async () => await expect(page.locator('.ema-mobile-wrapper svg[aria-label="EMA Chart for Sodium"]')).toBeVisible() }
+            { spec: 'Card is flipped', check: async () => await expect(page.locator('.flip-card')).toHaveClass(/flipped/) },
+            { spec: 'Protein EMA chart exists', check: async () => await expect(page.locator('.ema-mobile-content svg[aria-label="EMA Chart for Protein"]')).toBeVisible() },
+            { spec: 'Sodium EMA chart exists', check: async () => await expect(page.locator('.ema-mobile-content svg[aria-label="EMA Chart for Sodium"]')).toBeVisible() }
         ]
     });
 
@@ -98,7 +99,7 @@ test('US-114: EMA Graphs', async ({ page }, testInfo) => {
             { 
                 spec: 'Hover on Calories chart shows value', 
                 check: async () => {
-                    const chart = page.locator('.ema-mobile-wrapper svg[aria-label="EMA Chart for Calories"]');
+                    const chart = page.locator('.ema-mobile-content svg[aria-label="EMA Chart for Calories"]');
                     await chart.hover({ position: { x: 80, y: 30 } });
                     await expect(page.locator('.hover-value')).toBeVisible();
                 } 

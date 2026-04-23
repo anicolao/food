@@ -5,9 +5,12 @@
 
     interface Props {
         selectedDate: string;
+        chartWidth?: number;
+        chartHeight?: number;
+        columns?: number;
     }
 
-    let { selectedDate }: Props = $props();
+    let { selectedDate, chartWidth = 160, chartHeight = 60, columns }: Props = $props();
 
     let state = $state(store.getState());
 
@@ -77,11 +80,11 @@
     let fatData = $derived(getMetricEMASeries(stats, 'totalFat', selectedDate, 30, 7));
 </script>
 
-<div class="ema-container">
-    <MetricEMAChart label="Calories" data={caloriesData} target={settings.targetCalories} color="#43e97b" unit="kcal" />
-    <MetricEMAChart label="Protein" data={proteinData} target={macroTargets.protein} color="#c471ed" unit="g" />
-    <MetricEMAChart label="Carbs" data={carbsData} target={macroTargets.carbs} color="#24c6dc" unit="g" />
-    <MetricEMAChart label="Fat" data={fatData} target={macroTargets.fat} color="#D1913C" unit="g" />
+<div class="ema-container" style="grid-template-columns: {columns ? `repeat(${columns}, 1fr)` : 'repeat(auto-fill, minmax(170px, 1fr))'}">
+    <MetricEMAChart label="Calories" data={caloriesData} target={settings.targetCalories} color="#43e97b" unit="kcal" width={chartWidth} height={chartHeight} />
+    <MetricEMAChart label="Protein" data={proteinData} target={macroTargets.protein} color="#c471ed" unit="g" width={chartWidth} height={chartHeight} />
+    <MetricEMAChart label="Carbs" data={carbsData} target={macroTargets.carbs} color="#24c6dc" unit="g" width={chartWidth} height={chartHeight} />
+    <MetricEMAChart label="Fat" data={fatData} target={macroTargets.fat} color="#D1913C" unit="g" width={chartWidth} height={chartHeight} />
     
     {#each activeMicros as micro}
         <MetricEMAChart 
@@ -91,6 +94,8 @@
             limit={micro.limit}
             color={micro.color} 
             unit={micro.unit} 
+            width={chartWidth}
+            height={chartHeight}
         />
     {/each}
 </div>
