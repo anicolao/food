@@ -3,6 +3,7 @@
 	import '../app.css';
 
 	import MobileNav from '$lib/components/ui/MobileNav.svelte';
+	import DesktopSidebar from '$lib/components/ui/DesktopSidebar.svelte';
 	import ToastContainer from '$lib/components/ui/ToastContainer.svelte';
 	import PageTransitionWrapper from '$lib/components/ui/PageTransitionWrapper.svelte';
 	import { page } from '$app/stores';
@@ -14,6 +15,7 @@
     import { syncManager } from '$lib/sync-manager';
     import { store, batchHydrateEvents, setConfig } from '$lib/store';
     import { ensureDataStructures, saveIdentity } from '$lib/sheets';
+    import DesktopHeader from '$lib/components/ui/DesktopHeader.svelte';
 
 	let { children } = $props();
 
@@ -129,7 +131,12 @@
 
 
 <div class="app-shell">
+	<div class="desktop-nav">
+		<DesktopSidebar />
+	</div>
+	
 	<div class="main-content">
+        <DesktopHeader />
         <div class="content-area-grid">
             {#if reducedMotion || !transitionsEnabled}
                 <div class="transition-wrapper">
@@ -165,6 +172,10 @@
 		min-height: 100vh;
 	}
 
+	.desktop-nav {
+		display: none;
+	}
+
 	.mobile-nav-wrapper {
 		display: block;
 	}
@@ -194,5 +205,22 @@
 		grid-area: content;
 		width: 100%;
 		/* Ensure wrapper takes full height/width of the cell */
+	}
+
+	@media (min-width: 1024px) {
+		.desktop-nav {
+			display: block;
+			width: 280px; /* Match sidebar width */
+			flex-shrink: 0;
+		}
+
+		.mobile-nav-wrapper {
+			display: none;
+		}
+
+		.main-content {
+			padding-bottom: 0;
+            /* On desktop, main-content is right side of flex row */
+		}
 	}
 </style>
