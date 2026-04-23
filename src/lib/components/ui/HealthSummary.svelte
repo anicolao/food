@@ -158,13 +158,13 @@
     .health-summary {
         display: flex;
         flex-direction: column;
-        align-self: stretch;
-        width: auto;
+        width: calc(100% + 48px);
         margin: 16px -24px -24px -24px;
         padding: 16px 0;
         gap: 4px;
         background: rgba(0, 0, 0, 0.15);
         border-top: 1px solid rgba(255, 255, 255, 0.05);
+        box-sizing: border-box;
     }
 
     .primary-health-metrics {
