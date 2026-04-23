@@ -11,6 +11,7 @@
         gradientEnd: string;
         isLimit?: boolean; // If true, turning red when over target (Sodium)
         onclick?: () => void;
+        fullBleed?: boolean;
     }
 
     let {
@@ -21,7 +22,8 @@
         gradientStart,
         gradientEnd,
         isLimit = false,
-        onclick
+        onclick,
+        fullBleed = false
     }: Props = $props();
 
     const reducedMotion = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -44,6 +46,7 @@
 <div 
     class="health-bar-container" 
     class:clickable={!!onclick}
+    class:full-bleed={fullBleed}
     {onclick}
 >
     <div class="header">
@@ -62,6 +65,10 @@
     .health-bar-container {
         width: 100%;
         margin-bottom: 12px;
+    }
+
+    .health-bar-container.full-bleed {
+        margin-bottom: 8px;
     }
 
     .health-bar-container.clickable {
@@ -83,6 +90,10 @@
         letter-spacing: 0.05em;
     }
 
+    .full-bleed .header {
+        padding: 0 24px;
+    }
+
     .label {
         color: var(--text-secondary);
     }
@@ -100,11 +111,22 @@
         border: 1px solid rgba(255, 255, 255, 0.05);
     }
 
+    .full-bleed .bar-bg {
+        border-radius: 0;
+        border-left: none;
+        border-right: none;
+        height: 8px;
+    }
+
     .bar-fill {
         height: 100%;
         border-radius: 5px;
         transition: width 0.3s ease-out;
         box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+    }
+
+    .full-bleed .bar-fill {
+        border-radius: 0 4px 4px 0;
     }
 
     @media (prefers-reduced-motion: reduce) {

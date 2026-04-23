@@ -391,6 +391,7 @@
         align-items: center;
         width: 100%;
         position: relative;
+        overflow: hidden;
     }
 
     .status-positioner {
