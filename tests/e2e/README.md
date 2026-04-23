@@ -48,3 +48,13 @@
 
 ---
 
+## Entry Details page in desktop layout
+
+![Entry Details page in desktop layout](./screenshots/005-entry-details-desktop.png)
+
+**Verifications:**
+- [x] Back link visible
+- [x] Nutrition info visible
+
+---
+
