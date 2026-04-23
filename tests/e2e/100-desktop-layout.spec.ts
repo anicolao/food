@@ -183,5 +183,22 @@ test('US-112: Desktop Layout and Navigation', async ({ page }, testInfo) => {
         ]
     });
 
+    // 6. Entry Details Page
+    await page.goto('/');
+    await expect(page.getByText('Desktop Salad')).toBeVisible();
+    await page.getByText('Desktop Salad').click();
+    
+    // The details page should show the Back link and the nutrition info
+    await expect(page.getByText('Back')).toBeVisible();
+    await expect(page.getByLabel('Item Name')).toHaveValue('Desktop Salad');
+
+    await tester.step('entry-details-desktop', {
+        description: 'Entry Details page in desktop layout',
+        verifications: [
+            { spec: 'Back link visible', check: async () => await expect(page.getByText('Back')).toBeVisible() },
+            { spec: 'Nutrition info visible', check: async () => await expect(page.getByText('Calories')).toBeVisible() }
+        ]
+    });
+
     await tester.generateDocs();
 });
