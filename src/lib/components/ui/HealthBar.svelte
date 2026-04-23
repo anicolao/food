@@ -61,7 +61,6 @@
 <style>
     .health-bar-container {
         width: 100%;
-        margin-bottom: 12px;
         transition: background 0.2s;
     }
 
@@ -82,28 +81,21 @@
         font-weight: 700;
         text-transform: uppercase;
         letter-spacing: 0.05em;
+        padding: 0 24px;
     }
-
-    .label {
-        color: var(--text-secondary);
-    }
-
-    .value {
-        color: var(--text-primary);
-    }
-
+    
     .bar-bg {
         width: 100%;
-        height: 10px;
+        height: 12px;
         background: rgba(255, 255, 255, 0.05);
-        border-radius: 5px;
         overflow: hidden;
-        border: 1px solid rgba(255, 255, 255, 0.05);
+        border-top: 1px solid rgba(255, 255, 255, 0.05);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        margin-bottom: 12px;
     }
 
     .bar-fill {
         height: 100%;
-        border-radius: 5px;
         transition: width 0.3s ease-out;
         box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
     }

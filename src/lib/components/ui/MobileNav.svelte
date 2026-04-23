@@ -42,7 +42,7 @@
 
 <nav class="mobile-nav glass-panel">
     <div class="nav-group">
-        <NavItem href="{base}/" label="Home" active={true}>
+        <NavItem href="{base}/" label="Home" active={$page.url.pathname === `${base}/` || $page.url.pathname === base}>
             {#snippet icon()}
             <!-- Home Icon -->
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
@@ -70,7 +70,11 @@
     </div>
 
     <div class="nav-group">
-        <NavItem href={isReadOnly ? `${base}/switcher` : `${base}/settings`} label={isReadOnly ? "Switch User" : "Settings"}>
+        <NavItem 
+            href={isReadOnly ? `${base}/switcher` : `${base}/settings`} 
+            label={isReadOnly ? "Switch User" : "Settings"}
+            active={$page.url.pathname.startsWith(`${base}/settings`) || $page.url.pathname.startsWith(`${base}/switcher`)}
+        >
             {#snippet icon()}
             <!-- Settings/User Icon -->
              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
