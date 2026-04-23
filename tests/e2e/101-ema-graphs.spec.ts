@@ -61,8 +61,8 @@ test('US-114: EMA Graphs', async ({ page }, testInfo) => {
         description: 'EMA graphs are visible on desktop',
         verifications: [
             { spec: 'Desktop EMA wrapper visible', check: async () => await expect(page.locator('.ema-desktop-wrapper')).toBeVisible() },
-            { spec: 'Calories EMA chart exists', check: async () => await expect(page.locator('.ema-desktop-wrapper').getByText('Calories')).toBeVisible() },
-            { spec: 'Fiber EMA chart exists', check: async () => await expect(page.locator('.ema-desktop-wrapper').getByText('Fiber')).toBeVisible() }
+            { spec: 'Calories EMA chart exists', check: async () => await expect(page.locator('.ema-desktop-wrapper svg[aria-label="EMA Chart for Calories"]')).toBeVisible() },
+            { spec: 'Fiber EMA chart exists', check: async () => await expect(page.locator('.ema-desktop-wrapper svg[aria-label="EMA Chart for Fiber"]')).toBeVisible() }
         ]
     });
 
@@ -86,8 +86,8 @@ test('US-114: EMA Graphs', async ({ page }, testInfo) => {
         description: 'EMA graphs are visible on mobile after toggle',
         verifications: [
             { spec: 'Mobile EMA wrapper visible', check: async () => await expect(page.locator('.ema-mobile-wrapper')).toBeVisible() },
-            { spec: 'Protein EMA chart exists', check: async () => await expect(page.locator('.ema-mobile-wrapper').getByText('Protein')).toBeVisible() },
-            { spec: 'Sodium EMA chart exists', check: async () => await expect(page.locator('.ema-mobile-wrapper').getByText('Sodium')).toBeVisible() }
+            { spec: 'Protein EMA chart exists', check: async () => await expect(page.locator('.ema-mobile-wrapper svg[aria-label="EMA Chart for Protein"]')).toBeVisible() },
+            { spec: 'Sodium EMA chart exists', check: async () => await expect(page.locator('.ema-mobile-wrapper svg[aria-label="EMA Chart for Sodium"]')).toBeVisible() }
         ]
     });
 
@@ -98,7 +98,7 @@ test('US-114: EMA Graphs', async ({ page }, testInfo) => {
             { 
                 spec: 'Hover on Calories chart shows value', 
                 check: async () => {
-                    const chart = page.locator('svg[aria-label="EMA Chart for Calories"]').first();
+                    const chart = page.locator('.ema-mobile-wrapper svg[aria-label="EMA Chart for Calories"]');
                     await chart.hover({ position: { x: 80, y: 30 } });
                     await expect(page.locator('.hover-value')).toBeVisible();
                 } 
