@@ -155,9 +155,14 @@
     .health-summary {
         display: flex;
         flex-direction: column;
-        width: 100%;
-        margin-top: 16px;
+        width: calc(100% + 48px);
+        margin: 16px -24px -24px -24px;
+        padding: 16px 24px;
         gap: 4px;
+        background: rgba(0, 0, 0, 0.15);
+        border-top: 1px solid rgba(255, 255, 255, 0.05);
+        border-bottom-left-radius: var(--radius-l);
+        border-bottom-right-radius: var(--radius-l);
     }
 
     .primary-health-metrics {
@@ -176,16 +181,5 @@
 
     .metric-wrapper {
         width: 100%;
-    }
-
-    @media (min-width: 480px) {
-        .primary-health-metrics {
-            flex-direction: row;
-            gap: 16px;
-        }
-
-        .metric-wrapper {
-            flex: 1;
-        }
     }
 </style>
