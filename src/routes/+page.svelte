@@ -17,11 +17,13 @@
   import HealthSummary from '$lib/components/ui/HealthSummary.svelte';
   import ActivityCard from '$lib/components/ui/ActivityCard.svelte';
   import NetworkStatus from '$lib/components/ui/NetworkStatus.svelte';
+  import HealthBreakdownModal from '$lib/components/ui/HealthBreakdownModal.svelte';
 
   // Reactive State
   let authenticated = $state(false);
   let allLogs = $state<any[]>(store.getState().projections.log); // Synced from Redux
   let settings = $state(store.getState().settings);
+  let activeBreakdown = $state<{ title: string; key: string; unit: string } | null>(null);
   
   // Current Business Date (4AM cutoff)
   const today = getBusinessDate(new Date());
@@ -270,7 +272,7 @@
              {#if settings.showHealthMetrics}
                 <HealthSummary 
                     {stats}
-                    logs={visibleLogs}
+                    onshowBreakdown={(title, key, unit) => activeBreakdown = { title, key, unit }}
                 />
              {/if}
              
@@ -346,6 +348,16 @@
             </div>
         </section>
     </div>
+
+    {#if activeBreakdown}
+        <HealthBreakdownModal 
+            title={activeBreakdown.title}
+            logs={visibleLogs}
+            nutrientKey={activeBreakdown.key}
+            unit={activeBreakdown.unit}
+            onclose={() => activeBreakdown = null}
+        />
+    {/if}
   {/if}
 
 </div>
