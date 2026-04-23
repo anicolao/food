@@ -48,9 +48,14 @@ test('US-112: Desktop Layout and Navigation', async ({ page }, testInfo) => {
     // Robust Google API Mocks
     await mockDriveAPI(page);
     
+    // Dynamic data for Edit Flow
+    let saladName = 'Desktop Salad';
+    let saladCalories = 500;
+
     // Override only the Events values to provide our Desktop Salad
     await page.route('**/values/Events**', async route => {
-        if (route.request().method() === 'GET') {
+        const method = route.request().method();
+        if (method === 'GET') {
             await route.fulfill({
                 json: {
                     values: [
@@ -60,8 +65,8 @@ test('US-112: Desktop Layout and Navigation', async ({ page }, testInfo) => {
                                 date: today,
                                 time: '12:00',
                                 mealType: 'Lunch',
-                                description: 'Desktop Salad',
-                                calories: 500,
+                                description: saladName,
+                                calories: saladCalories,
                                 protein: 20,
                                 fat: 10,
                                 carbs: 50
@@ -70,6 +75,20 @@ test('US-112: Desktop Layout and Navigation', async ({ page }, testInfo) => {
                     ]
                 }
             });
+        } else if (method === 'POST') {
+            const body = route.request().postDataJSON();
+            if (body && body.values && body.values[0]) {
+                try {
+                    const payload = JSON.parse(body.values[0][3]);
+                    if (payload.entry) {
+                        saladName = payload.entry.description;
+                        saladCalories = payload.entry.calories;
+                    }
+                } catch (e) {
+                    console.log('Failed to parse POST body', e);
+                }
+            }
+            await route.fulfill({ json: { updates: { updatedRange: 'Events!A2' } } });
         } else {
             await route.fallback();
         }
@@ -130,6 +149,17 @@ test('US-112: Desktop Layout and Navigation', async ({ page }, testInfo) => {
         ]
     });
 
+    // 7. Network & Sync Page
+    await page.goto('/settings/network');
+    await expect(page.getByRole('heading', { name: 'Network & Sync' })).toBeVisible();
+
+    await tester.step('settings-network-desktop', {
+        description: 'Network & Sync page in desktop layout',
+        verifications: [
+            { spec: 'Heading visible', check: async () => await expect(page.getByRole('heading', { name: 'Network & Sync' })).toBeVisible() }
+        ]
+    });
+
     // 4. Switcher Page
     await page.locator('.desktop-header .user-chip').click();
     await expect(page).toHaveURL(/\/switcher/);
@@ -139,6 +169,17 @@ test('US-112: Desktop Layout and Navigation', async ({ page }, testInfo) => {
         description: 'Switcher page in desktop layout',
         verifications: [
             { spec: 'Mock users visible', check: async () => await expect(page.getByText('Bob')).toBeVisible() }
+        ]
+    });
+
+    // 8. Privacy Page
+    await page.goto('/privacy');
+    await expect(page.getByRole('heading', { name: 'Privacy Policy for Food Sheets' })).toBeVisible();
+
+    await tester.step('privacy-page-desktop', {
+        description: 'Privacy page in desktop layout',
+        verifications: [
+            { spec: 'Heading visible', check: async () => await expect(page.getByRole('heading', { name: 'Privacy Policy for Food Sheets' })).toBeVisible() }
         ]
     });
 
@@ -199,6 +240,29 @@ test('US-112: Desktop Layout and Navigation', async ({ page }, testInfo) => {
             { spec: 'Nutrition info visible', check: async () => await expect(page.getByText('Calories')).toBeVisible() }
         ]
     });
+
+    // 9. Edit Flow
+    await page.goto('/');
+    await expect(page.getByText('Desktop Salad')).toBeVisible();
+    await page.getByText('Desktop Salad').click();
+    
+    await page.getByLabel('Item Name').fill('Updated Desktop Salad');
+    await page.getByLabel('Calories').fill('600');
+    await page.getByRole('button', { name: 'Save Changes' }).click();
+    
+    // Should redirect to dashboard
+    await expect(page).toHaveURL(/\/(\?|$)/);
+    await expect(page.getByText('Updated Desktop Salad')).toBeVisible();
+    await expect(page.getByRole('link', { name: /Updated Desktop Salad/ }).getByText('600 kcal')).toBeVisible();
+
+    await tester.step('edit-flow-desktop', {
+        description: 'Edit flow in desktop layout',
+        verifications: [
+            { spec: 'Updated name visible', check: async () => await expect(page.getByText('Updated Desktop Salad')).toBeVisible() },
+            { spec: 'Updated calories visible', check: async () => await expect(page.getByRole('link', { name: /Updated Desktop Salad/ }).getByText('600 kcal')).toBeVisible() }
+        ]
+    });
+
 
     await tester.generateDocs();
 });
