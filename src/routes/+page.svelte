@@ -397,22 +397,8 @@
         gap: 24px;
     }
 
-    @media (min-width: 1024px) {
-        .dashboard-grid {
-            display: grid;
-            grid-template-columns: 380px 1fr;
-            gap: 32px;
-            align-items: start;
-        }
-
-        .left-col {
-            position: sticky;
-            top: 24px;
-        }
-    }
-
     .stats-section {
-        padding: 24px 0;
+        padding: 24px;
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -425,11 +411,12 @@
         position: absolute;
         top: 12px;
         right: 12px;
+        /* background: rgba(0,0,0,0.2); Removed to prevent "black box" around icon */
+        /* backdrop-filter: blur(4px); */
     }
 
     .hero-ring {
         margin-bottom: 30px;
-        padding: 0 24px;
     }
 
     .macros-row {
@@ -437,7 +424,6 @@
         justify-content: space-around;
         width: 100%;
         max-width: 400px;
-        padding: 0 24px;
     }
 
     .feed-header {

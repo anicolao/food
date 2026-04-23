@@ -969,8 +969,6 @@
   .log-page {
     min-height: 100vh;
     padding-bottom: 120px;
-    max-width: 800px;
-    margin: 0 auto;
   }
 
   .start-ui {
