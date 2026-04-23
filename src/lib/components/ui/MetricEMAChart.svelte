@@ -2,13 +2,13 @@
     interface Props {
         label: string;
         data: number[];
-        target: number;
-        targetRange?: [number, number];
+        target?: number;
+        limit?: number;
         color: string;
         unit?: string;
     }
 
-    let { label, data, target, targetRange, color, unit = '' }: Props = $props();
+    let { label, data, target, limit, color, unit = '' }: Props = $props();
 
     const width = 160;
     const height = 60;
@@ -18,11 +18,17 @@
         return height - padding - ((v - minVal) / range) * (height - 2 * padding);
     }
 
+    let allBaselineVals = $derived.by(() => {
+        const vals: number[] = [];
+        if (target !== undefined) vals.push(target);
+        if (limit !== undefined) vals.push(limit);
+        return vals;
+    });
+
     let points = $derived.by(() => {
         if (data.length === 0) return '';
         
-        let allVals = [...data, target];
-        if (targetRange) allVals.push(...targetRange);
+        let allVals = [...data, ...allBaselineVals];
         
         const minVal = Math.min(...allVals);
         const maxVal = Math.max(...allVals);
@@ -37,17 +43,20 @@
         }).join(' ');
     });
 
-    let targetLines = $derived.by(() => {
-        let allVals = [...data, target];
-        if (targetRange) allVals.push(...targetRange);
+    let targetLinesData = $derived.by(() => {
+        if (data.length === 0 && allBaselineVals.length === 0) return [];
+        
+        let allVals = [...data, ...allBaselineVals];
         const minVal = Math.min(...allVals);
         const maxVal = Math.max(...allVals);
         const range = maxVal - minVal || 1;
 
-        const lines = [{ y: getY(target, minVal, range), value: target }];
-        if (targetRange) {
-            lines.push({ y: getY(targetRange[0], minVal, range), value: targetRange[0] });
-            lines.push({ y: getY(targetRange[1], minVal, range), value: targetRange[1] });
+        const lines = [];
+        if (target !== undefined) {
+            lines.push({ y: getY(target, minVal, range), value: target, label: 'Target' });
+        }
+        if (limit !== undefined && limit !== target) {
+            lines.push({ y: getY(limit, minVal, range), value: limit, label: 'Limit' });
         }
         return lines;
     });
@@ -58,8 +67,7 @@
     let hoverData = $derived.by(() => {
         if (hoverIndex === null || data.length === 0) return null;
         
-        let allVals = [...data, target];
-        if (targetRange) allVals.push(...targetRange);
+        let allVals = [...data, ...allBaselineVals];
         const minVal = Math.min(...allVals);
         const maxVal = Math.max(...allVals);
         const range = maxVal - minVal || 1;
@@ -110,27 +118,6 @@
             </filter>
         </defs>
 
-        <!-- Target Lines -->
-        {#each targetLines as line}
-            <g>
-                <line 
-                    x1={padding} y1={line.y} x2={width - padding} y2={line.y} 
-                    stroke="rgba(255,255,255,0.15)" 
-                    stroke-width="1" 
-                    stroke-dasharray="4 2" 
-                />
-                <text 
-                    x={width - padding} y={line.y - 2} 
-                    text-anchor="end" 
-                    font-size="6" 
-                    fill="rgba(255,255,255,0.3)"
-                    class="target-label"
-                >
-                    {Math.round(line.value)}
-                </text>
-            </g>
-        {/each}
-        
         <!-- EMA Curve -->
         <polyline
             points={points}
@@ -141,6 +128,28 @@
             stroke-linejoin="round"
             filter="url(#glow-{label.replace(/\s+/g, '-')})"
         />
+
+        <!-- Target and Limit Lines (Drawn on top) -->
+        {#each targetLinesData as line}
+            <g>
+                <line 
+                    x1={padding} y1={line.y} x2={width - padding} y2={line.y} 
+                    stroke="rgba(255,255,255,0.25)" 
+                    stroke-width="1" 
+                    stroke-dasharray="4 2" 
+                    class="target-line"
+                />
+                <text 
+                    x={width - padding} y={line.y - 2} 
+                    text-anchor="end" 
+                    font-size="6" 
+                    fill="rgba(255,255,255,0.5)"
+                    class="target-label"
+                >
+                    {Math.round(line.value)}
+                </text>
+            </g>
+        {/each}
 
         <!-- Hover Indicator -->
         {#if hoverData}

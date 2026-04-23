@@ -30,17 +30,22 @@
         color: string;
         unit: string;
         settingsKey: keyof import('$lib/store').SettingsState;
+        isLimit?: boolean;
     }
 
     const microConfigs: MicroMetricConfig[] = [
         { key: 'totalFiber', label: 'Fiber', color: '#81c784', unit: 'g', settingsKey: 'fiberGoal' },
-        { key: 'totalSodium', label: 'Sodium', color: '#e57373', unit: 'mg', settingsKey: 'sodiumGoal' },
-        { key: 'totalSugar', label: 'Sugar', color: '#ba68c8', unit: 'g', settingsKey: 'sugarLimit' },
-        { key: 'totalAddedSugar', label: 'Added Sugar', color: '#f06292', unit: 'g', settingsKey: 'addedSugarLimit' },
-        { key: 'totalSaturatedFat', label: 'Sat. Fat', color: '#ffb74d', unit: 'g', settingsKey: 'satFatLimit' },
-        { key: 'totalTransFat', label: 'Trans Fat', color: '#ff8a65', unit: 'g', settingsKey: 'transFatLimit' },
-        { key: 'totalCholesterol', label: 'Cholesterol', color: '#90a4ae', unit: 'mg', settingsKey: 'cholesterolLimit' }
+        { key: 'totalSodium', label: 'Sodium', color: '#e57373', unit: 'mg', settingsKey: 'sodiumGoal', isLimit: true },
+        { key: 'totalSugar', label: 'Sugar', color: '#ba68c8', unit: 'g', settingsKey: 'sugarLimit', isLimit: true },
+        { key: 'totalAddedSugar', label: 'Added Sugar', color: '#f06292', unit: 'g', settingsKey: 'addedSugarLimit', isLimit: true },
+        { key: 'totalSaturatedFat', label: 'Sat. Fat', color: '#ffb74d', unit: 'g', settingsKey: 'satFatLimit', isLimit: true },
+        { key: 'totalTransFat', label: 'Trans Fat', color: '#ff8a65', unit: 'g', settingsKey: 'transFatLimit', isLimit: true },
+        { key: 'totalCholesterol', label: 'Cholesterol', color: '#90a4ae', unit: 'mg', settingsKey: 'cholesterolLimit', isLimit: true }
     ];
+
+    function getSubTarget(valuePer1000: number) {
+        return Math.round((settings.targetCalories / 1000) * valuePer1000);
+    }
 
     let activeMicros = $derived.by(() => {
         return microConfigs
@@ -50,19 +55,26 @@
             })
             .map(config => {
                 const setting = settings[config.settingsKey] as { value: number; enabled: boolean };
+                
+                // Some limits are per 1000kcal, others are absolute
+                const value = (config.key === 'totalFiber' || config.key === 'totalSodium') 
+                    ? setting.value 
+                    : getSubTarget(setting.value);
+
                 return {
                     ...config,
-                    data: getMetricEMASeries(stats, config.key, selectedDate),
-                    target: setting.value
+                    data: getMetricEMASeries(stats, config.key, selectedDate, 30, 7),
+                    target: !config.isLimit ? value : undefined,
+                    limit: config.isLimit ? value : undefined
                 };
             });
     });
 
-    // Core series
-    let caloriesData = $derived(getMetricEMASeries(stats, 'totalCalories', selectedDate));
-    let proteinData = $derived(getMetricEMASeries(stats, 'totalProtein', selectedDate));
-    let carbsData = $derived(getMetricEMASeries(stats, 'totalCarbs', selectedDate));
-    let fatData = $derived(getMetricEMASeries(stats, 'totalFat', selectedDate));
+    // Core series - use 7-day EMA
+    let caloriesData = $derived(getMetricEMASeries(stats, 'totalCalories', selectedDate, 30, 7));
+    let proteinData = $derived(getMetricEMASeries(stats, 'totalProtein', selectedDate, 30, 7));
+    let carbsData = $derived(getMetricEMASeries(stats, 'totalCarbs', selectedDate, 30, 7));
+    let fatData = $derived(getMetricEMASeries(stats, 'totalFat', selectedDate, 30, 7));
 </script>
 
 <div class="ema-container">
@@ -75,7 +87,8 @@
         <MetricEMAChart 
             label={micro.label} 
             data={micro.data} 
-            target={micro.target} 
+            target={micro.target}
+            limit={micro.limit}
             color={micro.color} 
             unit={micro.unit} 
         />
