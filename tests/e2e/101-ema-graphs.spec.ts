@@ -91,5 +91,20 @@ test('US-114: EMA Graphs', async ({ page }, testInfo) => {
         ]
     });
 
+    // 3. Hover Interaction
+    await tester.step('ema-chart-hover', {
+        description: 'Hovering on an EMA chart shows indicator and value',
+        verifications: [
+            { 
+                spec: 'Hover on Calories chart shows value', 
+                check: async () => {
+                    const chart = page.locator('svg[aria-label="EMA Chart for Calories"]').first();
+                    await chart.hover({ position: { x: 80, y: 30 } });
+                    await expect(page.locator('.hover-value')).toBeVisible();
+                } 
+            }
+        ]
+    });
+
     await tester.generateDocs();
 });

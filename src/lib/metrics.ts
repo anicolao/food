@@ -42,7 +42,7 @@ export function getMetricEMASeries(
   metricKey: string,
   endDate: string,
   daysBack: number = 30,
-  emaPeriods: number = 7
+  emaPeriods: number = 14
 ): number[] {
   const dates = getDatesRange(endDate, daysBack);
   const rawData = dates.map(date => stats[date]?.[metricKey] || 0);
