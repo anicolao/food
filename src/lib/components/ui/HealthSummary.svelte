@@ -44,34 +44,30 @@
 <div class="health-summary">
     <div class="primary-health-metrics">
         {#if settings.fiberGoal.enabled}
-            <div class="metric-wrapper">
-                <HealthBar 
-                    label="Fiber" 
-                    value={stats.totalFiber} 
-                    target={settings.fiberGoal.value} 
-                    unit="g" 
-                    gradientStart="#43e97b" 
-                    gradientEnd="#38f9d7" 
-                    fullBleed={true}
-                    onclick={() => showBreakdown('Fiber', 'fiber', 'g')}
-                />
-            </div>
+            <HealthBar 
+                label="Fiber" 
+                value={stats.totalFiber} 
+                target={settings.fiberGoal.value} 
+                unit="g" 
+                gradientStart="#43e97b" 
+                gradientEnd="#38f9d7" 
+                fullBleed={true}
+                onclick={() => showBreakdown('Fiber', 'fiber', 'g')}
+            />
         {/if}
 
         {#if settings.sodiumGoal.enabled}
-            <div class="metric-wrapper">
-                <HealthBar 
-                    label="Sodium" 
-                    value={stats.totalSodium} 
-                    target={settings.sodiumGoal.value} 
-                    unit="mg" 
-                    gradientStart="#f6d365" 
-                    gradientEnd="#fda085" 
-                    isLimit={true}
-                    fullBleed={true}
-                    onclick={() => showBreakdown('Sodium', 'sodium', 'mg')}
-                />
-            </div>
+            <HealthBar 
+                label="Sodium" 
+                value={stats.totalSodium} 
+                target={settings.sodiumGoal.value} 
+                unit="mg" 
+                gradientStart="#f6d365" 
+                gradientEnd="#fda085" 
+                isLimit={true}
+                fullBleed={true}
+                onclick={() => showBreakdown('Sodium', 'sodium', 'mg')}
+            />
         {/if}
     </div>
 
@@ -177,22 +173,10 @@
         width: 100%;
     }
 
-    @media (min-width: 480px) {
-        .primary-health-metrics {
-            flex-direction: row;
-            gap: 0;
-        }
-    }
-
     .other-health-metrics {
         display: flex;
         flex-direction: column;
         gap: 4px;
         width: 100%;
-    }
-
-    .metric-wrapper {
-        width: 100%;
-        flex: 1;
     }
 </style>
