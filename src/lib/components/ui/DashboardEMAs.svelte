@@ -8,9 +8,10 @@
         chartWidth?: number;
         chartHeight?: number;
         columns?: number;
+        fitToHeight?: number;
     }
 
-    let { selectedDate, chartWidth = 160, chartHeight = 60, columns }: Props = $props();
+    let { selectedDate, chartWidth = 160, chartHeight = 60, columns, fitToHeight }: Props = $props();
 
     let state = $state(store.getState());
 
@@ -78,13 +79,36 @@
     let proteinData = $derived(getMetricEMASeries(stats, 'totalProtein', selectedDate, 30, 7));
     let carbsData = $derived(getMetricEMASeries(stats, 'totalCarbs', selectedDate, 30, 7));
     let fatData = $derived(getMetricEMASeries(stats, 'totalFat', selectedDate, 30, 7));
+
+    let totalCharts = $derived(4 + activeMicros.length);
+    
+    // Calculate dynamic height if fitToHeight is provided
+    let dynamicChartHeight = $derived.by(() => {
+        if (!fitToHeight) return chartHeight;
+        
+        // We need to estimate rows. If columns not provided, we estimate based on width
+        // But for mobile flip card, columns is usually 2.
+        const cols = columns || 2;
+        const rows = Math.ceil(totalCharts / cols);
+        const containerGap = 12;
+        const cardOverhead = 46; // Padding (20) + Header (~20) + Gap (6)
+        
+        const availableTotalHeight = fitToHeight - (rows - 1) * containerGap;
+        const perCardHeight = availableTotalHeight / rows;
+        const calculatedHeight = perCardHeight - cardOverhead;
+        
+        // Ensure it doesn't get TOO small or TOO large
+        return Math.max(30, Math.min(120, calculatedHeight));
+    });
+
+    let isCompact = $derived(dynamicChartHeight < 50);
 </script>
 
 <div class="ema-container" style="grid-template-columns: {columns ? `repeat(${columns}, 1fr)` : 'repeat(auto-fill, minmax(170px, 1fr))'}">
-    <MetricEMAChart label="Calories" data={caloriesData} target={settings.targetCalories} color="#43e97b" unit="kcal" width={chartWidth} height={chartHeight} />
-    <MetricEMAChart label="Protein" data={proteinData} target={macroTargets.protein} color="#c471ed" unit="g" width={chartWidth} height={chartHeight} />
-    <MetricEMAChart label="Carbs" data={carbsData} target={macroTargets.carbs} color="#24c6dc" unit="g" width={chartWidth} height={chartHeight} />
-    <MetricEMAChart label="Fat" data={fatData} target={macroTargets.fat} color="#D1913C" unit="g" width={chartWidth} height={chartHeight} />
+    <MetricEMAChart label="Calories" data={caloriesData} target={settings.targetCalories} color="#43e97b" unit="kcal" width={chartWidth} height={dynamicChartHeight} compact={isCompact} />
+    <MetricEMAChart label="Protein" data={proteinData} target={macroTargets.protein} color="#c471ed" unit="g" width={chartWidth} height={dynamicChartHeight} compact={isCompact} />
+    <MetricEMAChart label="Carbs" data={carbsData} target={macroTargets.carbs} color="#24c6dc" unit="g" width={chartWidth} height={dynamicChartHeight} compact={isCompact} />
+    <MetricEMAChart label="Fat" data={fatData} target={macroTargets.fat} color="#D1913C" unit="g" width={chartWidth} height={dynamicChartHeight} compact={isCompact} />
     
     {#each activeMicros as micro}
         <MetricEMAChart 
@@ -95,7 +119,8 @@
             color={micro.color} 
             unit={micro.unit} 
             width={chartWidth}
-            height={chartHeight}
+            height={dynamicChartHeight}
+            compact={isCompact}
         />
     {/each}
 </div>
