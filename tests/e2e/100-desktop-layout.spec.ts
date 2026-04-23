@@ -1,6 +1,6 @@
-import { test, expect } from '../fixtures';
-import { TestStepHelper } from '../helpers/test-step-helper';
-import { mockDriveAPI } from '../helpers/mock-drive';
+import { test, expect } from './fixtures';
+import { TestStepHelper } from './helpers/test-step-helper';
+import { mockDriveAPI } from './helpers/mock-drive';
 
 test.use({ viewport: { width: 1280, height: 800 } });
 
