@@ -79,6 +79,10 @@
         border-color: rgba(255, 255, 255, 0.2);
     }
 
+    .health-bar-container.full-bleed.clickable:hover {
+        background: rgba(255, 255, 255, 0.05);
+    }
+
     .header {
         display: flex;
         justify-content: space-between;
