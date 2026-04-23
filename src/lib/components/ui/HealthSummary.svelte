@@ -52,6 +52,7 @@
                     unit="g" 
                     gradientStart="#43e97b" 
                     gradientEnd="#38f9d7" 
+                    fullBleed={true}
                     onclick={() => showBreakdown('Fiber', 'fiber', 'g')}
                 />
             </div>
@@ -67,6 +68,7 @@
                     gradientStart="#f6d365" 
                     gradientEnd="#fda085" 
                     isLimit={true}
+                    fullBleed={true}
                     onclick={() => showBreakdown('Sodium', 'sodium', 'mg')}
                 />
             </div>
@@ -83,6 +85,7 @@
                 gradientStart="#f6d365" 
                 gradientEnd="#fda085" 
                 isLimit={true}
+                fullBleed={true}
                 onclick={() => showBreakdown('Sugar', 'sugar', 'g')}
             />
         {/if}
@@ -96,6 +99,7 @@
                 gradientStart="#f6d365" 
                 gradientEnd="#fda085" 
                 isLimit={true}
+                fullBleed={true}
                 onclick={() => showBreakdown('Added Sugar', 'addedSugar', 'g')}
             />
         {/if}
@@ -109,6 +113,7 @@
                 gradientStart="#f6d365" 
                 gradientEnd="#fda085" 
                 isLimit={true}
+                fullBleed={true}
                 onclick={() => showBreakdown('Sat Fat', 'saturatedFat', 'g')}
             />
         {/if}
@@ -122,6 +127,7 @@
                 gradientStart="#ff416c" 
                 gradientEnd="#ff4b2b" 
                 isLimit={true}
+                fullBleed={true}
                 onclick={() => showBreakdown('Trans Fat', 'transFat', 'g')}
             />
         {/if}
@@ -135,6 +141,7 @@
                 gradientStart="#f6d365" 
                 gradientEnd="#fda085" 
                 isLimit={true}
+                fullBleed={true}
                 onclick={() => showBreakdown('Cholesterol', 'cholesterol', 'mg')}
             />
         {/if}
@@ -157,12 +164,10 @@
         flex-direction: column;
         width: calc(100% + 48px);
         margin: 16px -24px -24px -24px;
-        padding: 16px 24px;
+        padding: 16px 0;
         gap: 4px;
         background: rgba(0, 0, 0, 0.15);
         border-top: 1px solid rgba(255, 255, 255, 0.05);
-        border-bottom-left-radius: var(--radius-l);
-        border-bottom-right-radius: var(--radius-l);
     }
 
     .primary-health-metrics {
@@ -170,6 +175,13 @@
         flex-direction: column;
         gap: 4px;
         width: 100%;
+    }
+
+    @media (min-width: 480px) {
+        .primary-health-metrics {
+            flex-direction: row;
+            gap: 0;
+        }
     }
 
     .other-health-metrics {
@@ -181,5 +193,6 @@
 
     .metric-wrapper {
         width: 100%;
+        flex: 1;
     }
 </style>
