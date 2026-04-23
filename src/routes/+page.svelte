@@ -17,11 +17,14 @@
   import HealthSummary from '$lib/components/ui/HealthSummary.svelte';
   import ActivityCard from '$lib/components/ui/ActivityCard.svelte';
   import NetworkStatus from '$lib/components/ui/NetworkStatus.svelte';
+  import DashboardEMAs from '$lib/components/ui/DashboardEMAs.svelte';
+  import { slide } from 'svelte/transition';
 
   // Reactive State
   let authenticated = $state(false);
   let allLogs = $state<any[]>(store.getState().projections.log); // Synced from Redux
   let settings = $state(store.getState().settings);
+  let showEMAs = $state(false);
   
   // Current Business Date (4AM cutoff)
   const today = getBusinessDate(new Date());
@@ -224,6 +227,16 @@
         <button class="primary-btn" onclick={handleSignIn}>Sign In with Google</button>
     </div>
   {:else}
+    <div class="ema-desktop-wrapper desktop-only">
+        <DashboardEMAs {selectedDate} />
+    </div>
+
+    {#if showEMAs}
+        <div class="ema-mobile-wrapper mobile-only" transition:slide>
+            <DashboardEMAs {selectedDate} />
+        </div>
+    {/if}
+
     <div class="dashboard-grid">
         <div class="left-col">
             <section class="stats-section glass-panel">
@@ -316,6 +329,16 @@
                 </div>
                 <button class="nav-btn next" onclick={() => goToNextDay()} disabled={selectedDate === today} aria-label="Next Day">
                     &gt;
+                </button>
+                <button 
+                    class="nav-btn ema-toggle mobile-only" 
+                    class:active={showEMAs}
+                    onclick={() => showEMAs = !showEMAs} 
+                    aria-label="Toggle Trends"
+                >
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+                    </svg>
                 </button>
             </div>
             
@@ -477,8 +500,36 @@
         border-radius: var(--radius-m);
     }
 
+    .ema-desktop-wrapper {
+        margin-bottom: 24px;
+    }
+
+    .ema-mobile-wrapper {
+        margin-bottom: 16px;
+        background: rgba(255, 255, 255, 0.05);
+        padding: 12px;
+        border-radius: 16px;
+    }
+
+    .desktop-only {
+        display: none;
+    }
+
+    .ema-toggle.active {
+        color: var(--color-primary);
+        filter: drop-shadow(0 0 8px var(--color-primary));
+    }
+
     /* Desktop Layout */
     @media (min-width: 1024px) {
+        .desktop-only {
+            display: block;
+        }
+
+        .mobile-only {
+            display: none;
+        }
+
         .page-container {
             padding-bottom: 40px;
         }
