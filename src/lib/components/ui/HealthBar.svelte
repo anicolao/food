@@ -65,6 +65,7 @@
     .health-bar-container {
         width: 100%;
         margin-bottom: 12px;
+        transition: background 0.2s;
     }
 
     .health-bar-container.full-bleed {
