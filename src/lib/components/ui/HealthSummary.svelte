@@ -47,7 +47,6 @@
                 unit="g" 
                 gradientStart="#43e97b" 
                 gradientEnd="#38f9d7" 
-                fullBleed={true}
                 onclick={() => onshowBreakdown?.('Fiber', 'fiber', 'g')}
             />
         {/if}
@@ -61,7 +60,6 @@
                 gradientStart="#f6d365" 
                 gradientEnd="#fda085" 
                 isLimit={true}
-                fullBleed={true}
                 onclick={() => onshowBreakdown?.('Sodium', 'sodium', 'mg')}
             />
         {/if}
@@ -75,7 +73,6 @@
                 gradientStart="#f6d365" 
                 gradientEnd="#fda085" 
                 isLimit={true}
-                fullBleed={true}
                 onclick={() => onshowBreakdown?.('Sugar', 'sugar', 'g')}
             />
         {/if}
@@ -89,7 +86,6 @@
                 gradientStart="#f6d365" 
                 gradientEnd="#fda085" 
                 isLimit={true}
-                fullBleed={true}
                 onclick={() => onshowBreakdown?.('Added Sugar', 'addedSugar', 'g')}
             />
         {/if}
@@ -103,7 +99,6 @@
                 gradientStart="#f6d365" 
                 gradientEnd="#fda085" 
                 isLimit={true}
-                fullBleed={true}
                 onclick={() => onshowBreakdown?.('Sat Fat', 'saturatedFat', 'g')}
             />
         {/if}
@@ -117,7 +112,6 @@
                 gradientStart="#ff416c" 
                 gradientEnd="#ff4b2b" 
                 isLimit={true}
-                fullBleed={true}
                 onclick={() => onshowBreakdown?.('Trans Fat', 'transFat', 'g')}
             />
         {/if}
@@ -131,7 +125,6 @@
                 gradientStart="#f6d365" 
                 gradientEnd="#fda085" 
                 isLimit={true}
-                fullBleed={true}
                 onclick={() => onshowBreakdown?.('Cholesterol', 'cholesterol', 'mg')}
             />
         {/if}
@@ -142,13 +135,9 @@
     .health-summary {
         display: flex;
         flex-direction: column;
-        width: calc(100% + 48px);
-        margin: 16px -24px -24px -24px;
-        padding: 16px 0;
-        gap: 4px;
-        background: rgba(0, 0, 0, 0.15);
-        border-top: 1px solid rgba(255, 255, 255, 0.05);
-        box-sizing: border-box;
+        width: 100%;
+        margin-top: 16px;
+        gap: 8px;
     }
 </style>
 

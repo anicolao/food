@@ -371,19 +371,4 @@
         background: rgba(255,255,255,0.03);
         border-radius: var(--radius-m);
     }
-
-    /* Desktop Layout */
-    @media (min-width: 1024px) {
-        .dashboard-grid {
-            display: grid;
-            grid-template-columns: 350px 1fr;
-            gap: 40px;
-            align-items: start;
-        }
-        
-        .stats-section {
-            position: sticky;
-            top: 40px;
-        }
-    }
 </style>

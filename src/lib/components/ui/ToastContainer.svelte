@@ -86,13 +86,4 @@
     .close:hover {
         color: white;
     }
-
-    @media (min-width: 1024px) {
-        .toast-container {
-            bottom: 40px;
-            right: 40px;
-            left: auto;
-            transform: none;
-        }
-    }
 </style>
