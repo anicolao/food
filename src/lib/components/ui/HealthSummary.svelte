@@ -39,106 +39,118 @@
     function showBreakdown(title: string, key: string, unit: string) {
         activeBreakdown = { title, key, unit };
     }
+
+    const hasEnabledMetrics = $derived(
+        settings.fiberGoal.enabled ||
+        settings.sodiumGoal.enabled ||
+        settings.sugarLimit.enabled ||
+        settings.addedSugarLimit.enabled ||
+        settings.satFatLimit.enabled ||
+        settings.transFatLimit.enabled ||
+        settings.cholesterolLimit.enabled
+    );
 </script>
 
-<div class="health-summary">
-    {#if settings.fiberGoal.enabled}
-        <HealthBar 
-            label="Fiber" 
-            value={stats.totalFiber} 
-            target={settings.fiberGoal.value} 
-            unit="g" 
-            gradientStart="#43e97b" 
-            gradientEnd="#38f9d7" 
-            fullBleed={true}
-            onclick={() => showBreakdown('Fiber', 'fiber', 'g')}
-        />
-    {/if}
+{#if hasEnabledMetrics}
+    <div class="health-summary">
+        {#if settings.fiberGoal.enabled}
+            <HealthBar 
+                label="Fiber" 
+                value={stats.totalFiber} 
+                target={settings.fiberGoal.value} 
+                unit="g" 
+                gradientStart="#43e97b" 
+                gradientEnd="#38f9d7" 
+                fullBleed={true}
+                onclick={() => showBreakdown('Fiber', 'fiber', 'g')}
+            />
+        {/if}
 
-    {#if settings.sodiumGoal.enabled}
-        <HealthBar 
-            label="Sodium" 
-            value={stats.totalSodium} 
-            target={settings.sodiumGoal.value} 
-            unit="mg" 
-            gradientStart="#f6d365" 
-            gradientEnd="#fda085" 
-            isLimit={true}
-            fullBleed={true}
-            onclick={() => showBreakdown('Sodium', 'sodium', 'mg')}
-        />
-    {/if}
+        {#if settings.sodiumGoal.enabled}
+            <HealthBar 
+                label="Sodium" 
+                value={stats.totalSodium} 
+                target={settings.sodiumGoal.value} 
+                unit="mg" 
+                gradientStart="#f6d365" 
+                gradientEnd="#fda085" 
+                isLimit={true}
+                fullBleed={true}
+                onclick={() => showBreakdown('Sodium', 'sodium', 'mg')}
+            />
+        {/if}
 
-    {#if settings.sugarLimit.enabled}
-        <HealthBar 
-            label="Sugar" 
-            value={stats.totalSugar} 
-            target={getSubTarget(settings.sugarLimit.value)} 
-            unit="g" 
-            gradientStart="#f6d365" 
-            gradientEnd="#fda085" 
-            isLimit={true}
-            fullBleed={true}
-            onclick={() => showBreakdown('Sugar', 'sugar', 'g')}
-        />
-    {/if}
+        {#if settings.sugarLimit.enabled}
+            <HealthBar 
+                label="Sugar" 
+                value={stats.totalSugar} 
+                target={getSubTarget(settings.sugarLimit.value)} 
+                unit="g" 
+                gradientStart="#f6d365" 
+                gradientEnd="#fda085" 
+                isLimit={true}
+                fullBleed={true}
+                onclick={() => showBreakdown('Sugar', 'sugar', 'g')}
+            />
+        {/if}
 
-    {#if settings.addedSugarLimit.enabled}
-        <HealthBar 
-            label="Added Sugar" 
-            value={stats.totalAddedSugar} 
-            target={getSubTarget(settings.addedSugarLimit.value)} 
-            unit="g" 
-            gradientStart="#f6d365" 
-            gradientEnd="#fda085" 
-            isLimit={true}
-            fullBleed={true}
-            onclick={() => showBreakdown('Added Sugar', 'addedSugar', 'g')}
-        />
-    {/if}
+        {#if settings.addedSugarLimit.enabled}
+            <HealthBar 
+                label="Added Sugar" 
+                value={stats.totalAddedSugar} 
+                target={getSubTarget(settings.addedSugarLimit.value)} 
+                unit="g" 
+                gradientStart="#f6d365" 
+                gradientEnd="#fda085" 
+                isLimit={true}
+                fullBleed={true}
+                onclick={() => showBreakdown('Added Sugar', 'addedSugar', 'g')}
+            />
+        {/if}
 
-    {#if settings.satFatLimit.enabled}
-        <HealthBar 
-            label="Sat Fat" 
-            value={stats.totalSaturatedFat} 
-            target={getSubTarget(settings.satFatLimit.value)} 
-            unit="g" 
-            gradientStart="#f6d365" 
-            gradientEnd="#fda085" 
-            isLimit={true}
-            fullBleed={true}
-            onclick={() => showBreakdown('Sat Fat', 'saturatedFat', 'g')}
-        />
-    {/if}
+        {#if settings.satFatLimit.enabled}
+            <HealthBar 
+                label="Sat Fat" 
+                value={stats.totalSaturatedFat} 
+                target={getSubTarget(settings.satFatLimit.value)} 
+                unit="g" 
+                gradientStart="#f6d365" 
+                gradientEnd="#fda085" 
+                isLimit={true}
+                fullBleed={true}
+                onclick={() => showBreakdown('Sat Fat', 'saturatedFat', 'g')}
+            />
+        {/if}
 
-    {#if settings.transFatLimit.enabled}
-        <HealthBar 
-            label="Trans Fat" 
-            value={stats.totalTransFat} 
-            target={getSubTarget(settings.transFatLimit.value)} 
-            unit="g" 
-            gradientStart="#ff416c" 
-            gradientEnd="#ff4b2b" 
-            isLimit={true}
-            fullBleed={true}
-            onclick={() => showBreakdown('Trans Fat', 'transFat', 'g')}
-        />
-    {/if}
+        {#if settings.transFatLimit.enabled}
+            <HealthBar 
+                label="Trans Fat" 
+                value={stats.totalTransFat} 
+                target={getSubTarget(settings.transFatLimit.value)} 
+                unit="g" 
+                gradientStart="#ff416c" 
+                gradientEnd="#ff4b2b" 
+                isLimit={true}
+                fullBleed={true}
+                onclick={() => showBreakdown('Trans Fat', 'transFat', 'g')}
+            />
+        {/if}
 
-    {#if settings.cholesterolLimit.enabled}
-        <HealthBar 
-            label="Cholesterol" 
-            value={stats.totalCholesterol} 
-            target={getSubTarget(settings.cholesterolLimit.value)} 
-            unit="mg" 
-            gradientStart="#f6d365" 
-            gradientEnd="#fda085" 
-            isLimit={true}
-            fullBleed={true}
-            onclick={() => showBreakdown('Cholesterol', 'cholesterol', 'mg')}
-        />
-    {/if}
-</div>
+        {#if settings.cholesterolLimit.enabled}
+            <HealthBar 
+                label="Cholesterol" 
+                value={stats.totalCholesterol} 
+                target={getSubTarget(settings.cholesterolLimit.value)} 
+                unit="mg" 
+                gradientStart="#f6d365" 
+                gradientEnd="#fda085" 
+                isLimit={true}
+                fullBleed={true}
+                onclick={() => showBreakdown('Cholesterol', 'cholesterol', 'mg')}
+            />
+        {/if}
+    </div>
+{/if}
 
 {#if activeBreakdown}
     <HealthBreakdownModal 
@@ -154,8 +166,7 @@
     .health-summary {
         display: flex;
         flex-direction: column;
-        align-self: stretch;
-        width: auto;
+        width: calc(100% + 48px);
         margin: 16px -24px -24px -24px;
         padding: 16px 0;
         gap: 4px;
