@@ -16,7 +16,6 @@
   import MacroBubble from '$lib/components/ui/MacroBubble.svelte';
   import HealthSummary from '$lib/components/ui/HealthSummary.svelte';
   import ActivityCard from '$lib/components/ui/ActivityCard.svelte';
-  import NetworkStatus from '$lib/components/ui/NetworkStatus.svelte';
   import DashboardEMAs from '$lib/components/ui/DashboardEMAs.svelte';
   import { slide } from 'svelte/transition';
 
@@ -247,7 +246,7 @@
                         <section class="stats-section glass-panel">
                             <button 
                                 class="flip-toggle-btn mobile-only" 
-                                onclick={() => { showEMAs = true; flipRotation += 180; }}
+                                onclick={() => { showEMAs = true; flipRotation -= 180; }}
                                 aria-label="Show Trends"
                             >
                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -255,9 +254,6 @@
                                 </svg>
                             </button>
 
-                            <div class="status-positioner">
-                                <NetworkStatus />
-                            </div>
                             <div class="hero-ring">
                                 <StatsRing 
                                     value={stats.totalCalories} 
@@ -331,7 +327,7 @@
                         <section class="stats-section glass-panel">
                             <button 
                                 class="flip-toggle-btn back mobile-only" 
-                                onclick={() => { showEMAs = false; flipRotation += 180; }}
+                                onclick={() => { showEMAs = false; flipRotation -= 180; }}
                                 aria-label="Show Stats"
                             >
                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -359,8 +355,8 @@
 
         <!-- Right Col / Bottom Section: Feed -->
         <section class="feed-section">
-            <div class="ema-desktop-wrapper desktop-only">
-                <DashboardEMAs {selectedDate} chartWidth={320} fitToHeight={440} />
+            <div class="ema-desktop-wrapper glass-panel desktop-only">
+                <DashboardEMAs {selectedDate} columns={2} fitToHeight={432} />
             </div>
 
             <div class="feed-header">
@@ -453,6 +449,7 @@
         width: 100%;
         perspective: 1000px;
         margin-bottom: 24px;
+        position: relative;
     }
 
     .flip-card-inner {
@@ -501,8 +498,8 @@
     }
 
     .flip-toggle-btn.back {
-        left: auto;
-        right: 12px;
+        left: 12px;
+        right: auto;
     }
 
     .ema-mobile-content {
@@ -555,6 +552,7 @@
         position: absolute;
         top: 12px;
         right: 12px;
+        z-index: 20;
     }
 
     .hero-ring {
@@ -635,9 +633,7 @@
 
     .ema-desktop-wrapper {
         margin-bottom: 24px;
-        background: rgba(255, 255, 255, 0.05);
         padding: 24px;
-        border-radius: 24px;
         min-height: 480px;
     }
 
