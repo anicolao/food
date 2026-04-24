@@ -651,6 +651,7 @@
         }
         .flip-card {
             order: 1;
+            margin-bottom: 0;
         }
         .feed-section {
             order: 2;

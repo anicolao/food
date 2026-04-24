@@ -11,6 +11,7 @@
   import MacroBubble from '$lib/components/ui/MacroBubble.svelte';
   import ActivityCard from '$lib/components/ui/ActivityCard.svelte';
   import NetworkStatus from '$lib/components/ui/NetworkStatus.svelte';
+  import DashboardEMAs from '$lib/components/ui/DashboardEMAs.svelte';
 
   // Reactive State (Synced from Redux)
   let allLogs = $state<any[]>(store.getState().projections.log); 
@@ -227,10 +228,18 @@
                 </defs>
              </svg>
         </section>
+
+            <section class="ema-mobile-section glass-panel mobile-only">
+                <DashboardEMAs {selectedDate} columns={2} />
+            </section>
         </div>
 
         <!-- Right Col / Bottom Section: Feed -->
         <section class="feed-section">
+            <div class="ema-desktop-wrapper glass-panel desktop-only">
+                <DashboardEMAs {selectedDate} columns={2} fitToHeight={432} />
+            </div>
+
             <div class="feed-header">
                 <button class="nav-btn prev" onclick={() => goToPrevDay()} aria-label="Previous Day">
                     &lt;
@@ -372,8 +381,44 @@
         border-radius: var(--radius-m);
     }
 
+    .ema-desktop-wrapper {
+        margin-bottom: 24px;
+        padding: 24px;
+        min-height: 480px;
+    }
+
+    .ema-mobile-section {
+        padding: 20px;
+    }
+
+    .desktop-only {
+        display: none;
+    }
+
+    @media (max-width: 1023px) {
+        .left-col {
+            display: contents;
+        }
+        .stats-section {
+            order: 1;
+        }
+        .ema-mobile-section {
+            order: 2;
+        }
+        .feed-section {
+            order: 3;
+        }
+    }
+
     /* Desktop Layout */
     @media (min-width: 1024px) {
+        .desktop-only {
+            display: block;
+        }
+
+        .mobile-only {
+            display: none;
+        }
         .dashboard-grid {
             display: grid;
             grid-template-columns: 350px 1fr;
