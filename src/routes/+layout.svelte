@@ -16,10 +16,8 @@
     import { store, batchHydrateEvents, setConfig } from '$lib/store';
     import { ensureDataStructures, saveIdentity } from '$lib/sheets';
     import DesktopHeader from '$lib/components/ui/DesktopHeader.svelte';
-    import NetworkStatus from '$lib/components/ui/NetworkStatus.svelte';
 
-	let { children } = $props();
-
+    let { children } = $props();
 	let width = $state(0);
     // ... (rest of script)
 
@@ -138,9 +136,6 @@
 	
 	<div class="main-content">
         <DesktopHeader />
-        <div class="global-status-positioner">
-            <NetworkStatus />
-        </div>
         <div class="content-area-grid">
             {#if reducedMotion || !transitionsEnabled}
                 <div class="transition-wrapper">
@@ -194,25 +189,10 @@
         display: flex;
         flex-direction: column;
 		overflow-x: hidden; 
-        position: relative;
-	}
-    
-    .global-status-positioner {
-        position: absolute;
-        top: 32px; /* 20px page pad + 12px card pad */
-        right: 32px;
-        z-index: 200;
-    }
+		position: relative;
+		}
 
-    @media (min-width: 1024px) {
-        .global-status-positioner {
-            top: 52px; /* 40px desktop pad + 12px card pad */
-            right: 52px;
-        }
-    }
-    
-    /* Dedicated grid container for transitions */
-    .content-area-grid {
+		/* Dedicated grid container for transitions */    .content-area-grid {
         flex: 1;
         display: grid;
         grid-template-areas: "content";

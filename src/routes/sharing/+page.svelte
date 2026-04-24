@@ -10,6 +10,7 @@
   import StatsRing from '$lib/components/ui/StatsRing.svelte';
   import MacroBubble from '$lib/components/ui/MacroBubble.svelte';
   import ActivityCard from '$lib/components/ui/ActivityCard.svelte';
+  import NetworkStatus from '$lib/components/ui/NetworkStatus.svelte';
 
   // Reactive State (Synced from Redux)
   let allLogs = $state<any[]>(store.getState().projections.log); 
@@ -164,6 +165,9 @@
     <div class="dashboard-grid">
         <div class="left-col">
             <section class="stats-section glass-panel">
+             <div class="status-positioner">
+                 <NetworkStatus />
+             </div>
              <div class="hero-ring">
                  <StatsRing 
                     value={stats.totalCalories} 

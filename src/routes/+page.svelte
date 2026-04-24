@@ -16,6 +16,7 @@
   import MacroBubble from '$lib/components/ui/MacroBubble.svelte';
   import HealthSummary from '$lib/components/ui/HealthSummary.svelte';
   import ActivityCard from '$lib/components/ui/ActivityCard.svelte';
+  import NetworkStatus from '$lib/components/ui/NetworkStatus.svelte';
   import DashboardEMAs from '$lib/components/ui/DashboardEMAs.svelte';
   import { slide } from 'svelte/transition';
 
@@ -240,6 +241,9 @@
     <div class="dashboard-grid">
         <div class="left-col">
             <div class="flip-card" class:flipped={showEMAs}>
+                <div class="status-positioner">
+                    <NetworkStatus />
+                </div>
                 <div class="flip-card-inner" style="transform: rotateY({flipRotation}deg)">
                     <!-- Front Side: Rings and Macros -->
                     <div class="flip-card-front">
