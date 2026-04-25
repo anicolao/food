@@ -189,7 +189,7 @@
         display: flex;
         flex-direction: column;
         gap: 6px;
-        min-width: 170px;
+        min-width: 0;
         flex: 1;
     }
     .chart-card.compact {

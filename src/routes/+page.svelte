@@ -241,13 +241,13 @@
     <div class="dashboard-grid">
         <div class="left-col">
             <div class="flip-card" class:flipped={showEMAs}>
-                <div class="status-positioner">
-                    <NetworkStatus />
-                </div>
                 <div class="flip-card-inner" style="transform: rotateY({flipRotation}deg)">
                     <!-- Front Side: Rings and Macros -->
                     <div class="flip-card-front">
                         <section class="stats-section glass-panel">
+                            <div class="status-positioner">
+                                <NetworkStatus />
+                            </div>
                             <button 
                                 class="flip-toggle-btn mobile-only" 
                                 onclick={() => { showEMAs = true; flipRotation -= 180; }}
@@ -329,6 +329,9 @@
                     <!-- Back Side: EMA Graphs -->
                     <div class="flip-card-back">
                         <section class="stats-section glass-panel">
+                            <div class="status-positioner">
+                                <NetworkStatus />
+                            </div>
                             <button 
                                 class="flip-toggle-btn back mobile-only" 
                                 onclick={() => { showEMAs = false; flipRotation -= 180; }}
@@ -360,7 +363,7 @@
         <!-- Right Col / Bottom Section: Feed -->
         <section class="feed-section">
             <div class="ema-desktop-wrapper glass-panel desktop-only">
-                <DashboardEMAs {selectedDate} columns={2} fitToHeight={432} />
+                <DashboardEMAs {selectedDate} columns={1} fitToHeight={600} />
             </div>
 
             <div class="feed-header">
@@ -470,6 +473,7 @@
         -webkit-backface-visibility: hidden;
         backface-visibility: hidden;
         border-radius: 24px;
+        transform: translateZ(0);
     }
 
     .flip-card-back {
