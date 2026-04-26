@@ -16,7 +16,7 @@ We use **Google OAuth 2.0** to obtain a strict, limited-scope access token direc
 ## API Usage
 
 ### 1. Nutrition Analysis (Gemini Flash)
-- **Endpoint:** `generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent`
+- **Endpoint:** `generativelanguage.googleapis.com/v1beta/models/gemini-3-flash:generateContent`
 - **Method:** POST
 - **Data Sent:**
     - Your food image (Base64 encoded)
