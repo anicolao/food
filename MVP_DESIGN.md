@@ -102,8 +102,8 @@ Pivot table or formula-based aggregation. Derived from the `Log` projection.
 ## Gemini Integration
 
 ### Model
--   **Model**: `gemini-1.5-flash`
--   **Input**: Image (Binary/Base64) + Prompt
+- **Model**: `gemini-1.5-flash-latest`
+- **Input**: Image (Binary/Base64) + Prompt
 
 ### Prompt Strategy
 We will prompt Gemini to act as an expert nutritionist using the Canadian Nutrition Facts standard.
