@@ -363,7 +363,7 @@
         <!-- Right Col / Bottom Section: Feed -->
         <section class="feed-section">
             <div class="ema-desktop-wrapper glass-panel desktop-only">
-                <DashboardEMAs {selectedDate} columns={1} fitToHeight={600} />
+                <DashboardEMAs {selectedDate} columns={2} fitToHeight={600} />
             </div>
 
             <div class="feed-header">
@@ -523,6 +523,13 @@
         width: 100%;
         position: relative;
         min-height: 480px;
+    }
+
+    @media (max-width: 1023px) {
+        .stats-section {
+            height: 480px;
+            overflow-y: auto;
+        }
     }
 
     /* AI Analysis Card */
