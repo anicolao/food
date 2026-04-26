@@ -46,3 +46,21 @@ We assume that if a feature is not tested, it is broken.
 -   **GitHub Workflows**: Every PR is validated by the E2E suite.
 -   **PR Previews**: Deployments are generated for every PR to allow manual verification.
 -   **User Stories**: Every user story must be accompanied by at least one E2E test case.
+
+## Deployment
+
+The application is automatically deployed to GitHub Pages.
+
+-   **Production**: Merges to the `main` branch are deployed to the root of the site.
+-   **PR Previews**: Pull requests are deployed to a subdirectory named `pr<number>`.
+
+### Manual Trigger
+If an automatic deployment is not triggered (e.g., when a PR is merged by an autonomous agent using the default `GITHUB_TOKEN`), you can manually trigger the deployment:
+
+```bash
+gh workflow run deploy.yml --ref main
+```
+
+### Known Limitations
+GitHub does not trigger workflows from events (like merges) performed by the default `GITHUB_TOKEN`. In such cases, manual triggering or using a Personal Access Token (PAT) is required.
+
