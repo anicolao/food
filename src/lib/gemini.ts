@@ -1,4 +1,5 @@
 import { ensureValidToken } from './auth';
+import type { LogEntry, SettingsState } from './store';
 
 export interface NutritionEstimate {
     is_label: boolean;
@@ -68,17 +69,13 @@ Structure:
 export interface ImageInput {
     base64: string;
     mimeType: string;
-    // ...
-    // Note: If you need to add more fields, do it here. 
-    // The previous code had a syntax error here if I just remove `}`? No.
 }
-// I will just supply the whole file content for safety or minimal changes.
 
 export async function analyzeFood(inputs: { images?: ImageInput[], text?: string }, previousRationale?: string, userCorrection?: string): Promise<NutritionEstimate> {
     const token = await ensureValidToken();
     if (!token) throw new Error('User not authenticated for Gemini analysis');
 
-    const url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
+    const url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent';
 
     let prompt = SYSTEM_PROMPT;
 
@@ -136,6 +133,65 @@ export async function analyzeFood(inputs: { images?: ImageInput[], text?: string
     if (!candidate) throw new Error('No content in Gemini response');
 
     return JSON.parse(candidate) as NutritionEstimate;
+}
+
+export async function getAINutritionistFeedback(logs: LogEntry[], settingsSummary: string, emaSummary: string): Promise<string> {
+    const token = await ensureValidToken();
+    if (!token) throw new Error('User not authenticated for AI feedback');
+
+    const url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent';
+
+    const prompt = `
+Act as a Canadian Registered Dietitian. Provide evidence-based nutrition advice strictly aligned with the 2019 Canada Food Guide and Health Canada’s Dietary Guidelines.
+
+Core Constraints:
+
+Proportions Over Portions: Prioritize the 'Plate Model' (1/2 vegetables/fruits, 1/4 whole grains, 1/4 protein).
+
+Regional Accuracy: Reference Canadian protein sources (e.g., pulses, lean game, North Atlantic fish) and local seasonal produce.
+
+Metrics: Use Metric units (grams, milliliters) and % Daily Value based on Canadian labeling laws (e.g., 2,300mg sodium limit).
+
+Tone: Professional, encouraging, and mindful of Canada's diverse food environment.
+
+Task: Review the daily log and provide at least one thing to focus on and one piece of positive feedback.
+
+CONTEXT DATA:
+1. LAST 14 DAYS FOOD LOGS:
+${JSON.stringify(logs.map(l => ({ date: l.date, time: l.time, description: l.description, calories: l.calories, protein: l.protein, carbs: l.carbs, fat: l.fat })))}
+
+2. USER SETTINGS SUMMARY:
+${settingsSummary}
+
+3. 14-DAY EMA TRENDS:
+${emaSummary}
+
+Please provide your response in HTML format (using basic tags like <p>, <ul>, <li>, <strong>, <h4>). Do not include <html> or <body> tags.
+`;
+
+    const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+            contents: [{
+                parts: [{ text: prompt }]
+            }]
+        })
+    });
+
+    if (!response.ok) {
+        const err = await response.text();
+        throw new Error(`Gemini API Error: ${response.status} - ${err}`);
+    }
+
+    const result = await response.json();
+    const candidate = result.candidates?.[0]?.content?.parts?.[0]?.text;
+    if (!candidate) throw new Error('No content in Gemini response');
+
+    return candidate;
 }
 
 export async function generateImageWithGemini(prompt: string): Promise<string | null> {

@@ -11,6 +11,8 @@
   import { cubicOut } from 'svelte/easing';
   import { resolveDriveImage } from '$lib/images';
   import { getBusinessDate, groupLogs, type ActivityGroup } from '$lib/activity-grouping';
+  import { getAINutritionistFeedback } from '$lib/gemini';
+  import { getMetricEMASeries, getDatesRange } from '$lib/metrics';
   
   import StatsRing from '$lib/components/ui/StatsRing.svelte';
   import MacroBubble from '$lib/components/ui/MacroBubble.svelte';
@@ -27,6 +29,60 @@
   let showEMAs = $state(false);
   let flipRotation = $state(0);
   let innerWidth = $state(0);
+
+  let aiFeedback = $state<string | null>(null);
+  let isLoadingFeedback = $state(false);
+
+  async function getFeedback() {
+    isLoadingFeedback = true;
+    try {
+      const endDate = today;
+      const daysBack = 14;
+      const dates = getDatesRange(endDate, daysBack);
+      
+      const last14DaysLogs = allLogs.filter(l => dates.includes(l.date));
+      
+      const settingsSummary = `
+Target Calories: ${settings.targetCalories} kcal
+Macro Ratios: Protein ${settings.macroRatios.protein * 100}%, Fat ${settings.macroRatios.fat * 100}%, Carbs ${settings.macroRatios.carbs * 100}%
+Fiber Goal: ${settings.fiberGoal.value}g (Enabled: ${settings.fiberGoal.enabled})
+Sodium Goal: ${settings.sodiumGoal.value}mg (Enabled: ${settings.sodiumGoal.enabled})
+`;
+
+      const metricsToTrack = [
+        { key: 'totalCalories', label: 'Calories' },
+        { key: 'totalProtein', label: 'Protein' },
+        { key: 'totalCarbs', label: 'Carbs' },
+        { key: 'totalFat', label: 'Fat' },
+        { key: 'totalFiber', label: 'Fiber', enabled: settings.fiberGoal.enabled },
+        { key: 'totalSodium', label: 'Sodium', enabled: settings.sodiumGoal.enabled },
+        { key: 'totalSugar', label: 'Sugar', enabled: settings.sugarLimit.enabled },
+        { key: 'totalAddedSugar', label: 'Added Sugar', enabled: settings.addedSugarLimit.enabled },
+        { key: 'totalSaturatedFat', label: 'Saturated Fat', enabled: settings.satFatLimit.enabled },
+        { key: 'totalTransFat', label: 'Trans Fat', enabled: settings.transFatLimit.enabled },
+        { key: 'totalCholesterol', label: 'Cholesterol', enabled: settings.cholesterolLimit.enabled },
+      ];
+
+      const state = store.getState();
+      const stats = state.projections.stats;
+      
+      let emaSummary = '';
+      metricsToTrack.forEach(m => {
+        if (m.enabled !== false) {
+            const series = getMetricEMASeries(stats, m.key, endDate, daysBack, 14);
+            const currentEMA = series[series.length - 1] || 0;
+            emaSummary += `${m.label} 14-day EMA: ${currentEMA.toFixed(1)}\n`;
+        }
+      });
+
+      aiFeedback = await getAINutritionistFeedback(last14DaysLogs, settingsSummary, emaSummary);
+    } catch (e) {
+      console.error('Failed to get AI feedback', e);
+      aiFeedback = "<p>Sorry, I couldn't generate feedback right now. Please try again later.</p>";
+    } finally {
+      isLoadingFeedback = false;
+    }
+  }
 
   $effect(() => {
     if (innerWidth >= 1024) {
@@ -349,11 +405,28 @@
             </div>
 
             <section class="ai-analysis-card glass-panel">
-                <h3>AI Analysis</h3>
-                <div class="coming-soon">
-                    <span class="badge">Coming Soon</span>
-                    <p>Personalized insights based on your nutrition trends.</p>
+                <div class="card-header">
+                    <h3>AI Nutritionist</h3>
+                    {#if aiFeedback && !isLoadingFeedback}
+                        <button class="text-btn" onclick={getFeedback}>Refresh</button>
+                    {/if}
                 </div>
+                
+                {#if isLoadingFeedback}
+                    <div class="ai-loading">
+                        <div class="spinner"></div>
+                        <p>Consulting AI Dietitian...</p>
+                    </div>
+                {:else if aiFeedback}
+                    <div class="ai-content" in:slide>
+                        {@html aiFeedback}
+                    </div>
+                {:else}
+                    <div class="ai-prompt">
+                        <p>Get personalized feedback based on your last 14 days of logs and trends.</p>
+                        <button class="primary-btn full-width" onclick={getFeedback}>Get AI Feedback</button>
+                    </div>
+                {/if}
             </section>
         </div>
 
@@ -537,28 +610,91 @@
     }
 
     .ai-analysis-card h3 {
-        margin: 0 0 12px 0;
+        margin: 0;
         font-size: 1rem;
         color: var(--text-secondary);
         text-transform: uppercase;
         letter-spacing: 0.05em;
     }
 
-    .coming-soon {
+    .card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+    }
+
+    .text-btn {
+        background: none;
+        border: none;
+        color: var(--color-primary);
+        font-size: 0.85rem;
+        font-weight: 600;
+        cursor: pointer;
+        padding: 4px 8px;
+    }
+
+    .ai-prompt {
         display: flex;
         flex-direction: column;
-        gap: 8px;
+        gap: 12px;
+        color: var(--text-muted);
+        font-size: 0.9rem;
+    }
+
+    .full-width {
+        width: 100%;
+    }
+
+    .ai-loading {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 12px;
+        padding: 20px 0;
         color: var(--text-muted);
     }
 
-    .badge {
-        background: var(--color-primary);
+    .ai-content {
+        font-size: 0.95rem;
+        line-height: 1.5;
+        color: var(--text-secondary);
+    }
+
+    .ai-content :global(p) {
+        margin-bottom: 12px;
+    }
+
+    .ai-content :global(ul) {
+        margin-bottom: 12px;
+        padding-left: 20px;
+    }
+
+    .ai-content :global(li) {
+        margin-bottom: 4px;
+    }
+
+    .ai-content :global(strong) {
         color: white;
-        padding: 4px 8px;
-        border-radius: 4px;
-        font-size: 0.7rem;
-        font-weight: 700;
-        width: fit-content;
+    }
+
+    .ai-content :global(h4) {
+        margin: 16px 0 8px 0;
+        color: white;
+        font-size: 1rem;
+    }
+
+    .spinner {
+        width: 30px;
+        height: 30px;
+        border: 3px solid rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+        border-top-color: var(--color-primary);
+        animation: spin 1s ease-in-out infinite;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
     }
 
     .status-positioner {
