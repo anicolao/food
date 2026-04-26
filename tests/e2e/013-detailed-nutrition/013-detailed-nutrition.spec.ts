@@ -41,7 +41,7 @@ test('013-detailed-nutrition: Log and Edit Detailed Nutrition', async ({ page })
                 await mockDriveAPI(page);
 
                 // Mock Gemini Analysis Response with details
-                await page.route('**/v1beta/models/gemini-2.5-flash:generateContent*', async route => {
+                await page.route('**/v1beta/models/gemini-*:generateContent*', async route => {
                     const json = {
                         candidates: [{
                             content: {
