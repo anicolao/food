@@ -61,11 +61,10 @@ export async function getLatestFlashModel(token: string): Promise<string> {
             return picked;
         }
     } catch (e) {
-        console.warn('Error fetching Gemini models', e);
-        throw e; // No more hardcoded fallback
+        console.warn('Error fetching Gemini models, falling back to gemini-1.5-flash-latest', e);
     }
 
-    throw new Error('No valid Gemini Flash models found');
+    return 'gemini-1.5-flash-latest';
 }
 
 export interface NutritionEstimate {
