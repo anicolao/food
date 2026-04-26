@@ -5,7 +5,7 @@ test.describe('Issue #121: AI Nutritionist Feedback', () => {
   let lastPrompt: any = null;
 
   test.beforeEach(async ({ page }) => {
-    await page.route('**/v1beta/models/gemini-2.5-flash:generateContent', async (route) => {
+    await page.route('**/v1beta/models/gemini-2.0-flash:generateContent', async (route) => {
       lastPrompt = route.request().postDataJSON();
       // Delay to ensure loading state is visible
       await new Promise(resolve => setTimeout(resolve, 500));
@@ -58,7 +58,7 @@ test.describe('Issue #121: AI Nutritionist Feedback', () => {
     
     expect(lastPrompt).toBeDefined();
     const promptText = lastPrompt.contents[0].parts[0].text;
-    expect(promptText).toContain('Act as a Canadian Registered Dietitian');
+    expect(promptText).toContain('Act as a Canadian Nutritionist');
     expect(promptText).toContain('LAST 14 DAYS FOOD LOGS');
     expect(promptText).toContain('USER SETTINGS SUMMARY');
     expect(promptText).toContain('14-DAY EMA TRENDS');

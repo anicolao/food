@@ -25,6 +25,7 @@
   // Reactive State
   let authenticated = $state(false);
   let allLogs = $state<any[]>(store.getState().projections.log); // Synced from Redux
+  let statsProjection = $state(store.getState().projections.stats);
   let settings = $state(store.getState().settings);
   let showEMAs = $state(false);
   let flipRotation = $state(0);
@@ -39,7 +40,7 @@
   let selectedDate = $derived($page.url.searchParams.get('date') || today);
 
   // Derived state for AI feedback from Redux store
-  let aiFeedbackFromStore = $derived(store.getState().projections.stats[selectedDate]?.aiFeedback);
+  let aiFeedbackFromStore = $derived(statsProjection[selectedDate]?.aiFeedback);
 
   async function getFeedback() {
     isLoadingFeedback = true;
@@ -278,6 +279,7 @@
       // Sync Redux -> Local State
       allLogs = state.projections.log;
       settings = state.settings;
+      statsProjection = state.projections.stats;
     });
 
     return () => {
