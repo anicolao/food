@@ -1,31 +1,41 @@
 import { ensureValidToken } from './auth';
-import type { LogEntry, SettingsState } from './store';
+import { store, type LogEntry, type SettingsState } from './store';
+import { toasts } from './toast';
 
 let cachedFlashModel: string | null = null;
 
+export async function listAvailableModels(token: string): Promise<any[]> {
+    const url = 'https://generativelanguage.googleapis.com/v1beta/models';
+    const response = await fetch(url, {
+        headers: {
+            'Authorization': `Bearer ${token}`
+        }
+    });
+
+    if (!response.ok) {
+        throw new Error(`Failed to fetch Gemini models: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data.models || [];
+}
+
 export async function getLatestFlashModel(token: string): Promise<string> {
+    // 1. Check if user has a preferred model in store
+    const preferredModel = store.getState().config.geminiModel;
+    if (preferredModel) {
+        if (cachedFlashModel !== preferredModel) {
+            toasts.info(`Using AI model: ${preferredModel}`);
+            cachedFlashModel = preferredModel;
+        }
+        return preferredModel;
+    }
+
     if (cachedFlashModel) return cachedFlashModel;
 
     try {
-        const url = 'https://generativelanguage.googleapis.com/v1beta/models';
-        const response = await fetch(url, {
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
-        });
-
-        if (!response.ok) {
-            console.warn('Failed to fetch Gemini models, falling back to default', response.status);
-            return 'gemini-1.5-flash-latest';
-        }
-
-        const data = await response.json();
-        if (!data.models || !Array.isArray(data.models)) {
-            console.warn('Invalid Gemini models response', data);
-            return 'gemini-1.5-flash-latest';
-        }
-
-        const flashModels = data.models
+        const models = await listAvailableModels(token);
+        const flashModels = models
             .filter((m: any) => 
                 m.name && 
                 m.name.includes('flash') && 
@@ -42,14 +52,19 @@ export async function getLatestFlashModel(token: string): Promise<string> {
             });
 
         if (flashModels.length > 0) {
-            cachedFlashModel = flashModels[0];
-            return cachedFlashModel!;
+            const picked = flashModels[0];
+            if (cachedFlashModel !== picked) {
+                toasts.info(`Using AI model: ${picked}`);
+                cachedFlashModel = picked;
+            }
+            return picked;
         }
     } catch (e) {
         console.warn('Error fetching Gemini models', e);
+        throw e; // No more hardcoded fallback
     }
 
-    return 'gemini-1.5-flash-latest';
+    throw new Error('No valid Gemini Flash models found');
 }
 
 export interface NutritionEstimate {
@@ -187,7 +202,13 @@ export async function analyzeFood(inputs: { images?: ImageInput[], text?: string
     return JSON.parse(candidate) as NutritionEstimate;
 }
 
-export async function getAINutritionistFeedback(logs: LogEntry[], settings: SettingsState, settingsSummary: string, emaSummary: string): Promise<string> {
+export async function getAINutritionistFeedback(
+    logs: LogEntry[], 
+    settings: SettingsState, 
+    settingsSummary: string, 
+    emaSummary: string,
+    recentFeedbacks: { date: string, feedback: string }[]
+): Promise<string> {
     const token = await ensureValidToken();
     if (!token) throw new Error('User not authenticated for AI feedback');
 
@@ -212,6 +233,7 @@ Task: Review the daily log and provide at least one thing to focus on and one pi
 Instructions: 
 1. Be much briefer than usual.
 2. Focus your advice on specific foods and examples from the user's logs provided below. Avoid generic advice that doesn't apply to what the user actually ate.
+3. Refer to prior advice if relevant.
 
 CONTEXT DATA:
 1. LAST 14 DAYS FOOD LOGS:
@@ -242,6 +264,9 @@ ${settingsSummary}
 
 3. 14-DAY EMA TRENDS:
 ${emaSummary}
+
+4. RECENT FEEDBACKS:
+${JSON.stringify(recentFeedbacks)}
 
 Please provide your response in HTML format (using basic tags like <p>, <ul>, <li>, <strong>, <h4>). Do not include <html> or <body> tags.
 `;

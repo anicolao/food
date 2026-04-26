@@ -78,6 +78,13 @@
       const state = store.getState();
       const stats = state.projections.stats;
       
+      // Get two most recent feedbacks before selectedDate
+      const recentFeedbacks = Object.entries(stats)
+        .filter(([date, s]) => (s as any).aiFeedback && date < selectedDate)
+        .sort(([dateA], [dateB]) => dateB.localeCompare(dateA))
+        .slice(0, 2)
+        .map(([date, s]) => ({ date, feedback: (s as any).aiFeedback! }));
+
       let emaSummary = '';
       metricsToTrack.forEach(m => {
         if (m.enabled !== false) {
@@ -87,7 +94,7 @@
         }
       });
 
-      const feedback = await getAINutritionistFeedback(last14DaysLogs, settings, settingsSummary, emaSummary);
+      const feedback = await getAINutritionistFeedback(last14DaysLogs, settings, settingsSummary, emaSummary, recentFeedbacks);
       
       // @ts-ignore
       store.dispatch(dispatchEvent('ai/feedbackGenerated', {
