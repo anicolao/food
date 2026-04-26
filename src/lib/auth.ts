@@ -8,7 +8,7 @@ export const GOOGLE_API_KEY = (import.meta.env && import.meta.env.VITE_GOOGLE_AP
 export const SCOPES = [
     'https://www.googleapis.com/auth/drive.file',
     'https://www.googleapis.com/auth/photospicker.mediaitems.readonly',
-    'https://www.googleapis.com/auth/generative-language.retriever',
+    'https://www.googleapis.com/auth/generative-language',
     'https://www.googleapis.com/auth/userinfo.profile',
     'https://www.googleapis.com/auth/userinfo.email'
 ].join(' ');
