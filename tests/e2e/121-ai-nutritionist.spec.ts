@@ -58,7 +58,7 @@ test.describe('Issue #121: AI Nutritionist Feedback', () => {
     
     expect(lastPrompt).toBeDefined();
     const promptText = lastPrompt.contents[0].parts[0].text;
-    expect(promptText).toContain('Act as a Canadian Nutritionist');
+    expect(promptText).toContain('Act as a Canadian Registered Dietitian');
     expect(promptText).toContain('LAST 14 DAYS FOOD LOGS');
     expect(promptText).toContain('USER SETTINGS SUMMARY');
     expect(promptText).toContain('14-DAY EMA TRENDS');

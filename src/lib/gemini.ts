@@ -75,7 +75,7 @@ export async function analyzeFood(inputs: { images?: ImageInput[], text?: string
     const token = await ensureValidToken();
     if (!token) throw new Error('User not authenticated for Gemini analysis');
 
-    const url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
+    const url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash:generateContent';
 
     let prompt = SYSTEM_PROMPT;
 
@@ -139,10 +139,10 @@ export async function getAINutritionistFeedback(logs: LogEntry[], settings: Sett
     const token = await ensureValidToken();
     if (!token) throw new Error('User not authenticated for AI feedback');
 
-    const url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
+    const url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash:generateContent';
 
     const prompt = `
-Act as a Canadian Nutritionist. Provide evidence-based nutrition advice strictly aligned with the 2019 Canada Food Guide and Health Canada’s Dietary Guidelines.
+Act as a Canadian Registered Dietitian. Provide evidence-based nutrition advice strictly aligned with the 2019 Canada Food Guide and Health Canada’s Dietary Guidelines.
 
 Core Constraints:
 
