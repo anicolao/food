@@ -5,6 +5,8 @@
   import { syncManager } from "$lib/sync-manager";
   import { store, setConfig } from "$lib/store";
   import { getFileMetadata, renameFile, findDatabaseFiles } from "$lib/sheets";
+  import { listAvailableModels } from "$lib/gemini";
+  import { ensureValidToken } from "$lib/auth";
 
   // --- Versioning & SW Logic ---
   const version = `v${import.meta.env.VITE_APP_VERSION}`;
@@ -78,6 +80,32 @@
   let availableFiles: any[] = [];
   let showPicker = false;
   let isLoadingFiles = false;
+
+  // AI Model state
+  let availableModels: any[] = [];
+  let isLoadingModels = false;
+  let currentModel = store.getState().config.geminiModel || "Automatic (Flash)";
+
+  async function loadModels() {
+    if (!isOnline) return;
+    isLoadingModels = true;
+    try {
+      const token = await ensureValidToken();
+      if (!token) return;
+      const models = await listAvailableModels(token);
+      availableModels = models.filter(m => m.supportedGenerationMethods.includes('generateContent'));
+    } catch (e) {
+      console.error("Failed to load models", e);
+    } finally {
+      isLoadingModels = false;
+    }
+  }
+
+  function selectModel(modelName: string) {
+    const name = modelName.replace('models/', '');
+    store.dispatch(setConfig({ geminiModel: name }));
+    currentModel = name;
+  }
 
   async function checkStatus() {
     isOnline = navigator.onLine;
@@ -153,8 +181,7 @@
       )
     ) {
       // update store config
-      const current = store.getState().config;
-      setConfig({ ...current, spreadsheetId: fileId });
+      store.dispatch(setConfig({ spreadsheetId: fileId }));
       spreadsheetId = fileId;
       sheetName = ""; // Force refresh
       showPicker = false;
@@ -350,6 +377,44 @@
       />
     </div>
     <p class="help">Managed via Google Drive integration.</p>
+  </section>
+
+  <section class="card glass-panel">
+    <h2>AI Model Configuration</h2>
+    <div class="status-row">
+      <span class="label">Current Model</span>
+      <span class="value mono">{currentModel}</span>
+    </div>
+
+    <div class="field mt-4">
+      <button class="secondary-btn small" on:click={loadModels} disabled={!isOnline || isLoadingModels}>
+        {isLoadingModels ? "Fetching Models..." : "Refresh Model List"}
+      </button>
+    </div>
+
+    {#if availableModels.length > 0}
+      <div class="file-picker glass-panel mt-2">
+        <ul class="file-list">
+          {#each availableModels as model}
+            <li>
+              <button
+                class="file-option {model.name.replace('models/', '') === currentModel ? 'active' : ''}"
+                on:click={() => selectModel(model.name)}
+              >
+                <div class="file-info">
+                  <span class="fname">{model.displayName || model.name.replace('models/', '')}</span>
+                  <span class="fmeta">{model.description}</span>
+                </div>
+                {#if model.name.replace('models/', '') === currentModel}
+                  <span class="check">✓</span>
+                {/if}
+              </button>
+            </li>
+          {/each}
+        </ul>
+      </div>
+    {/if}
+    <p class="help">Choose a specific Gemini model or leave as Automatic for the latest Flash model.</p>
   </section>
 
   <section class="card glass-panel">

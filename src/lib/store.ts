@@ -369,11 +369,12 @@ interface ConfigState {
   spreadsheetId: string | null;
   folderId: string | null;
   isReadOnly: boolean;
+  geminiModel: string | null;
 }
 
 const configSlice = createSlice({
   name: 'config',
-  initialState: { spreadsheetId: null, folderId: null, isReadOnly: false } as ConfigState,
+  initialState: { spreadsheetId: null, folderId: null, isReadOnly: false, geminiModel: null } as ConfigState,
   reducers: {
     setConfig: (state, action: PayloadAction<Partial<ConfigState>>) => {
       // Merges partial updates
