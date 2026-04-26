@@ -53,30 +53,39 @@ test('US-112: Desktop Layout and Navigation', async ({ page }, testInfo) => {
     await mockDriveAPI(page);
 
     // Mock Gemini
-    await page.route('**generativelanguage.googleapis.com**', async route => {
-        await geminiPromise;
-        await route.fulfill({
-            json: {
-                candidates: [{
-                    content: {
-                        parts: [{
-                            text: JSON.stringify({
-                                is_label: true,
-                                item_name: 'High Sodium Ramen',
-                                calories: 600,
-                                fat: { total: 20 },
-                                carbohydrates: { total: 80 },
-                                protein: 15,
-                                details: {
-                                    fiber: 10,
-                                    sodium: 1800
-                                }
-                            })
-                        }]
-                    }
-                }]
-            }
-        });
+    await page.route('**generativelanguage.googleapis.com/**', async route => {
+        const url = route.request().url();
+        if (url.includes('/v1beta/models') && !url.includes(':')) {
+            await route.fulfill({
+                json: {
+                    models: [{ name: 'models/gemini-1.5-flash-latest', supportedGenerationMethods: ['generateContent'] }]
+                }
+            });
+        } else {
+            await geminiPromise;
+            await route.fulfill({
+                json: {
+                    candidates: [{
+                        content: {
+                            parts: [{
+                                text: JSON.stringify({
+                                    is_label: true,
+                                    item_name: 'High Sodium Ramen',
+                                    calories: 600,
+                                    fat: { total: 20 },
+                                    carbohydrates: { total: 80 },
+                                    protein: 15,
+                                    details: {
+                                        fiber: 10,
+                                        sodium: 1800
+                                    }
+                                })
+                            }]
+                        }
+                    }]
+                }
+            });
+        }
     });
     
     // Dynamic data for Edit Flow
@@ -344,13 +353,13 @@ test('US-112: Desktop Layout and Navigation', async ({ page }, testInfo) => {
     await page.getByText('Desktop Salad').click();
     
     // The details page should show the Back link and the nutrition info
-    await expect(page.getByText('Back')).toBeVisible();
+    await expect(page.locator('.nav-header').getByText('Back')).toBeVisible();
     await expect(page.getByLabel('Item Name')).toHaveValue('Desktop Salad');
 
     await tester.step('entry-details-desktop', {
         description: 'Entry Details page in desktop layout',
         verifications: [
-            { spec: 'Back link visible', check: async () => await expect(page.getByText('Back')).toBeVisible() },
+            { spec: 'Back link visible', check: async () => await expect(page.locator('.nav-header').getByText('Back')).toBeVisible() },
             { spec: 'Nutrition info visible', check: async () => await expect(page.getByText('Calories')).toBeVisible() }
         ]
     });

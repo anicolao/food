@@ -1,6 +1,57 @@
 import { ensureValidToken } from './auth';
 import type { LogEntry, SettingsState } from './store';
 
+let cachedFlashModel: string | null = null;
+
+export async function getLatestFlashModel(token: string): Promise<string> {
+    if (cachedFlashModel) return cachedFlashModel;
+
+    try {
+        const url = 'https://generativelanguage.googleapis.com/v1beta/models';
+        const response = await fetch(url, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        if (!response.ok) {
+            console.warn('Failed to fetch Gemini models, falling back to default', response.status);
+            return 'gemini-1.5-flash-latest';
+        }
+
+        const data = await response.json();
+        if (!data.models || !Array.isArray(data.models)) {
+            console.warn('Invalid Gemini models response', data);
+            return 'gemini-1.5-flash-latest';
+        }
+
+        const flashModels = data.models
+            .filter((m: any) => 
+                m.name && 
+                m.name.includes('flash') && 
+                m.supportedGenerationMethods &&
+                m.supportedGenerationMethods.includes('generateContent')
+            )
+            .map((m: any) => m.name.replace('models/', ''))
+            .sort((a: string, b: string) => {
+                // Priority 1: -latest
+                if (a.endsWith('-latest') && !b.endsWith('-latest')) return -1;
+                if (!a.endsWith('-latest') && b.endsWith('-latest')) return 1;
+                // Priority 2: Lexicographical order (highest version)
+                return b.localeCompare(a);
+            });
+
+        if (flashModels.length > 0) {
+            cachedFlashModel = flashModels[0];
+            return cachedFlashModel!;
+        }
+    } catch (e) {
+        console.warn('Error fetching Gemini models', e);
+    }
+
+    return 'gemini-1.5-flash-latest';
+}
+
 export interface NutritionEstimate {
     is_label: boolean;
     item_name: string;
@@ -75,7 +126,8 @@ export async function analyzeFood(inputs: { images?: ImageInput[], text?: string
     const token = await ensureValidToken();
     if (!token) throw new Error('User not authenticated for Gemini analysis');
 
-    const url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent';
+    const model = await getLatestFlashModel(token);
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
 
     let prompt = SYSTEM_PROMPT;
 
@@ -139,7 +191,8 @@ export async function getAINutritionistFeedback(logs: LogEntry[], settings: Sett
     const token = await ensureValidToken();
     if (!token) throw new Error('User not authenticated for AI feedback');
 
-    const url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent';
+    const model = await getLatestFlashModel(token);
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
 
     const prompt = `
 Act as a Canadian Registered Dietitian. Provide evidence-based nutrition advice strictly aligned with the 2019 Canada Food Guide and Health Canada’s Dietary Guidelines.
@@ -154,11 +207,11 @@ Metrics: Use Metric units (grams, milliliters) and % Daily Value based on Canadi
 
 Tone: Professional, encouraging, and mindful of Canada's diverse food environment.
 
+Task: Review the daily log and provide at least one thing to focus on and one piece of positive feedback.
+
 Instructions: 
 1. Be much briefer than usual.
 2. Focus your advice on specific foods and examples from the user's logs provided below. Avoid generic advice that doesn't apply to what the user actually ate.
-
-Task: Review the logs and provide at least one thing to focus on and one piece of positive feedback.
 
 CONTEXT DATA:
 1. LAST 14 DAYS FOOD LOGS:
