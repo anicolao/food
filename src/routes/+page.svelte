@@ -2,7 +2,7 @@
   import { onMount } from 'svelte';
   import { initializeAuth, signIn, signOut, ensureValidToken, authState } from '$lib/auth';
 
-  import { store } from '$lib/store';
+  import { store, dispatchEvent } from '$lib/store';
   import { syncManager } from '$lib/sync-manager';
   import { base } from '$app/paths';
   import { goto } from '$app/navigation';
@@ -30,13 +30,21 @@
   let flipRotation = $state(0);
   let innerWidth = $state(0);
 
-  let aiFeedback = $state<string | null>(null);
   let isLoadingFeedback = $state(false);
+
+  // Current Business Date (4AM cutoff)
+  const today = getBusinessDate(new Date());
+  
+  // Reactive selected date state from URL
+  let selectedDate = $derived($page.url.searchParams.get('date') || today);
+
+  // Derived state for AI feedback from Redux store
+  let aiFeedbackFromStore = $derived(store.getState().projections.stats[selectedDate]?.aiFeedback);
 
   async function getFeedback() {
     isLoadingFeedback = true;
     try {
-      const endDate = today;
+      const endDate = selectedDate;
       const daysBackLogs = 14;
       const logDates = getDatesRange(endDate, daysBackLogs);
       
@@ -78,10 +86,15 @@
         }
       });
 
-      aiFeedback = await getAINutritionistFeedback(last14DaysLogs, settings, settingsSummary, emaSummary);
+      const feedback = await getAINutritionistFeedback(last14DaysLogs, settings, settingsSummary, emaSummary);
+      
+      // @ts-ignore
+      store.dispatch(dispatchEvent('ai/feedbackGenerated', {
+          date: selectedDate,
+          feedback
+      }));
     } catch (e) {
       console.error('Failed to get AI feedback', e);
-      aiFeedback = "<p>Sorry, I couldn't generate feedback right now. Please try again later.</p>";
     } finally {
       isLoadingFeedback = false;
     }
@@ -93,14 +106,6 @@
       flipRotation = 0;
     }
   });
-  
-  // Current Business Date (4AM cutoff)
-  const today = getBusinessDate(new Date());
-  
-  // Reactive selected date state from URL
-  let selectedDate = $derived($page.url.searchParams.get('date') || today);
-
-  // Helper to format Date to YYYY-MM-DD (Local)
   function toISOLocalDate(d: Date) {
       const year = d.getFullYear();
       const month = String(d.getMonth() + 1).padStart(2, '0');
@@ -410,7 +415,7 @@
             <section class="ai-analysis-card glass-panel">
                 <div class="card-header">
                     <h3>AI Nutritionist</h3>
-                    {#if aiFeedback && !isLoadingFeedback}
+                    {#if aiFeedbackFromStore && !isLoadingFeedback}
                         <button class="text-btn" onclick={getFeedback}>Refresh</button>
                     {/if}
                 </div>
@@ -418,11 +423,11 @@
                 {#if isLoadingFeedback}
                     <div class="ai-loading">
                         <div class="spinner"></div>
-                        <p>Consulting AI Dietitian...</p>
+                        <p>Consulting AI Nutritionist...</p>
                     </div>
-                {:else if aiFeedback}
+                {:else if aiFeedbackFromStore}
                     <div class="ai-content" in:slide>
-                        {@html aiFeedback}
+                        {@html aiFeedbackFromStore}
                     </div>
                 {:else}
                     <div class="ai-prompt">

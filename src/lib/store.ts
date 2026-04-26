@@ -79,6 +79,7 @@ interface DailyStats {
   totalCholesterol: number;
   // Micros
   totalSodium: number;
+  aiFeedback?: string;
 }
 
 interface AppState {
@@ -122,6 +123,27 @@ const eventLogSlice = createSlice({
 
 const applyEventToState = (state: any, event: FoodEvent) => {
   switch (event.type) {
+    case 'ai/feedbackGenerated': {
+      const { date, feedback } = event.payload;
+      if (!state.stats[date]) {
+        state.stats[date] = {
+          date,
+          totalCalories: 0,
+          totalProtein: 0,
+          totalFat: 0,
+          totalCarbs: 0,
+          totalFiber: 0,
+          totalSugar: 0,
+          totalAddedSugar: 0,
+          totalSaturatedFat: 0,
+          totalTransFat: 0,
+          totalCholesterol: 0,
+          totalSodium: 0
+        };
+      }
+      state.stats[date].aiFeedback = feedback;
+      break;
+    }
     case 'log/entryConfirmed': {
       // Payload expected: { entry: LogEntry }
       const entry = event.payload.entry as LogEntry;
