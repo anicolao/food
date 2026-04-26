@@ -87,4 +87,34 @@ test.describe('Issue #121: AI Nutritionist Feedback', () => {
     expect(promptText).toContain('14-DAY EMA TRENDS');
     expect(promptText).toContain('Calories 14-day EMA (last 14 days)');
   });
+
+  test('AI Nutritionist appears in sharing view with folderId', async ({ page }) => {
+    // Navigate to home and sign in first to ensure we have auth if public discovery fails
+    await page.goto('/');
+    await page.waitForFunction(() => (window as any)._authReady);
+    await page.click('button:has-text("Sign In with Google")');
+
+    // Navigate to sharing view
+    await page.goto('/sharing?folderId=mock-folder-id');
+    
+    // Wait for page to be ready
+    await expect(page.locator('[data-testid="sharing-page"]')).toBeVisible();
+    
+    // Check for AI nutritionist card
+    const card = page.locator('[data-testid="ai-nutritionist-card"]');
+    await expect(card).toBeVisible();
+    
+    // Trigger feedback in sharing view
+    const feedbackBtn = card.locator('button:has-text("Get AI Feedback")');
+    await feedbackBtn.click();
+    
+    await expect(card.locator('.ai-loading')).toBeVisible();
+    
+    const content = card.locator('.ai-content');
+    await expect(content).toBeVisible();
+    await expect(content.locator('h4').first()).toContainText('Positive Feedback');
+    
+    // Verify HealthSummary is visible
+    await expect(page.locator('.health-summary-wrapper')).toBeVisible();
+  });
 });

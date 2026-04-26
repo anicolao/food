@@ -1,6 +1,7 @@
 import { ensureValidToken } from './auth';
 import { store, type LogEntry, type SettingsState } from './store';
 import { toasts } from './toast';
+import { getDatesRange, getMetricEMASeries } from './metrics';
 
 let cachedFlashModel: string | null = null;
 
@@ -200,6 +201,66 @@ export async function analyzeFood(inputs: { images?: ImageInput[], text?: string
     if (!candidate) throw new Error('No content in Gemini response');
 
     return JSON.parse(candidate) as NutritionEstimate;
+}
+
+export function prepareFeedbackContext(
+    selectedDate: string,
+    allLogs: LogEntry[],
+    settings: SettingsState,
+    stats: Record<string, any>
+) {
+    const endDate = selectedDate;
+    const daysBackLogs = 14;
+    const logDates = getDatesRange(endDate, daysBackLogs);
+    
+    const last14DaysLogs = allLogs.filter(l => logDates.includes(l.date));
+    
+    let settingsSummary = `Target Calories: ${settings.targetCalories} kcal\n`;
+    settingsSummary += `Macro Ratios: Protein ${settings.macroRatios.protein * 100}%, Fat ${settings.macroRatios.fat * 100}%, Carbs ${settings.macroRatios.carbs * 100}%\n`;
+    if (settings.fiberGoal.enabled) settingsSummary += `Fiber Goal: ${settings.fiberGoal.value}g\n`;
+    if (settings.sodiumGoal.enabled) settingsSummary += `Sodium Goal: ${settings.sodiumGoal.value}mg\n`;
+    if (settings.sugarLimit.enabled) settingsSummary += `Sugar Limit: ${settings.sugarLimit.value}g/1000kcal\n`;
+    if (settings.addedSugarLimit.enabled) settingsSummary += `Added Sugar Limit: ${settings.addedSugarLimit.value}g/1000kcal\n`;
+    if (settings.satFatLimit.enabled) settingsSummary += `Saturated Fat Limit: ${settings.satFatLimit.value}g/1000kcal\n`;
+    if (settings.transFatLimit.enabled) settingsSummary += `Trans Fat Limit: ${settings.transFatLimit.value}g/1000kcal\n`;
+    if (settings.cholesterolLimit.enabled) settingsSummary += `Cholesterol Limit: ${settings.cholesterolLimit.value}mg/1000kcal\n`;
+
+    const metricsToTrack = [
+        { key: 'totalCalories', label: 'Calories' },
+        { key: 'totalProtein', label: 'Protein' },
+        { key: 'totalCarbs', label: 'Carbs' },
+        { key: 'totalFat', label: 'Fat' },
+        { key: 'totalFiber', label: 'Fiber', enabled: settings.fiberGoal.enabled },
+        { key: 'totalSodium', label: 'Sodium', enabled: settings.sodiumGoal.enabled },
+        { key: 'totalSugar', label: 'Sugar', enabled: settings.sugarLimit.enabled },
+        { key: 'totalAddedSugar', label: 'Added Sugar', enabled: settings.addedSugarLimit.enabled },
+        { key: 'totalSaturatedFat', label: 'Saturated Fat', enabled: settings.satFatLimit.enabled },
+        { key: 'totalTransFat', label: 'Trans Fat', enabled: settings.transFatLimit.enabled },
+        { key: 'totalCholesterol', label: 'Cholesterol', enabled: settings.cholesterolLimit.enabled },
+    ];
+
+    // Get two most recent feedbacks before selectedDate
+    const recentFeedbacks = Object.entries(stats)
+        .filter(([date, s]) => (s as any).aiFeedback && date < selectedDate)
+        .sort(([dateA], [dateB]) => dateB.localeCompare(dateA))
+        .slice(0, 2)
+        .map(([date, s]) => ({ date, feedback: (s as any).aiFeedback! }));
+
+    let emaSummary = '';
+    metricsToTrack.forEach(m => {
+        if (m.enabled !== false) {
+            const series = getMetricEMASeries(stats, m.key, endDate, 28, 14);
+            const last14EMAs = series.slice(-14);
+            emaSummary += `${m.label} 14-day EMA (last 14 days): ${last14EMAs.map(v => v.toFixed(1)).join(', ')}\n`;
+        }
+    });
+
+    return {
+        last14DaysLogs,
+        settingsSummary,
+        emaSummary,
+        recentFeedbacks
+    };
 }
 
 export async function getAINutritionistFeedback(
