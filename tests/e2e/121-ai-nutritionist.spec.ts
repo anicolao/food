@@ -5,7 +5,7 @@ test.describe('Issue #121: AI Nutritionist Feedback', () => {
   let lastPrompt: any = null;
 
   test.beforeEach(async ({ page }) => {
-    await page.route('**/v1beta/models/gemini-2.0-flash:generateContent', async (route) => {
+    await page.route('**/v1beta/models/gemini-*:generateContent*', async (route) => {
       lastPrompt = route.request().postDataJSON();
       // Delay to ensure loading state is visible
       await new Promise(resolve => setTimeout(resolve, 500));
