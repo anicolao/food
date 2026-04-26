@@ -407,6 +407,7 @@
         align-items: center;
         width: 100%;
         position: relative;
+        margin-bottom: 24px;
     }
 
     .status-positioner {
@@ -590,6 +591,7 @@
         }
         .stats-section {
             order: 1;
+            margin-bottom: 0;
         }
         .ema-mobile-section {
             order: 2;
