@@ -11,6 +11,10 @@ permissions:
   contents: write
   pull-requests: write
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
@@ -35,7 +39,7 @@ jobs:
             echo "dir=pr${{ github.event.pull_request.number }}" >> $GITHUB_OUTPUT
           else
             echo "path=/food" >> $GITHUB_OUTPUT
-            echo "dir=." >> $GITHUB_OUTPUT
+            echo "dir=" >> $GITHUB_OUTPUT
           fi
 
       - name: Build
@@ -57,7 +61,17 @@ jobs:
             echo "✅ OAuth configuration is present"
           fi
 
-      - name: Deploy to gh-pages branch
+      - name: Deploy to gh-pages (Production)
+        if: github.event_name != 'pull_request'
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./build
+          # destination_dir is intentionally NOT set for production to deploy to root
+          keep_files: true
+
+      - name: Deploy to gh-pages (PR Preview)
+        if: github.event_name == 'pull_request'
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
