@@ -102,7 +102,7 @@ Pivot table or formula-based aggregation. Derived from the `Log` projection.
 ## Gemini Integration
 
 ### Model
--   **Model**: `gemini-3-flash`
+-   **Model**: `gemini-1.5-flash`
 -   **Input**: Image (Binary/Base64) + Prompt
 
 ### Prompt Strategy
