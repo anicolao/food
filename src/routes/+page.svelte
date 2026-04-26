@@ -37,10 +37,10 @@
     isLoadingFeedback = true;
     try {
       const endDate = today;
-      const daysBack = 14;
-      const dates = getDatesRange(endDate, daysBack);
+      const daysBackLogs = 14;
+      const logDates = getDatesRange(endDate, daysBackLogs);
       
-      const last14DaysLogs = allLogs.filter(l => dates.includes(l.date));
+      const last14DaysLogs = allLogs.filter(l => logDates.includes(l.date));
       
       const settingsSummary = `
 Target Calories: ${settings.targetCalories} kcal
@@ -69,9 +69,9 @@ Sodium Goal: ${settings.sodiumGoal.value}mg (Enabled: ${settings.sodiumGoal.enab
       let emaSummary = '';
       metricsToTrack.forEach(m => {
         if (m.enabled !== false) {
-            const series = getMetricEMASeries(stats, m.key, endDate, daysBack, 14);
-            const currentEMA = series[series.length - 1] || 0;
-            emaSummary += `${m.label} 14-day EMA: ${currentEMA.toFixed(1)}\n`;
+            const series = getMetricEMASeries(stats, m.key, endDate, 28, 14);
+            const last14EMAs = series.slice(-14);
+            emaSummary += `${m.label} 14-day EMA (last 14 days): ${last14EMAs.map(v => v.toFixed(1)).join(', ')}\n`;
         }
       });
 
