@@ -78,7 +78,7 @@
         }
       });
 
-      aiFeedback = await getAINutritionistFeedback(last14DaysLogs, settingsSummary, emaSummary);
+      aiFeedback = await getAINutritionistFeedback(last14DaysLogs, settings, settingsSummary, emaSummary);
     } catch (e) {
       console.error('Failed to get AI feedback', e);
       aiFeedback = "<p>Sorry, I couldn't generate feedback right now. Please try again later.</p>";

@@ -75,7 +75,7 @@ export async function analyzeFood(inputs: { images?: ImageInput[], text?: string
     const token = await ensureValidToken();
     if (!token) throw new Error('User not authenticated for Gemini analysis');
 
-    const url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent';
+    const url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
 
     let prompt = SYSTEM_PROMPT;
 
@@ -135,11 +135,11 @@ export async function analyzeFood(inputs: { images?: ImageInput[], text?: string
     return JSON.parse(candidate) as NutritionEstimate;
 }
 
-export async function getAINutritionistFeedback(logs: LogEntry[], settingsSummary: string, emaSummary: string): Promise<string> {
+export async function getAINutritionistFeedback(logs: LogEntry[], settings: SettingsState, settingsSummary: string, emaSummary: string): Promise<string> {
     const token = await ensureValidToken();
     if (!token) throw new Error('User not authenticated for AI feedback');
 
-    const url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent';
+    const url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
 
     const prompt = `
 Act as a Canadian Registered Dietitian. Provide evidence-based nutrition advice strictly aligned with the 2019 Canada Food Guide and Health Canada’s Dietary Guidelines.
@@ -158,7 +158,27 @@ Task: Review the daily log and provide at least one thing to focus on and one pi
 
 CONTEXT DATA:
 1. LAST 14 DAYS FOOD LOGS:
-${JSON.stringify(logs.map(l => ({ date: l.date, time: l.time, description: l.description, calories: l.calories, protein: l.protein, carbs: l.carbs, fat: l.fat })))}
+${JSON.stringify(logs.map(l => {
+    const details: any = {};
+    if (settings.fiberGoal.enabled && l.details?.fiber !== undefined) details.fiber = l.details.fiber;
+    if (settings.sodiumGoal.enabled && l.details?.sodium !== undefined) details.sodium = l.details.sodium;
+    if (settings.sugarLimit.enabled && l.details?.sugar !== undefined) details.sugar = l.details.sugar;
+    if (settings.addedSugarLimit.enabled && l.details?.addedSugar !== undefined) details.addedSugar = l.details.addedSugar;
+    if (settings.satFatLimit.enabled && l.details?.saturatedFat !== undefined) details.saturatedFat = l.details.saturatedFat;
+    if (settings.transFatLimit.enabled && l.details?.transFat !== undefined) details.transFat = l.details.transFat;
+    if (settings.cholesterolLimit.enabled && l.details?.cholesterol !== undefined) details.cholesterol = l.details.cholesterol;
+
+    return { 
+        date: l.date, 
+        time: l.time, 
+        description: l.description, 
+        calories: l.calories, 
+        protein: l.protein, 
+        carbs: l.carbs, 
+        fat: l.fat,
+        details
+    };
+}))}
 
 2. USER SETTINGS SUMMARY:
 ${settingsSummary}
