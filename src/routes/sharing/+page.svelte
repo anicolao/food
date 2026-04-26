@@ -234,12 +234,12 @@
             </section>
         </div>
 
+        <div class="ema-desktop-wrapper glass-panel desktop-only">
+            <DashboardEMAs {selectedDate} columns={2} />
+        </div>
+
         <!-- Right Col / Bottom Section: Feed -->
         <section class="feed-section">
-            <div class="ema-desktop-wrapper glass-panel desktop-only">
-                <DashboardEMAs {selectedDate} columns={2} fitToHeight={432} />
-            </div>
-
             <div class="feed-header">
                 <button class="nav-btn prev" onclick={() => goToPrevDay()} aria-label="Previous Day">
                     &lt;
@@ -425,10 +425,32 @@
             gap: 40px;
             align-items: start;
         }
+
+        .ema-desktop-wrapper, .feed-section {
+            grid-column: 2;
+        }
         
         .stats-section {
             position: sticky;
             top: 40px;
+        }
+    }
+
+    @media (min-width: 1600px) {
+        .page-container {
+            max-width: 1800px;
+        }
+        .dashboard-grid {
+            grid-template-columns: 350px 650px 1fr;
+        }
+        .ema-desktop-wrapper {
+            grid-column: 2;
+            position: sticky;
+            top: 40px;
+            margin-bottom: 0;
+        }
+        .feed-section {
+            grid-column: 3;
         }
     }
 </style>

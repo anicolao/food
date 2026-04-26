@@ -241,13 +241,13 @@
     <div class="dashboard-grid">
         <div class="left-col">
             <div class="flip-card" class:flipped={showEMAs}>
+                <div class="status-positioner">
+                    <NetworkStatus />
+                </div>
                 <div class="flip-card-inner" style="transform: rotateY({flipRotation}deg)">
                     <!-- Front Side: Rings and Macros -->
                     <div class="flip-card-front">
                         <section class="stats-section glass-panel">
-                            <div class="status-positioner">
-                                <NetworkStatus />
-                            </div>
                             <button 
                                 class="flip-toggle-btn mobile-only" 
                                 onclick={() => { showEMAs = true; flipRotation -= 180; }}
@@ -329,9 +329,6 @@
                     <!-- Back Side: EMA Graphs -->
                     <div class="flip-card-back">
                         <section class="stats-section glass-panel">
-                            <div class="status-positioner">
-                                <NetworkStatus />
-                            </div>
                             <button 
                                 class="flip-toggle-btn back mobile-only" 
                                 onclick={() => { showEMAs = false; flipRotation -= 180; }}
@@ -344,7 +341,7 @@
                                 </svg>
                             </button>
                             <div class="ema-mobile-content">
-                                <DashboardEMAs {selectedDate} columns={2} fitToHeight={392} />
+                                <DashboardEMAs {selectedDate} columns={2} />
                             </div>
                         </section>
                     </div>
@@ -360,12 +357,12 @@
             </section>
         </div>
 
+        <div class="ema-desktop-wrapper glass-panel desktop-only">
+            <DashboardEMAs {selectedDate} columns={2} />
+        </div>
+
         <!-- Right Col / Bottom Section: Feed -->
         <section class="feed-section">
-            <div class="ema-desktop-wrapper glass-panel desktop-only">
-                <DashboardEMAs {selectedDate} columns={2} fitToHeight={600} />
-            </div>
-
             <div class="feed-header">
                 <button class="nav-btn prev" onclick={() => goToPrevDay()} aria-label="Previous Day">
                     &lt;
@@ -465,21 +462,23 @@
         text-align: center;
         transition: transform 0.6s;
         transform-style: preserve-3d;
+        display: grid;
+        grid-template-columns: 100%;
+        grid-template-rows: 1fr;
     }
 
     .flip-card-front, .flip-card-back {
-        position: relative;
+        grid-area: 1 / 1;
         width: 100%;
         -webkit-backface-visibility: hidden;
         backface-visibility: hidden;
         border-radius: 24px;
         transform: translateZ(0);
+        display: flex;
+        flex-direction: column;
     }
 
     .flip-card-back {
-        position: absolute;
-        top: 0;
-        left: 0;
         transform: rotateY(-180deg);
     }
 
@@ -527,8 +526,7 @@
 
     @media (max-width: 1023px) {
         .stats-section {
-            height: 480px;
-            overflow-y: auto;
+            overflow: visible;
         }
     }
 
@@ -692,6 +690,10 @@
             gap: 40px;
             align-items: start;
         }
+
+        .ema-desktop-wrapper, .feed-section {
+            grid-column: 2;
+        }
         
         .left-col {
             position: sticky;
@@ -706,10 +708,29 @@
         .flip-card-inner {
             transform: none !important;
             transform-style: flat;
+            display: block;
         }
 
         .flip-card-back {
             display: none;
+        }
+    }
+
+    @media (min-width: 1600px) {
+        .page-container {
+            max-width: 1800px;
+        }
+        .dashboard-grid {
+            grid-template-columns: 350px 650px 1fr;
+        }
+        .ema-desktop-wrapper {
+            grid-column: 2;
+            position: sticky;
+            top: 40px;
+            margin-bottom: 0;
+        }
+        .feed-section {
+            grid-column: 3;
         }
     }
 </style>
