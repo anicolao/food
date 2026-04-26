@@ -55,30 +55,39 @@ test('US-015: Fiber and Sodium tracking', async ({ page }, testInfo) => {
     });
 
     // Mock Gemini
-    await page.route('**generativelanguage.googleapis.com**', async route => {
-        await geminiPromise;
-        await route.fulfill({
-            json: {
-                candidates: [{
-                    content: {
-                        parts: [{
-                            text: JSON.stringify({
-                                is_label: true,
-                                item_name: 'High Sodium Ramen',
-                                calories: 600,
-                                fat: { total: 20 },
-                                carbohydrates: { total: 80 },
-                                protein: 15,
-                                details: {
-                                    fiber: 10,
-                                    sodium: 1800
-                                }
-                            })
-                        }]
-                    }
-                }]
-            }
-        });
+    await page.route('**generativelanguage.googleapis.com/**', async route => {
+        const url = route.request().url();
+        if (url.includes('/v1beta/models') && !url.includes(':')) {
+            await route.fulfill({
+                json: {
+                    models: [{ name: 'models/gemini-1.5-flash-latest', supportedGenerationMethods: ['generateContent'] }]
+                }
+            });
+        } else {
+            await geminiPromise;
+            await route.fulfill({
+                json: {
+                    candidates: [{
+                        content: {
+                            parts: [{
+                                text: JSON.stringify({
+                                    is_label: true,
+                                    item_name: 'High Sodium Ramen',
+                                    calories: 600,
+                                    fat: { total: 20 },
+                                    carbohydrates: { total: 80 },
+                                    protein: 15,
+                                    details: {
+                                        fiber: 10,
+                                        sodium: 1800
+                                    }
+                                })
+                            }]
+                        }
+                    }]
+                }
+            });
+        }
     });
 
     await page.goto('/');
@@ -192,30 +201,39 @@ test('US-015: Fiber and Sodium tracking', async ({ page }, testInfo) => {
     // Log another one to exceed limit
     // Re-mock Gemini for second call
     geminiPromise = new Promise<void>(r => { resolveGemini = r; });
-    await page.route('**generativelanguage.googleapis.com**', async route => {
-        await geminiPromise;
-        await route.fulfill({
-            json: {
-                candidates: [{
-                    content: {
-                        parts: [{
-                            text: JSON.stringify({
-                                is_label: true,
-                                item_name: 'Another Ramen',
-                                calories: 600,
-                                fat: { total: 20 },
-                                carbohydrates: { total: 80 },
-                                protein: 15,
-                                details: {
-                                    fiber: 10,
-                                    sodium: 500
-                                }
-                            })
-                        }]
-                    }
-                }]
-            }
-        });
+    await page.route('**generativelanguage.googleapis.com/**', async route => {
+        const url = route.request().url();
+        if (url.includes('/v1beta/models') && !url.includes(':')) {
+            await route.fulfill({
+                json: {
+                    models: [{ name: 'models/gemini-1.5-flash-latest', supportedGenerationMethods: ['generateContent'] }]
+                }
+            });
+        } else {
+            await geminiPromise;
+            await route.fulfill({
+                json: {
+                    candidates: [{
+                        content: {
+                            parts: [{
+                                text: JSON.stringify({
+                                    is_label: true,
+                                    item_name: 'Another Ramen',
+                                    calories: 600,
+                                    fat: { total: 20 },
+                                    carbohydrates: { total: 80 },
+                                    protein: 15,
+                                    details: {
+                                        fiber: 10,
+                                        sodium: 500
+                                    }
+                                })
+                            }]
+                        }
+                    }]
+                }
+            });
+        }
     });
 
     await page.getByLabel('Log new food entry').first().click();

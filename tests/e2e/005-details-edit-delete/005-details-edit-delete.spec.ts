@@ -48,10 +48,19 @@ test('US-018 to US-022: Details, Edit and Delete', async ({ page }, testInfo) =>
     fs.utimesSync('tests/e2e/fixtures/apple.png', mockDate, mockDate);
 
     // Mock Gemini
-    await page.route('**generativelanguage.googleapis.com**', async route => {
-        await geminiPromise;
-        // Original Food Logic
-        await route.fulfill({ json: { candidates: [{ content: { parts: [{ text: JSON.stringify({ is_label: false, item_name: 'Original Food', calories: 100, fat: { total: 10 }, carbohydrates: { total: 10 }, protein: 10 }) }] } }] } });
+    await page.route('**generativelanguage.googleapis.com/**', async route => {
+        const url = route.request().url();
+        if (url.includes('/v1beta/models') && !url.includes(':')) {
+            await route.fulfill({
+                json: {
+                    models: [{ name: 'models/gemini-1.5-flash-latest', supportedGenerationMethods: ['generateContent'] }]
+                }
+            });
+        } else {
+            await geminiPromise;
+            // Original Food Logic
+            await route.fulfill({ json: { candidates: [{ content: { parts: [{ text: JSON.stringify({ is_label: false, item_name: 'Original Food', calories: 100, fat: { total: 10 }, carbohydrates: { total: 10 }, protein: 10 }) }] } }] } });
+        }
     });
 
     await page.goto('/');

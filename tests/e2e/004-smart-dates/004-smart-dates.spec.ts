@@ -55,9 +55,18 @@ test('US-013 to US-017: Smart Date Formatting', async ({ page }, testInfo) => {
     await mockDriveAPI(page);
 
     // Specific Mock for Gemini (not in helper)
-    await page.route('**generativelanguage.googleapis.com**', async route => {
-        await geminiGate;
-        await route.fulfill({ json: { candidates: [{ content: { parts: [{ text: JSON.stringify({ is_label: false, item_name: 'Test Food', calories: 100, fat: { total: 0 }, carbohydrates: { total: 0 }, protein: 0 }) }] } }] } });
+    await page.route('**generativelanguage.googleapis.com/**', async route => {
+        const url = route.request().url();
+        if (url.includes('/v1beta/models') && !url.includes(':')) {
+            await route.fulfill({
+                json: {
+                    models: [{ name: 'models/gemini-1.5-flash-latest', supportedGenerationMethods: ['generateContent'] }]
+                }
+            });
+        } else {
+            await geminiGate;
+            await route.fulfill({ json: { candidates: [{ content: { parts: [{ text: JSON.stringify({ is_label: false, item_name: 'Test Food', calories: 100, fat: { total: 0 }, carbohydrates: { total: 0 }, protein: 0 }) }] } }] } });
+        }
     });
 
     // Mock Drive Image Download explicitly if needed (mockDriveAPI handles lh3...)

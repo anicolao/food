@@ -77,27 +77,37 @@ test('US-003 to US-010: User logs food flow', async ({ page }, testInfo) => {
     });
 
     // Mock Gemini
-    await page.route('**generativelanguage.googleapis.com**', async route => {
-        // Wait for test to signal readiness (Analyzing UI visible)
-        await geminiPromise;
-        await route.fulfill({
-            json: {
-                candidates: [{
-                    content: {
-                        parts: [{
-                            text: JSON.stringify({
-                                is_label: true,
-                                item_name: 'Mock Apple',
-                                calories: 95,
-                                fat: { total: 0 },
-                                carbohydrates: { total: 25 },
-                                protein: 0
-                            })
-                        }]
-                    }
-                }]
-            }
-        });
+    await page.route('**generativelanguage.googleapis.com/**', async route => {
+        const url = route.request().url();
+        if (url.includes('/v1beta/models') && !url.includes(':')) {
+            await route.fulfill({
+                json: {
+                    models: [{ name: 'models/gemini-1.5-flash-latest', supportedGenerationMethods: ['generateContent'] }]
+                }
+            });
+        } else if (url.includes(':generateContent')) {
+            // Wait for test to signal readiness (Analyzing UI visible)
+            await geminiPromise;
+            await route.fulfill({
+                json: {
+                    candidates: [{
+                        content: {
+                            parts: [{
+                                text: JSON.stringify({
+                                    is_label: true,
+                                    item_name: 'Mock Apple',
+                                    calories: 95,
+                                    fat: { total: 0 }, carbohydrates: { total: 25 },
+                                    protein: 0
+                                })
+                            }]
+                        }
+                    }]
+                }
+            });
+        } else {
+            await route.fallback();
+        }
     });
 
     await page.goto('/');

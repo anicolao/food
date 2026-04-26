@@ -17,6 +17,14 @@ test.describe('Offline Support & Sync', () => {
             } else if (url.includes('drive/v3/files')) {
                 await route.fallback();
             } else if (url.includes('generativelanguage')) {
+                if (url.includes('/v1beta/models') && !url.includes(':')) {
+                    await route.fulfill({
+                        json: {
+                            models: [{ name: 'models/gemini-1.5-flash-latest', supportedGenerationMethods: ['generateContent'] }]
+                        }
+                    });
+                    return;
+                }
                 await route.fulfill({
                     json: {
                         candidates: [{
@@ -24,11 +32,11 @@ test.describe('Offline Support & Sync', () => {
                                 parts: [{
                                     text: JSON.stringify({
                                         is_label: true,
-                                        item_name: 'Offline Banana',
-                                        calories: 105,
-                                        fat: { total: 0.4 },
-                                        carbohydrates: { total: 27 },
-                                        protein: 1.3
+                                        item_name: 'Offline Apple',
+                                        calories: 95,
+                                        fat: { total: 0 },
+                                        carbohydrates: { total: 25 },
+                                        protein: 0
                                     })
                                 }]
                             }
@@ -36,6 +44,7 @@ test.describe('Offline Support & Sync', () => {
                     }
                 });
             } else {
+
                 await route.continue();
             }
         });

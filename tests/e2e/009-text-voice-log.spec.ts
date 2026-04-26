@@ -75,10 +75,28 @@ test('US-009: User logs food via Text and Voice', async ({ page, context }, test
         console.log('MOCKING:', url);
 
         if (url.includes('generativelanguage')) {
+            if (route.request().method() === 'OPTIONS') {
+                await route.continue();
+                return;
+            }
+
+            if (url.includes('/v1beta/models') && !url.includes(':')) {
+                await route.fulfill({
+                    json: {
+                        models: [{ name: 'models/gemini-1.5-flash-latest', supportedGenerationMethods: ['generateContent'] }]
+                    }
+                });
+                return;
+            }
+
             // Wait for test to signal readiness
             await geminiPromise;
 
             const reqBody = route.request().postDataJSON();
+            if (!reqBody) {
+                await route.continue();
+                return;
+            }
             const tools = reqBody.tools;
 
             // Handle Tool Use (Image Search)
