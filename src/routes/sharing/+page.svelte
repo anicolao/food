@@ -5,18 +5,25 @@
   import { goto } from '$app/navigation';
   import { cubicOut } from 'svelte/easing';
   import { getBusinessDate, groupLogs } from '$lib/activity-grouping';
+  import { getAINutritionistFeedback, prepareFeedbackContext } from '$lib/gemini';
   import { base } from '$app/paths';
+  import { slide } from 'svelte/transition';
+  import { dispatchEvent } from '$lib/store';
   
   import StatsRing from '$lib/components/ui/StatsRing.svelte';
   import MacroBubble from '$lib/components/ui/MacroBubble.svelte';
+  import HealthSummary from '$lib/components/ui/HealthSummary.svelte';
   import ActivityCard from '$lib/components/ui/ActivityCard.svelte';
   import NetworkStatus from '$lib/components/ui/NetworkStatus.svelte';
   import DashboardEMAs from '$lib/components/ui/DashboardEMAs.svelte';
 
   // Reactive State (Synced from Redux)
   let allLogs = $state<any[]>(store.getState().projections.log); 
+  let statsProjection = $state(store.getState().projections.stats);
   let settings = $state(store.getState().settings);
   
+  let isLoadingFeedback = $state(false);
+
   // Folders are managed by Layout, but let's just make sure we pass context safely
   const folderId = $page.url.searchParams.get('folderId');
 
@@ -25,6 +32,36 @@
   
   // Reactive selected date state from URL
   let selectedDate = $derived($page.url.searchParams.get('date') || today);
+
+  // Derived state for AI feedback from Redux store
+  let aiFeedbackFromStore = $derived(statsProjection[selectedDate]?.aiFeedback);
+
+  async function getFeedback() {
+    isLoadingFeedback = true;
+    try {
+      const state = store.getState();
+      const stats = state.projections.stats;
+
+      const {
+        last14DaysLogs,
+        settingsSummary,
+        emaSummary,
+        recentFeedbacks
+      } = prepareFeedbackContext(selectedDate, allLogs, settings, stats);
+
+      const feedback = await getAINutritionistFeedback(last14DaysLogs, settings, settingsSummary, emaSummary, recentFeedbacks);
+      
+      // @ts-ignore
+      store.dispatch(dispatchEvent('ai/feedbackGenerated', {
+          date: selectedDate,
+          feedback
+      }));
+    } catch (e) {
+      console.error('Failed to get AI feedback', e);
+    } finally {
+      isLoadingFeedback = false;
+    }
+  }
 
   // Helper to format Date to YYYY-MM-DD (Local)
   function toISOLocalDate(d: Date) {
@@ -115,12 +152,31 @@
 
   // Derived stats
   let stats = $derived.by(() => {
-      const newStats = { totalCalories: 0, totalProtein: 0, totalFat: 0, totalCarbs: 0 };
+      const newStats = { 
+          totalCalories: 0, 
+          totalProtein: 0, 
+          totalFat: 0, 
+          totalCarbs: 0,
+          totalFiber: 0,
+          totalSugar: 0,
+          totalAddedSugar: 0,
+          totalSaturatedFat: 0,
+          totalTransFat: 0,
+          totalCholesterol: 0,
+          totalSodium: 0
+      };
       visibleLogs.forEach(entry => {
           newStats.totalCalories += Number(entry.calories || 0);
           newStats.totalProtein += Number(entry.protein || 0);
           newStats.totalFat += Number(entry.fat || 0);
           newStats.totalCarbs += Number(entry.carbs || 0);
+          newStats.totalFiber += Number(entry.details?.fiber || 0);
+          newStats.totalSugar += Number(entry.details?.sugar || 0);
+          newStats.totalAddedSugar += Number(entry.details?.addedSugar || 0);
+          newStats.totalSaturatedFat += Number(entry.details?.saturatedFat || 0);
+          newStats.totalTransFat += Number(entry.details?.transFat || 0);
+          newStats.totalCholesterol += Number(entry.details?.cholesterol || 0);
+          newStats.totalSodium += Number(entry.details?.sodium || 0);
       });
       return newStats;
   });
@@ -143,11 +199,13 @@
     // Check if store already has data (SSR/Client mismatch prevention)
     allLogs = store.getState().projections.log;
     settings = store.getState().settings;
+    statsProjection = store.getState().projections.stats;
 
     const unsubscribe = store.subscribe(() => {
       const state = store.getState();
       allLogs = state.projections.log;
       settings = state.settings;
+      statsProjection = state.projections.stats;
     });
 
     return () => {
@@ -227,6 +285,40 @@
                     </linearGradient>
                 </defs>
              </svg>
+
+             {#if settings.showHealthMetrics}
+                <div class="health-summary-wrapper">
+                    <HealthSummary 
+                        {stats}
+                        logs={visibleLogs}
+                    />
+                </div>
+             {/if}
+        </section>
+
+        <section class="ai-analysis-card glass-panel" data-testid="ai-nutritionist-card">
+            <div class="card-header">
+                <h3>AI Nutritionist</h3>
+                {#if aiFeedbackFromStore && !isLoadingFeedback}
+                    <button class="text-btn" onclick={getFeedback}>Refresh</button>
+                {/if}
+            </div>
+            
+            {#if isLoadingFeedback}
+                <div class="ai-loading">
+                    <div class="spinner"></div>
+                    <p>Consulting AI Nutritionist...</p>
+                </div>
+            {:else if aiFeedbackFromStore}
+                <div class="ai-content" in:slide>
+                    {@html aiFeedbackFromStore}
+                </div>
+            {:else}
+                <div class="ai-prompt">
+                    <p>Get personalized feedback based on your last 14 days of logs and trends.</p>
+                    <button class="primary-btn full-width" onclick={getFeedback}>Get AI Feedback</button>
+                </div>
+            {/if}
         </section>
 
             <section class="ema-mobile-section glass-panel mobile-only">
@@ -327,11 +419,108 @@
         margin-bottom: 30px;
     }
 
+    .health-summary-wrapper {
+        width: 100%;
+        margin-top: 20px;
+    }
+
     .macros-row {
         display: flex;
         justify-content: space-around;
         width: 100%;
         max-width: 400px;
+    }
+
+    /* AI Analysis Card */
+    .ai-analysis-card {
+        padding: 20px;
+        margin-bottom: 24px;
+    }
+
+    .ai-analysis-card h3 {
+        margin: 0;
+        font-size: 1rem;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 16px;
+    }
+
+    .text-btn {
+        background: none;
+        border: none;
+        color: var(--color-primary);
+        font-weight: 600;
+        cursor: pointer;
+        font-size: 0.9rem;
+    }
+
+    .ai-content {
+        line-height: 1.6;
+        color: var(--text-primary);
+    }
+
+    .ai-content :global(h4) {
+        margin: 16px 0 8px 0;
+        color: var(--color-primary);
+    }
+
+    .ai-content :global(ul) {
+        padding-left: 20px;
+        margin: 8px 0;
+    }
+
+    .ai-content :global(li) {
+        margin-bottom: 4px;
+    }
+
+    .ai-loading {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 12px;
+        padding: 20px 0;
+        color: var(--text-secondary);
+    }
+
+    .ai-prompt {
+        text-align: center;
+        color: var(--text-secondary);
+    }
+
+    .full-width {
+        width: 100%;
+    }
+
+    .primary-btn {
+        background: var(--color-primary);
+        color: white;
+        padding: 12px 24px;
+        border-radius: var(--radius-m);
+        border: none;
+        font-weight: 600;
+        font-size: 1rem;
+        margin-top: 20px;
+        cursor: pointer;
+    }
+
+    .spinner {
+        width: 30px;
+        height: 30px;
+        border: 3px solid rgba(255,255,255,0.1);
+        border-top-color: var(--color-primary);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
     }
 
     .feed-header {
