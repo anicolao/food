@@ -48,7 +48,7 @@ test('US-001: User signs in', async ({ page }, testInfo) => {
     await page.getByText('Sign In with Google').click();
 
     // Verify authenticated state
-    await expect(page.locator('img[alt="Synced"]')).toBeVisible();
+    await expect(page.locator('img[alt="Synced"]:visible').first()).toBeVisible();
 
     await tester.step('authenticated', {
         description: 'User is signed in',
