@@ -40,7 +40,7 @@ export class TestStepHelper {
         const filename = `${paddedIndex}-${id.replace(/_/g, '-')}.png`;
 
         // 3. Stabilization: Wait for Network Sync (if present)
-        const networkStatus = this.page.locator('button[data-status]');
+        const networkStatus = this.page.locator('button[data-status]:visible');
         const expectedStatus = options.networkStatus ?? 'synced';
         if (expectedStatus !== 'skip') {
             const statusVisible = await networkStatus.first()
