@@ -65,7 +65,7 @@ test('US-012: Stats persist after reload', async ({ page }, testInfo) => {
     await page.waitForFunction(() => (window as any)._authReady);
     await page.getByText('Sign In with Google').click();
 
-    await expect(page.locator('img[alt="Synced"]')).toBeVisible();
+    await expect(page.locator('img[alt="Synced"]:visible').first()).toBeVisible();
 
     await tester.step('stats-loaded', {
         description: 'Stats loaded from sheet',
