@@ -279,7 +279,7 @@
                     <!-- Front Side: Rings and Macros -->
                     <div class="flip-card-front">
                         <section class="stats-section glass-panel">
-                            <div class="status-positioner" style:display={showEMAs ? 'none' : 'block'}>
+                            <div class="status-positioner">
                                 <NetworkStatus />
                             </div>
                             <button 
@@ -363,7 +363,7 @@
                     <!-- Back Side: EMA Graphs -->
                     <div class="flip-card-back">
                         <section class="stats-section glass-panel">
-                            <div class="status-positioner" style:display={showEMAs ? 'block' : 'none'}>
+                            <div class="status-positioner">
                                 <NetworkStatus />
                             </div>
                             <button 
@@ -524,6 +524,7 @@
     .flip-card-front, .flip-card-back {
         grid-area: 1 / 1;
         width: 100%;
+        height: 100%;
         -webkit-backface-visibility: hidden;
         backface-visibility: hidden;
         border-radius: 24px;

@@ -92,7 +92,7 @@ test('US-014: Dashboard State Persistence', async ({ page }, testInfo) => {
     // Wait for sync to populate data to avoid screenshot mismatch (empty vs populated)
     await expect(page.locator('.activity-card').first()).toBeVisible();
     // Wait for network to settle to Synced to avoid icon animation frame diffs
-    await expect(page.locator('[data-status="synced"]:visible')).toBeVisible();
+    await expect(page.locator('[data-status="synced"]:visible').first()).toBeVisible();
 
     await tester.step('initial-load', {
         description: 'Dashboard loads today',
@@ -110,7 +110,7 @@ test('US-014: Dashboard State Persistence', async ({ page }, testInfo) => {
     await expect(prevBtn).toBeVisible();
     await prevBtn.click();
     await expect(page.locator('.feed-header h2').first()).toHaveText('Yesterday'); // Explicit wait
-    await expect(page.locator('[data-status="synced"]:visible')).toBeVisible();
+    await expect(page.locator('[data-status="synced"]:visible').first()).toBeVisible();
 
     await tester.step('prev-day', {
         description: 'Navigate to Yesterday',
@@ -123,7 +123,7 @@ test('US-014: Dashboard State Persistence', async ({ page }, testInfo) => {
     await page.reload();
     // Wait for hydration/render before screenshotting
     await expect(page.locator('.feed-header h2').first()).toBeVisible();
-    await expect(page.locator('[data-status="synced"]:visible')).toBeVisible();
+    await expect(page.locator('[data-status="synced"]:visible').first()).toBeVisible();
     await tester.step('reload', {
         description: 'Reload preserves date',
         verifications: [
@@ -134,7 +134,7 @@ test('US-014: Dashboard State Persistence', async ({ page }, testInfo) => {
     // 4. Navigate Forward
     await page.locator('button[aria-label="Next Day"]').click();
     await expect(page.locator('.feed-header h2').first()).toHaveText('Today');
-    await expect(page.locator('[data-status="synced"]:visible')).toBeVisible();
+    await expect(page.locator('[data-status="synced"]:visible').first()).toBeVisible();
 
     await tester.step('next-day', {
         description: 'Return to Today',
@@ -161,7 +161,7 @@ test('US-014: Dashboard State Persistence', async ({ page }, testInfo) => {
 
     await page.reload();
     await expect(page.locator('.activity-card')).toBeVisible(); // Ensure content rerendered
-    await expect(page.locator('[data-status="synced"]:visible')).toBeVisible();
+    await expect(page.locator('[data-status="synced"]:visible').first()).toBeVisible();
     await tester.step('reload-collapse', {
         description: 'Reload preserves collapse state',
         verifications: [
