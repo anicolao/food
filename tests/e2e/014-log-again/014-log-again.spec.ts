@@ -76,7 +76,7 @@ test('US-014: Log Again and Favourites', async ({ page }, testInfo) => {
     await expect(page.locator('.feed-header h2').first()).toBeVisible();
 
     // Explicitly wait for Sync to complete so store is hydrated
-    await expect(page.locator('[data-status="synced"]')).toBeVisible();
+    await expect(page.locator('[data-status="synced"]:visible')).toBeVisible();
 
     // 1. Navigate to Entry Details via Dashboard
     // It should appear in Today list

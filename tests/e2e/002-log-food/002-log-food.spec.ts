@@ -190,7 +190,7 @@ test('US-003 to US-010: User logs food flow', async ({ page }, testInfo) => {
     // Save
     await page.getByText('Save Entry').first().click();
 
-    await expect(page.locator('[data-status="synced"]')).toBeVisible();
+    await expect(page.locator('[data-status="synced"]:visible')).toBeVisible();
 
     await tester.step('saved', {
         description: 'Returned to Dashboard',

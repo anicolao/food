@@ -150,7 +150,7 @@ test('US-112: Desktop Layout and Navigation', async ({ page }, testInfo) => {
     
     // Wait for the specific salad to appear
     await expect(page.getByText('Desktop Salad')).toBeVisible({ timeout: 15000 });
-    await expect(page.locator('[data-status="synced"]')).toBeVisible({ timeout: 15000 });
+    await expect(page.locator('[data-status="synced"]:visible')).toBeVisible({ timeout: 15000 });
 
     await tester.step('dashboard-desktop', {
         description: 'Dashboard shows desktop layout',

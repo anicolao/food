@@ -121,7 +121,7 @@ test('US-013 to US-017: Smart Date Formatting', async ({ page }, testInfo) => {
     // --- Verification ---
 
     // 1. Verify Today (Should only see 'Today Food')
-    await expect(page.locator('[data-status="synced"]')).toBeVisible();
+    await expect(page.locator('[data-status="synced"]:visible')).toBeVisible();
     await tester.step('check-today', {
         description: 'Verify Today View',
         verifications: [
@@ -135,7 +135,7 @@ test('US-013 to US-017: Smart Date Formatting', async ({ page }, testInfo) => {
     // 2. Navigate to Yesterday (2024-03-14)
     await page.locator('.nav-btn.prev').first().click();
     await expect(page.locator('.feed-header h2').first()).toHaveText('Yesterday');
-    await expect(page.locator('[data-status="synced"]')).toBeVisible();
+    await expect(page.locator('[data-status="synced"]:visible')).toBeVisible();
 
     await tester.step('check-yesterday', {
         description: 'Verify Yesterday View',
@@ -153,7 +153,7 @@ test('US-013 to US-017: Smart Date Formatting', async ({ page }, testInfo) => {
     }
     // Monday 11th should show "Mon, Mar 11"
     await expect(page.locator('.feed-header h2').first()).toHaveText('Mon, Mar 11');
-    await expect(page.locator('[data-status="synced"]')).toBeVisible();
+    await expect(page.locator('[data-status="synced"]:visible')).toBeVisible();
 
     await tester.step('check-monday', {
         description: 'Verify Monday View',
