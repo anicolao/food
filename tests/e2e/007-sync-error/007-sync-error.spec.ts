@@ -52,7 +52,7 @@ test.describe('Sync Error UX', () => {
 
         // 6. Trigger Sync
         // The app polls every 2s. Wait for the error icon to appear.
-        const statusBtn = page.locator('button.network-status:visible');
+        const statusBtn = page.locator('button.network-status:visible').first();
         await expect(statusBtn).toHaveAttribute('data-status', 'error', { timeout: 15000 });
 
         // 7. Verify Error Icon
