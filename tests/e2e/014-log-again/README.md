@@ -33,3 +33,25 @@
 
 ---
 
+## Favourite restores the original timestamp before editing
+
+![Favourite restores the original timestamp before editing](./screenshots/003-favourite-prefill.png)
+
+**Verifications:**
+- [x] Name is Existing Salad
+- [x] Date starts on March 15
+- [x] Time starts at 12:00
+- [x] Media is restored
+
+---
+
+## Favourite timestamp updates after manual edits
+
+![Favourite timestamp updates after manual edits](./screenshots/004-edit-favourite-timestamp.png)
+
+**Verifications:**
+- [x] Date changes to March 14
+- [x] Time changes to 12:30
+
+---
+
