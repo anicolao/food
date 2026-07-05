@@ -90,18 +90,6 @@
     }),
   );
 
-  // Derived display values for custom inputs
-  let displayDate = $derived(entryDate); // ISO string is already what we want: YYYY-MM-DD
-  let displayTime = $derived(
-    (() => {
-      if (!entryTime) return "--:--";
-      const [h, m] = entryTime.split(":").map(Number);
-      const suffix = h >= 12 ? "PM" : "AM";
-      const h12 = h % 12 || 12;
-      return `${String(h12).padStart(2, "0")}:${String(m).padStart(2, "0")} ${suffix}`;
-    })(),
-  );
-
   let showCorrectionInput = $state(false);
   let userCorrection = $state("");
   let isSaving = $state(false);
