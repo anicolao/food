@@ -112,6 +112,7 @@ test('US-014: Log Again and Favourites', async ({ page }, testInfo) => {
             { spec: 'Name is Existing Salad', check: async () => await expect(page.getByLabel('Log Description')).toHaveValue('Existing Salad') },
             { spec: 'Calories is 350', check: async () => await expect(page.getByLabel('Calories')).toHaveValue('350') },
             { spec: 'Date is Today (15th)', check: async () => await expect(page.getByLabel('Date')).toHaveValue('2024-03-15') },
+            { spec: 'Time is 12:00', check: async () => await expect(page.getByLabel('Time')).toHaveValue('12:00') },
             { spec: 'Media is preserved', check: async () => await expect(page.locator('.preview-strip img')).toHaveCount(2) } // Check image copy
         ]
     });
@@ -152,6 +153,19 @@ test('US-014: Log Again and Favourites', async ({ page }, testInfo) => {
     await expect(page.getByLabel('Log Description')).toHaveValue('Existing Salad');
     // Verify Media also restored from favourite (since Log Again populated it previously)
     await expect(page.locator('.preview-strip img')).toHaveCount(2);
+
+    // 13. Edit date/time before saving the favourite again
+    await page.getByLabel('Date').fill('2024-03-14');
+    await page.getByLabel('Time').fill('12:30');
+    await expect(page.getByLabel('Date')).toHaveValue('2024-03-14');
+    await expect(page.getByLabel('Time')).toHaveValue('12:30');
+
+    await page.getByText('Save Entry').click();
+    await expect(page.locator('.feed-header h2').first()).toHaveText('Today');
+
+    await page.locator('.nav-btn.prev').first().click();
+    await expect(page.locator('.feed-header h2').first()).toHaveText('Yesterday');
+    await expect(page.locator('.activity-card').filter({ hasText: 'Existing Salad' })).toBeVisible();
 
     tester.generateDocs();
 });
