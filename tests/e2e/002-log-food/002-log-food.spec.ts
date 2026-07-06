@@ -133,7 +133,6 @@ test('US-003 to US-010: User logs food flow', async ({ page }, testInfo) => {
 
     await tester.step('log-page', {
         description: 'User on log page',
-        screenshot: false,
         verifications: [
             { spec: 'Camera button visible', check: async () => await expect(page.getByText('Camera').first()).toBeVisible({ timeout: 2000 }) },
             { spec: 'Upload button visible', check: async () => await expect(page.getByText('Library').first()).toBeVisible({ timeout: 2000 }) },
@@ -148,7 +147,6 @@ test('US-003 to US-010: User logs food flow', async ({ page }, testInfo) => {
 
     await tester.step('preview', {
         description: 'Image preview shown',
-        screenshot: false,
         verifications: [
             { spec: 'Preview visible', check: async () => await expect(page.locator('.sheet-thumb')).toBeVisible() },
             { spec: 'Status is Analyzing', check: async () => await expect(page.getByText('Analyzing 1 images with Gemini...')).toBeVisible({ timeout: 10000 }) }
@@ -166,7 +164,6 @@ test('US-003 to US-010: User logs food flow', async ({ page }, testInfo) => {
 
     await tester.step('analysis', {
         description: 'AI Analysis Received',
-        screenshot: false,
         verifications: [
             { spec: 'Calories populated', check: async () => await expect(page.getByLabel('Calories')).toHaveValue('95') }
         ]
@@ -184,7 +181,6 @@ test('US-003 to US-010: User logs food flow', async ({ page }, testInfo) => {
 
     await tester.step('edited', {
         description: 'User corrects analysis',
-        screenshot: false,
         verifications: [
             { spec: 'Calories updated to 100', check: async () => await expect(page.getByLabel('Calories')).toHaveValue('100') },
             { spec: 'Meal type is Lunch', check: async () => await expect(page.getByLabel('Meal')).toHaveValue('Lunch') }

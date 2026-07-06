@@ -624,8 +624,6 @@
         // Fallback: Best effort to save what we have locally
       }
 
-      const isoDateTime = new Date(`${entryDate}T${entryTime}`).toISOString();
-
       // Construct object for Redux/Storage, avoiding proxy issues by using plain collected values
       const form = {
         item_name: itemName,
