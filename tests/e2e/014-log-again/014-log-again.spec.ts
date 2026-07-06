@@ -160,27 +160,17 @@ test('US-014: Log Again and Favourites', async ({ page }, testInfo) => {
     const dateField = page.getByLabel('Date');
     const timeField = page.getByLabel('Time');
 
-    await tester.step('favourite-prefill', {
-        description: 'Favourite restores the original timestamp before editing',
-        verifications: [
-            { spec: 'Name is Existing Salad', check: async () => await expect(page.getByLabel('Log Description')).toHaveValue('Existing Salad') },
-            { spec: 'Date starts on March 15', check: async () => await expect(dateField).toHaveValue('2024-03-15') },
-            { spec: 'Time starts at 12:00', check: async () => await expect(timeField).toHaveValue('12:00') },
-            { spec: 'Media is restored', check: async () => await expect(page.locator('.preview-strip img')).toHaveCount(2) }
-        ]
-    });
+    await expect(page.getByLabel('Log Description')).toHaveValue('Existing Salad');
+    await expect(dateField).toHaveValue('2024-03-15');
+    await expect(timeField).toHaveValue('12:00');
+    await expect(page.locator('.preview-strip img')).toHaveCount(2);
 
     // 13. Edit date/time before saving the favourite again
     await moveDateBackOneDay(dateField);
     await timeField.fill('12:30');
 
-    await tester.step('edit-favourite-timestamp', {
-        description: 'Favourite timestamp updates after manual edits',
-        verifications: [
-            { spec: 'Date changes to March 14', check: async () => await expect(dateField).toHaveValue('2024-03-14') },
-            { spec: 'Time changes to 12:30', check: async () => await expect(timeField).toHaveValue('12:30') }
-        ]
-    });
+    await expect(dateField).toHaveValue('2024-03-14');
+    await expect(timeField).toHaveValue('12:30');
 
     await page.getByText('Save Entry').click();
     await expect(page.locator('.feed-header h2').first()).toHaveText('Today');
