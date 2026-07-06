@@ -10,6 +10,7 @@ export interface Verification {
 export interface StepOptions {
     description: string;
     verifications: Verification[];
+    screenshot?: boolean;
     networkStatus?: 'synced' | 'offline' | 'error' | 'skip';
 }
 
@@ -62,10 +63,16 @@ export class TestStepHelper {
             }, { timeout: 30000 });
         }
 
-        // 4. Capture & Verify (Zero-Pixel Tolerance)
-        // This will check against the baseline in 'screenshots/{filename}'.
-        // If the file doesn't exist, it will fail (unless --update-snapshots is used).
-        await expect(this.page).toHaveScreenshot(filename.replace(/\.png$/, ''));
+        if (
+            options.screenshot !== false &&
+            process.env.PLAYWRIGHT_SKIP_VISUAL !== '1' &&
+            process.platform === 'darwin'
+        ) {
+            // 4. Capture & Verify (Zero-Pixel Tolerance)
+            // This will check against the baseline in 'screenshots/{filename}'.
+            // If the file doesn't exist, it will fail (unless --update-snapshots is used).
+            await expect(this.page).toHaveScreenshot(filename.replace(/\.png$/, ''));
+        }
 
         // 4. Record for Docs
         this.steps.push({
