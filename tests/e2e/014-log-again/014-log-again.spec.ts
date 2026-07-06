@@ -5,8 +5,10 @@ import { mockDriveAPI } from '../helpers/mock-drive';
 
 async function moveDateBackOneDay(field: Locator) {
     await field.click();
-    await field.press('Shift+Tab');
+    await field.press('ArrowRight');
+    await field.press('ArrowRight');
     await field.press('ArrowDown');
+    await field.press('Tab');
 }
 
 test('US-014: Log Again and Favourites', async ({ page }, testInfo) => {
@@ -43,6 +45,7 @@ test('US-014: Log Again and Favourites', async ({ page }, testInfo) => {
     ];
 
     const eventParams: any[] = [];
+    const appendedEntries: any[] = [];
 
     await page.route('**sheets.googleapis.com**', async route => {
         const url = route.request().url();
@@ -51,6 +54,9 @@ test('US-014: Log Again and Favourites', async ({ page }, testInfo) => {
             const postData = route.request().postDataJSON();
             if (postData && postData.values && postData.values[0]) {
                 eventParams.push(postData.values[0][2]); // Capture event Type
+                if (postData.values[0][2] === 'log/entryConfirmed') {
+                    appendedEntries.push(JSON.parse(postData.values[0][3]).entry);
+                }
                 // If logAgain, capture payload
                 if (postData.values[0][2] === 'log/logAgain') {
                     eventParams.push(JSON.parse(postData.values[0][3]));
@@ -165,14 +171,17 @@ test('US-014: Log Again and Favourites', async ({ page }, testInfo) => {
     await expect(timeField).toHaveValue('12:00');
     await expect(page.locator('.preview-strip img')).toHaveCount(2);
 
-    // 13. Edit date/time before saving the favourite again
+    // 13. Edit date before saving the favourite again
     await moveDateBackOneDay(dateField);
-    await timeField.fill('12:30');
 
     await expect(dateField).toHaveValue('2024-03-14');
-    await expect(timeField).toHaveValue('12:30');
+    await expect(timeField).toHaveValue('12:00');
 
     await page.getByText('Save Entry').click();
+    await expect.poll(() => appendedEntries.at(-1)).toMatchObject({
+        date: '2024-03-14',
+        time: '12:00'
+    });
     await expect(page.locator('.feed-header h2').first()).toHaveText('Today');
 
     await page.locator('.nav-btn.prev').first().click();
