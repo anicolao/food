@@ -97,6 +97,23 @@ test('US-009: User logs food via Text and Voice', async ({ page, context }, test
                 await route.continue();
                 return;
             }
+            const tools = reqBody.tools;
+
+            // Handle Tool Use (Image Search)
+            if (tools && tools[0]?.googleSearch) {
+                console.log('MOCKING GEMINI IMAGE SEARCH');
+                await route.fulfill({
+                    json: {
+                        candidates: [{
+                            content: {
+                                parts: [{ text: 'https://example.com/mock-apple.jpg' }]
+                            }
+                        }]
+                    }
+                });
+                return;
+            }
+
             // Handle Text Analysis
             const textPrompt = reqBody.contents?.[0]?.parts?.find((p: any) => p.text)?.text || '';
 
@@ -141,29 +158,12 @@ test('US-009: User logs food via Text and Voice', async ({ page, context }, test
         } else if (url.includes('drive/v3/files') || url.includes('sheets.googleapis.com')) {
             // Standard Drive/Sheets mocks
             await route.fallback();
+        } else if (url === 'https://example.com/mock-apple.jpg') {
+            // Mock the image fetch verification
+            await route.fulfill({ status: 200, body: Buffer.from('fake-image-data') });
         } else {
             await route.continue();
         }
-    });
-    await page.route('**commons.wikimedia.org/**', async route => {
-        await route.fulfill({
-            json: {
-                query: {
-                    pages: {
-                        '1': {
-                            imageinfo: [{ url: 'https://example.com/mock-apple.jpg' }]
-                        }
-                    }
-                }
-            }
-        });
-    });
-    await page.route('https://example.com/mock-apple.jpg', async route => {
-        await route.fulfill({
-            status: 200,
-            body: fs.readFileSync('tests/e2e/fixtures/apple.png'),
-            contentType: 'image/png'
-        });
     });
 
     await page.goto('/');

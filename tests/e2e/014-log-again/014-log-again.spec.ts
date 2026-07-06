@@ -3,11 +3,13 @@ import { test, expect } from '../fixtures';
 import { TestStepHelper } from '../helpers/test-step-helper';
 import { mockDriveAPI } from '../helpers/mock-drive';
 
-async function moveDateBackOneDay(field: Locator) {
+async function enterDate(field: Locator, value: string) {
     await field.click();
-    await field.press('ArrowRight');
-    await field.press('ArrowRight');
-    await field.press('ArrowDown');
+    await field.press('Control+A');
+    await field.press('Meta+A');
+    await field.press('Backspace');
+    await expect(field).toHaveValue('');
+    await field.pressSequentially(value);
     await field.press('Tab');
 }
 
@@ -172,7 +174,7 @@ test('US-014: Log Again and Favourites', async ({ page }, testInfo) => {
     await expect(page.locator('.preview-strip img')).toHaveCount(2);
 
     // 13. Edit date before saving the favourite again
-    await moveDateBackOneDay(dateField);
+    await enterDate(dateField, '2024-03-14');
 
     await expect(dateField).toHaveValue('2024-03-14');
     await expect(timeField).toHaveValue('12:00');
